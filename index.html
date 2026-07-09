@@ -43,7 +43,7 @@ body{font-family:'Inter',sans-serif;background:#eef2ff;color:var(--gray800);}
 /* ── Module accent colors — palette raffinée ── */
 .c1{--mc:#2563eb;} .c2{--mc:#dc2626;} .c3{--mc:#7c3aed;}
 .c4{--mc:#d97706;} .c5{--mc:#0d9488;} .c6{--mc:#059669;}
-.c7{--mc:#0284c7;} .c8{--mc:#ea580c;} .c9{--mc:#9333ea;}
+.c7{--mc:#0284c7;} .c8{--mc:#ea580c;} .c9{--mc:#9333ea;} .c10{--mc:#0284c7;} .c11{--mc:#a855f7;}
 
 /* ═══════════════════════════════════════════════════════
    ANIMATIONS
@@ -566,6 +566,10 @@ textarea{resize:vertical;min-height:80px;}
   background:linear-gradient(135deg,var(--accent),var(--green));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
+.amdec-inp{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:.3rem .5rem;font-size:.75rem;background:#fff;outline:none;}
+.amdec-inp:focus{border-color:#9333ea;box-shadow:0 0 0 2px rgba(147,51,234,.12);}
+.amdec-num{width:44px;border:1px solid #e2e8f0;border-radius:6px;padding:.3rem;font-size:.78rem;font-weight:700;text-align:center;background:#fff;outline:none;}
+.amdec-num:focus{border-color:#dc2626;box-shadow:0 0 0 2px rgba(220,38,38,.12);}
 
 /* ─ Certificate ─ */
 .cert-wrap{
@@ -719,7 +723,9 @@ textarea{resize:vertical;min-height:80px;}
   <button class="nav-btn c6" onclick="goModule(6)" data-module="6" data-section="m6">🗺️ VSM</button>
   <button class="nav-btn c7" onclick="goModule(7)" data-module="7" data-section="m7">📈 SPC</button>
   <button class="nav-btn c8" onclick="goModule(8)" data-module="8" data-section="m8">⏱️ SMED</button>
-  <button class="nav-btn c9" onclick="goModule(9)" data-module="9" data-section="m9">🎓 Quiz Final</button>
+  <button class="nav-btn c9" onclick="goModule(9)" data-module="9" data-section="m9">⚠️ AMDEC</button>
+  <button class="nav-btn c10" onclick="goModule(10)" data-module="10" data-section="m10">🏗️ Projet</button>
+  <button class="nav-btn c11" onclick="goModule(11)" data-module="11" data-section="m11">🎓 Quiz Final</button>
 </nav>
 
 <main>
@@ -1615,8 +1621,131 @@ textarea{resize:vertical;min-height:80px;}
   </div>
 </div>
 
-<!-- ══════════════ M9 – QUIZ ══════════════ -->
+<!-- ══════════════ M9 – AMDEC ══════════════ -->
 <div id="m9" class="section">
+  <div class="mod-header">
+    <div class="mod-header-top" style="--mc:#9333ea;--mc-dark:#7e22ce;">
+      <div class="mod-header-icon">⚠️</div>
+      <div class="mod-header-text">
+        <h2>Module 9 — AMDEC / FMEA</h2>
+        <p>Analysez les modes de défaillance, leurs effets et leur criticité. Priorisez les actions correctives par IPR.</p>
+      </div>
+    </div>
+  </div>
+  <div class="ccard" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:2px solid #d8b4fe;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
+      <div>
+        <div style="font-weight:800;font-size:.87rem;color:#6d28d9;">🎲 Exercices IA — Scénarios à l'infini</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">L'IA génère un nouveau processus industriel à analyser en AMDEC.</div>
+      </div>
+      <button id="genExBtnM9" class="btn btn-primary btn-sm" onclick="generateAmdecExercise()">🎲 Nouvel exercice</button>
+    </div>
+    <div id="amdecExContext" style="margin-top:.5rem;"></div>
+  </div>
+  <div class="ccard">
+    <div class="ccard-title"><span style="background:#9333ea;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>AMDEC Processus — PRECISION MAROC · Ligne CNC</div>
+    <div style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border-radius:12px;padding:1rem;border:1.5px solid #d8b4fe;font-size:.83rem;color:#374151;line-height:1.8;">
+      ⚠️ <b>Situation :</b> La ligne CNC de PRECISION MAROC présente un taux de rebuts de 8% et 3 accidents en 6 mois. La direction exige une <b>AMDEC Processus</b> complète pour identifier et prioriser les risques avant la prochaine certification ISO 9001.<br>
+      🎯 <b>Mission :</b> Remplir le tableau AMDEC — pour chaque mode de défaillance, évaluer la <b>Gravité (G)</b>, l'<b>Occurrence (O)</b> et la <b>Détection (D)</b>. L'<b>IPR = G × O × D</b>. Tout IPR ≥ 100 nécessite une action corrective immédiate.
+    </div>
+    <div style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+      <div style="background:#faf5ff;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #9333ea;text-align:center;min-width:90px;"><div style="font-size:1.2rem;font-weight:900;color:#7c3aed;">G×O×D</div><div style="font-size:.62rem;color:#7c3aed;font-weight:700;text-transform:uppercase;">IPR = Criticité</div></div>
+      <div style="background:#fef2f2;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #dc2626;text-align:center;min-width:90px;"><div style="font-size:1.2rem;font-weight:900;color:#dc2626;">≥ 100</div><div style="font-size:.62rem;color:#dc2626;font-weight:700;text-transform:uppercase;">Action requise</div></div>
+      <div style="background:#fffbeb;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #d97706;text-align:center;min-width:90px;"><div style="font-size:1.2rem;font-weight:900;color:#d97706;">1 → 10</div><div style="font-size:.62rem;color:#d97706;font-weight:700;text-transform:uppercase;">Échelle G, O, D</div></div>
+    </div>
+  </div>
+  <div class="ccard">
+    <div class="ccard-title">Tableau AMDEC</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:.75rem;" id="amdecTable">
+        <thead><tr style="background:#f5f3ff;">
+          <th style="padding:.5rem .6rem;border-bottom:2px solid #d8b4fe;color:#5b21b6;font-weight:800;text-align:left;min-width:120px;">Composant / Fonction</th>
+          <th style="padding:.5rem .6rem;border-bottom:2px solid #d8b4fe;color:#5b21b6;font-weight:800;text-align:left;min-width:130px;">Mode de défaillance</th>
+          <th style="padding:.5rem .6rem;border-bottom:2px solid #d8b4fe;color:#5b21b6;font-weight:800;text-align:left;min-width:130px;">Effet(s)</th>
+          <th style="padding:.5rem .6rem;border-bottom:2px solid #d8b4fe;color:#5b21b6;font-weight:800;text-align:left;min-width:130px;">Cause(s)</th>
+          <th style="padding:.5rem .4rem;border-bottom:2px solid #d8b4fe;color:#dc2626;font-weight:800;text-align:center;width:48px;">G</th>
+          <th style="padding:.5rem .4rem;border-bottom:2px solid #d8b4fe;color:#dc2626;font-weight:800;text-align:center;width:48px;">O</th>
+          <th style="padding:.5rem .4rem;border-bottom:2px solid #d8b4fe;color:#dc2626;font-weight:800;text-align:center;width:48px;">D</th>
+          <th style="padding:.5rem .4rem;border-bottom:2px solid #d8b4fe;color:#9333ea;font-weight:800;text-align:center;width:55px;">IPR</th>
+          <th style="padding:.5rem .6rem;border-bottom:2px solid #d8b4fe;color:#059669;font-weight:800;text-align:left;min-width:140px;">Action corrective</th>
+          <th style="padding:.5rem .4rem;border-bottom:2px solid #d8b4fe;color:#374151;font-weight:800;text-align:center;width:36px;"></th>
+        </tr></thead>
+        <tbody id="amdecBody"></tbody>
+      </table>
+    </div>
+    <div class="btn-row" style="margin-top:.8rem;">
+      <button class="btn btn-ghost btn-sm" onclick="addAmdecRow()">+ Ajouter une ligne</button>
+      <button class="btn btn-gold" onclick="calcAllIPR()">📊 Calculer tous les IPR</button>
+    </div>
+    <div id="amdecSummary" style="margin-top:.8rem;"></div>
+  </div>
+  <div class="ccard">
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="analyzeAmdec()">🤖 Feedback IA complet</button>
+      <button class="btn btn-green" onclick="validateModule(9,scoreAmdec)">✅ Valider le Module AMDEC</button>
+    </div>
+    <div id="amdecAI" style="margin-top:.5rem;"></div>
+    <div id="amdecScore"></div>
+  </div>
+</div>
+
+<!-- ══════════════ M10 – PROJET INTÉGRÉ ══════════════ -->
+<div id="m10" class="section">
+  <div class="mod-header">
+    <div class="mod-header-top" style="--mc:#0284c7;--mc-dark:#0369a1;">
+      <div class="mod-header-icon">🏗️</div>
+      <div class="mod-header-text">
+        <h2>Module 10 — Projet Intégré Lean</h2>
+        <p>Cas industriel complexe multi-problèmes. Choisissez vos outils, justifiez vos choix, appliquez-les.</p>
+      </div>
+    </div>
+  </div>
+  <div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
+    <div style="font-weight:800;font-size:.87rem;color:#1e40af;margin-bottom:.3rem;">🏗️ Projet de synthèse — Cas industriel complet</div>
+    <div style="font-size:.72rem;color:#6b7280;">L'IA génère un cas industriel avec plusieurs problèmes imbriqués. À vous de diagnostiquer, choisir les bons outils et les appliquer.</div>
+    <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="generateCapstoneProblem()">🤖 Générer un cas industriel</button>
+      <span id="capstoneGenStatus"></span>
+    </div>
+  </div>
+  <div id="capstoneProblemCard" style="display:none;" class="ccard">
+    <div class="ccard-title"><span style="background:#0284c7;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CAS</span>Situation industrielle à résoudre</div>
+    <div id="capstoneProblemText" style="font-size:.83rem;color:#374151;line-height:1.8;"></div>
+  </div>
+  <div id="capstoneToolsCard" style="display:none;" class="ccard">
+    <div class="ccard-title"><span style="background:#0284c7;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 1</span>Sélection des outils Lean à mobiliser</div>
+    <div style="background:#eff6ff;border-radius:10px;padding:.8rem 1rem;border:1px solid #93c5fd;font-size:.79rem;color:#1e40af;margin-bottom:1rem;">
+      🎯 <b>Pensée ingénieur :</b> Il n'existe pas de réponse unique. Choisissez les outils les plus pertinents pour ce cas précis et justifiez chaque choix. La qualité du raisonnement compte plus que la quantité d'outils.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;" id="capstoneToolGrid">
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_pdca" style="width:auto;margin:0;"> 🔄 PDCA</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_5s" style="width:auto;margin:0;"> 🧹 5S</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_ishikawa" style="width:auto;margin:0;"> 🐟 Ishikawa</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_pareto" style="width:auto;margin:0;"> 📊 Pareto</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_kanban" style="width:auto;margin:0;"> 📋 Kanban</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_vsm" style="width:auto;margin:0;"> 🗺️ VSM</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_spc" style="width:auto;margin:0;"> 📈 SPC</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_smed" style="width:auto;margin:0;"> ⏱️ SMED</label>
+      <label style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border-radius:8px;padding:.6rem .8rem;border:1.5px solid #e2e8f0;cursor:pointer;font-size:.78rem;font-weight:600;text-transform:none;letter-spacing:0;" onclick="updateCapstoneScore()"><input type="checkbox" id="tool_amdec" style="width:auto;margin:0;"> ⚠️ AMDEC</label>
+    </div>
+  </div>
+  <div id="capstoneJustifCard" style="display:none;" class="ccard">
+    <div class="ccard-title"><span style="background:#0284c7;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 2</span>Justification du choix des outils</div>
+    <textarea id="capstoneJustif" placeholder="Expliquez pourquoi vous avez sélectionné ces outils pour ce cas précis. Ex : 'J'ai choisi l'Ishikawa pour identifier les causes racines des défauts signalés, puis le Pareto pour prioriser les causes à traiter en premier. Le SMED est pertinent car les changements de série fréquents ont été identifiés comme cause de surcharge...'" style="min-height:110px;" oninput="updateCapstoneScore()"></textarea>
+    <div class="ccard-title" style="margin-top:1rem;"><span style="background:#0284c7;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 3</span>Plan d'action intégré</div>
+    <textarea id="capstonePlan" placeholder="Décrivez votre plan d'action global : séquence de mise en œuvre des outils, responsables, délais, indicateurs de suivi et gains attendus. Ex : 'Semaine 1-2 : Ishikawa + Pareto pour diagnostic. Semaine 3-4 : Chantier 5S. Mois 2 : SMED sur les 3 postes goulots...'" style="min-height:110px;" oninput="updateCapstoneScore()"></textarea>
+    <div id="capstoneScoreBar" style="margin-top:.6rem;"></div>
+    <div class="btn-row">
+      <button class="btn btn-gold" onclick="analyzeCapstone()">🤖 Évaluation IA du projet</button>
+      <button class="btn btn-green" onclick="validateModule(10,scoreCapstone)">✅ Valider le Module Projet</button>
+    </div>
+    <div id="capstoneAI" style="margin-top:.5rem;"></div>
+    <div id="capstoneScore"></div>
+  </div>
+</div>
+
+<!-- ══════════════ M11 – QUIZ ══════════════ -->
+<div id="m11" class="section">
   <div class="mod-header">
     <div class="mod-header-top" style="--mc:#a855f7;--mc-dark:#7e22ce;">
       <div class="mod-header-icon">🎓</div>
@@ -1692,7 +1821,9 @@ const MODULES=[
   {id:6,name:'VSM Simplifié',icon:'🗺️',desc:'Value Stream Mapping et taux valeur ajoutée',time:'~25 min'},
   {id:7,name:'Carte de Contrôle SPC',icon:'📈',desc:'Cartes de contrôle et règles de Nelson IA',time:'~20 min'},
   {id:8,name:'SMED Simulator',icon:'⏱️',desc:'Changement de série rapide, calcul du gain',time:'~20 min'},
-  {id:9,name:'Quiz Final IA',icon:'🎓',desc:'QCM dynamique IA – 70% requis + certificat',time:'~30 min'}
+  {id:9,name:'AMDEC / FMEA',icon:'⚠️',desc:'Analyse modes de défaillance et criticité IPR',time:'~25 min'},
+  {id:10,name:'Projet Intégré Lean',icon:'🏗️',desc:'Cas industriel multi-outils – synthèse complète',time:'~45 min'},
+  {id:11,name:'Quiz Final IA',icon:'🎓',desc:'QCM dynamique IA – 70% requis + certificat',time:'~30 min'}
 ];
 
 let state=JSON.parse(sessionStorage.getItem('greenlab_v2')||'{}');
@@ -1829,6 +1960,7 @@ function goModule(n){
   if(n===2)init5S();if(n===3)initIshikawa();
   if(n===4)initPareto();if(n===5)initKanban();
   if(n===6)initVSM();if(n===8)initSMED();
+  if(n===9)initAmdecTable();
   if(n===2)_refreshM2Badge();
   if(n>=3&&n<=8)_refreshExBadge(n);
 }
@@ -1840,13 +1972,13 @@ function updateNav(){
     else if(n>1&&!state.completed.includes(n-1))b.classList.add('nav-locked');
   });
   const done=state.completed.length;
-  document.getElementById('globalBadge').textContent=done+' / 9 modules';
-  document.getElementById('globalBar').style.width=(done/9*100)+'%';
-  document.getElementById('progressText').textContent=Math.round(done/9*100)+'%';
+  document.getElementById('globalBadge').textContent=done+' / 11 modules';
+  document.getElementById('globalBar').style.width=(done/11*100)+'%';
+  document.getElementById('progressText').textContent=Math.round(done/11*100)+'%';
   const sd=document.getElementById('statDone');if(sd)sd.textContent=done;
   const sa=document.getElementById('statAvg');
   if(sa){const sc=Object.values(state.scores);sa.textContent=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length)+'%':'–';}
-  const cb=document.getElementById('completionBanner');if(cb)cb.style.display=done>=9?'block':'none';
+  const cb=document.getElementById('completionBanner');if(cb)cb.style.display=done>=11?'block':'none';
   renderGrid();
   renderRadarChart();
   checkBadges();
@@ -1882,11 +2014,11 @@ function renderGrid(){
 }
 
 /* ── Validation ── */
-const _moduleNames={1:'Cycle PDCA',2:'Méthode 5S',3:'Diagramme Ishikawa',4:'Analyse de Pareto',5:'Tableau Kanban',6:'Value Stream Mapping',7:'Cartes de contrôle SPC',8:'SMED',9:'Quiz Final'};
+const _moduleNames={1:'Cycle PDCA',2:'Méthode 5S',3:'Diagramme Ishikawa',4:'Analyse de Pareto',5:'Tableau Kanban',6:'Value Stream Mapping',7:'Cartes de contrôle SPC',8:'SMED',9:'AMDEC/FMEA',10:'Projet Intégré Lean',11:'Quiz Final'};
 function validateModule(n,scoreFn){
   const score=scoreFn();
   state.scores[n]=score;
-  const minScore=n===9?70:60;
+  const minScore=n===11?70:60;
   const pass=score>=minScore;
   if(pass&&!state.completed.includes(n)){state.completed.push(n);state.completed.sort((a,b)=>a-b);}
   save();updateNav();
@@ -1902,11 +2034,11 @@ function validateModule(n,scoreFn){
     <div style="flex:1;">
       <div style="font-weight:800;font-size:1rem;color:${pass?'var(--green)':'var(--red)'};">${encouragement}</div>
       <div style="font-size:.8rem;color:var(--gray400);margin-top:.2rem;">Score : ${score}% — Minimum requis : ${minScore}%</div>
-      ${pass?`<div style="font-size:.78rem;margin-top:.5rem;padding:.4rem .7rem;background:rgba(5,150,105,.07);border-radius:8px;color:#065f46;">📚 <strong>${_moduleNames[n]}</strong> maîtrisé${n<9?' — compétence ajoutée à votre radar':' — parcours complet validé !'}</div>`:''}
+      ${pass?`<div style="font-size:.78rem;margin-top:.5rem;padding:.4rem .7rem;background:rgba(5,150,105,.07);border-radius:8px;color:#065f46;">📚 <strong>${_moduleNames[n]}</strong> maîtrisé${n<11?' — compétence ajoutée à votre radar':' — parcours complet validé !'}</div>`:''}
       ${!pass?`<div style="font-size:.8rem;color:var(--red);margin-top:.3rem;">Score insuffisant (${score}% / ${minScore}% requis). Complétez mieux vos réponses et réessayez.</div>`:''}
-      ${pass&&n<9?`<div style="font-size:.8rem;color:var(--green);margin-top:.3rem;font-weight:700;">🔓 Module ${n+1} débloqué !</div>`:''}
+      ${pass&&n<11?`<div style="font-size:.8rem;color:var(--green);margin-top:.3rem;font-weight:700;">🔓 Module ${n+1} débloqué !</div>`:''}
     </div>`;
-  if(pass&&n===9)showCertificate();
+  if(pass&&n===11)showCertificate();
 }
 
 /* ── AI Text Formatter ── */
@@ -3533,12 +3665,186 @@ function submitQuiz(){
       <div style="color:var(--gray400);font-size:.88rem;margin-bottom:1.4rem;">${ok} / ${quizData.length} bonnes réponses</div>
       <button class="btn btn-gold" onclick="generateQuiz()" style="font-size:.92rem;padding:.6rem 1.6rem;">🔄 Générer un nouveau quiz (10 nouvelles questions)</button>
     </div>`;
-  state.scores[9]=pct;
-  if(pass&&!state.completed.includes(9))state.completed.push(9);
+  state.scores[11]=pct;
+  if(pass&&!state.completed.includes(11))state.completed.push(11);
   save();updateNav();
   if(pass){document.getElementById('certificateArea').style.display='block';showCertificate();}
 }
-function scoreQuiz(){return state.scores[9]||0;}
+function scoreQuiz(){return state.scores[11]||0;}
+
+/* ══ M9 – AMDEC ══ */
+let amdecRows=[];
+function initAmdecTable(){
+  if(amdecRows.length>0)return;
+  amdecRows=[
+    {comp:'Broche CNC',mode:'Usure prématurée de l\'outil',effect:'Pièces hors tolérance',cause:'Mauvaise lubrification',g:'',o:'',d:'',action:''},
+    {comp:'Convoyeur de copeaux',mode:'Bourrage / obstruction',effect:'Arrêt de la ligne',cause:'Accumulation copeaux',g:'',o:'',d:'',action:''},
+    {comp:'Système de serrage',mode:'Desserrage en cours d\'usinage',effect:'Accident opérateur + rebut',cause:'Usure des mors',g:'',o:'',d:'',action:''},
+    {comp:'Contrôle qualité',mode:'Mesure hors étalonnage',effect:'Acceptation de pièces non-conformes',cause:'Non respect fréquence étalonnage',g:'',o:'',d:'',action:''}
+  ];
+  renderAmdecTable();
+}
+function renderAmdecTable(){
+  const tbody=document.getElementById('amdecBody');if(!tbody)return;
+  tbody.innerHTML='';
+  amdecRows.forEach((r,i)=>{
+    const ipr=(parseInt(r.g)||0)*(parseInt(r.o)||0)*(parseInt(r.d)||0);
+    const iprCol=ipr===0?'#94a3b8':ipr>=200?'#dc2626':ipr>=100?'#f59e0b':'#16a34a';
+    const tr=document.createElement('tr');
+    tr.style.borderBottom='1px solid #f1f5f9';
+    tr.innerHTML=`
+      <td style="padding:.35rem .5rem;"><input class="amdec-inp" value="${r.comp}" oninput="amdecRows[${i}].comp=this.value" placeholder="Composant"></td>
+      <td style="padding:.35rem .5rem;"><input class="amdec-inp" value="${r.mode}" oninput="amdecRows[${i}].mode=this.value" placeholder="Mode de défaillance"></td>
+      <td style="padding:.35rem .5rem;"><input class="amdec-inp" value="${r.effect}" oninput="amdecRows[${i}].effect=this.value" placeholder="Effet(s)"></td>
+      <td style="padding:.35rem .5rem;"><input class="amdec-inp" value="${r.cause}" oninput="amdecRows[${i}].cause=this.value" placeholder="Cause(s)"></td>
+      <td style="padding:.35rem .3rem;text-align:center;"><input class="amdec-num" type="number" min="1" max="10" value="${r.g}" oninput="amdecRows[${i}].g=this.value;calcIPRRow(${i})" placeholder="1-10"></td>
+      <td style="padding:.35rem .3rem;text-align:center;"><input class="amdec-num" type="number" min="1" max="10" value="${r.o}" oninput="amdecRows[${i}].o=this.value;calcIPRRow(${i})" placeholder="1-10"></td>
+      <td style="padding:.35rem .3rem;text-align:center;"><input class="amdec-num" type="number" min="1" max="10" value="${r.d}" oninput="amdecRows[${i}].d=this.value;calcIPRRow(${i})" placeholder="1-10"></td>
+      <td style="padding:.35rem .3rem;text-align:center;"><span id="ipr_${i}" style="font-weight:800;font-size:.85rem;color:${iprCol};">${ipr||'—'}</span></td>
+      <td style="padding:.35rem .5rem;"><input class="amdec-inp" value="${r.action}" oninput="amdecRows[${i}].action=this.value" placeholder="Action corrective proposée..."></td>
+      <td style="padding:.35rem .3rem;text-align:center;"><button onclick="removeAmdecRow(${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:1rem;padding:.1rem .3rem;">✕</button></td>`;
+    tbody.appendChild(tr);
+  });
+  updateAmdecSummary();
+}
+function calcIPRRow(i){
+  const r=amdecRows[i];
+  const ipr=(parseInt(r.g)||0)*(parseInt(r.o)||0)*(parseInt(r.d)||0);
+  const el=document.getElementById('ipr_'+i);if(!el)return;
+  const col=ipr===0?'#94a3b8':ipr>=200?'#dc2626':ipr>=100?'#f59e0b':'#16a34a';
+  el.style.color=col;el.textContent=ipr||'—';
+  updateAmdecSummary();
+}
+function calcAllIPR(){amdecRows.forEach((_,i)=>calcIPRRow(i));updateAmdecSummary();}
+function addAmdecRow(){
+  amdecRows.push({comp:'',mode:'',effect:'',cause:'',g:'',o:'',d:'',action:''});
+  renderAmdecTable();
+}
+function removeAmdecRow(i){amdecRows.splice(i,1);renderAmdecTable();}
+function updateAmdecSummary(){
+  const el=document.getElementById('amdecSummary');if(!el)return;
+  const filled=amdecRows.filter(r=>r.g&&r.o&&r.d);
+  const critical=filled.filter(r=>(parseInt(r.g)||0)*(parseInt(r.o)||0)*(parseInt(r.d)||0)>=100);
+  const withAction=filled.filter(r=>r.action&&r.action.trim().length>5);
+  if(!filled.length){el.innerHTML='';return;}
+  el.innerHTML=`<div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;">
+    <div style="background:#faf5ff;border-radius:8px;padding:.4rem .75rem;font-size:.78rem;border:1px solid #d8b4fe;">📊 <b>${filled.length}</b> lignes avec IPR calculé</div>
+    <div style="background:#fef2f2;border-radius:8px;padding:.4rem .75rem;font-size:.78rem;border:1px solid #fca5a5;color:#dc2626;">🔴 <b>${critical.length}</b> IPR critiques (≥100)</div>
+    <div style="background:#f0fdf4;border-radius:8px;padding:.4rem .75rem;font-size:.78rem;border:1px solid #86efac;color:#16a34a;">✅ <b>${withAction.length}</b> actions définies</div>
+  </div>`;
+}
+async function generateAmdecExercise(){
+  const btn=document.getElementById('genExBtnM9');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
+  const ctx=document.getElementById('amdecExContext');if(ctx)ctx.innerHTML='<div class="ai-loading">🤖 Génération d\'un contexte industriel…</div>';
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  if(!key){if(ctx)ctx.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer un exercice.</div>';if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}return;}
+  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Décris en 4-6 phrases : le secteur (automobile, aéronautique, agroalimentaire, pharmaceutique, etc.), la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction.`;
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:.8})});
+    const data=await res.json();
+    const txt=data.choices?.[0]?.message?.content||'';
+    if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid #d8b4fe;font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;">${formatAIText(txt)}</div>`;
+    amdecRows=[];renderAmdecTable();
+  }catch(e){if(ctx)ctx.innerHTML='<div class="alert alert-warning">Erreur IA. Vérifiez votre clé.</div>';}
+  if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
+}
+async function analyzeAmdec(){
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const el=document.getElementById('amdecAI');if(el)el.innerHTML='<div class="ai-loading">🤖 Analyse AMDEC en cours…</div>';
+  if(!key){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  const filled=amdecRows.filter(r=>r.g&&r.o&&r.d);
+  if(filled.length<2){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Complétez au moins 2 lignes AMDEC avec G, O et D.</div>';return;}
+  const tableText=filled.map(r=>`- ${r.comp}: mode="${r.mode}", effet="${r.effect}", cause="${r.cause}", G=${r.g}, O=${r.o}, D=${r.d}, IPR=${parseInt(r.g)*parseInt(r.o)*parseInt(r.d)}, action="${r.action||'non définie'}"`).join('\n');
+  const prompt=`Tu es expert AMDEC en génie industriel. Voici le tableau AMDEC d'un étudiant :\n${tableText}\n\nDonne un feedback structuré en 4 points : 1) Qualité du remplissage des cotations G/O/D, 2) Pertinence des IPR calculés (critique si ≥100), 3) Qualité des actions correctives proposées, 4) Recommandations d'amélioration. Utilise des termes techniques Lean/qualité.`;
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:.5})});
+    const data=await res.json();
+    const txt=data.choices?.[0]?.message?.content||'Pas de réponse.';
+    if(el)el.innerHTML=`<div class="ai-feedback">${formatAIText(txt)}</div>`;
+  }catch(e){if(el)el.innerHTML='<div class="alert alert-warning">Erreur IA.</div>';}
+}
+function scoreAmdec(){
+  const filled=amdecRows.filter(r=>r.comp&&r.mode&&r.effect&&r.cause);
+  const withIPR=amdecRows.filter(r=>r.g&&r.o&&r.d);
+  const withAction=withIPR.filter(r=>r.action&&r.action.trim().length>8);
+  const critical=withIPR.filter(r=>(parseInt(r.g)||0)*(parseInt(r.o)||0)*(parseInt(r.d)||0)>=100);
+  let s=0;
+  if(filled.length>=3)s+=20;if(filled.length>=4)s+=10;
+  if(withIPR.length>=3)s+=25;if(withIPR.length>=4)s+=10;
+  if(withAction.length>=2)s+=20;if(withAction.length>=3)s+=10;
+  if(critical.length>=1)s+=5;
+  return Math.min(100,s);
+}
+
+/* ══ M10 – CAPSTONE ══ */
+async function generateCapstoneProblem(){
+  const btn=document.querySelector('#m10 .btn-primary');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
+  const statusEl=document.getElementById('capstoneGenStatus');if(statusEl)statusEl.textContent='';
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  if(!key){if(statusEl)statusEl.innerHTML='<span style="color:#dc2626;font-size:.78rem;">⚠️ Clé API requise</span>';if(btn){btn.disabled=false;btn.textContent='🤖 Générer un cas industriel';}return;}
+  const sectors=['automobile','aéronautique','agroalimentaire','pharmaceutique','textile','logistique','sidérurgie'];
+  const sector=sectors[Math.floor(Math.random()*sectors.length)];
+  const prompt=`Génère un cas industriel complexe multi-problèmes pour un projet de synthèse Lean en génie industriel, secteur ${sector}. Décris une situation réelle avec 3-4 problèmes imbriqués (ex: taux de rebuts élevé + pannes machines + retards livraison + surstock). Sois très précis avec des chiffres réels (%, heures, nombre de pièces). Le cas doit nécessiter au moins 3-4 outils Lean différents. Format : paragraphe narratif de 6-8 phrases, concret et technique. Pas d'introduction, commence directement par la description.`;
+  const pc=document.getElementById('capstoneProblemCard'),pt=document.getElementById('capstoneProblemText'),tc=document.getElementById('capstoneToolsCard'),jc=document.getElementById('capstoneJustifCard');
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:500,temperature:.8})});
+    const data=await res.json();
+    const txt=data.choices?.[0]?.message?.content||'';
+    if(pt)pt.innerHTML=formatAIText(txt);
+    if(pc)pc.style.display='block';
+    if(tc)tc.style.display='block';
+    if(jc)jc.style.display='block';
+    document.querySelectorAll('#capstoneToolGrid input[type=checkbox]').forEach(cb=>cb.checked=false);
+    document.getElementById('capstoneJustif').value='';
+    document.getElementById('capstonePlan').value='';
+    updateCapstoneScore();
+  }catch(e){if(statusEl)statusEl.innerHTML='<span style="color:#dc2626;font-size:.78rem;">Erreur IA. Vérifiez votre clé.</span>';}
+  if(btn){btn.disabled=false;btn.textContent='🤖 Générer un cas industriel';}
+}
+function updateCapstoneScore(){
+  const tools=document.querySelectorAll('#capstoneToolGrid input[type=checkbox]:checked').length;
+  const justif=(document.getElementById('capstoneJustif')?.value||'').trim();
+  const plan=(document.getElementById('capstonePlan')?.value||'').trim();
+  let s=0;
+  if(tools>=2)s+=20;if(tools>=3)s+=15;if(tools>=4)s+=10;
+  if(justif.length>80)s+=20;if(justif.length>200)s+=10;
+  if(plan.length>100)s+=15;if(plan.length>300)s+=10;
+  const el=document.getElementById('capstoneScoreBar');if(!el)return;
+  const pct=Math.min(100,s);
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;font-size:.78rem;">
+    <div style="flex:1;background:#e2e8f0;border-radius:6px;height:8px;"><div style="background:#0284c7;height:8px;border-radius:6px;width:${pct}%;transition:width .4s;"></div></div>
+    <span style="font-weight:800;color:#0284c7;">${pct}%</span>
+  </div>`;
+}
+async function analyzeCapstone(){
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const el=document.getElementById('capstoneAI');if(el)el.innerHTML='<div class="ai-loading">🤖 Évaluation du projet…</div>';
+  if(!key){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  const tools=[...document.querySelectorAll('#capstoneToolGrid input[type=checkbox]:checked')].map(cb=>cb.closest('label').textContent.trim()).join(', ');
+  const justif=document.getElementById('capstoneJustif')?.value||'';
+  const plan=document.getElementById('capstonePlan')?.value||'';
+  const prob=document.getElementById('capstoneProblemText')?.textContent||'cas industriel fourni';
+  if(!tools||!justif){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Sélectionnez des outils et rédigez une justification.</div>';return;}
+  const prompt=`Tu es expert Lean Six Sigma. Un étudiant en génie industriel a analysé ce cas : "${prob.slice(0,300)}..."\n\nOutils choisis : ${tools}\nJustification : ${justif}\nPlan d'action : ${plan}\n\nÉvalue : 1) Pertinence des outils choisis par rapport au cas, 2) Qualité du raisonnement dans la justification, 3) Faisabilité et cohérence du plan d'action, 4) Points forts et axes d'amélioration. Sois précis et pédagogique, niveau ingénieur.`;
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:.5})});
+    const data=await res.json();
+    const txt=data.choices?.[0]?.message?.content||'Pas de réponse.';
+    if(el)el.innerHTML=`<div class="ai-feedback">${formatAIText(txt)}</div>`;
+  }catch(e){if(el)el.innerHTML='<div class="alert alert-warning">Erreur IA.</div>';}
+}
+function scoreCapstone(){
+  const tools=document.querySelectorAll('#capstoneToolGrid input[type=checkbox]:checked').length;
+  const justif=(document.getElementById('capstoneJustif')?.value||'').trim();
+  const plan=(document.getElementById('capstonePlan')?.value||'').trim();
+  const prob=document.getElementById('capstoneProblemText')?.textContent||'';
+  let s=0;
+  if(prob.length>50)s+=10;
+  if(tools>=2)s+=20;if(tools>=3)s+=10;if(tools>=4)s+=5;
+  if(justif.length>80)s+=20;if(justif.length>200)s+=10;
+  if(plan.length>100)s+=15;if(plan.length>300)s+=10;
+  return Math.min(100,s);
+}
 
 /* ══ CERTIFICATE ══ */
 function showCertificate(){
@@ -3693,12 +3999,12 @@ function clearRoster(){
 function exportRosterCSV(){
   const roster=getRoster();
   if(!roster.length){alert('Aucun étudiant à exporter.');return;}
-  const hdrs=['Nom','M1-PDCA','M2-5S','M3-Ishikawa','M4-Pareto','M5-Kanban','M6-VSM','M7-SPC','M8-SMED','M9-Quiz','Modules complétés','Score moyen','Date'];
+  const hdrs=['Nom','M1-PDCA','M2-5S','M3-Ishikawa','M4-Pareto','M5-Kanban','M6-VSM','M7-SPC','M8-SMED','M9-AMDEC','M10-Projet','M11-Quiz','Modules complétés','Score moyen','Date'];
   const rows=roster.map(s=>{
     const done=s.c||[],sc=s.s||{};
-    const mods=Array.from({length:9},(_,i)=>{const m=i+1,isDone=done.includes(m),score=sc[m];return score!=null?(isDone?score+'% ✓':score+'%'):'—';});
+    const mods=Array.from({length:11},(_,i)=>{const m=i+1,isDone=done.includes(m),score=sc[m];return score!=null?(isDone?score+'% ✓':score+'%'):'—';});
     const avg=Object.keys(sc).length?Math.round(Object.values(sc).reduce((a,b)=>a+b,0)/Object.keys(sc).length):0;
-    return [s.n||'Anonyme',...mods,done.length+'/9',avg?avg+'%':'—',s.d?new Date(s.d).toLocaleDateString('fr-FR'):'—'];
+    return [s.n||'Anonyme',...mods,done.length+'/11',avg?avg+'%':'—',s.d?new Date(s.d).toLocaleDateString('fr-FR'):'—'];
   });
   const csv=[hdrs,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
@@ -3753,7 +4059,7 @@ function adminBulkImport(){
 }
 
 function adminUnlockAll(){
-  for(let i=1;i<=9;i++){if(!state.completed.includes(i))state.completed.push(i);if(!state.scores[i])state.scores[i]=100;}
+  for(let i=1;i<=11;i++){if(!state.completed.includes(i))state.completed.push(i);if(!state.scores[i])state.scores[i]=100;}
   state.completed.sort((a,b)=>a-b);save();updateNav();
   document.getElementById('admAccessMsg').innerHTML='<div class="alert alert-success" style="margin:0;">✅ Tous les modules débloqués avec score 100%.</div>';
 }
@@ -3928,7 +4234,7 @@ function cvSkip(){state.domain=null;save();closeCVModal();}
 const BADGES=[
   {id:'first_blood',icon:'🥇',name:'Premier Pas',desc:'Valider son 1er module',check:()=>state.completed.length>=1},
   {id:'halfway',icon:'🎯',name:'Mi-parcours',desc:'Valider 5 modules',check:()=>state.completed.length>=5},
-  {id:'lean_master',icon:'🏆',name:'Lean Master',desc:'Valider les 9 modules',check:()=>state.completed.length>=9},
+  {id:'lean_master',icon:'🏆',name:'Lean Master',desc:'Valider les 11 modules',check:()=>state.completed.length>=11},
   {id:'perfectionist',icon:'💎',name:'Perfectionniste',desc:'100% dans un module',check:()=>Object.values(state.scores).some(s=>s>=100)},
   {id:'excellent',icon:'⭐',name:'Excellence',desc:'Moyenne ≥ 80% sur 5+ modules',check:()=>{const sc=Object.values(state.scores);return sc.length>=5&&sc.reduce((a,b)=>a+b,0)/sc.length>=80;}},
   {id:'sensei',icon:'🥋',name:'Sensei IA',desc:'Expert atteint dans 3 modules',check:()=>Object.entries(state.exLevels).filter(([,v])=>v>=7).length>=3},
@@ -3936,7 +4242,7 @@ const BADGES=[
   {id:'marathoner',icon:'🏃',name:'Marathonien',desc:'2h+ de formation au total',check:()=>Object.values(state.timers).reduce((a,b)=>a+b,0)>=7200},
 ];
 function checkBadges(){
-  if(state.completed.length<9){renderBadges();return;}
+  if(state.completed.length<11){renderBadges();return;}
   let nb=false;
   BADGES.forEach(b=>{
     if(!state.badges.includes(b.id)&&b.check()){state.badges.push(b.id);nb=true;_showBadgeToast(b);}
@@ -3953,7 +4259,7 @@ function _showBadgeToast(b){
 function renderBadges(){
   const el=document.getElementById('badgesSection');if(!el)return;
   const cnt=document.getElementById('badgeCount');
-  const allDone=state.completed.length>=9;
+  const allDone=state.completed.length>=11;
   const earned=allDone?BADGES.filter(b=>state.badges.includes(b.id)).length:0;
   if(cnt)cnt.textContent=earned+'/'+BADGES.length;
   if(!allDone){
@@ -3980,7 +4286,7 @@ function renderBadges(){
 /* ══ RADAR DES COMPÉTENCES ══ */
 function renderRadarChart(){
   const canvas=document.getElementById('radarCanvas');if(!canvas)return;
-  const labels=['PDCA','5S','Ishikawa','Pareto','Kanban','VSM','SPC','SMED','Quiz'];
+  const labels=['PDCA','5S','Ishikawa','Pareto','Kanban','VSM','SPC','SMED','AMDEC','Projet','Quiz'];
   const data=labels.map((_,i)=>state.scores[i+1]||0);
   const ph=document.getElementById('radarPlaceholder');
   if(data.every(v=>v===0)){if(ph)ph.style.display='flex';canvas.style.display='none';return;}
@@ -4390,7 +4696,7 @@ function renderTeacherTable(){
         labels:sorted.map(s=>s.name),
         datasets:[
           {label:'Score moyen (%)',data:sorted.map(s=>s.avg||0),backgroundColor:sorted.map(s=>(s.avg||0)>=70?'rgba(5,150,105,.75)':(s.avg||0)>=50?'rgba(245,158,11,.75)':'rgba(239,68,68,.75)'),borderRadius:6,borderSkipped:false},
-          {label:'Modules validés (/9)',data:sorted.map(s=>(s.completed?.length||0)*11.1),backgroundColor:'rgba(99,102,241,.3)',borderRadius:6,borderSkipped:false}
+          {label:'Modules validés (/11)',data:sorted.map(s=>(s.completed?.length||0)*9.09),backgroundColor:'rgba(99,102,241,.3)',borderRadius:6,borderSkipped:false}
         ]
       },
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:11}}}},scales:{y:{min:0,max:100,ticks:{stepSize:20,callback:v=>v+'%'},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}
