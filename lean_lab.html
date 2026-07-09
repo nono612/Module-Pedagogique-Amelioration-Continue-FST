@@ -902,6 +902,17 @@ textarea{resize:vertical;min-height:80px;}
   </div>
 
   <!-- Problem generation -->
+  <div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin-bottom:.5rem;">
+      <div>
+        <div style="font-weight:800;font-size:.87rem;color:#1e40af;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
+      </div>
+      <span id="exLevelBadgeM1" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
+    </div>
+    <div id="genExStatusM1" style="margin-top:.2rem;"></div>
+    <div id="exValidateBtnM1"></div>
+  </div>
   <div class="ccard">
     <div class="ccard-title">Problème industriel à résoudre</div>
     <div id="pdcaProblemCard">
@@ -1023,14 +1034,15 @@ textarea{resize:vertical;min-height:80px;}
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
         <div style="font-weight:800;font-size:.87rem;color:#991b1b;">🎲 Exercices IA — Ateliers 5S à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouvel atelier industriel dans ton secteur. Difficulté croissante : ⭐ Débutant → ⭐⭐⭐ Expert.</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM2" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM2" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM2" class="btn btn-primary btn-sm" onclick="generateModule2Exercise()" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel atelier</button>
       </div>
     </div>
     <div id="genExStatusM2" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM2"></div>
     <div id="m2ExContext"></div>
   </div>
 
@@ -1090,15 +1102,16 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#f8f9ff,#eff2ff);border:2px solid #c7d2fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouveau cas industriel. Difficulté croissante : ⭐ Débutant → ⭐⭐ Intermédiaire → ⭐⭐⭐ Expert.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM3" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM3" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM3" class="btn btn-primary btn-sm" onclick="generateModuleExercise(3)" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel exercice</button>
       </div>
     </div>
     <div id="genExStatusM3" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM3"></div>
     <div id="ishiExContext"></div>
   </div>
   <div class="ccard">
@@ -1189,15 +1202,16 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#f8f9ff,#eff2ff);border:2px solid #c7d2fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouveau jeu de données défauts. Difficulté croissante : ⭐ Débutant → ⭐⭐ Intermédiaire → ⭐⭐⭐ Expert.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM4" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM4" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM4" class="btn btn-primary btn-sm" onclick="generateModuleExercise(4)" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel exercice</button>
       </div>
     </div>
     <div id="genExStatusM4" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM4"></div>
     <div id="paretoExContext"></div>
   </div>
   <div class="ccard">
@@ -1275,15 +1289,16 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#f8f9ff,#eff2ff);border:2px solid #c7d2fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouveau scénario Kanban. Difficulté croissante : ⭐ Débutant → ⭐⭐ Intermédiaire → ⭐⭐⭐ Expert.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM5" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM5" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM5" class="btn btn-primary btn-sm" onclick="generateModuleExercise(5)" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel exercice</button>
       </div>
     </div>
     <div id="genExStatusM5" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM5"></div>
     <div id="kanbanExContext"></div>
   </div>
   <div class="ccard">
@@ -1367,15 +1382,16 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#f8f9ff,#eff2ff);border:2px solid #c7d2fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouveau flux à cartographier. Difficulté croissante : ⭐ Débutant → ⭐⭐ Intermédiaire → ⭐⭐⭐ Expert.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM6" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM6" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM6" class="btn btn-primary btn-sm" onclick="generateModuleExercise(6)" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel exercice</button>
       </div>
     </div>
     <div id="genExStatusM6" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM6"></div>
     <div id="vsmExContext"></div>
   </div>
   <div class="ccard">
@@ -1508,15 +1524,16 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#f8f9ff,#eff2ff);border:2px solid #c7d2fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouveau jeu de mesures SPC. Difficulté croissante : ⭐ Débutant → ⭐⭐ Intermédiaire → ⭐⭐⭐ Expert.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM7" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM7" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM7" class="btn btn-primary btn-sm" onclick="generateModuleExercise(7)" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel exercice</button>
       </div>
     </div>
     <div id="genExStatusM7" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM7"></div>
     <div id="spcExContext"></div>
   </div>
   <div class="ccard">
@@ -1573,15 +1590,16 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#f8f9ff,#eff2ff);border:2px solid #c7d2fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">Génère un nouveau changement de série à analyser. Difficulté croissante : ⭐ Débutant → ⭐⭐ Intermédiaire → ⭐⭐⭐ Expert.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#3730a3;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
       </div>
       <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0;">
-        <span id="exLevelBadgeM8" style="font-size:.71rem;font-weight:800;background:#d1fae5;color:#065f46;border-radius:20px;padding:.2rem .75rem;white-space:nowrap;">⭐ Débutant</span>
+        <span id="exLevelBadgeM8" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;"></span>
         <button id="genExBtnM8" class="btn btn-primary btn-sm" onclick="generateModuleExercise(8)" style="font-size:.8rem;padding:.35rem .9rem;">🎲 Nouvel exercice</button>
       </div>
     </div>
     <div id="genExStatusM8" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM8"></div>
     <div id="smedExContext"></div>
   </div>
   <div class="ccard">
@@ -1635,11 +1653,14 @@ textarea{resize:vertical;min-height:80px;}
   <div class="ccard" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:2px solid #d8b4fe;">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;">
       <div>
-        <div style="font-weight:800;font-size:.87rem;color:#6d28d9;">🎲 Exercices IA — Scénarios à l'infini</div>
-        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">L'IA génère un nouveau processus industriel à analyser en AMDEC.</div>
+        <div style="font-weight:800;font-size:.87rem;color:#6d28d9;">🎲 Exercices IA — 3 niveaux obligatoires</div>
+        <div style="font-size:.72rem;color:#6b7280;margin-top:.15rem;">3 niveaux obligatoires : complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
+        <span id="exLevelBadgeM9" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;margin-top:.35rem;"></span>
       </div>
       <button id="genExBtnM9" class="btn btn-primary btn-sm" onclick="generateAmdecExercise()">🎲 Nouvel exercice</button>
     </div>
+    <div id="genExStatusM9" style="margin-top:.3rem;"></div>
+    <div id="exValidateBtnM9"></div>
     <div id="amdecExContext" style="margin-top:.5rem;"></div>
   </div>
   <div class="ccard">
@@ -1961,8 +1982,8 @@ function goModule(n){
   if(n===4)initPareto();if(n===5)initKanban();
   if(n===6)initVSM();if(n===8)initSMED();
   if(n===9)initAmdecTable();
+  if(n>=1&&n<=9){_refreshExBadge(n);_showExValidateBtn(n);}
   if(n===2)_refreshM2Badge();
-  if(n>=3&&n<=8)_refreshExBadge(n);
 }
 function updateNav(){
   document.querySelectorAll('.nav-btn[data-module]').forEach(b=>{
@@ -2015,7 +2036,25 @@ function renderGrid(){
 
 /* ── Validation ── */
 const _moduleNames={1:'Cycle PDCA',2:'Méthode 5S',3:'Diagramme Ishikawa',4:'Analyse de Pareto',5:'Tableau Kanban',6:'Value Stream Mapping',7:'Cartes de contrôle SPC',8:'SMED',9:'AMDEC/FMEA',10:'Projet Intégré Lean',11:'Quiz Final'};
+const _MODULES_WITH_LEVELS=[1,2,3,4,5,6,7,8,9];
 function validateModule(n,scoreFn){
+  if(_MODULES_WITH_LEVELS.includes(n)){
+    const levDone=(state.exLevels||{})[n]||0;
+    if(levDone<3){
+      const labels=['Débutant','Intermédiaire','Avancé'];
+      const next=labels[levDone];
+      const el=document.getElementById('m'+n);
+      let box=el?.querySelector('.score-result');
+      if(!box){box=document.createElement('div');el?.querySelector('.ccard:last-child')?.appendChild(box);}
+      box.className='score-result fail';
+      box.innerHTML=`<div style="flex:1;"><div style="font-weight:800;font-size:.95rem;color:var(--red);">🔒 Module verrouillé</div>
+        <div style="font-size:.82rem;color:#6b7280;margin-top:.3rem;">Vous devez compléter les <b>3 niveaux d'exercices</b> avant de valider ce module.</div>
+        <div style="display:flex;gap:.4rem;margin-top:.6rem;flex-wrap:wrap;">${_EX_LEVELS.map((lv,i)=>{const done=i<levDone,cur=i===levDone&&levDone<3;return`<span style="font-size:.72rem;font-weight:800;padding:.2rem .6rem;border-radius:12px;background:${done?lv.color+'25':cur?lv.color+'15':'#f1f5f9'};color:${done||cur?lv.color:'#94a3b8'};border:1.5px solid ${done?lv.color:cur?lv.color+'88':'#e2e8f0'};">${done?'✓ ':'→ '}${lv.label}${done?' ✓':cur?' (en cours)':' 🔒'}</span>`;}).join('')}</div>
+        <div style="font-size:.8rem;color:var(--red);margin-top:.5rem;font-weight:700;">Prochain niveau à faire : <b>${next}</b> — Cliquez sur 🎲 Nouvel exercice</div>
+      </div>`;
+      return;
+    }
+  }
   const score=scoreFn();
   state.scores[n]=score;
   const minScore=n===11?70:60;
@@ -2131,29 +2170,30 @@ function generatePDCAProblem(){
   const key=getKey();
   const card=document.getElementById('pdcaProblemCard');
   card.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du problème...</div><div class="ai-loading-text">L\'IA prépare un scénario industriel réaliste...</div></div>';
+  const lv=getExLevel(1);
+  const lvDesc=['DÉBUTANT — problème simple, univoque, chiffres parlants, secteur courant (agroalimentaire, BTP, textile).','INTERMÉDIAIRE — problème multi-facteurs, secteur technique (automobile, logistique, chimie), analyse approfondie requise.','AVANCÉ — problème complexe, enjeux forts, secteur exigeant (aéronautique, pharma, électronique précision), ambiguïtés à résoudre.'][lv.idx];
   const sectors=['Automobile','Aéronautique','Agroalimentaire','Pharmaceutique','Électronique','Textile','Chimie','Métallurgie','Énergie','Logistique','BTP','Plasturgie'];
   const sector=state.domain?state.domain.secteur:sectors[Math.floor(Math.random()*sectors.length)];
   const domainHint=state.domain?`\nProfil étudiant : ${state.domain.poste||''} chez ${state.domain.entreprise||''}. ${state.domain.contexte||''}. Crée un problème ancré dans CE secteur avec des détails réalistes.`:'';
   if(!key){
-    const fallbacks=state.domain?PDCA_FALLBACKS.filter(f=>f.secteur&&f.secteur.toLowerCase().includes(sector.toLowerCase())):[];
-    const pool=fallbacks.length?fallbacks:PDCA_FALLBACKS;
-    const prob=pool[Math.floor(Math.random()*pool.length)];
+    const pool=PDCA_FALLBACKS.filter(f=>!f.difficulte||f.difficulte===lv.label)||PDCA_FALLBACKS;
+    const prob=(pool.length?pool:PDCA_FALLBACKS)[Math.floor(Math.random()*(pool.length||PDCA_FALLBACKS.length))];
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
-    setTimeout(()=>{renderProblemCard(prob);showPDCAForm();},700);
+    setTimeout(()=>{renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);},700);
     return;
   }
-  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur.\nSecteur IMPOSÉ: ${sector}${domainHint}\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
+  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
   fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600})})
   .then(r=>r.json()).then(data=>{
     const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
     if(!m)throw new Error();
     const prob=JSON.parse(m[0]);
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
-    renderProblemCard(prob);showPDCAForm();
+    renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);
   }).catch(()=>{
     const prob=PDCA_FALLBACKS[Math.floor(Math.random()*PDCA_FALLBACKS.length)];
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
-    renderProblemCard(prob);showPDCAForm();
+    renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);
   });
 }
 
@@ -3444,32 +3484,60 @@ function showSMEDCorrection(){
   </div>`;
 }
 
-/* ══ EXERCICES IA INFINIS (M3–M8) ══ */
+/* ══ EXERCICES IA — 3 NIVEAUX SÉQUENTIELS (M3–M10) ══ */
+const _EX_LEVELS=[
+  {label:'Débutant',stars:'⭐',idx:0,color:'#16a34a',bg:'#f0fdf4',border:'#bbf7d0'},
+  {label:'Intermédiaire',stars:'⭐⭐',idx:1,color:'#d97706',bg:'#fffbeb',border:'#fde68a'},
+  {label:'Avancé',stars:'⭐⭐⭐',idx:2,color:'#dc2626',bg:'#fef2f2',border:'#fecaca'}
+];
 function getExLevel(modId){
-  const n=(state.exLevels||{})[modId]||0;
-  if(n<3)return{label:'Débutant',stars:'⭐',idx:0};
-  if(n<7)return{label:'Intermédiaire',stars:'⭐⭐',idx:1};
-  return{label:'Expert',stars:'⭐⭐⭐',idx:2};
+  const completed=(state.exLevels||{})[modId]||0;
+  return _EX_LEVELS[Math.min(completed,2)];
 }
-function incExLevel(modId){
+function completeExLevel(modId){
   if(!state.exLevels)state.exLevels={};
-  state.exLevels[modId]=(state.exLevels[modId]||0)+1;
+  const current=state.exLevels[modId]||0;
+  if(current>=3){_refreshExBadge(modId);return;}
+  state.exLevels[modId]=current+1;
   save();
-  const lv=getExLevel(modId);
-  const badge=document.getElementById('exLevelBadgeM'+modId);
-  if(badge){
-    badge.textContent=lv.stars+' '+lv.label;
-    badge.style.background=lv.idx===0?'#d1fae5':lv.idx===1?'#fef3c7':'#fee2e2';
-    badge.style.color=lv.idx===0?'#065f46':lv.idx===1?'#92400e':'#991b1b';
+  _refreshExBadge(modId);
+  const validateBtn=document.getElementById('exValidateBtnM'+modId);
+  if(validateBtn)validateBtn.innerHTML='';
+  const statusEl=document.getElementById('genExStatusM'+modId);
+  const labels=['Débutant','Intermédiaire','Avancé'];
+  const next=state.exLevels[modId];
+  if(next<3){
+    if(statusEl)statusEl.innerHTML=`<div class="alert alert-success" style="margin:0;padding:.4rem .8rem;font-size:.79rem;">✅ Niveau <b>${labels[current]}</b> validé ! Cliquez sur <b>🎲 Nouvel exercice</b> pour démarrer le niveau <b>${labels[next]}</b>.</div>`;
+    setTimeout(()=>{if(statusEl)statusEl.innerHTML='';},5000);
+  } else {
+    if(statusEl)statusEl.innerHTML=`<div class="alert alert-success" style="margin:0;padding:.4rem .8rem;font-size:.79rem;">🎉 <b>Les 3 niveaux sont validés !</b> Vous pouvez maintenant valider le module.</div>`;
   }
 }
+function _showExValidateBtn(modId){
+  const el=document.getElementById('exValidateBtnM'+modId);
+  if(!el)return;
+  const completed=(state.exLevels||{})[modId]||0;
+  if(completed>=3){
+    el.innerHTML='<div style="font-size:.77rem;color:#059669;font-weight:700;margin-top:.3rem;">✅ Les 3 niveaux sont complétés</div>';
+    return;
+  }
+  const lv=_EX_LEVELS[Math.min(completed,2)];
+  el.innerHTML=`<button class="btn btn-green btn-sm" onclick="completeExLevel(${modId})" style="margin-top:.4rem;font-size:.8rem;">✅ J'ai terminé — Valider le niveau ${lv.stars} ${lv.label}</button>`;
+}
 function _refreshExBadge(modId){
-  const lv=getExLevel(modId);
   const badge=document.getElementById('exLevelBadgeM'+modId);
-  if(badge){
-    badge.textContent=lv.stars+' '+lv.label;
-    badge.style.background=lv.idx===0?'#d1fae5':lv.idx===1?'#fef3c7':'#fee2e2';
-    badge.style.color=lv.idx===0?'#065f46':lv.idx===1?'#92400e':'#991b1b';
+  if(!badge)return;
+  const completed=(state.exLevels||{})[modId]||0;
+  badge.innerHTML=_EX_LEVELS.map((s,i)=>{
+    const done=i<completed,current=i===completed&&completed<3,locked=i>completed;
+    return `<span style="display:inline-flex;align-items:center;gap:.18rem;font-size:.67rem;font-weight:800;padding:.15rem .5rem;border-radius:12px;background:${done?s.color+'25':current?s.color+'15':'#f1f5f9'};color:${done||current?s.color:'#94a3b8'};border:1.5px solid ${done?s.color:current?s.color+'99':'#e2e8f0'};white-space:nowrap;">${done?'✓ ':current?'→ ':'🔒 '}${s.label}</span>`;
+  }).join('<span style="color:#cbd5e1;font-size:.65rem;margin:0 .05rem;">›</span>');
+  badge.style.cssText='display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;background:transparent;padding:0;border-radius:0;';
+  const btn=document.getElementById('genExBtnM'+modId);
+  if(btn){
+    const completed2=(state.exLevels||{})[modId]||0;
+    btn.disabled=completed2>=3;
+    btn.title=completed2>=3?'Les 3 niveaux sont complétés':'';
   }
 }
 
@@ -3524,9 +3592,9 @@ async function generateModuleExercise(modId){
     if(!mm)throw new Error('Réponse IA invalide — pas de JSON');
     const ex=JSON.parse(mm[0]);
     _applyModuleExercise(modId,ex,lv);
-    incExLevel(modId);
-    statusEl.innerHTML='<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Scénario '+lv.label+' généré — À vous de jouer !</div>';
-    setTimeout(()=>{if(statusEl)statusEl.innerHTML='';},3000);
+    statusEl.innerHTML='<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Scénario <b>'+lv.label+'</b> généré — Résolvez l\'exercice ci-dessous, puis validez ce niveau.</div>';
+    setTimeout(()=>{if(statusEl)statusEl.innerHTML='';},4000);
+    _showExValidateBtn(modId);
   }catch(e){
     statusEl.innerHTML=`<div class="alert alert-danger" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">❌ ${_escH(e.message)}</div>`;
   }
@@ -3738,13 +3806,21 @@ async function generateAmdecExercise(){
   const ctx=document.getElementById('amdecExContext');if(ctx)ctx.innerHTML='<div class="ai-loading">🤖 Génération d\'un contexte industriel…</div>';
   const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
   if(!key){if(ctx)ctx.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer un exercice.</div>';if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}return;}
-  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Décris en 4-6 phrases : le secteur (automobile, aéronautique, agroalimentaire, pharmaceutique, etc.), la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction.`;
+  const lv=getExLevel(9);
+  const lvDescs=[
+    'DÉBUTANT — Secteur simple (agroalimentaire, textile). Composants évidents, défaillances claires, causes directes.',
+    'INTERMÉDIAIRE — Secteur technique (automobile, logistique). Plusieurs composants interagissants, causes multiples à identifier.',
+    'AVANCÉ — Secteur exigeant (aéronautique, pharmaceutique). Défaillances ambiguës, effets en cascade, enjeux sécurité critiques.'
+  ][lv.idx];
+  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction.`;
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:.8})});
     const data=await res.json();
     const txt=data.choices?.[0]?.message?.content||'';
-    if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid #d8b4fe;font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;">${formatAIText(txt)}</div>`;
+    const lv=getExLevel(9);
+    if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.4rem;">${lv.stars} Exercice niveau ${lv.label}</div>${formatAIText(txt)}</div>`;
     amdecRows=[];renderAmdecTable();
+    _showExValidateBtn(9);
   }catch(e){if(ctx)ctx.innerHTML='<div class="alert alert-warning">Erreur IA. Vérifiez votre clé.</div>';}
   if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
 }
@@ -4237,7 +4313,7 @@ const BADGES=[
   {id:'lean_master',icon:'🏆',name:'Lean Master',desc:'Valider les 11 modules',check:()=>state.completed.length>=11},
   {id:'perfectionist',icon:'💎',name:'Perfectionniste',desc:'100% dans un module',check:()=>Object.values(state.scores).some(s=>s>=100)},
   {id:'excellent',icon:'⭐',name:'Excellence',desc:'Moyenne ≥ 80% sur 5+ modules',check:()=>{const sc=Object.values(state.scores);return sc.length>=5&&sc.reduce((a,b)=>a+b,0)/sc.length>=80;}},
-  {id:'sensei',icon:'🥋',name:'Sensei IA',desc:'Expert atteint dans 3 modules',check:()=>Object.entries(state.exLevels).filter(([,v])=>v>=7).length>=3},
+  {id:'sensei',icon:'🥋',name:'Sensei IA',desc:'3 niveaux complétés dans 3 modules',check:()=>Object.entries(state.exLevels).filter(([,v])=>v>=3).length>=3},
   {id:'cv_pro',icon:'💼',name:'Profil Pro',desc:'CV analysé et profil configuré',check:()=>!!state.domain},
   {id:'marathoner',icon:'🏃',name:'Marathonien',desc:'2h+ de formation au total',check:()=>Object.values(state.timers).reduce((a,b)=>a+b,0)>=7200},
 ];
@@ -4361,16 +4437,8 @@ function _watchFeedbackDiv(elId,modId){
 
 /* ══ M2 – GÉNÉRATEUR 5S INFINIS ══ */
 let fiveS_customItems=null,_m2LastEx=null;
-function getM2Level(){
-  const n=state.exLevels[2]||0;
-  if(n>=7)return{label:'⭐⭐⭐ Expert',color:'#991b1b',bg:'#fee2e2'};
-  if(n>=3)return{label:'⭐⭐ Intermédiaire',color:'#92400e',bg:'#fef3c7'};
-  return{label:'⭐ Débutant',color:'#065f46',bg:'#d1fae5'};
-}
-function _refreshM2Badge(){
-  const lv=getM2Level();const b=document.getElementById('exLevelBadgeM2');if(!b)return;
-  b.textContent=lv.label;b.style.background=lv.bg;b.style.color=lv.color;
-}
+function getM2Level(){return getExLevel(2);}
+function _refreshM2Badge(){_refreshExBadge(2);}
 async function generateModule2Exercise(){
   const key=getKey();
   if(!key){alert('⚠️ Clé API requise dans l\'en-tête de la page.');return;}
@@ -4378,8 +4446,9 @@ async function generateModule2Exercise(){
   const status=document.getElementById('genExStatusM2');
   if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   if(status)status.innerHTML='<div style="font-size:.74rem;color:#6366f1;">🔄 L\'IA crée un nouvel atelier 5S…</div>';
-  const n=state.exLevels[2]||0;const lv=getM2Level();
-  const lvDesc=n>=7?'Niveau EXPERT : certains items peuvent être ambigus (appartenir à 2 S), pas de contexte textuel évident — seulement le nom et la zone.':n>=3?'Niveau INTERMÉDIAIRE : atelier avec contexte détaillé mais certains items moins évidents (matériaux périmés mais encore partiellement utilisés, etc.).':'Niveau DÉBUTANT : atelier avec des situations claires et non ambiguës, chaque item correspond évidemment à 1 seul S.';
+  const lv=getExLevel(2);
+  const lvDescs=['Niveau DÉBUTANT : atelier avec des situations claires et non ambiguës, chaque item correspond évidemment à 1 seul S.','Niveau INTERMÉDIAIRE : atelier avec contexte détaillé mais certains items moins évidents (matériaux périmés mais encore partiellement utilisés, etc.).','Niveau AVANCÉ : certains items peuvent être ambigus (appartenir à 2 S), pas de contexte textuel évident — seulement le nom et la zone.'];
+  const lvDesc=lvDescs[lv.idx];
   const domCtx=state.domain?` L'étudiant est ${state.domain.poste||'ingénieur'} dans le secteur ${state.domain.secteur||'industriel'} chez ${state.domain.entreprise||'une entreprise'}. Adapte le secteur et les matériaux à ce contexte métier.`:'';
   const prompt=`Tu es expert Lean 5S. Génère un exercice de classification 5S pour un atelier industriel fictif.
 ${lvDesc}${domCtx}
@@ -4399,11 +4468,11 @@ Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri,
     const VALID_S=['seiri','seiton','seiso','seiketsu','shitsuke'];
     ex.items=ex.items.filter(it=>VALID_S.includes(it.correct));
     if(ex.items.length<12)throw new Error('Trop peu d\'items valides');
-    if(status)status.innerHTML='';
-    state.exLevels[2]=(state.exLevels[2]||0)+1;save();
-    _refreshM2Badge();
+    if(status)status.innerHTML=`<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Atelier <b>${lv.label}</b> généré — Classifiez les éléments puis validez ce niveau.</div>`;
+    setTimeout(()=>{if(status)status.innerHTML='';},4000);
     _m2LastEx=ex;
     _applyM2Exercise(ex,lv);
+    _showExValidateBtn(2);
     checkBadges();
   }catch(e){
     if(status)status.innerHTML=`<div style="font-size:.74rem;color:#dc2626;">❌ Erreur : ${_escH(e.message)}</div>`;
@@ -4879,8 +4948,8 @@ window.addEventListener('DOMContentLoaded',()=>{
   _watchFeedbackDiv('vsmAIFull',6);
   _watchFeedbackDiv('spcAIFull',7);
   _watchFeedbackDiv('smedAIFull',8);
-  // Init badge M2
-  _refreshM2Badge();
+  // Init level steppers for all exercise modules
+  for(let i=1;i<=9;i++)_refreshExBadge(i);
   // Init révision badge count
   const rb=document.getElementById('revisionBadge');
   if(rb)rb.textContent=Object.keys(state.feedbacks||{}).length;
