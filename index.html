@@ -1130,11 +1130,42 @@ textarea{resize:vertical;min-height:80px;}
       <button class="btn btn-primary" onclick="drawFishbone()">🐟 Générer le diagramme</button>
       <button class="btn btn-gold" onclick="analyzeIshikawa()">🤖 Feedback IA complet</button>
       <button class="btn btn-purple" onclick="showIshikawaCorrection()">📖 Voir la correction</button>
-      <button class="btn btn-green" onclick="validateModule(3,scoreIshikawa)">✅ Valider le Module</button>
     </div>
     <div id="ishiAIFeedback" style="margin-top:.5rem;"></div>
     <div id="ishiCorrection" style="margin-top:.5rem;"></div>
     <div id="ishiScore"></div>
+  </div>
+
+  <!-- ── M3 : Priorisation des causes racines ── -->
+  <div class="ccard" style="border:2px solid #c4b5fd;">
+    <div class="ccard-title"><span style="background:#7c3aed;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 2</span>Priorisation des causes — Matrice Criticité</div>
+    <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:10px;padding:.8rem 1rem;border:1px solid #ddd6fe;font-size:.8rem;color:#4c1d95;margin-bottom:1rem;">
+      🎯 <b>Objectif ingénieur :</b> Identifier les 3 causes racines prioritaires. Pour chaque cause saisie ci-dessus, évaluez son <b>Impact</b> (1=faible → 5=critique) et sa <b>Probabilité d'occurrence</b> (1=rare → 5=fréquent). L'<b>Indice de Criticité = Impact × Probabilité</b>.
+    </div>
+    <div id="ishiPrioGrid" style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:.78rem;">
+        <thead><tr style="background:#f5f3ff;">
+          <th style="padding:.5rem .7rem;text-align:left;border-bottom:2px solid #ddd6fe;color:#5b21b6;font-weight:800;">Cause identifiée</th>
+          <th style="padding:.5rem .7rem;text-align:center;border-bottom:2px solid #ddd6fe;color:#5b21b6;font-weight:800;">Catégorie 5M</th>
+          <th style="padding:.5rem .7rem;text-align:center;border-bottom:2px solid #ddd6fe;color:#5b21b6;font-weight:800;">Impact (1-5)</th>
+          <th style="padding:.5rem .7rem;text-align:center;border-bottom:2px solid #ddd6fe;color:#5b21b6;font-weight:800;">Probabilité (1-5)</th>
+          <th style="padding:.5rem .7rem;text-align:center;border-bottom:2px solid #ddd6fe;color:#ef4444;font-weight:800;">Criticité</th>
+        </tr></thead>
+        <tbody id="ishiPrioBody"><tr><td colspan="5" style="padding:1rem;text-align:center;color:#94a3b8;font-style:italic;">Saisissez d'abord vos causes dans la section 5M ci-dessus, puis cliquez sur "Calculer".</td></tr></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-purple btn-sm" onclick="buildIshiPrioTable()">🔄 Charger mes causes</button>
+      <button class="btn btn-gold" onclick="calcIshiCriticite()">📊 Calculer les criticités</button>
+    </div>
+    <div id="ishiPrioResult" style="margin-top:.8rem;"></div>
+    <div style="margin-top:1rem;">
+      <label style="font-size:.8rem;font-weight:800;color:#5b21b6;">📝 Vos 3 causes racines prioritaires à traiter en priorité</label>
+      <textarea id="ishiRootCauses" placeholder="Ex : 1. Usure des outils (criticité 20) — planifier la maintenance préventive&#10;2. Absence de procédure de contrôle (criticité 18) — rédiger une gamme de contrôle&#10;3. Vibrations machines (criticité 15) — audit vibrations mensuel" style="min-height:90px;margin-top:.4rem;"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="validateModule(3,scoreIshikawa)">✅ Valider le Module</button>
+    </div>
   </div>
 </div>
 
@@ -1188,10 +1219,39 @@ textarea{resize:vertical;min-height:80px;}
     <div class="btn-row">
       <button class="btn btn-gold" onclick="analyzeParetoFull()">🤖 Feedback IA complet</button>
       <button class="btn btn-purple" onclick="showParetoCorrection()">📖 Voir la correction</button>
-      <button class="btn btn-green" onclick="validateModule(4,scorePareto)">✅ Valider le Module Pareto</button>
     </div>
     <div id="paretoAIFull" style="margin-top:.5rem;"></div>
     <div id="paretoCorrection" style="margin-top:.5rem;"></div>
+  </div>
+
+  <!-- ── M4 : Plan d'action ── -->
+  <div class="ccard" style="border:2px solid #fde68a;">
+    <div class="ccard-title"><span style="background:#d97706;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 2</span>Plan d'action — Des 20% vitaux aux actions correctives</div>
+    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:10px;padding:.8rem 1rem;border:1px solid #fde68a;font-size:.8rem;color:#92400e;margin-bottom:1rem;">
+      🎯 <b>Décision ingénieur :</b> Le Pareto a révélé les défauts vitaux. Définissez maintenant un <b>plan d'action chiffré</b> : pour chaque défaut prioritaire, quelle action, quel responsable, quel délai et quel gain espéré ?
+    </div>
+    <div id="paretoPlanRows">
+      <div style="display:grid;grid-template-columns:1.8fr 2fr 1fr 1fr 1fr;gap:.4rem;padding:.3rem .5rem;margin-bottom:.2rem;">
+        <span style="font-size:.65rem;font-weight:800;color:var(--gray400);text-transform:uppercase;">Défaut prioritaire</span>
+        <span style="font-size:.65rem;font-weight:800;color:var(--gray400);text-transform:uppercase;">Action corrective</span>
+        <span style="font-size:.65rem;font-weight:800;color:var(--gray400);text-transform:uppercase;">Responsable</span>
+        <span style="font-size:.65rem;font-weight:800;color:var(--gray400);text-transform:uppercase;">Délai</span>
+        <span style="font-size:.65rem;font-weight:800;color:var(--gray400);text-transform:uppercase;">Gain estimé (€)</span>
+      </div>
+      <div id="paretoPlanBody"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-amber btn-sm" onclick="loadParetoPlan()" style="background:#d97706;color:#fff;border-radius:9px;padding:.28rem .7rem;font-size:.74rem;font-weight:700;border:none;cursor:pointer;">🔄 Charger les défauts vitaux</button>
+      <button class="btn btn-ghost btn-sm" onclick="addParetoPlanRow()">+ Ajouter une ligne</button>
+    </div>
+    <div id="paretoPlanSummary" style="margin-top:.8rem;"></div>
+    <div style="margin-top:1rem;">
+      <label style="font-size:.8rem;font-weight:800;color:#92400e;">📝 Justification de vos choix d'actions (décision managériale)</label>
+      <textarea id="paretoDecision" placeholder="Ex : En ciblant les 3 défauts représentant 78% des rebuts (rayures, dimensions hors tolérances, bavures), nous estimons réduire les pertes de 12 000€ à moins de 3 000€/semaine. Priorité donnée aux rayures car impact client direct..." style="min-height:80px;margin-top:.4rem;"></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green" onclick="validateModule(4,scorePareto)">✅ Valider le Module Pareto</button>
+    </div>
   </div>
 </div>
 
@@ -1232,6 +1292,32 @@ textarea{resize:vertical;min-height:80px;}
       <div style="background:#f0fdfa;border-radius:8px;padding:.5rem;border-left:3px solid #14b8a6;"><b style="color:#0f766e;">Alerte WIP</b><br>Rouge = goulot d'étranglement<br><span style="font-size:.7rem;color:#6b7280;">Analysez avant d'ajouter</span></div>
     </div>
   </div>
+  <!-- Calculateur Takt Time -->
+  <div class="ccard" style="border:2px solid #99f6e4;">
+    <div class="ccard-title"><span style="background:#0d9488;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 1</span>Calcul du Takt Time — Rythme imposé par le client</div>
+    <div style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border-radius:10px;padding:.8rem 1rem;border:1px solid #99f6e4;font-size:.8rem;color:#0f766e;margin-bottom:1rem;">
+      ⏱️ <b>Takt Time</b> = Temps disponible ÷ Demande client. C'est le rythme auquel le client consomme une unité. Votre processus doit produire <b>au plus</b> une pièce par Takt Time pour éviter la surproduction.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:.8rem;">
+      <div>
+        <label>Temps disponible (min/jour)</label>
+        <input type="number" id="taktAvailable" placeholder="Ex : 450" min="1" style="margin:0;" oninput="calcTaktTime()">
+        <div style="font-size:.68rem;color:#64748b;margin-top:.2rem;">Temps net (pauses exclues)</div>
+      </div>
+      <div>
+        <label>Demande client (pièces/jour)</label>
+        <input type="number" id="taktDemand" placeholder="Ex : 90" min="1" style="margin:0;" oninput="calcTaktTime()">
+        <div style="font-size:.68rem;color:#64748b;margin-top:.2rem;">Commandes quotidiennes</div>
+      </div>
+      <div id="taktResult" style="background:#f0fdfa;border-radius:10px;padding:.8rem;border:1.5px solid #6ee7b7;display:flex;flex-direction:column;justify-content:center;text-align:center;">
+        <div style="font-size:.65rem;font-weight:800;color:#0f766e;text-transform:uppercase;letter-spacing:.5px;">Takt Time</div>
+        <div id="taktValue" style="font-size:2rem;font-weight:900;color:#0d9488;margin:.2rem 0;">–</div>
+        <div style="font-size:.65rem;color:#64748b;">min/pièce</div>
+      </div>
+    </div>
+    <div id="taktAnalysis" style="margin-top:.3rem;"></div>
+  </div>
+
   <div class="ccard">
     <div style="display:flex;align-items:flex-end;gap:1.2rem;flex-wrap:wrap;padding:.9rem;background:var(--gray50);border-radius:12px;border:1.5px solid var(--gray200);margin-bottom:1.2rem;">
       <div>
@@ -1316,7 +1402,82 @@ textarea{resize:vertical;min-height:80px;}
     <div id="vsmTimeline"></div>
     <div id="vsmScore"></div>
   </div>
-  <div class="ccard">
+  <!-- ── M6 : Takt Time + Gaspillages + État futur ── -->
+  <div class="ccard" style="border:2px solid #6ee7b7;">
+    <div class="ccard-title"><span style="background:#059669;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 2</span>Takt Time & Analyse approfondie</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label>Demande client (pièces/jour)</label>
+        <input type="number" id="vsmDemand" placeholder="Ex : 100" min="1" style="margin:0;" oninput="calcVsmTakt()">
+      </div>
+      <div>
+        <label>Temps disponible (min/jour)</label>
+        <input type="number" id="vsmAvailable" placeholder="Ex : 480" min="1" style="margin:0;" oninput="calcVsmTakt()">
+      </div>
+    </div>
+    <div id="vsmTaktResult" style="background:#ecfdf5;border-radius:10px;padding:.8rem 1rem;border:1px solid #6ee7b7;display:none;">
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
+        <div style="text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:#059669;" id="vsmTaktVal">–</div><div style="font-size:.65rem;color:#64748b;text-transform:uppercase;">Takt Time (min/p)</div></div>
+        <div style="text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:#0284c7;" id="vsmLeadTimeVal">–</div><div style="font-size:.65rem;color:#64748b;text-transform:uppercase;">Lead Time total (min)</div></div>
+        <div style="text-align:center;"><div style="font-size:1.4rem;font-weight:900;color:#7c3aed;" id="vsmGapVal">–</div><div style="font-size:.65rem;color:#64748b;text-transform:uppercase;">Écart Takt/Cycle max</div></div>
+      </div>
+      <div id="vsmTaktAnalysis" style="margin-top:.6rem;font-size:.78rem;"></div>
+    </div>
+  </div>
+
+  <div class="ccard" style="border:2px solid #6ee7b7;">
+    <div class="ccard-title"><span style="background:#059669;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 3</span>Identification des 7 Gaspillages (MUDA)</div>
+    <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:10px;padding:.8rem 1rem;border:1px solid #6ee7b7;font-size:.79rem;color:#065f46;margin-bottom:.9rem;">
+      🔍 Analysez votre VSM et cochez les gaspillages que vous identifiez dans le flux actuel. Justifiez chaque sélection avec un exemple chiffré issu de votre cartographie.
+    </div>
+    <div id="vsmMudaGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda0" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">① Surproduction</div><div style="font-size:.68rem;color:#6b7280;">Produire plus que la demande client</div><input type="text" id="mudaEx0" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda1" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">② Attentes</div><div style="font-size:.68rem;color:#6b7280;">Opérateurs ou pièces qui attendent</div><input type="text" id="mudaEx1" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda2" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">③ Transports inutiles</div><div style="font-size:.68rem;color:#6b7280;">Déplacements sans valeur ajoutée</div><input type="text" id="mudaEx2" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda3" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">④ Traitements inutiles</div><div style="font-size:.68rem;color:#6b7280;">Opérations superflues sans valeur</div><input type="text" id="mudaEx3" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda4" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">⑤ Stocks excessifs</div><div style="font-size:.68rem;color:#6b7280;">En-cours entre postes, surstocks</div><input type="text" id="mudaEx4" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda5" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">⑥ Mouvements inutiles</div><div style="font-size:.68rem;color:#6b7280;">Ergonomie déficiente, gestes inutiles</div><input type="text" id="mudaEx5" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+      <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .8rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+        <input type="checkbox" id="muda6" style="width:auto;margin:.2rem .1rem 0 0;flex-shrink:0;" oninput="updateMudaScore()">
+        <div style="flex:1;"><div style="font-size:.76rem;font-weight:700;color:#065f46;">⑦ Défauts / Rebuts</div><div style="font-size:.68rem;color:#6b7280;">Non-conformités, retouches, inspections</div><input type="text" id="mudaEx6" placeholder="Exemple dans votre VSM..." style="margin:.3rem 0 0;font-size:.72rem;padding:.3rem .6rem;" oninput="updateMudaScore()"></div>
+      </div>
+    </div>
+    <div id="vsmMudaScore" style="margin-top:.8rem;"></div>
+  </div>
+
+  <div class="ccard" style="border:2px solid #6ee7b7;">
+    <div class="ccard-title"><span style="background:#059669;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 4</span>VSM État Futur — Propositions d'amélioration</div>
+    <div style="font-size:.79rem;color:#374151;margin-bottom:.8rem;">Sur la base de votre analyse (taux VA, takt time, gaspillages identifiés), proposez des améliorations concrètes pour votre <b>VSM état futur</b> :</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.8rem;">
+      <div>
+        <label>Taux VA cible visé (%)</label>
+        <input type="number" id="vsmTargetVA" placeholder="Ex : 45" min="1" max="100" style="margin:0;">
+      </div>
+      <div>
+        <label>Lead Time cible (min)</label>
+        <input type="number" id="vsmTargetLT" placeholder="Ex : 85" min="1" style="margin:0;">
+      </div>
+    </div>
+    <label>Actions Lean proposées pour atteindre l'état futur</label>
+    <textarea id="vsmFutureState" placeholder="Ex :&#10;1. Supprimer l'attente entre Tournage et Fraisage (–25 min) → flux continu one-piece-flow&#10;2. Réduire le temps de contrôle qualité par autocontrôle opérateur (–10 min)&#10;3. Regrouper les étapes Lavage + Marquage en cellule U (–15 min d'attente)&#10;→ Taux VA estimé : 52% · Lead Time estimé : 75 min" style="min-height:100px;"></textarea>
     <div class="btn-row">
       <button class="btn btn-gold" onclick="analyzeVSM()">🤖 Feedback IA complet</button>
       <button class="btn btn-purple" onclick="showVSMCorrection()">📖 Voir la correction</button>
@@ -2622,6 +2783,7 @@ function generatePareto(){
     {type:'line',label:'Cumulé %',data:cumulPct,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.08)',fill:true,yAxisID:'y1',tension:.3,pointRadius:5,pointBackgroundColor:'#f59e0b'}
   ]},options:{responsive:true,plugins:{legend:{display:true}},scales:{y:{position:'left',title:{display:true,text:'Fréquence'}},y1:{position:'right',min:0,max:100,title:{display:true,text:'% Cumulé'},grid:{drawOnChartArea:false},ticks:{callback:v=>v+'%'}}}}});
   const vital=sorted.filter((_,i)=>cumulPct[i]<=80).length||1;
+  window._paretoVitaux=sorted.slice(0,vital).map(r=>({label:r.name,count:r.count}));
   document.getElementById('paretoAI').innerHTML=`<div class="alert alert-info"><b>Règle 80/20 :</b> Concentrez-vous sur <b>${sorted.slice(0,vital).map(r=>r.name).join(', ')}</b> (${vital} défaut${vital>1?'s':''} = ~80% des occurrences).</div><div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;font-size:.74rem;"><span style="background:#fee2e2;color:#991b1b;border-radius:6px;padding:.2rem .5rem;font-weight:700;">🔴 Vitaux : ${sorted.slice(0,vital).map(r=>r.name+' ('+r.count+')').join(' · ')}</span><span style="background:#f1f5f9;color:#475569;border-radius:6px;padding:.2rem .5rem;font-weight:700;">⬜ Trivials : ${sorted.slice(vital).map(r=>r.name).join(' · ')||'—'}</span></div>`;
 }
 async function aiPareto(){
@@ -2809,6 +2971,8 @@ function renderVSMSteps(){
 function addVSMStep(){vsmSteps.push({name:'',cycle:0,wait:0,va:false});saveVSM();renderVSMSteps();}
 function saveVSM(){state.vsmSteps=vsmSteps;save();}
 function calcVSM(){
+  window._vsmStepsData=vsmSteps.map(r=>({cycle:r.cycle,attente:r.wait,va:r.va}));
+  calcVsmTakt();
   const tCycle=vsmSteps.reduce((s,r)=>s+r.cycle,0);
   const tWait=vsmSteps.reduce((s,r)=>s+r.wait,0);
   const vaCycle=vsmSteps.filter(r=>r.va).reduce((s,r)=>s+r.cycle,0);
@@ -4204,6 +4368,145 @@ function exportTeacherCSV(){
   const csv=[h,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
   a.download='rapport_ac_fst_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+/* ══ M3 – ISHIKAWA PRIORISATION ══ */
+function buildIshiPrioTable(){
+  const cats=['Matière','Matériel','Méthode','Main-d\'œuvre','Milieu'];
+  const rows=[];
+  cats.forEach(cat=>{
+    const inp=document.getElementById('ishi'+cat.replace(/[^a-z]/gi,''));
+    const val=inp?inp.value.trim():'';
+    if(!val)return;
+    val.split('\n').forEach(line=>{const l=line.trim();if(l)rows.push({cause:l,cat});});
+  });
+  if(!rows.length){
+    // fallback: lire les inputs ishi par texte
+    document.querySelectorAll('.ishi-group textarea').forEach(ta=>{
+      const cat=ta.closest('.ishi-group')?.querySelector('h5')?.textContent||'';
+      (ta.value||'').split('\n').forEach(l=>{const t=l.trim();if(t)rows.push({cause:t,cat});});
+    });
+  }
+  const body=document.getElementById('ishiPrioBody');
+  if(!rows.length){body.innerHTML='<tr><td colspan="5" style="padding:.8rem;text-align:center;color:#94a3b8;">Aucune cause trouvée — saisissez vos causes 5M ci-dessus d\'abord.</td></tr>';return;}
+  body.innerHTML=rows.map((r,i)=>`<tr style="border-bottom:1px solid #ede9fe;">
+    <td style="padding:.4rem .7rem;font-size:.77rem;color:#374151;">${r.cause}</td>
+    <td style="padding:.4rem .7rem;text-align:center;"><span style="background:#ede9fe;color:#5b21b6;border-radius:20px;padding:.1rem .5rem;font-size:.7rem;font-weight:700;">${r.cat}</span></td>
+    <td style="padding:.4rem .7rem;text-align:center;"><input type="number" min="1" max="5" value="3" id="prioImp${i}" style="width:55px;margin:0;padding:.2rem .4rem;font-size:.8rem;text-align:center;"></td>
+    <td style="padding:.4rem .7rem;text-align:center;"><input type="number" min="1" max="5" value="3" id="prioProb${i}" style="width:55px;margin:0;padding:.2rem .4rem;font-size:.8rem;text-align:center;"></td>
+    <td style="padding:.4rem .7rem;text-align:center;font-weight:900;color:#7c3aed;" id="prioCrit${i}">9</td>
+  </tr>`).join('');
+  window._ishiPrioRows=rows;
+}
+function calcIshiCriticite(){
+  const rows=window._ishiPrioRows||[];
+  if(!rows.length){buildIshiPrioTable();return;}
+  const scored=rows.map((r,i)=>{
+    const imp=parseInt(document.getElementById('prioImp'+i)?.value)||3;
+    const prob=parseInt(document.getElementById('prioProb'+i)?.value)||3;
+    const crit=imp*prob;
+    const el=document.getElementById('prioCrit'+i);
+    if(el){el.textContent=crit;el.style.color=crit>=15?'#dc2626':crit>=10?'#d97706':'#059669';}
+    return{...r,imp,prob,crit};
+  }).sort((a,b)=>b.crit-a.crit);
+  const top3=scored.slice(0,3);
+  document.getElementById('ishiPrioResult').innerHTML=`
+    <div style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border-radius:10px;padding:.9rem 1rem;border:1.5px solid #fca5a5;margin-top:.5rem;">
+      <div style="font-weight:800;font-size:.82rem;color:#991b1b;margin-bottom:.6rem;">🎯 Top 3 causes racines à traiter en priorité</div>
+      ${top3.map((r,i)=>`<div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.35rem;padding:.4rem .6rem;background:rgba(255,255,255,.6);border-radius:8px;">
+        <span style="font-weight:900;font-size:1rem;color:${['#dc2626','#d97706','#059669'][i]};">#${i+1}</span>
+        <span style="flex:1;font-size:.78rem;font-weight:700;color:#374151;">${r.cause}</span>
+        <span style="background:#fee2e2;color:#991b1b;border-radius:20px;padding:.1rem .6rem;font-size:.72rem;font-weight:800;">Criticité : ${r.crit}</span>
+        <span style="background:#ede9fe;color:#5b21b6;border-radius:20px;padding:.1rem .5rem;font-size:.68rem;">${r.cat}</span>
+      </div>`).join('')}
+    </div>`;
+}
+
+/* ══ M4 – PARETO PLAN D'ACTION ══ */
+function loadParetoPlan(){
+  const body=document.getElementById('paretoPlanBody');
+  const vitaux=window._paretoVitaux||[];
+  if(!vitaux.length){
+    body.innerHTML='<div style="padding:.6rem;color:#92400e;font-size:.78rem;">⚠️ Générez d\'abord le diagramme Pareto ci-dessus pour identifier les défauts vitaux.</div>';return;
+  }
+  body.innerHTML=vitaux.slice(0,5).map((d,i)=>`
+    <div style="display:grid;grid-template-columns:1.8fr 2fr 1fr 1fr 1fr;gap:.4rem;margin-bottom:.4rem;align-items:center;">
+      <div style="background:#fef3c7;border-radius:6px;padding:.35rem .6rem;font-size:.75rem;font-weight:700;color:#92400e;">${d.label||d}</div>
+      <input type="text" placeholder="Action corrective..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planAction${i}">
+      <input type="text" placeholder="Nom..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planResp${i}">
+      <input type="text" placeholder="Délai..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planDelai${i}">
+      <input type="number" placeholder="€" style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planGain${i}" oninput="updateParetoPlanSummary()">
+    </div>`).join('');
+}
+function addParetoPlanRow(){
+  const body=document.getElementById('paretoPlanBody');
+  const i=body.querySelectorAll('div').length;
+  const row=document.createElement('div');
+  row.style.cssText='display:grid;grid-template-columns:1.8fr 2fr 1fr 1fr 1fr;gap:.4rem;margin-bottom:.4rem;align-items:center;';
+  row.innerHTML=`<input type="text" placeholder="Défaut..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;">
+    <input type="text" placeholder="Action corrective..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planAction${i}">
+    <input type="text" placeholder="Nom..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planResp${i}">
+    <input type="text" placeholder="Délai..." style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planDelai${i}">
+    <input type="number" placeholder="€" style="margin:0;font-size:.74rem;padding:.3rem .6rem;" id="planGain${i}" oninput="updateParetoPlanSummary()">`;
+  body.appendChild(row);
+}
+function updateParetoPlanSummary(){
+  let total=0;
+  document.querySelectorAll('[id^="planGain"]').forEach(el=>{total+=parseFloat(el.value)||0;});
+  const el=document.getElementById('paretoPlanSummary');
+  if(total>0)el.innerHTML=`<div style="background:#ecfdf5;border-radius:8px;padding:.6rem .9rem;border:1.5px solid #6ee7b7;font-size:.8rem;color:#065f46;font-weight:700;">💰 Gain total estimé : <span style="font-size:1.1rem;">${total.toLocaleString('fr-FR')} €</span></div>`;
+}
+
+/* ══ M5 – KANBAN TAKT TIME ══ */
+function calcTaktTime(){
+  const avail=parseFloat(document.getElementById('taktAvailable')?.value)||0;
+  const demand=parseFloat(document.getElementById('taktDemand')?.value)||0;
+  const valEl=document.getElementById('taktValue');
+  const analysisEl=document.getElementById('taktAnalysis');
+  if(!avail||!demand){if(valEl)valEl.textContent='–';return;}
+  const takt=(avail/demand).toFixed(2);
+  if(valEl)valEl.textContent=takt;
+  const wip=parseInt(document.getElementById('wipLimit')?.value)||3;
+  const color=parseFloat(takt)>=2?'#059669':'#dc2626';
+  if(analysisEl)analysisEl.innerHTML=`<div style="background:#f0fdf4;border-radius:8px;padding:.6rem .9rem;border:1px solid #6ee7b7;font-size:.78rem;color:#065f46;">
+    ✅ <b>Takt Time = ${takt} min/pièce</b> — Votre processus doit produire <b>1 pièce toutes les ${takt} minutes</b> pour satisfaire la demande.<br>
+    <span style="color:${color};">Avec votre WIP de ${wip}, vérifiez que le temps de cycle de chaque poste est ≤ ${takt} min. Sinon, ce poste est un goulot.</span>
+  </div>`;
+}
+
+/* ══ M6 – VSM TAKT + MUDA ══ */
+function calcVsmTakt(){
+  const demand=parseFloat(document.getElementById('vsmDemand')?.value)||0;
+  const avail=parseFloat(document.getElementById('vsmAvailable')?.value)||0;
+  const res=document.getElementById('vsmTaktResult');
+  if(!demand||!avail){if(res)res.style.display='none';return;}
+  const takt=(avail/demand).toFixed(2);
+  // Calculer lead time depuis les étapes VSM
+  const steps=window._vsmStepsData||[];
+  const leadTime=steps.reduce((s,r)=>{const c=parseFloat(r.cycle)||0;const a=parseFloat(r.attente)||0;return s+c+a;},0);
+  const maxCycle=Math.max(...steps.map(r=>parseFloat(r.cycle)||0),0);
+  const gap=(maxCycle-parseFloat(takt)).toFixed(2);
+  document.getElementById('vsmTaktVal').textContent=takt;
+  document.getElementById('vsmLeadTimeVal').textContent=leadTime||'–';
+  document.getElementById('vsmGapVal').textContent=gap>0?'+'+gap:gap;
+  document.getElementById('vsmGapVal').style.color=gap>0?'#dc2626':'#059669';
+  const analysis=document.getElementById('vsmTaktAnalysis');
+  if(analysis)analysis.innerHTML=gap>0
+    ?`<div style="background:#fef2f2;border-radius:8px;padding:.5rem .8rem;border-left:3px solid #dc2626;font-size:.77rem;color:#991b1b;">⚠️ <b>Goulot détecté !</b> Le cycle max (${maxCycle} min) dépasse le Takt Time (${takt} min) de <b>${gap} min</b>. Le flux ne peut pas suivre la demande client — action corrective requise.</div>`
+    :`<div style="background:#ecfdf5;border-radius:8px;padding:.5rem .8rem;border-left:3px solid #059669;font-size:.77rem;color:#065f46;">✅ <b>Flux en capacité</b> — Le cycle max (${maxCycle} min) est inférieur au Takt Time (${takt} min). Le flux peut théoriquement satisfaire la demande.</div>`;
+  if(res)res.style.display='block';
+}
+function updateMudaScore(){
+  let checked=0;let withEx=0;
+  for(let i=0;i<7;i++){
+    if(document.getElementById('muda'+i)?.checked){checked++;if((document.getElementById('mudaEx'+i)?.value||'').trim().length>5)withEx++;}
+  }
+  const el=document.getElementById('vsmMudaScore');
+  if(!el)return;
+  if(!checked){el.innerHTML='';return;}
+  el.innerHTML=`<div style="background:#ecfdf5;border-radius:8px;padding:.6rem .9rem;border:1px solid #6ee7b7;font-size:.78rem;color:#065f46;">
+    ✅ <b>${checked}/7 gaspillages identifiés</b> — ${withEx}/${checked} justifiés avec un exemple. ${withEx<checked?'<span style="color:#d97706;">Complétez les exemples pour un meilleur score.</span>':'Bonne analyse !'}
+  </div>`;
 }
 
 /* ══ INIT ══ */
