@@ -1545,6 +1545,7 @@ state.vsmSteps=state.vsmSteps||null;
 state.smedRows=state.smedRows||null;
 state.paretoData=state.paretoData||null;
 state.domain=state.domain||null;
+state.cvSeen=state.cvSeen||false;
 state.exLevels=state.exLevels||{};
 state.timers=state.timers||{};
 state.badges=state.badges||[];
@@ -3602,6 +3603,7 @@ function showCVModal(){
 }
 function closeCVModal(){
   const m=document.getElementById('cvModal');if(m)m.classList.add('hidden');
+  state.cvSeen=true;save();
 }
 function _renderCVExtract(d){
   const el=document.getElementById('cvExtract');if(!el)return;
@@ -4216,8 +4218,8 @@ window.addEventListener('DOMContentLoaded',()=>{
     drop.addEventListener('dragleave',function(){this.classList.remove('drag');});
     drop.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleCVFile(f);});
   }
-  // Modal CV uniquement si l'étudiant a déjà un nom (session en cours) mais pas encore de CV
-  if(state.studentName&&!state.domain)showCVModal();
+  // Modal CV à chaque nouvel onglet/session, sauf si déjà vu dans cette session
+  if(!state.cvSeen)showCVModal();
   updateTimeDisplay();
   // Watchers pour mode révision
   _watchFeedbackDiv('pdcaAI',1);
