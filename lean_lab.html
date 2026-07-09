@@ -2703,7 +2703,13 @@ function drawFishbone(){
 function scoreIshikawa(){
   let tot=0;ISHI_CATS.forEach(c=>tot+=(ishiData[c]||[]).length);
   const eff=document.getElementById('ishiEffect').value;
-  let s=0;if(eff&&eff.length>5)s+=20;s+=Math.min(80,tot*8);return Math.min(100,s);
+  let s=0;if(eff&&eff.length>5)s+=15;s+=Math.min(55,tot*8);
+  // Bonus matrice criticité
+  const rows=window._ishiPrioRows||[];
+  if(rows.length>=3)s+=15;
+  const rootCauses=(document.getElementById('ishiRootCauses')?.value||'').trim();
+  if(rootCauses.length>30)s+=15;
+  return Math.min(100,s);
 }
 
 async function analyzeIshikawa(){
@@ -2792,7 +2798,18 @@ async function aiPareto(){
   const prompt=`Expert Lean Six Sigma. Analyse ce diagramme de Pareto:\n${sorted.map((r,i)=>`${i+1}. ${r.name}: ${r.count} (${Math.round(r.count/total*100)}%)`).join('\n')}\nTotal: ${total} défauts\n\n1. Vitaux peu nombreux (80/20)\n2. Actions prioritaires\n3. Outils Lean recommandés\n4. Gain potentiel${getDomainContext()}`;
   await callClaude(prompt,'paretoAI');
 }
-function scorePareto(){if(!paretoC)return 0;let s=0;if(paretoRows.length>=3)s+=40;if(paretoRows.length>=5)s+=20;if(paretoC)s+=40;return Math.min(100,s);}
+function scorePareto(){
+  if(!paretoC)return 0;let s=0;
+  if(paretoRows.length>=3)s+=25;if(paretoRows.length>=5)s+=15;if(paretoC)s+=20;
+  // Bonus plan d'action
+  const vitaux=window._paretoVitaux||[];
+  let planFilled=0;
+  vitaux.forEach((_,i)=>{if((document.getElementById('planAction'+i)?.value||'').trim().length>5)planFilled++;});
+  if(planFilled>0)s+=20;if(planFilled>=2)s+=10;
+  const decision=(document.getElementById('paretoDecision')?.value||'').trim();
+  if(decision.length>40)s+=10;
+  return Math.min(100,s);
+}
 
 async function analyzeParetoFull(){
   const el=document.getElementById('paretoAIFull');
@@ -2895,8 +2912,13 @@ function updateKanban(){renderKanban();}
 function scoreKanban(){
   const total=Object.values(state.kanban).flat().length;
   const done=(state.kanban.done||[]).length;
-  if(total<3)return 0;let s=40;
-  if(total>=5)s+=20;if(done>=1)s+=20;if(done/total>=.2)s+=20;return Math.min(100,s);
+  if(total<3)return 0;let s=30;
+  if(total>=5)s+=15;if(done>=1)s+=15;if(done/total>=.2)s+=15;
+  // Bonus takt time
+  const avail=parseFloat(document.getElementById('taktAvailable')?.value)||0;
+  const demand=parseFloat(document.getElementById('taktDemand')?.value)||0;
+  if(avail>0&&demand>0)s+=25;
+  return Math.min(100,s);
 }
 
 async function analyzeKanban(){
@@ -2994,7 +3016,22 @@ function calcVSM(){
     }
   }
 }
-function scoreVSM(){if(vsmSteps.length<3)return 0;let s=40;if(vsmSteps.length>=4)s+=20;if(vsmSteps.some(v=>v.va))s+=20;if(vsmC)s+=20;return Math.min(100,s);}
+function scoreVSM(){
+  if(vsmSteps.length<3)return 0;let s=25;
+  if(vsmSteps.length>=4)s+=10;if(vsmSteps.some(v=>v.va))s+=10;if(vsmC)s+=10;
+  // Bonus takt time
+  const demand=parseFloat(document.getElementById('vsmDemand')?.value)||0;
+  const avail=parseFloat(document.getElementById('vsmAvailable')?.value)||0;
+  if(demand>0&&avail>0)s+=15;
+  // Bonus 7 gaspillages
+  let mudaChecked=0;let mudaJustified=0;
+  for(let i=0;i<7;i++){if(document.getElementById('muda'+i)?.checked){mudaChecked++;if((document.getElementById('mudaEx'+i)?.value||'').trim().length>5)mudaJustified++;}}
+  if(mudaChecked>=3)s+=15;if(mudaJustified>=2)s+=5;
+  // Bonus état futur
+  const futureState=(document.getElementById('vsmFutureState')?.value||'').trim();
+  if(futureState.length>60)s+=10;
+  return Math.min(100,s);
+}
 
 async function analyzeVSM(){
   const el=document.getElementById('vsmAIFull');
