@@ -1947,6 +1947,15 @@ function getKey(){
   const el=document.getElementById('apiKey');
   return (el&&el.value.trim())||'';
 }
+
+/* ── Admin Config ── */
+function getAdminConfig(){return JSON.parse(localStorage.getItem('greenlab_admin_config')||'{}');}
+function saveAdminConfig(cfg){localStorage.setItem('greenlab_admin_config',JSON.stringify(cfg));}
+function getThreshold(n){const cfg=getAdminConfig();if(cfg.thresholds&&cfg.thresholds[n]!=null)return cfg.thresholds[n];if(n===11)return cfg.quizThreshold!=null?cfg.quizThreshold:70;return cfg.defaultThreshold!=null?cfg.defaultThreshold:60;}
+function isModuleActive(n){const cfg=getAdminConfig();if(!cfg.moduleToggles)return true;return cfg.moduleToggles[n]!==false;}
+function _prevActiveModule(n){for(let i=n-1;i>=1;i--){if(isModuleActive(i))return i;}return null;}
+function getCustomModules(){return JSON.parse(localStorage.getItem('greenlab_custom_modules')||'[]');}
+function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));}
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
   if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
@@ -1973,8 +1982,10 @@ function showSection(id){
   });
 }
 function goModule(n){
-  if(n>1&&!state.completed.includes(n-1)){
-    alert(`🔒 Complétez le Module ${n-1} pour débloquer ce module.`);return;
+  if(!isModuleActive(n)){alert('Ce module est actuellement désactivé par le professeur.');return;}
+  const _prevReq=_prevActiveModule(n);
+  if(_prevReq&&!state.completed.includes(_prevReq)){
+    alert(`🔒 Complétez le Module ${_prevReq} pour débloquer ce module.`);return;
   }
   _moduleLeave();_moduleActiveId=n;_moduleStartTs=Date.now();
   showSection('m'+n);
@@ -1990,7 +2001,8 @@ function updateNav(){
     const n=+b.dataset.module;
     b.classList.remove('nav-locked','nav-done');
     if(state.completed.includes(n))b.classList.add('nav-done');
-    else if(n>1&&!state.completed.includes(n-1))b.classList.add('nav-locked');
+    else if(!isModuleActive(n))b.classList.add('nav-locked');
+    else{const _p=_prevActiveModule(n);if(_p&&!state.completed.includes(_p))b.classList.add('nav-locked');}
   });
   const done=state.completed.length;
   document.getElementById('globalBadge').textContent=done+' / 11 modules';
@@ -2009,9 +2021,10 @@ function updateNav(){
 function renderGrid(){
   const g=document.getElementById('moduleGrid');g.innerHTML='';
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
-  MODULES.forEach(m=>{
+  MODULES.filter(m=>isModuleActive(m.id)).forEach(m=>{
     const done=state.completed.includes(m.id);
-    const locked=m.id>1&&!state.completed.includes(m.id-1);
+    const prev=_prevActiveModule(m.id);
+    const locked=prev!=null&&!state.completed.includes(prev);
     const score=state.scores[m.id]!==undefined?state.scores[m.id]:null;
     const d=document.createElement('div');
     d.className='mod-card c'+m.id+(locked?' mod-locked':'')+(done?' mod-done':'');
@@ -2030,6 +2043,14 @@ function renderGrid(){
         ${score!==null?`<div class="mod-score-row"><div class="mod-score-track"><div class="mod-score-fill" style="width:${score}%"></div></div><span class="mod-score-val">${score}%</span></div>`:''}
       </div>`;
     if(!locked)d.onclick=()=>goModule(m.id);
+    g.appendChild(d);
+  });
+  getCustomModules().filter(cm=>cm.active!==false).forEach((cm,i)=>{
+    const d=document.createElement('div');
+    d.className='mod-card c-custom';
+    d.style.cssText='border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#f3e8ff);';
+    d.innerHTML=`<div class="mod-card-top"><div><div class="mod-num" style="color:#7c3aed;">Module +${i+1}</div><span class="mod-status-chip chip-open">→ Disponible</span></div><div class="mod-icon-wrap">${cm.icone||'🧩'}</div></div><div class="mod-card-body"><h3>${cm.titre}</h3><p>${cm.desc||''}</p><div style="font-size:.68rem;color:#94a3b8;margin-top:.3rem;">⏱️ ${cm.duree||'~20 min'}</div></div>`;
+    d.onclick=()=>goCustomModule(i);
     g.appendChild(d);
   });
 }
@@ -2057,7 +2078,7 @@ function validateModule(n,scoreFn){
   }
   const score=scoreFn();
   state.scores[n]=score;
-  const minScore=n===11?70:60;
+  const minScore=getThreshold(n);
   const pass=score>=minScore;
   if(pass&&!state.completed.includes(n)){state.completed.push(n);state.completed.sort((a,b)=>a-b);}
   save();updateNav();
@@ -2078,6 +2099,7 @@ function validateModule(n,scoreFn){
       ${pass&&n<11?`<div style="font-size:.8rem;color:var(--green);margin-top:.3rem;font-weight:700;">🔓 Module ${n+1} débloqué !</div>`:''}
     </div>`;
   if(pass&&n===11)showCertificate();
+  if(!pass)tryAdaptiveRemediation(n,score,minScore);
 }
 
 /* ── AI Text Formatter ── */
@@ -3989,13 +4011,15 @@ document.addEventListener('keydown',function(e){
 });
 
 function admTab(name){
-  ['roster','import','access'].forEach(t=>{
+  ['roster','import','access','gen'].forEach(t=>{
     const tab=document.getElementById('adm-tab-'+t);
     const panel=document.getElementById('adm-panel-'+t);
     if(tab)tab.classList.toggle('active',t===name);
     if(panel)panel.style.display=t===name?'block':'none';
   });
   if(name==='roster')renderRoster();
+  if(name==='access')renderAdminAccess();
+  if(name==='gen')renderCustomModuleList();
 }
 
 function getRoster(){return JSON.parse(localStorage.getItem('greenlab_admin_roster')||'[]');}
@@ -4303,8 +4327,43 @@ ${txt.slice(0,4000)}`;
     console.error(e);
   }
 }
-function cvStartModules(){closeCVModal();}
+function cvStartModules(){
+  const key=getKey();
+  const recoPanel=document.getElementById('cvRecoPanel');
+  if(state.domain&&key&&recoPanel){
+    recoPanel.style.display='block';
+    recoPanel.innerHTML='<div class="ai-wrap" style="margin:0;"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse de votre profil pour personnaliser votre parcours…</div></div>';
+    genererRecommandationCV().then(reco=>{
+      if(!reco||!reco.length){closeCVModal();return;}
+      state.cvReco=reco;save();
+      recoPanel.innerHTML=`<div style="background:#faf5ff;border:2px solid #7c3aed;border-radius:12px;padding:.9rem 1rem;">
+        <div style="font-weight:800;color:#4c1d95;font-size:.85rem;margin-bottom:.6rem;">🎯 Parcours recommandé pour votre profil</div>
+        ${reco.slice(0,7).map((r,i)=>{const mod=MODULES.find(m=>m.id===r.id);return mod?`<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.4rem;"><span style="font-size:.68rem;font-weight:900;color:#fff;background:#7c3aed;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span><div><div style="font-size:.77rem;font-weight:800;color:#4c1d95;">${mod.icon} M${mod.id} — ${mod.name}</div><div style="font-size:.72rem;color:#6b7280;margin-top:.1rem;">${_escH(r.justification||'')}</div></div></div>`:'';}).join('')}
+        <div style="display:flex;gap:.5rem;margin-top:.8rem;">
+          <button class="btn btn-purple btn-sm" onclick="closeCVModal()" style="flex:2;">✅ Suivre ce parcours</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeCVModal()" style="flex:1;font-size:.72rem;">Ordre normal</button>
+        </div>
+      </div>`;
+    });
+    return;
+  }
+  closeCVModal();
+}
 function cvSkip(){state.domain=null;save();closeCVModal();}
+
+async function genererRecommandationCV(){
+  const key=getKey();
+  if(!key||!state.domain)return null;
+  const actifNames=MODULES.filter(m=>isModuleActive(m.id)).map(m=>`M${m.id}: ${m.name}`).join(', ');
+  const prompt=`Tu es un conseiller pédagogique Lean/Six Sigma. Voici le profil d'un étudiant :\n- Poste : ${state.domain.poste||'ingénieur'}\n- Entreprise : ${state.domain.entreprise||'industrie'}\n- Secteur : ${state.domain.secteur||'industrie'}\n- Contexte : ${state.domain.contexte||''}\n\nModules disponibles : ${actifNames}\n\nRecommande 7 modules prioritaires pour CE profil. JSON uniquement : [{"id":1,"justification":"une phrase"},...] (exactement 7 items, id = numéro du module parmi ceux disponibles)`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700})});
+    const data=await resp.json();
+    const text=data.choices[0].message.content;
+    const m=text.match(/\[[\s\S]*\]/);
+    return m?JSON.parse(m[0]):null;
+  }catch(e){return null;}
+}
 
 /* ══ BADGES ══ */
 const BADGES=[
@@ -4955,6 +5014,202 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(rb)rb.textContent=Object.keys(state.feedbacks||{}).length;
 });
 
+/* ══════════════════════════════════════════
+   F1 — REMÉDIATION ADAPTATIVE
+══════════════════════════════════════════ */
+async function tryAdaptiveRemediation(n,score,minScore){
+  const key=getKey();
+  if(!key)return;
+  const el=document.getElementById('m'+n);
+  if(!el)return;
+  let box=el.querySelector('.remediation-box');
+  if(!box){
+    box=document.createElement('div');
+    box.className='remediation-box';
+    box.style.cssText='margin-top:1rem;';
+    const last=el.querySelector('.ccard:last-child');
+    if(last)last.after(box);else el.appendChild(box);
+  }
+  const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
+  const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
+  const color={'débutant':'#dc2626','intermédiaire':'#d97706','avancé avec lacunes':'#2563eb'}[niveau];
+  box.innerHTML=`<div class="ai-wrap" style="border-left:4px solid ${color};background:linear-gradient(135deg,#fffbeb,#fff7ed);"><div class="ai-wrap-header" style="color:${color};">📚 Cours adapté — Niveau ${niveauLabel}</div><div class="ai-loading-text" style="font-size:.78rem;">Génération du contenu personnalisé…</div></div>`;
+  const modName=_moduleNames[n]||'ce module';
+  const domCtx=state.domain?` L'étudiant est ${state.domain.poste||'ingénieur'} dans le secteur ${state.domain.secteur}. Adapte les exemples à ce secteur.`:'';
+  const consignes={'débutant':'- Ré-explique les 3 concepts fondamentaux de façon très simple\n- Donne un exemple concret du quotidien pour chacun\n- Propose une astuce mnémotechnique','intermédiaire':'- Rappelle les points clés avec des exemples industriels\n- Identifie 2-3 erreurs fréquentes à ce niveau\n- Suggère un exercice de consolidation rapide','avancé avec lacunes':'- Identifie les subtilités et pièges avancés\n- Approfondis les 2 points les moins bien maîtrisés\n- Propose un cas industriel complexe'}[niveau];
+  const prompt=`Tu es un formateur Lean/Six Sigma expert. L'étudiant vient d'obtenir ${score}% au module "${modName}" (seuil requis : ${minScore}%).${domCtx}\n\nNiveau détecté : ${niveau}\n\nGénère un contenu de révision adapté en français :\n${consignes}\n\nUtilise des emojis et des paragraphes courts. Maximum 280 mots.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600})});
+    if(!resp.ok){box.innerHTML='';return;}
+    const data=await resp.json();
+    const text=data.choices[0].message.content;
+    box.innerHTML=`<div class="ai-wrap" style="border-left:4px solid ${color};background:linear-gradient(135deg,#fffbeb,#fff7ed);"><div class="ai-wrap-header" style="color:${color};">📚 Cours adapté — Niveau ${niveauLabel}</div>${formatAIText(text)}</div>`;
+  }catch(e){box.innerHTML='';}
+}
+
+/* ══════════════════════════════════════════
+   F2 — CONFIG ADMIN : SEUILS & TOGGLES
+══════════════════════════════════════════ */
+function renderAdminAccess(){
+  const cfg=getAdminConfig();
+  const t=document.getElementById('admThresholdGlobal');
+  const tq=document.getElementById('admThresholdQuiz');
+  if(t)t.value=cfg.defaultThreshold!=null?cfg.defaultThreshold:60;
+  if(tq)tq.value=cfg.quizThreshold!=null?cfg.quizThreshold:70;
+  renderModuleToggles();
+}
+function saveThresholds(){
+  const cfg=getAdminConfig();
+  cfg.defaultThreshold=Math.min(100,Math.max(1,parseInt(document.getElementById('admThresholdGlobal').value)||60));
+  cfg.quizThreshold=Math.min(100,Math.max(1,parseInt(document.getElementById('admThresholdQuiz').value)||70));
+  saveAdminConfig(cfg);
+  const msg=document.getElementById('admThresholdMsg');
+  if(msg){msg.innerHTML='<span style="color:#059669;font-weight:700;">✅ Seuil sauvegardé.</span>';setTimeout(()=>{if(msg)msg.innerHTML='';},2000);}
+}
+function renderModuleToggles(){
+  const wrap=document.getElementById('moduleToggleList');
+  if(!wrap)return;
+  wrap.innerHTML=MODULES.map(m=>{
+    const active=isModuleActive(m.id);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:${active?'#f0fdf4':'#fef2f2'};border:1px solid ${active?'#86efac':'#fca5a5'};">
+      <div style="display:flex;align-items:center;gap:.45rem;"><span>${m.icon}</span><span style="font-size:.76rem;font-weight:700;color:${active?'#166534':'#991b1b'};">M${m.id} — ${m.name}</span></div>
+      <button onclick="toggleModuleActive(${m.id})" style="font-size:.68rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;border:none;cursor:pointer;background:${active?'#059669':'#dc2626'};color:#fff;">${active?'Actif ✓':'Inactif'}</button>
+    </div>`;
+  }).join('');
+}
+function toggleModuleActive(n){
+  const cfg=getAdminConfig();
+  if(!cfg.moduleToggles)cfg.moduleToggles={};
+  cfg.moduleToggles[n]=!isModuleActive(n);
+  saveAdminConfig(cfg);
+  renderModuleToggles();
+  updateNav();
+}
+
+/* ══════════════════════════════════════════
+   F3 — GÉNÉRATEUR DE MODULE NO-CODE
+══════════════════════════════════════════ */
+let _genPreviewData=null;
+async function generateCustomModule(){
+  const key=getKey();
+  const title=(document.getElementById('genTitle')?.value||'').trim();
+  const desc=(document.getElementById('genDesc')?.value||'').trim();
+  const level=document.getElementById('genLevel')?.value||'intermédiaire';
+  const dur=(document.getElementById('genDuration')?.value||'~20 min').trim();
+  const prev=document.getElementById('genPreview');
+  const msg=document.getElementById('admGenMsg');
+  if(!title||!desc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et la description.</span>';return;}
+  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
+  if(msg)msg.innerHTML='';
+  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
+  const prompt=`Tu es un expert Lean/Six Sigma. Crée un module pédagogique complet sur "${title}" pour ingénieurs de niveau ${level}.\nObjectifs : ${desc}\n\nRéponds UNIQUEMENT en JSON valide (pas de texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte (1 phrase)","duree":"${dur||'~20 min'}","sections":[{"titre":"...","contenu":"Contenu détaillé (4-5 paragraphes, exemples industriels, emojis)"},{"titre":"...","contenu":"..."},{"titre":"...","contenu":"..."}],"quiz":[{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1},{"q":"?","opts":["A","B","C","D"],"correct":2},{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1}]}\n\n3 sections obligatoires, 5 questions quiz. JSON uniquement.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2500})});
+    const data=await resp.json();
+    const text=data.choices[0].message.content;
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('JSON introuvable dans la réponse IA');
+    _genPreviewData=JSON.parse(m[0]);
+    _renderGenPreview(_genPreviewData,dur,level);
+  }catch(e){if(prev)prev.innerHTML=`<span style="color:#dc2626;font-size:.78rem;">❌ Erreur : ${_escH(e.message)}</span>`;}
+}
+function _renderGenPreview(d,dur,level){
+  const prev=document.getElementById('genPreview');
+  if(!prev)return;
+  prev.innerHTML=`<div style="border:2px solid #7c3aed;border-radius:12px;padding:1rem;background:#faf5ff;margin-top:.6rem;">
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;">
+      <span style="font-size:1.6rem;">${d.icone||'🧩'}</span>
+      <div><div style="font-weight:900;font-size:.92rem;color:#4c1d95;">${_escH(d.titre)}</div><div style="font-size:.72rem;color:#7c3aed;">Niveau ${level} · ${d.duree||dur}</div></div>
+    </div>
+    <div style="font-size:.77rem;color:#6b7280;margin-bottom:.7rem;">${_escH(d.desc||'')}</div>
+    ${(d.sections||[]).slice(0,3).map(s=>`<div style="margin-bottom:.5rem;"><div style="font-weight:800;font-size:.77rem;color:#4c1d95;">📌 ${_escH(s.titre)}</div><div style="font-size:.73rem;color:#374151;line-height:1.5;margin-top:.15rem;">${_escH((s.contenu||'').slice(0,180))}${(s.contenu||'').length>180?'…':''}</div></div>`).join('')}
+    <div style="font-size:.73rem;color:#7c3aed;font-weight:700;margin-top:.5rem;">📝 ${(d.quiz||[]).length} questions de quiz incluses</div>
+    <div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">
+      <button class="btn btn-purple btn-sm" onclick="publishCustomModule()">✅ Publier ce module</button>
+      <button class="btn btn-ghost btn-sm" onclick="generateCustomModule()">🔄 Régénérer</button>
+    </div>
+  </div>`;
+}
+function publishCustomModule(){
+  if(!_genPreviewData)return;
+  const mods=getCustomModules();
+  _genPreviewData.active=true;
+  mods.push(_genPreviewData);
+  saveCustomModules(mods);
+  const msg=document.getElementById('admGenMsg');
+  if(msg)msg.innerHTML='<span style="color:#059669;font-weight:700;">✅ Module publié ! Il apparaît maintenant dans la liste des modules.</span>';
+  const prev=document.getElementById('genPreview');
+  if(prev)prev.innerHTML='';
+  const t=document.getElementById('genTitle');if(t)t.value='';
+  const desc=document.getElementById('genDesc');if(desc)desc.value='';
+  _genPreviewData=null;
+  renderCustomModuleList();
+  updateNav();
+}
+function renderCustomModuleList(){
+  const wrap=document.getElementById('customModuleList');
+  const empty=document.getElementById('customModuleEmpty');
+  const mods=getCustomModules();
+  if(!wrap)return;
+  if(!mods.length){if(empty)empty.style.display='block';wrap.innerHTML='';return;}
+  if(empty)empty.style.display='none';
+  wrap.innerHTML=mods.map((m,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:#faf5ff;border:1px solid #ddd6fe;">
+    <span style="font-size:.76rem;font-weight:700;color:#4c1d95;">${m.icone||'🧩'} ${_escH(m.titre)}</span>
+    <div style="display:flex;gap:.3rem;">
+      <button onclick="toggleCustomModuleActive(${i})" style="font-size:.67rem;font-weight:800;padding:.16rem .45rem;border-radius:5px;border:none;cursor:pointer;background:${m.active!==false?'#7c3aed':'#94a3b8'};color:#fff;">${m.active!==false?'Visible':'Masqué'}</button>
+      <button onclick="deleteCustomModule(${i})" style="font-size:.67rem;padding:.16rem .4rem;border-radius:5px;border:none;cursor:pointer;background:#fee2e2;color:#dc2626;">🗑</button>
+    </div>
+  </div>`).join('');
+}
+function toggleCustomModuleActive(i){const mods=getCustomModules();if(!mods[i])return;mods[i].active=mods[i].active===false;saveCustomModules(mods);renderCustomModuleList();updateNav();}
+function deleteCustomModule(i){if(!confirm('Supprimer ce module ?'))return;const mods=getCustomModules();mods.splice(i,1);saveCustomModules(mods);renderCustomModuleList();updateNav();}
+
+let _customModIdx=null,_customModQuizAnswers={};
+function goCustomModule(i){
+  const mods=getCustomModules();
+  const m=mods[i];
+  if(!m)return;
+  _customModIdx=i;
+  _customModQuizAnswers={};
+  _moduleLeave();_moduleActiveId='c'+(i+1);_moduleStartTs=Date.now();
+  const sec=document.getElementById('m-custom');
+  if(!sec)return;
+  const qHtml=m.quiz&&m.quiz.length?(m.quiz.map((q,qi)=>`<div class="q-block"><div class="q-num">Question ${qi+1} / ${m.quiz.length}</div><div class="q-text">${_escH(q.q)}</div>${q.opts.map((o,oi)=>`<div class="q-opt" id="cmq-${qi}-${oi}" onclick="pickCustomQ(${qi},${oi})">${_escH(o)}</div>`).join('')}</div>`).join('')+'<button class="btn btn-purple" onclick="submitCustomQuiz()" style="margin-top:1rem;">📊 Valider le quiz</button><div id="customQuizScore"></div>'):'';
+  sec.innerHTML=`
+    <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);">
+      <div style="font-size:2.5rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
+      <h1 style="font-size:1.6rem;margin-bottom:.4rem;">${_escH(m.titre)}</h1>
+      <p style="opacity:.85;">${_escH(m.desc||'')}</p>
+      <div style="font-size:.78rem;opacity:.7;margin-top:.3rem;">⏱️ ${m.duree||'~20 min'}</div>
+    </div>
+    <div class="ccard">${(m.sections||[]).map(s=>`<div style="margin-bottom:1.2rem;"><h3 style="color:#4c1d95;margin-bottom:.5rem;">📌 ${_escH(s.titre)}</h3><div style="line-height:1.75;color:#374151;">${(s.contenu||'').replace(/\n/g,'<br>')}</div></div>`).join('<hr style="border:none;border-top:1px solid #ede9fe;margin:1.1rem 0;">')}</div>
+    ${qHtml?`<div class="ccard"><h2 style="color:#4c1d95;margin-bottom:1rem;">📝 Quiz du module</h2>${qHtml}</div>`:''}
+    <div class="ccard" style="text-align:center;"><button class="btn btn-ghost" onclick="showSection('home');updateNav();">← Retour aux modules</button></div>`;
+  showSection('m-custom');
+}
+function pickCustomQ(qi,oi){
+  _customModQuizAnswers[qi]=oi;
+  const m=getCustomModules()[_customModIdx];
+  if(!m||!m.quiz||!m.quiz[qi])return;
+  m.quiz[qi].opts.forEach((_,oi2)=>{const el=document.getElementById(`cmq-${qi}-${oi2}`);if(el)el.classList.toggle('selected',oi2===oi);});
+}
+function submitCustomQuiz(){
+  const m=getCustomModules()[_customModIdx];
+  if(!m||!m.quiz)return;
+  let ok=0;
+  m.quiz.forEach((q,qi)=>{
+    const ans=_customModQuizAnswers[qi];
+    q.opts.forEach((_,oi)=>{const el=document.getElementById(`cmq-${qi}-${oi}`);if(!el)return;if(oi===q.correct)el.classList.add('correct');else if(ans===oi)el.classList.add('wrong');});
+    if(ans===q.correct)ok++;
+  });
+  const pct=Math.round(ok/m.quiz.length*100);
+  const minSc=getThreshold(0);
+  const pass=pct>=minSc;
+  const el=document.getElementById('customQuizScore');
+  if(el)el.innerHTML=`<div style="text-align:center;padding:1.4rem;"><div class="quiz-score-big" style="color:${pass?'var(--green)':'var(--red)'};">${pct}%</div><div style="font-weight:800;font-size:1rem;margin-top:.5rem;color:${pass?'var(--green)':'var(--red)'};">${pass?'✅ Module validé !':'❌ Score insuffisant ('+minSc+'% requis) — Réessayez.'}</div><div style="font-size:.82rem;color:#6b7280;margin-top:.3rem;">${ok}/${m.quiz.length} bonnes réponses</div></div>`;
+  _customModQuizAnswers={};
+}
+
 </script>
 
 <!-- ═══════════ CV WELCOME MODAL ═══════════ -->
@@ -4991,6 +5246,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       <div style="margin-top:.8rem;padding:.8rem 1rem;background:#f0fdf4;border-radius:10px;border:1.5px solid #86efac;font-size:.75rem;color:#166534;line-height:1.6;">
         💡 <strong>Pourquoi votre CV ?</strong> L'IA utilisera votre dernière expérience professionnelle pour générer des exercices Lean dans votre secteur réel (automobile, aéronautique, logistique…). Vos données restent dans votre navigateur.
       </div>
+      <div id="cvRecoPanel" style="display:none;margin-top:.7rem;"></div>
       <div class="cv-actions">
         <button class="btn btn-purple" onclick="cvStartModules()" style="flex:2;">🚀 Commencer les modules</button>
         <button class="btn btn-ghost" onclick="cvSkip()" style="flex:1;font-size:.78rem;color:#94a3b8;">Continuer sans CV</button>
@@ -4998,6 +5254,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     </div>
   </div>
 </div>
+
+<!-- ═══════════ SECTION MODULE CUSTOM ═══════════ -->
+<div id="m-custom" class="section"></div>
 
 <!-- ═══════════ ADMIN DASHBOARD MODAL ═══════════ -->
 <div id="adminModal">
@@ -5011,8 +5270,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     </div>
     <div class="adm-tabs">
       <button class="adm-tab active" id="adm-tab-roster" onclick="admTab('roster')">📊 Étudiants (<span id="rosterCount">0</span>)</button>
-      <button class="adm-tab" id="adm-tab-import" onclick="admTab('import')">📥 Importer codes</button>
-      <button class="adm-tab" id="adm-tab-access" onclick="admTab('access')">🔓 Accès modules</button>
+      <button class="adm-tab" id="adm-tab-import" onclick="admTab('import')">📥 Importer</button>
+      <button class="adm-tab" id="adm-tab-access" onclick="admTab('access')">⚙️ Config</button>
+      <button class="adm-tab" id="adm-tab-gen" onclick="admTab('gen')">🧩 Générateur</button>
     </div>
     <!-- PANEL: ROSTER -->
     <div id="adm-panel-roster" class="adm-panel">
@@ -5040,23 +5300,87 @@ window.addEventListener('DOMContentLoaded',()=>{
         <div id="admBulkMsg" style="margin-top:.5rem;"></div>
       </div>
     </div>
-    <!-- PANEL: ACCESS -->
+    <!-- PANEL: ACCESS / CONFIG -->
     <div id="adm-panel-access" class="adm-panel" style="display:none;">
-      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.4rem;">Contrôle d'accès administrateur</div>
-      <div style="font-size:.8rem;color:#6b7280;margin-bottom:1.2rem;line-height:1.6;">Ces actions modifient votre propre session sur cet ordinateur (pas celles des étudiants).</div>
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:1rem;">
-          <div style="font-weight:800;color:#166534;margin-bottom:.35rem;">🔓 Débloquer tous les modules</div>
-          <div style="font-size:.77rem;color:#15803d;margin-bottom:.8rem;">Accès immédiat aux 9 modules avec score 100% — pour tests et démonstrations.</div>
+      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.4rem;">⚙️ Configuration pédagogique</div>
+
+      <!-- Threshold -->
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:.9rem 1rem;margin-bottom:1rem;">
+        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.3rem;">🎯 Seuil de validation</div>
+        <div style="font-size:.75rem;color:#6b7280;margin-bottom:.7rem;">Score minimum requis pour valider un module (tous les étudiants, toutes les sessions futures).</div>
+        <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;">Modules 1-10 :</label>
+          <input type="number" id="admThresholdGlobal" min="1" max="100" value="60" style="width:64px;padding:.3rem .5rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;font-weight:700;text-align:center;">
+          <span style="font-size:.78rem;color:#6b7280;">%</span>
+          <label style="font-size:.78rem;font-weight:700;color:#374151;margin-left:.8rem;">Quiz final :</label>
+          <input type="number" id="admThresholdQuiz" min="1" max="100" value="70" style="width:64px;padding:.3rem .5rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;font-weight:700;text-align:center;">
+          <span style="font-size:.78rem;color:#6b7280;">%</span>
+          <button class="btn btn-purple btn-sm" onclick="saveThresholds()" style="margin-left:auto;">💾 Sauvegarder</button>
+        </div>
+        <div id="admThresholdMsg" style="margin-top:.4rem;font-size:.75rem;"></div>
+      </div>
+
+      <!-- Module Toggles -->
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:.9rem 1rem;margin-bottom:1rem;">
+        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.3rem;">🔀 Modules actifs</div>
+        <div style="font-size:.75rem;color:#6b7280;margin-bottom:.7rem;">Masquez les modules que vous n'avez pas encore enseignés. Les modules inactifs sont invisibles pour les étudiants.</div>
+        <div id="moduleToggleList"></div>
+      </div>
+
+      <!-- Quick actions -->
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:.8rem;">
+          <div style="font-weight:800;color:#166534;font-size:.8rem;margin-bottom:.3rem;">🔓 Débloquer tous les modules</div>
+          <div style="font-size:.72rem;color:#15803d;margin-bottom:.6rem;">Score 100% partout — pour tests et démonstrations.</div>
           <button class="btn btn-green btn-sm" onclick="adminUnlockAll()">Débloquer tout</button>
         </div>
-        <div style="flex:1;min-width:200px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:1rem;">
-          <div style="font-weight:800;color:#991b1b;margin-bottom:.35rem;">🔄 Réinitialiser la progression</div>
-          <div style="font-size:.77rem;color:#b91c1c;margin-bottom:.8rem;">Efface toute la progression sur cet ordinateur — utile pour tester comme un étudiant.</div>
+        <div style="flex:1;min-width:180px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:.8rem;">
+          <div style="font-weight:800;color:#991b1b;font-size:.8rem;margin-bottom:.3rem;">🔄 Réinitialiser la progression</div>
+          <div style="font-size:.72rem;color:#b91c1c;margin-bottom:.6rem;">Efface toute la progression sur cet ordinateur.</div>
           <button class="btn btn-red btn-sm" onclick="adminResetProgress()">Réinitialiser</button>
         </div>
       </div>
       <div id="admAccessMsg" style="margin-top:.9rem;"></div>
+    </div>
+
+    <!-- PANEL: GENERATOR -->
+    <div id="adm-panel-gen" class="adm-panel" style="display:none;">
+      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.25rem;">🧩 Générateur de module no-code</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-bottom:1rem;line-height:1.5;">Créez un module personnalisé sans programmer. L'IA génère le cours, les exercices et le quiz.</div>
+      <div style="display:flex;flex-direction:column;gap:.65rem;">
+        <div>
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Titre du module *</label>
+          <input type="text" id="genTitle" placeholder="ex: Lean Healthcare, TPM, 8D, DMAIC..." style="width:100%;padding:.45rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.84rem;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Description / Objectifs pédagogiques *</label>
+          <textarea id="genDesc" placeholder="Décrivez ce que l'étudiant apprendra et pratiquera dans ce module..." style="width:100%;min-height:72px;padding:.45rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <div style="display:flex;gap:.7rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:110px;">
+            <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Niveau</label>
+            <select id="genLevel" style="width:100%;padding:.4rem .55rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;">
+              <option value="débutant">Débutant</option>
+              <option value="intermédiaire" selected>Intermédiaire</option>
+              <option value="avancé">Avancé</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:110px;">
+            <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Durée estimée</label>
+            <input type="text" id="genDuration" placeholder="~30 min" style="width:100%;padding:.4rem .55rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;box-sizing:border-box;">
+          </div>
+        </div>
+        <button class="btn btn-purple" onclick="generateCustomModule()" style="margin-top:.2rem;">✨ Générer avec l'IA</button>
+      </div>
+      <div id="admGenMsg" style="margin-top:.5rem;font-size:.78rem;"></div>
+      <div id="genPreview" style="margin-top:.8rem;"></div>
+
+      <!-- Custom module list -->
+      <div style="margin-top:1.3rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
+        <div style="font-weight:700;font-size:.8rem;color:#374151;margin-bottom:.5rem;">Modules publiés</div>
+        <div id="customModuleList"></div>
+        <div id="customModuleEmpty" style="font-size:.75rem;color:#94a3b8;display:none;">Aucun module créé pour l'instant.</div>
+      </div>
     </div>
   </div>
 </div>
