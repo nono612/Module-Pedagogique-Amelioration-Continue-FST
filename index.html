@@ -3779,9 +3779,10 @@ async function generateQuiz(){
   document.getElementById('quizArea').innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du quiz IA...</div></div>';
   if(!key){quizData=FALLBACK;renderQuiz();return;}
   const domainHintQuiz=state.domain?`\nL'étudiant travaille dans le secteur ${state.domain.secteur} (${state.domain.poste||'ingénieur'} chez ${state.domain.entreprise||'une entreprise'}). Inclus 2 à 3 questions avec des mises en situation concrètes dans CE secteur.`:'';
-  const prompt=`Génère 10 questions QCM en français sur Lean/Six Sigma/PDCA/5S/Ishikawa/Pareto/Kanban/VSM/SPC/SMED pour ingénieurs.${domainHintQuiz} JSON uniquement:\n[{"q":"?","opts":["A","B","C","D"],"correct":0},...]\n10 questions exactes, index correct 0-based.`;
+  const _quizSeed=Math.floor(Math.random()*99999);
+  const prompt=`Génère 10 questions QCM en français sur Lean/Six Sigma/PDCA/5S/Ishikawa/Pareto/Kanban/VSM/SPC/SMED pour ingénieurs.${domainHintQuiz} [Variation #${_quizSeed} — questions ORIGINALES, différentes des sessions précédentes.] JSON uniquement:\n[{"q":"?","opts":["A","B","C","D"],"correct":0},...]\n10 questions exactes, index correct 0-based.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500,temperature:1.0})});
     const data=await resp.json();const text=data.choices[0].message.content;
     const m=text.match(/\[[\s\S]*\]/);
     quizData=m?JSON.parse(m[0]):FALLBACK;renderQuiz();
