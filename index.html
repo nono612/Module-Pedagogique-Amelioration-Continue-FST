@@ -2248,8 +2248,9 @@ function generatePDCAProblem(){
     setTimeout(()=>{renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);},700);
     return;
   }
-  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
-  fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600})})
+  const _pdcaSeed=Math.floor(Math.random()*99999);
+  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\n[Variation #${_pdcaSeed} — entreprise fictive ORIGINALE, problème DIFFÉRENT des précédents.]\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
+  fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:1.0})})
   .then(r=>r.json()).then(data=>{
     const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
     if(!m)throw new Error();
@@ -3648,11 +3649,13 @@ async function generateModuleExercise(modId){
       prompt=`Formateur Lean senior. Génère un CAS INDUSTRIEL MULTI-PROBLÈMES pour projet de synthèse Lean/Six Sigma. ${lvDesc}${domCtx}\nJSON uniquement:\n{"secteur":"...","entreprise":"Nom fictif réaliste","probleme":"Texte narratif 5-7 phrases très précis avec chiffres concrets (%, heures, coûts). 3-4 problèmes industriels imbriqués nécessitant plusieurs outils Lean. Commence directement par la description sans introduction.","outils_pertinents":["PDCA","Pareto","Ishikawa"],"kpi1_v":"ex: 12%","kpi1_l":"Taux rebuts","kpi2_v":"ex: 4h","kpi2_l":"Arrêts/jour","kpi3_v":"ex: 180k€","kpi3_l":"Coûts qualité"}\nNiveaux: Débutant=2 problèmes simples 2-3 outils. Intermédiaire=3 problèmes liés 3-4 outils. Avancé=4+ problèmes complexes 5+ outils contraintes fortes.`;
       break;
   }
+  const _seed=Math.floor(Math.random()*99999);
+  prompt+=`\n[Variation #${_seed} — génère un scénario ORIGINAL, entreprise et secteur différents des exercices précédents.]`;
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:1.0})
     });
     const rdata=await resp.json();
     if(!resp.ok)throw new Error(rdata.error?.message||'Erreur API '+resp.status);
@@ -3896,9 +3899,10 @@ async function generateAmdecExercise(){
     'INTERMÉDIAIRE — Secteur technique (automobile, logistique). Plusieurs composants interagissants, causes multiples à identifier.',
     'AVANCÉ — Secteur exigeant (aéronautique, pharmaceutique). Défaillances ambiguës, effets en cascade, enjeux sécurité critiques.'
   ][lv.idx];
-  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction.`;
+  const _amdecSeed=Math.floor(Math.random()*99999);
+  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction. [Variation #${_amdecSeed} — scénario ORIGINAL, entreprise et secteur différents des précédents.]`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:.8})});
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:1.0})});
     const data=await res.json();
     const txt=data.choices?.[0]?.message?.content||'';
     const lv=getExLevel(9);
@@ -4574,15 +4578,17 @@ async function generateModule2Exercise(){
   const lvDescs=['Niveau DÉBUTANT : atelier avec des situations claires et non ambiguës, chaque item correspond évidemment à 1 seul S.','Niveau INTERMÉDIAIRE : atelier avec contexte détaillé mais certains items moins évidents (matériaux périmés mais encore partiellement utilisés, etc.).','Niveau AVANCÉ : certains items peuvent être ambigus (appartenir à 2 S), pas de contexte textuel évident — seulement le nom et la zone.'];
   const lvDesc=lvDescs[lv.idx];
   const domCtx=state.domain?` L'étudiant est ${state.domain.poste||'ingénieur'} dans le secteur ${state.domain.secteur||'industriel'} chez ${state.domain.entreprise||'une entreprise'}. Adapte le secteur et les matériaux à ce contexte métier.`:'';
+  const _m2Seed=Math.floor(Math.random()*99999);
   const prompt=`Tu es expert Lean 5S. Génère un exercice de classification 5S pour un atelier industriel fictif.
 ${lvDesc}${domCtx}
+[Variation #${_m2Seed} — entreprise et secteur DIFFÉRENTS des exercices précédents, items originaux.]
 
 Réponds UNIQUEMENT avec un JSON valide (aucun texte avant ou après) :
 {"entreprise":"Nom","secteur":"secteur","contexte":"description courte 2 phrases","items":[{"id":"a","emoji":"🔨","name":"Nom court","context":"Situation (1-2 phrases)","correct":"seiri","zone":"usinage"},{"id":"b",...},...]}
 
 Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri, seiton, seiso, seiketsu, shitsuke. Minimum 3 items par catégorie. Les zones doivent être parmi : usinage, stockage, controle, allee, bureau, vestiaire.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:0.8})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:1.0})});
     if(!resp.ok)throw new Error((await resp.json()).error?.message||resp.statusText);
     const data=await resp.json();
     const raw=data.choices[0].message.content;
