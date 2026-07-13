@@ -31,13 +31,12 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 .slide-ctr{font-size:.72rem;font-weight:800;color:rgba(255,255,255,.3);}
 .pbar{position:fixed;top:50px;left:0;right:0;height:2px;background:rgba(255,255,255,.05);z-index:99;}
 .pbar-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);transition:width .35s;}
-.navctrl{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:.8rem;z-index:100;}
-.nbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#fff;border-radius:9px;padding:.45rem 1.2rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
-.nbtn:hover{background:rgba(255,255,255,.13);}
-.nbtn:disabled{opacity:.25;cursor:not-allowed;}
-.dots{display:flex;gap:.35rem;align-items:center;}
-.dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer;transition:.3s;}
-.dot.on{background:#f59e0b;width:18px;border-radius:3px;}
+.navctrl{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1rem;z-index:100;background:rgba(13,27,42,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.5rem 1rem;}
+.nbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#fff;border-radius:8px;padding:.38rem 1rem;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+.nbtn:hover{background:rgba(255,255,255,.15);}
+.nbtn:disabled{opacity:.2;cursor:not-allowed;}
+.sect-label{font-size:.68rem;font-weight:700;color:rgba(255,255,255,.7);min-width:220px;text-align:center;letter-spacing:.2px;}
+.slide-num{font-size:.6rem;color:rgba(255,255,255,.3);font-weight:600;}
 /* layout helpers */
 .row{display:flex;gap:1.2rem;width:100%;max-width:1020px;align-items:flex-start;}
 .col{flex:1;display:flex;flex-direction:column;gap:.8rem;}
@@ -1845,19 +1844,19 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 </div><!-- /deck -->
 
 <div class="navctrl">
-  <button class="nbtn" id="pb" onclick="prev()" disabled>← Précédent</button>
-  <div class="dots" id="dr"></div>
-  <button class="nbtn" id="nb" onclick="next()">Suivant →</button>
+  <button class="nbtn" id="pb" onclick="prev()" disabled>← Préc.</button>
+  <span class="slide-num" id="sc">1 / 37</span>
+  <div class="sect-label" id="sect-label"></div>
+  <button class="nbtn" id="nb" onclick="next()">Suiv. →</button>
 </div>
 
 <script>
 const TOTAL=37;let cur=0;
-function buildDots(){const r=document.getElementById('dr');for(let i=0;i<TOTAL;i++){const d=document.createElement('div');d.className='dot';d.onclick=()=>go(i);r.appendChild(d);}}
 function go(n){if(n<0||n>=TOTAL)return;const ss=document.querySelectorAll('.slide');ss[cur].classList.remove('active');ss[cur].classList.add('exit');setTimeout(()=>ss[cur].classList.remove('exit'),380);cur=n;ss[cur].classList.add('active');upd();}
 function next(){go(cur+1);}function prev(){go(cur-1);}
-function upd(){document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===TOTAL-1;document.getElementById('sc').textContent=(cur+1)+' / '+TOTAL;document.getElementById('pf').style.width=((cur+1)/TOTAL*100)+'%';}
+function upd(){const ss=document.querySelectorAll('.slide');const tag=ss[cur].querySelector('.stag');document.getElementById('sect-label').textContent=tag?tag.textContent.trim():'';document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===TOTAL-1;document.getElementById('sc').textContent=(cur+1)+' / '+TOTAL;document.getElementById('pf').style.width=((cur+1)/TOTAL*100)+'%';}
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')next();if(e.key==='ArrowLeft')prev();});
-buildDots();upd();
+upd();
 </script>
 </body>
 </html>
