@@ -1722,12 +1722,15 @@ textarea{resize:vertical;min-height:80px;}
     </div>
   </div>
   <div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
-    <div style="font-weight:800;font-size:.87rem;color:#1e40af;margin-bottom:.3rem;">🏗️ Projet de synthèse — Cas industriel complet</div>
-    <div style="font-size:.72rem;color:#6b7280;">L'IA génère un cas industriel avec plusieurs problèmes imbriqués. À vous de diagnostiquer, choisir les bons outils et les appliquer.</div>
-    <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="generateCapstoneProblem()">🤖 Générer un cas industriel</button>
+    <div style="font-weight:800;font-size:.87rem;color:#1e40af;margin-bottom:.3rem;">🏗️ Projet de synthèse — Cas industriel multi-problèmes</div>
+    <div style="font-size:.72rem;color:#6b7280;margin-bottom:.6rem;">L'IA génère un cas industriel avec plusieurs problèmes imbriqués. Diagnostiquez, choisissez les bons outils, justifiez et planifiez. <b>3 niveaux de difficulté</b> à compléter avant de valider le module.</div>
+    <div id="exLevelBadgeM10" style="margin-bottom:.6rem;"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-primary btn-sm" id="genExBtnM10" onclick="generateModuleExercise(10)">🎲 Nouveau cas industriel</button>
       <span id="capstoneGenStatus"></span>
     </div>
+    <div id="genExStatusM10" style="margin-top:.4rem;"></div>
+    <div id="exValidateBtnM10" style="margin-top:.3rem;"></div>
   </div>
   <div id="capstoneProblemCard" style="display:none;" class="ccard">
     <div class="ccard-title"><span style="background:#0284c7;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CAS</span>Situation industrielle à résoudre</div>
@@ -1993,7 +1996,7 @@ function goModule(n){
   if(n===4)initPareto();if(n===5)initKanban();
   if(n===6)initVSM();if(n===8)initSMED();
   if(n===9)initAmdecTable();
-  if(n>=1&&n<=9){_refreshExBadge(n);_showExValidateBtn(n);}
+  if(n>=1&&n<=10){_refreshExBadge(n);_showExValidateBtn(n);}
   if(n===2)_refreshM2Badge();
 }
 function updateNav(){
@@ -2057,7 +2060,7 @@ function renderGrid(){
 
 /* ── Validation ── */
 const _moduleNames={1:'Cycle PDCA',2:'Méthode 5S',3:'Diagramme Ishikawa',4:'Analyse de Pareto',5:'Tableau Kanban',6:'Value Stream Mapping',7:'Cartes de contrôle SPC',8:'SMED',9:'AMDEC/FMEA',10:'Projet Intégré Lean',11:'Quiz Final'};
-const _MODULES_WITH_LEVELS=[1,2,3,4,5,6,7,8,9];
+const _MODULES_WITH_LEVELS=[1,2,3,4,5,6,7,8,9,10];
 function validateModule(n,scoreFn){
   if(_MODULES_WITH_LEVELS.includes(n)){
     const levDone=(state.exLevels||{})[n]||0;
@@ -3600,6 +3603,9 @@ async function generateModuleExercise(modId){
     case 8:
       prompt=`Formateur Lean. Génère des TÂCHES SMED pour exercice changement de série. ${lvDesc}${domCtx}\nJSON uniquement:\n{"secteur":"...","entreprise":"Nom fictif","machine":"type machine","duree_actuelle":85,"objectif":40,"contexte":"2 phrases","taches":[{"nom":"Arrêt machine","dur":5,"type":"interne"},{"nom":"Préparation outil","dur":10,"type":"externe"}]}\nRègles: 8-11 tâches, dur en min (2-25), type UNIQUEMENT "interne" ou "externe". Somme ≈ duree_actuelle.`;
       break;
+    case 10:
+      prompt=`Formateur Lean senior. Génère un CAS INDUSTRIEL MULTI-PROBLÈMES pour projet de synthèse Lean/Six Sigma. ${lvDesc}${domCtx}\nJSON uniquement:\n{"secteur":"...","entreprise":"Nom fictif réaliste","probleme":"Texte narratif 5-7 phrases très précis avec chiffres concrets (%, heures, coûts). 3-4 problèmes industriels imbriqués nécessitant plusieurs outils Lean. Commence directement par la description sans introduction.","outils_pertinents":["PDCA","Pareto","Ishikawa"],"kpi1_v":"ex: 12%","kpi1_l":"Taux rebuts","kpi2_v":"ex: 4h","kpi2_l":"Arrêts/jour","kpi3_v":"ex: 180k€","kpi3_l":"Coûts qualité"}\nNiveaux: Débutant=2 problèmes simples 2-3 outils. Intermédiaire=3 problèmes liés 3-4 outils. Avancé=4+ problèmes complexes 5+ outils contraintes fortes.`;
+      break;
   }
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
@@ -3691,6 +3697,22 @@ function _applyModuleExercise(modId,ex,lv){
       const ctx=document.getElementById('smedExContext');
       const tot=ex.taches?ex.taches.reduce((s,t)=>s+(+(t.dur||t.duree||0)),0):+(ex.duree_actuelle||0);
       if(ctx)ctx.innerHTML=buildCtx(`${ex.machine?'Machine : '+ex.machine+'. ':''}Durée actuelle : ${ex.duree_actuelle||tot} min. Objectif SMED : <${ex.objectif||'?'} min. ${ex.contexte||''}`,[{v:(ex.duree_actuelle||tot)+' min',l:'Durée actuelle',c:'#ef4444'},{v:'<'+(ex.objectif||'?')+' min',l:'Objectif',c:'#059669'}]);
+      break;
+    }
+    case 10:{
+      const pt=document.getElementById('capstoneProblemText');
+      const pc=document.getElementById('capstoneProblemCard');
+      const tc=document.getElementById('capstoneToolsCard');
+      const jc=document.getElementById('capstoneJustifCard');
+      if(pt)pt.innerHTML=buildCtx(ex.probleme||ex.description||'',[{v:ex.kpi1_v,l:ex.kpi1_l,c:'#ef4444'},{v:ex.kpi2_v,l:ex.kpi2_l,c:'#d97706'},{v:ex.kpi3_v,l:ex.kpi3_l,c:'#7c3aed'}]);
+      if(pc)pc.style.display='block';
+      if(tc)tc.style.display='block';
+      if(jc)jc.style.display='block';
+      document.querySelectorAll('#capstoneToolGrid input[type=checkbox]').forEach(cb=>cb.checked=false);
+      const justifEl=document.getElementById('capstoneJustif');if(justifEl)justifEl.value='';
+      const planEl=document.getElementById('capstonePlan');if(planEl)planEl.value='';
+      updateCapstoneScore();
+      _showExValidateBtn(10);
       break;
     }
   }
@@ -3875,7 +3897,8 @@ function scoreAmdec(){
 }
 
 /* ══ M10 – CAPSTONE ══ */
-async function generateCapstoneProblem(){
+function generateCapstoneProblem(){generateModuleExercise(10);}
+async function _generateCapstoneProblemLegacy(){
   const btn=document.querySelector('#m10 .btn-primary');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const statusEl=document.getElementById('capstoneGenStatus');if(statusEl)statusEl.textContent='';
   const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
