@@ -1951,6 +1951,30 @@ function getKey(){
   return (el&&el.value.trim())||'';
 }
 
+/* ── Empty state card pour modules M2-M10 ── */
+const _MOD_EMPTY_CFG={
+  2:{ctx:'m2ExContext',fn:'generateModule2Exercise()',icon:'🧹',name:'5S'},
+  3:{ctx:'ishiExContext',fn:'generateModuleExercise(3)',icon:'🐟',name:'Ishikawa'},
+  4:{ctx:'paretoExContext',fn:'generateModuleExercise(4)',icon:'📊',name:'Pareto'},
+  5:{ctx:'kanbanExContext',fn:'generateModuleExercise(5)',icon:'📋',name:'Kanban'},
+  6:{ctx:'vsmExContext',fn:'generateModuleExercise(6)',icon:'🗺️',name:'VSM'},
+  7:{ctx:'spcExContext',fn:'generateModuleExercise(7)',icon:'📈',name:'SPC'},
+  8:{ctx:'smedExContext',fn:'generateModuleExercise(8)',icon:'⏱️',name:'SMED'},
+  9:{ctx:'amdecExContext',fn:'generateAmdecExercise()',icon:'⚠️',name:'AMDEC'},
+  10:{ctx:'genExStatusM10',fn:'generateModuleExercise(10)',icon:'🏗️',name:'Projet Intégré'}
+};
+function _initExEmptyState(modId){
+  const cfg=_MOD_EMPTY_CFG[modId];if(!cfg)return;
+  const el=document.getElementById(cfg.ctx);
+  if(!el||el.innerHTML.trim())return;
+  el.innerHTML=`<div style="text-align:center;padding:2.5rem 1rem 2rem;border:2px dashed #e2e8f0;border-radius:14px;background:#f8fafc;margin-top:.7rem;">
+    <div style="font-size:3rem;margin-bottom:.7rem;">${cfg.icon}</div>
+    <div style="font-size:1rem;font-weight:800;color:var(--gray800);margin-bottom:.4rem;">Prêt pour votre défi ${cfg.name} ?</div>
+    <div style="font-size:.83rem;color:var(--gray400);margin-bottom:1.4rem;max-width:380px;margin-left:auto;margin-right:auto;line-height:1.6;">Cliquez ci-dessous — l'IA génère un exercice industriel réaliste adapté à votre niveau actuel.</div>
+    <button class="btn btn-gold" style="font-size:.9rem;padding:.65rem 1.6rem;" onclick="${cfg.fn}">🎲 Générer un exercice ${cfg.name}</button>
+  </div>`;
+}
+
 /* ── Admin Config ── */
 function getAdminConfig(){return JSON.parse(localStorage.getItem('greenlab_admin_config')||'{}');}
 function saveAdminConfig(cfg){localStorage.setItem('greenlab_admin_config',JSON.stringify(cfg));}
@@ -1997,6 +2021,7 @@ function goModule(n){
   if(n===6)initVSM();if(n===8)initSMED();
   if(n===9)initAmdecTable();
   if(n>=1&&n<=10){_refreshExBadge(n);_showExValidateBtn(n);}
+  if(n>=2&&n<=10)_initExEmptyState(n);
   if(n===2)_refreshM2Badge();
 }
 function updateNav(){
@@ -3620,8 +3645,7 @@ async function generateModuleExercise(modId){
     if(!mm)throw new Error('Réponse IA invalide — pas de JSON');
     const ex=JSON.parse(mm[0]);
     _applyModuleExercise(modId,ex,lv);
-    statusEl.innerHTML='<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Scénario <b>'+lv.label+'</b> généré — Résolvez l\'exercice ci-dessous, puis validez ce niveau.</div>';
-    setTimeout(()=>{if(statusEl)statusEl.innerHTML='';},4000);
+    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Scénario <b>${lv.label}</b> généré — Résolvez l'exercice, puis validez ce niveau.</div><button class="btn btn-ghost btn-sm" onclick="generateModuleExercise(${modId})" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau problème</button></div>`;
     _showExValidateBtn(modId);
   }catch(e){
     statusEl.innerHTML=`<div class="alert alert-danger" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">❌ ${_escH(e.message)}</div>`;
@@ -3864,6 +3888,8 @@ async function generateAmdecExercise(){
     const lv=getExLevel(9);
     if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.4rem;">${lv.stars} Exercice niveau ${lv.label}</div>${formatAIText(txt)}</div>`;
     amdecRows=[];renderAmdecTable();
+    const _st9=document.getElementById('genExStatusM9');
+    if(_st9)_st9.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Contexte AMDEC <b>${lv.label}</b> généré — Remplissez le tableau, puis validez.</div><button class="btn btn-ghost btn-sm" onclick="generateAmdecExercise()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau problème</button></div>`;
     _showExValidateBtn(9);
   }catch(e){if(ctx)ctx.innerHTML='<div class="alert alert-warning">Erreur IA. Vérifiez votre clé.</div>';}
   if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
@@ -4550,8 +4576,7 @@ Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri,
     const VALID_S=['seiri','seiton','seiso','seiketsu','shitsuke'];
     ex.items=ex.items.filter(it=>VALID_S.includes(it.correct));
     if(ex.items.length<12)throw new Error('Trop peu d\'items valides');
-    if(status)status.innerHTML=`<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Atelier <b>${lv.label}</b> généré — Classifiez les éléments puis validez ce niveau.</div>`;
-    setTimeout(()=>{if(status)status.innerHTML='';},4000);
+    if(status)status.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Atelier 5S <b>${lv.label}</b> généré — Classifiez les éléments puis validez ce niveau.</div><button class="btn btn-ghost btn-sm" onclick="generateModule2Exercise()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau problème</button></div>`;
     _m2LastEx=ex;
     _applyM2Exercise(ex,lv);
     _showExValidateBtn(2);
