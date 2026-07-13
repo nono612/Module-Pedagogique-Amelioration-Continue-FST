@@ -1865,6 +1865,8 @@ state.smedRows=state.smedRows||null;
 state.paretoData=state.paretoData||null;
 state.domain=state.domain||null;
 state.cvSeen=state.cvSeen||false;
+state.cvFilter=state.cvFilter||false;
+state.cvRecoIds=state.cvRecoIds||[];
 state.exLevels=state.exLevels||{};
 state.timers=state.timers||{};
 state.badges=state.badges||[];
@@ -2046,13 +2048,27 @@ function updateNav(){
 }
 
 /* ── Home Grid ── */
+function _prevCVModule(recoIds,currentId){const idx=recoIds.indexOf(currentId);if(idx<=0)return null;return recoIds[idx-1];}
+function cvApplyParcours(){state.cvFilter=true;state.cvRecoIds=(state.cvReco||[]).map(r=>r.id);save();closeCVModal();renderGrid();updateNav();}
+function cvClearFilter(){state.cvFilter=false;state.cvRecoIds=[];save();renderGrid();updateNav();}
 function renderGrid(){
   const g=document.getElementById('moduleGrid');g.innerHTML='';
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
-  MODULES.filter(m=>isModuleActive(m.id)).forEach(m=>{
+  const _cvActive=state.cvFilter&&state.cvRecoIds&&state.cvRecoIds.length>0;
+  if(_cvActive){
+    const banner=document.createElement('div');
+    banner.style.cssText='grid-column:1/-1;background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #7c3aed;border-radius:12px;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.2rem;';
+    banner.innerHTML=`<div style="font-size:.8rem;color:#4c1d95;font-weight:700;">🎯 Parcours CV actif — ${state.cvRecoIds.length} modules sélectionnés pour votre profil</div><button class="btn btn-ghost btn-sm" onclick="cvClearFilter()" style="font-size:.72rem;flex-shrink:0;color:#6b7280;">✕ Voir tous les modules</button>`;
+    g.appendChild(banner);
+  }
+  const modsToShow=_cvActive
+    ?state.cvRecoIds.map(id=>MODULES.find(m=>m.id===id)).filter(Boolean).filter(m=>isModuleActive(m.id))
+    :MODULES.filter(m=>isModuleActive(m.id));
+  modsToShow.forEach(m=>{
     const done=state.completed.includes(m.id);
-    const prev=_prevActiveModule(m.id);
-    const locked=prev!=null&&!state.completed.includes(prev);
+    let locked;
+    if(_cvActive){const prevId=_prevCVModule(state.cvRecoIds,m.id);locked=prevId!=null&&!state.completed.includes(prevId);}
+    else{const prev=_prevActiveModule(m.id);locked=prev!=null&&!state.completed.includes(prev);}
     const score=state.scores[m.id]!==undefined?state.scores[m.id]:null;
     const d=document.createElement('div');
     d.className='mod-card c'+m.id+(locked?' mod-locked':'')+(done?' mod-done':'');
@@ -4389,8 +4405,8 @@ function cvStartModules(){
         <div style="font-weight:800;color:#4c1d95;font-size:.85rem;margin-bottom:.6rem;">🎯 Parcours recommandé pour votre profil</div>
         ${reco.slice(0,7).map((r,i)=>{const mod=MODULES.find(m=>m.id===r.id);return mod?`<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.4rem;"><span style="font-size:.68rem;font-weight:900;color:#fff;background:#7c3aed;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span><div><div style="font-size:.77rem;font-weight:800;color:#4c1d95;">${mod.icon} M${mod.id} — ${mod.name}</div><div style="font-size:.72rem;color:#6b7280;margin-top:.1rem;">${_escH(r.justification||'')}</div></div></div>`:'';}).join('')}
         <div style="display:flex;gap:.5rem;margin-top:.8rem;">
-          <button class="btn btn-purple btn-sm" onclick="closeCVModal()" style="flex:2;">✅ Suivre ce parcours</button>
-          <button class="btn btn-ghost btn-sm" onclick="closeCVModal()" style="flex:1;font-size:.72rem;">Ordre normal</button>
+          <button class="btn btn-purple btn-sm" onclick="cvApplyParcours()" style="flex:2;">✅ Suivre ce parcours</button>
+          <button class="btn btn-ghost btn-sm" onclick="cvClearFilter();closeCVModal();" style="flex:1;font-size:.72rem;">Ordre normal</button>
         </div>
       </div>`;
     });
