@@ -410,6 +410,16 @@ textarea{resize:vertical;min-height:80px;}
 }
 .score-result.pass{background:#ecfdf5;border:2px solid #6ee7b7;}
 .score-result.fail{background:#fef2f2;border:2px solid #fca5a5;}
+
+/* ─ Remediation overlay ─ */
+.rem-overlay{position:fixed;inset:0;background:rgba(13,27,42,.88);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(4px);}
+.rem-page{background:#fff;border-radius:20px;width:100%;max-width:860px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.5);}
+.rem-header{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:1.2rem 1.6rem;border-bottom:2px solid #f1f5f9;flex-shrink:0;}
+.rem-header-title{font-weight:900;font-size:1rem;color:#0d1b2a;line-height:1.4;}
+.rem-header-sub{font-size:.72rem;color:#6b7280;margin-top:.15rem;}
+.rem-close{background:#f1f5f9;border:none;border-radius:10px;padding:.5rem .8rem;font-size:.88rem;cursor:pointer;font-weight:800;color:#374151;white-space:nowrap;transition:background .18s;}
+.rem-close:hover{background:#e2e8f0;}
+.rem-body{overflow-y:auto;padding:1.4rem 1.8rem;flex:1;}
 .score-ring{
   width:64px;height:64px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
@@ -969,7 +979,7 @@ textarea{resize:vertical;min-height:80px;}
         <button class="btn btn-primary" onclick="evaluatePDCA()">📊 Évaluer mes réponses</button>
         <button class="btn btn-gold" onclick="analyzePDCA()">🤖 Feedback IA complet</button>
         <button class="btn btn-purple" onclick="showPDCACorrection()">📖 Voir la correction</button>
-        <button class="btn btn-green" onclick="validateModule(1,scorePDCA)">✅ Valider le module</button>
+        <button class="btn btn-green" onclick="validateModule(1,scorePDCAWithAI)">✅ Valider le module</button>
       </div>
       <div id="pdcaEvalResult" style="margin-top:1rem;"></div>
       <div id="pdcaAI" style="margin-top:.5rem;"></div>
@@ -1115,19 +1125,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="ishiExContext"></div>
   </div>
   <div class="ccard">
-    <div class="ccard-title"><span style="background:#8b5cf6;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>Cas Industriel — PRECISION MAROC</div>
-    <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:12px;padding:1rem;border:1.5px solid #c4b5fd;font-size:.83rem;color:#374151;line-height:1.8;">
-      🏭 <b>Problème identifié :</b> Le taux de rebuts de l'atelier PRECISION MAROC est de <b style="color:#7c3aed;">8%</b> (objectif 2%). Les pièces aéronautiques présentent des <b>non-conformités dimensionnelles et de surface</b> qui génèrent 12 000€/semaine de pertes.<br>
-      🎯 <b>Votre mission :</b> Construire un diagramme Ishikawa (5M) pour identifier toutes les causes racines potentielles de ce taux de rebuts excessif.
-    </div>
-    <div style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-      <div style="background:#f5f3ff;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #8b5cf6;text-align:center;min-width:100px;"><div style="font-size:1.4rem;font-weight:900;color:#7c3aed;">8%</div><div style="font-size:.65rem;color:#7c3aed;font-weight:700;text-transform:uppercase;">Taux rebuts</div></div>
-      <div style="background:#fef2f2;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #ef4444;text-align:center;min-width:100px;"><div style="font-size:1.4rem;font-weight:900;color:#ef4444;">12k€</div><div style="font-size:.65rem;color:#ef4444;font-weight:700;text-transform:uppercase;">Perte/semaine</div></div>
-      <div style="background:#fffbeb;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #d97706;text-align:center;min-width:100px;"><div style="font-size:1.4rem;font-weight:900;color:#d97706;">42%</div><div style="font-size:.65rem;color:#d97706;font-weight:700;text-transform:uppercase;">Score audit ISO</div></div>
-      <div style="background:#fff7ed;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #f97316;text-align:center;min-width:100px;"><div style="font-size:1.4rem;font-weight:900;color:#f97316;">3</div><div style="font-size:.65rem;color:#f97316;font-weight:700;text-transform:uppercase;">Accidents/6 mois</div></div>
-    </div>
-  </div>
-  <div class="ccard">
     <div class="ccard-title">Effet / Problème principal</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
       <div>
@@ -1183,7 +1180,7 @@ textarea{resize:vertical;min-height:80px;}
       <textarea id="ishiRootCauses" placeholder="Ex : 1. Usure des outils (criticité 20) — planifier la maintenance préventive&#10;2. Absence de procédure de contrôle (criticité 18) — rédiger une gamme de contrôle&#10;3. Vibrations machines (criticité 15) — audit vibrations mensuel" style="min-height:90px;margin-top:.4rem;"></textarea>
     </div>
     <div class="btn-row">
-      <button class="btn btn-green" onclick="validateModule(3,scoreIshikawa)">✅ Valider le Module</button>
+      <button class="btn btn-green" onclick="validateModule(3,scoreIshikawaWithAI)">✅ Valider le Module</button>
     </div>
   </div>
 </div>
@@ -1213,13 +1210,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="genExStatusM4" style="margin-top:.3rem;"></div>
     <div id="exValidateBtnM4"></div>
     <div id="paretoExContext"></div>
-  </div>
-  <div class="ccard">
-    <div class="ccard-title"><span style="background:#f59e0b;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>Analyse des Défauts — PRECISION MAROC</div>
-    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-radius:12px;padding:1rem;border:1.5px solid #fde68a;font-size:.83rem;color:#374151;line-height:1.8;">
-      📊 Le département qualité a enregistré <b>1 250 pièces défectueuses</b> sur les 3 derniers mois. Votre mission : appliquer la <b>loi de Pareto (80/20)</b> pour identifier les défauts prioritaires et concentrer les actions correctives.<br>
-      💡 <b>Règle :</b> 20% des types de défauts causent 80% des rebuts. Concentrez les ressources sur ces "vitaux peu nombreux".
-    </div>
   </div>
   <div class="ccard">
     <div class="ccard-title">Données de défauts</div>
@@ -1301,18 +1291,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="exValidateBtnM5"></div>
     <div id="kanbanExContext"></div>
   </div>
-  <div class="ccard">
-    <div class="ccard-title"><span style="background:#14b8a6;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">THÉORIE</span>Kanban & Flux Tiré — PRECISION MAROC</div>
-    <div style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border-radius:12px;padding:1rem;border:1.5px solid #99f6e4;font-size:.83rem;color:#374151;line-height:1.8;">
-      📋 <b>Problème :</b> L'atelier PRECISION MAROC produit en flux poussé — chaque poste produit au maximum sans regarder la demande aval. Résultat : <b>stocks intermédiaires en cours</b> saturés, opérateurs surchargés, et délais non tenus.<br>
-      🎯 <b>Mission :</b> Mettre en place un tableau Kanban pour piloter le flux de production. Définissez une <b>limite WIP</b> (Work In Progress) adaptée et faites avancer les tâches de Backlog → En cours → Terminé.
-    </div>
-    <div style="margin-top:.7rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;font-size:.78rem;">
-      <div style="background:#f0fdfa;border-radius:8px;padding:.5rem;border-left:3px solid #14b8a6;"><b style="color:#0f766e;">WIP recommandé</b><br>2-3 tâches max en "En cours"<br><span style="font-size:.7rem;color:#6b7280;">Évite la surcharge et révèle les goulots</span></div>
-      <div style="background:#f0fdfa;border-radius:8px;padding:.5rem;border-left:3px solid #14b8a6;"><b style="color:#0f766e;">Règle de flux</b><br>Finir avant de commencer<br><span style="font-size:.7rem;color:#6b7280;">Stop Starting, Start Finishing</span></div>
-      <div style="background:#f0fdfa;border-radius:8px;padding:.5rem;border-left:3px solid #14b8a6;"><b style="color:#0f766e;">Alerte WIP</b><br>Rouge = goulot d'étranglement<br><span style="font-size:.7rem;color:#6b7280;">Analysez avant d'ajouter</span></div>
-    </div>
-  </div>
   <!-- Calculateur Takt Time -->
   <div class="ccard" style="border:2px solid #99f6e4;">
     <div class="ccard-title"><span style="background:#0d9488;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">ÉTAPE 1</span>Calcul du Takt Time — Rythme imposé par le client</div>
@@ -1393,14 +1371,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="genExStatusM6" style="margin-top:.3rem;"></div>
     <div id="exValidateBtnM6"></div>
     <div id="vsmExContext"></div>
-  </div>
-  <div class="ccard">
-    <div class="ccard-title"><span style="background:#10b981;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>VSM — Flux de Production PRECISION MAROC</div>
-    <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:12px;padding:1rem;border:1.5px solid #6ee7b7;font-size:.83rem;color:#374151;line-height:1.8;">
-      🗺️ <b>Objectif :</b> Cartographier le flux de valeur (Value Stream Map) de l'atelier pour visualiser le temps réellement créateur de valeur vs les gaspillages (attentes, transports, surproduction).<br>
-      📐 <b>Taux VA cible :</b> Un bon flux industriel vise <b>30% minimum</b> de temps à valeur ajoutée. En dessous, les gaspillages dominent.<br>
-      💡 Les données pré-remplies correspondent au flux actuel de PRECISION MAROC. Analysez et calculez.
-    </div>
   </div>
   <div class="ccard">
     <div class="ccard-title">Étapes du processus</div>
@@ -1537,17 +1507,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="spcExContext"></div>
   </div>
   <div class="ccard">
-    <div class="ccard-title"><span style="background:#0ea5e9;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>Carte de Contrôle — Diamètre pièces CNC</div>
-    <div style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;padding:1rem;border:1.5px solid #7dd3fc;font-size:.83rem;color:#374151;line-height:1.8;">
-      📈 L'atelier mesure le <b>diamètre intérieur</b> (mm) de pièces aéronautiques usinées sur CNC. Cible : <b>50.000 mm</b>, tolérance ±0.200 mm. Des dérives ont été observées — la SPC permettra d'identifier si le processus est <b>sous contrôle statistique</b>.
-    </div>
-    <div style="margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
-      <button class="btn btn-ghost btn-sm" onclick="loadSPCScenario(1)">📊 Scénario 1 : Processus stable</button>
-      <button class="btn btn-ghost btn-sm" onclick="loadSPCScenario(2)">⚠️ Scénario 2 : Dérive progressive</button>
-      <button class="btn btn-ghost btn-sm" onclick="loadSPCScenario(3)">🔴 Scénario 3 : Points hors limites</button>
-    </div>
-  </div>
-  <div class="ccard">
     <div class="ccard-title">Saisie des mesures</div>
     <div class="spc-input-wrap">
       <label>Mesures séparées par des virgules (min. 10 points)</label>
@@ -1603,17 +1562,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="smedExContext"></div>
   </div>
   <div class="ccard">
-    <div class="ccard-title"><span style="background:#f97316;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>SMED — Changement de Moule PRECISION MAROC</div>
-    <div style="background:linear-gradient(135deg,#fff7ed,#fed7aa);border-radius:12px;padding:1rem;border:1.5px solid #fdba74;font-size:.83rem;color:#374151;line-height:1.8;">
-      ⏱️ <b>Problème :</b> Chaque changement de série sur les CNC de PRECISION MAROC prend <b>88 minutes</b>, immobilisant les machines et les opérateurs. L'objectif SMED : réduire ce temps à <b>moins de 45 minutes</b>.<br>
-      🎯 <b>Méthode :</b> Classifiez chaque tâche en <b>Interne</b> (machine arrêtée obligatoire) ou <b>Externe</b> (réalisable machine en marche). Puis externalisez au maximum.
-    </div>
-    <div style="margin-top:.7rem;display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.78rem;">
-      <div style="background:#fff7ed;border-radius:8px;padding:.5rem;border-left:3px solid #ea580c;"><b style="color:#c2410c;">⛔ Interne (machine à l'ARRÊT)</b><br><span style="color:#6b7280;">Montage/démontage outil, réglage, 1er essai</span></div>
-      <div style="background:#ecfdf5;border-radius:8px;padding:.5rem;border-left:3px solid #059669;"><b style="color:#065f46;">✅ Externe (machine EN MARCHE)</b><br><span style="color:#6b7280;">Préparation outil, nettoyage, commandes</span></div>
-    </div>
-  </div>
-  <div class="ccard">
     <div class="ccard-title">Tâches de changement de série</div>
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;padding:.3rem .5rem;margin-bottom:.3rem;">
       <span style="font-size:.7rem;font-weight:800;color:var(--gray400);text-transform:uppercase;">Tâche</span>
@@ -1664,18 +1612,6 @@ textarea{resize:vertical;min-height:80px;}
     <div id="amdecExContext" style="margin-top:.5rem;"></div>
   </div>
   <div class="ccard">
-    <div class="ccard-title"><span style="background:#9333ea;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CONTEXTE</span>AMDEC Processus — PRECISION MAROC · Ligne CNC</div>
-    <div style="background:linear-gradient(135deg,#faf5ff,#f3e8ff);border-radius:12px;padding:1rem;border:1.5px solid #d8b4fe;font-size:.83rem;color:#374151;line-height:1.8;">
-      ⚠️ <b>Situation :</b> La ligne CNC de PRECISION MAROC présente un taux de rebuts de 8% et 3 accidents en 6 mois. La direction exige une <b>AMDEC Processus</b> complète pour identifier et prioriser les risques avant la prochaine certification ISO 9001.<br>
-      🎯 <b>Mission :</b> Remplir le tableau AMDEC — pour chaque mode de défaillance, évaluer la <b>Gravité (G)</b>, l'<b>Occurrence (O)</b> et la <b>Détection (D)</b>. L'<b>IPR = G × O × D</b>. Tout IPR ≥ 100 nécessite une action corrective immédiate.
-    </div>
-    <div style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-      <div style="background:#faf5ff;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #9333ea;text-align:center;min-width:90px;"><div style="font-size:1.2rem;font-weight:900;color:#7c3aed;">G×O×D</div><div style="font-size:.62rem;color:#7c3aed;font-weight:700;text-transform:uppercase;">IPR = Criticité</div></div>
-      <div style="background:#fef2f2;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #dc2626;text-align:center;min-width:90px;"><div style="font-size:1.2rem;font-weight:900;color:#dc2626;">≥ 100</div><div style="font-size:.62rem;color:#dc2626;font-weight:700;text-transform:uppercase;">Action requise</div></div>
-      <div style="background:#fffbeb;border-radius:8px;padding:.5rem .75rem;border-top:3px solid #d97706;text-align:center;min-width:90px;"><div style="font-size:1.2rem;font-weight:900;color:#d97706;">1 → 10</div><div style="font-size:.62rem;color:#d97706;font-weight:700;text-transform:uppercase;">Échelle G, O, D</div></div>
-    </div>
-  </div>
-  <div class="ccard">
     <div class="ccard-title">Tableau AMDEC</div>
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:.75rem;" id="amdecTable">
@@ -1722,12 +1658,15 @@ textarea{resize:vertical;min-height:80px;}
     </div>
   </div>
   <div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
-    <div style="font-weight:800;font-size:.87rem;color:#1e40af;margin-bottom:.3rem;">🏗️ Projet de synthèse — Cas industriel complet</div>
-    <div style="font-size:.72rem;color:#6b7280;">L'IA génère un cas industriel avec plusieurs problèmes imbriqués. À vous de diagnostiquer, choisir les bons outils et les appliquer.</div>
-    <div style="margin-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="generateCapstoneProblem()">🤖 Générer un cas industriel</button>
+    <div style="font-weight:800;font-size:.87rem;color:#1e40af;margin-bottom:.3rem;">🏗️ Projet de synthèse — Cas industriel multi-problèmes</div>
+    <div style="font-size:.72rem;color:#6b7280;margin-bottom:.6rem;">L'IA génère un cas industriel avec plusieurs problèmes imbriqués. Diagnostiquez, choisissez les bons outils, justifiez et planifiez. <b>3 niveaux de difficulté</b> à compléter avant de valider le module.</div>
+    <div id="exLevelBadgeM10" style="margin-bottom:.6rem;"></div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-primary btn-sm" id="genExBtnM10" onclick="generateModuleExercise(10)">🎲 Nouveau cas industriel</button>
       <span id="capstoneGenStatus"></span>
     </div>
+    <div id="genExStatusM10" style="margin-top:.4rem;"></div>
+    <div id="exValidateBtnM10" style="margin-top:.3rem;"></div>
   </div>
   <div id="capstoneProblemCard" style="display:none;" class="ccard">
     <div class="ccard-title"><span style="background:#0284c7;color:#fff;border-radius:6px;padding:.12rem .5rem;font-size:.72rem;font-weight:800;margin-right:.4rem;">CAS</span>Situation industrielle à résoudre</div>
@@ -1758,7 +1697,7 @@ textarea{resize:vertical;min-height:80px;}
     <div id="capstoneScoreBar" style="margin-top:.6rem;"></div>
     <div class="btn-row">
       <button class="btn btn-gold" onclick="analyzeCapstone()">🤖 Évaluation IA du projet</button>
-      <button class="btn btn-green" onclick="validateModule(10,scoreCapstone)">✅ Valider le Module Projet</button>
+      <button class="btn btn-green" onclick="validateModule(10,scoreCapstoneWithAI)">✅ Valider le Module Projet</button>
     </div>
     <div id="capstoneAI" style="margin-top:.5rem;"></div>
     <div id="capstoneScore"></div>
@@ -1862,6 +1801,8 @@ state.smedRows=state.smedRows||null;
 state.paretoData=state.paretoData||null;
 state.domain=state.domain||null;
 state.cvSeen=state.cvSeen||false;
+state.cvFilter=state.cvFilter||false;
+state.cvRecoIds=state.cvRecoIds||[];
 state.exLevels=state.exLevels||{};
 state.timers=state.timers||{};
 state.badges=state.badges||[];
@@ -1947,6 +1888,39 @@ function getKey(){
   const el=document.getElementById('apiKey');
   return (el&&el.value.trim())||'';
 }
+
+/* ── Empty state card pour modules M2-M10 ── */
+const _MOD_EMPTY_CFG={
+  2:{ctx:'m2ExContext',fn:'generateModule2Exercise()',icon:'🧹',name:'5S'},
+  3:{ctx:'ishiExContext',fn:'generateModuleExercise(3)',icon:'🐟',name:'Ishikawa'},
+  4:{ctx:'paretoExContext',fn:'generateModuleExercise(4)',icon:'📊',name:'Pareto'},
+  5:{ctx:'kanbanExContext',fn:'generateModuleExercise(5)',icon:'📋',name:'Kanban'},
+  6:{ctx:'vsmExContext',fn:'generateModuleExercise(6)',icon:'🗺️',name:'VSM'},
+  7:{ctx:'spcExContext',fn:'generateModuleExercise(7)',icon:'📈',name:'SPC'},
+  8:{ctx:'smedExContext',fn:'generateModuleExercise(8)',icon:'⏱️',name:'SMED'},
+  9:{ctx:'amdecExContext',fn:'generateAmdecExercise()',icon:'⚠️',name:'AMDEC'},
+  10:{ctx:'genExStatusM10',fn:'generateModuleExercise(10)',icon:'🏗️',name:'Projet Intégré'}
+};
+function _initExEmptyState(modId){
+  const cfg=_MOD_EMPTY_CFG[modId];if(!cfg)return;
+  const el=document.getElementById(cfg.ctx);
+  if(!el||el.innerHTML.trim())return;
+  el.innerHTML=`<div style="text-align:center;padding:2.5rem 1rem 2rem;border:2px dashed #e2e8f0;border-radius:14px;background:#f8fafc;margin-top:.7rem;">
+    <div style="font-size:3rem;margin-bottom:.7rem;">${cfg.icon}</div>
+    <div style="font-size:1rem;font-weight:800;color:var(--gray800);margin-bottom:.4rem;">Prêt pour votre défi ${cfg.name} ?</div>
+    <div style="font-size:.83rem;color:var(--gray400);margin-bottom:1.4rem;max-width:380px;margin-left:auto;margin-right:auto;line-height:1.6;">Cliquez ci-dessous — l'IA génère un exercice industriel réaliste adapté à votre niveau actuel.</div>
+    <button class="btn btn-gold" style="font-size:.9rem;padding:.65rem 1.6rem;" onclick="${cfg.fn}">🎲 Générer un exercice ${cfg.name}</button>
+  </div>`;
+}
+
+/* ── Admin Config ── */
+function getAdminConfig(){return JSON.parse(localStorage.getItem('greenlab_admin_config')||'{}');}
+function saveAdminConfig(cfg){localStorage.setItem('greenlab_admin_config',JSON.stringify(cfg));}
+function getThreshold(n){const cfg=getAdminConfig();if(cfg.thresholds&&cfg.thresholds[n]!=null)return cfg.thresholds[n];if(n===11)return cfg.quizThreshold!=null?cfg.quizThreshold:70;return cfg.defaultThreshold!=null?cfg.defaultThreshold:60;}
+function isModuleActive(n){const cfg=getAdminConfig();if(!cfg.moduleToggles)return true;return cfg.moduleToggles[n]!==false;}
+function _prevActiveModule(n){for(let i=n-1;i>=1;i--){if(isModuleActive(i))return i;}return null;}
+function getCustomModules(){return JSON.parse(localStorage.getItem('greenlab_custom_modules')||'[]');}
+function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));}
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
   if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
@@ -1962,6 +1936,10 @@ function _moduleLeave(){
     save();
   }
   _moduleActiveId=null;_moduleStartTs=null;
+  // Stop any running exercise timers
+  stopExTimer();
+  if(_exTimerCustomId){clearInterval(_exTimerCustomId);_exTimerCustomId=null;}
+  stopCustomQuizTimer();
 }
 function showSection(id){
   if(id==='home')_moduleLeave();
@@ -1973,8 +1951,22 @@ function showSection(id){
   });
 }
 function goModule(n){
-  if(n>1&&!state.completed.includes(n-1)){
-    alert(`🔒 Complétez le Module ${n-1} pour débloquer ce module.`);return;
+  if(!isModuleActive(n)){alert('Ce module est actuellement désactivé par le professeur.');return;}
+  const _cvActive=state.cvFilter&&state.cvRecoIds&&state.cvRecoIds.length>0;
+  if(_cvActive&&!state.cvRecoIds.includes(n)&&!state.completed.includes(n)){
+    alert('🎯 Ce module ne fait pas partie de votre parcours CV personnalisé.');return;
+  }
+  if(_cvActive){
+    const prevId=_prevCVModule(state.cvRecoIds,n);
+    if(prevId!=null&&!state.completed.includes(prevId)){
+      const prevMod=MODULES.find(m=>m.id===prevId);
+      alert(`🔒 Complétez d'abord "${prevMod?.name||'le module précédent'}" pour débloquer celui-ci.`);return;
+    }
+  } else {
+    const _prevReq=_prevActiveModule(n);
+    if(_prevReq&&!state.completed.includes(_prevReq)){
+      alert(`🔒 Complétez le Module ${_prevReq} pour débloquer ce module.`);return;
+    }
   }
   _moduleLeave();_moduleActiveId=n;_moduleStartTs=Date.now();
   showSection('m'+n);
@@ -1982,15 +1974,24 @@ function goModule(n){
   if(n===4)initPareto();if(n===5)initKanban();
   if(n===6)initVSM();if(n===8)initSMED();
   if(n===9)initAmdecTable();
-  if(n>=1&&n<=9){_refreshExBadge(n);_showExValidateBtn(n);}
+  if(n>=1&&n<=10){_refreshExBadge(n);_showExValidateBtn(n);}
+  if(n>=2&&n<=10)_initExEmptyState(n);
   if(n===2)_refreshM2Badge();
 }
 function updateNav(){
+  const _cvActive=state.cvFilter&&state.cvRecoIds&&state.cvRecoIds.length>0;
   document.querySelectorAll('.nav-btn[data-module]').forEach(b=>{
     const n=+b.dataset.module;
     b.classList.remove('nav-locked','nav-done');
+    // En mode parcours CV : masquer les modules hors recommandation (sauf déjà validés)
+    if(_cvActive&&!state.cvRecoIds.includes(n)&&!state.completed.includes(n)){
+      b.style.display='none';return;
+    }
+    b.style.display='';
     if(state.completed.includes(n))b.classList.add('nav-done');
-    else if(n>1&&!state.completed.includes(n-1))b.classList.add('nav-locked');
+    else if(!isModuleActive(n))b.classList.add('nav-locked');
+    else if(_cvActive){const prevId=_prevCVModule(state.cvRecoIds,n);if(prevId!=null&&!state.completed.includes(prevId))b.classList.add('nav-locked');}
+    else{const _p=_prevActiveModule(n);if(_p&&!state.completed.includes(_p))b.classList.add('nav-locked');}
   });
   const done=state.completed.length;
   document.getElementById('globalBadge').textContent=done+' / 11 modules';
@@ -2006,19 +2007,34 @@ function updateNav(){
 }
 
 /* ── Home Grid ── */
+function _prevCVModule(recoIds,currentId){const idx=recoIds.indexOf(currentId);if(idx<=0)return null;return recoIds[idx-1];}
+function cvApplyParcours(){state.cvFilter=true;state.cvRecoIds=(state.cvReco||[]).map(r=>r.id);save();closeCVModal();renderGrid();updateNav();}
+function cvClearFilter(){state.cvFilter=false;state.cvRecoIds=[];save();renderGrid();updateNav();}
 function renderGrid(){
   const g=document.getElementById('moduleGrid');g.innerHTML='';
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
-  MODULES.forEach(m=>{
+  const _cvActive=state.cvFilter&&state.cvRecoIds&&state.cvRecoIds.length>0;
+  if(_cvActive){
+    const banner=document.createElement('div');
+    banner.style.cssText='grid-column:1/-1;background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #7c3aed;border-radius:12px;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.2rem;';
+    banner.innerHTML=`<div style="font-size:.8rem;color:#4c1d95;font-weight:700;">🎯 Parcours CV actif — ${state.cvRecoIds.length} modules sélectionnés pour votre profil</div><button class="btn btn-ghost btn-sm" onclick="cvClearFilter()" style="font-size:.72rem;flex-shrink:0;color:#6b7280;">✕ Voir tous les modules</button>`;
+    g.appendChild(banner);
+  }
+  const modsToShow=_cvActive
+    ?state.cvRecoIds.map(id=>MODULES.find(m=>m.id===id)).filter(Boolean).filter(m=>isModuleActive(m.id))
+    :MODULES.filter(m=>isModuleActive(m.id));
+  modsToShow.forEach((m,visIdx)=>{
     const done=state.completed.includes(m.id);
-    const locked=m.id>1&&!state.completed.includes(m.id-1);
+    let locked;
+    if(_cvActive){const prevId=_prevCVModule(state.cvRecoIds,m.id);locked=prevId!=null&&!state.completed.includes(prevId);}
+    else{const prev=_prevActiveModule(m.id);locked=prev!=null&&!state.completed.includes(prev);}
     const score=state.scores[m.id]!==undefined?state.scores[m.id]:null;
     const d=document.createElement('div');
     d.className='mod-card c'+m.id+(locked?' mod-locked':'')+(done?' mod-done':'');
     d.innerHTML=`
       <div class="mod-card-top">
         <div>
-          <div class="mod-num">Module ${m.id}</div>
+          <div class="mod-num">Module ${visIdx+1}</div>
           <span class="mod-status-chip ${done?'chip-done':locked?'chip-locked':'chip-open'}">${done?'✓ Validé':locked?'🔒 Verrouillé':'→ Disponible'}</span>
         </div>
         <div class="mod-icon-wrap">${m.icon}</div>
@@ -2032,12 +2048,20 @@ function renderGrid(){
     if(!locked)d.onclick=()=>goModule(m.id);
     g.appendChild(d);
   });
+  getCustomModules().filter(cm=>cm.active!==false).forEach((cm,i)=>{
+    const d=document.createElement('div');
+    d.className='mod-card c-custom';
+    d.style.cssText='border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#f3e8ff);';
+    d.innerHTML=`<div class="mod-card-top"><div><div class="mod-num" style="color:#7c3aed;">Module +${i+1}</div><span class="mod-status-chip chip-open">→ Disponible</span></div><div class="mod-icon-wrap">${cm.icone||'🧩'}</div></div><div class="mod-card-body"><h3>${cm.titre}</h3><p>${cm.desc||''}</p><div style="font-size:.68rem;color:#94a3b8;margin-top:.3rem;">⏱️ ${cm.duree||'~20 min'}</div></div>`;
+    d.onclick=()=>goCustomModule(i);
+    g.appendChild(d);
+  });
 }
 
 /* ── Validation ── */
 const _moduleNames={1:'Cycle PDCA',2:'Méthode 5S',3:'Diagramme Ishikawa',4:'Analyse de Pareto',5:'Tableau Kanban',6:'Value Stream Mapping',7:'Cartes de contrôle SPC',8:'SMED',9:'AMDEC/FMEA',10:'Projet Intégré Lean',11:'Quiz Final'};
-const _MODULES_WITH_LEVELS=[1,2,3,4,5,6,7,8,9];
-function validateModule(n,scoreFn){
+const _MODULES_WITH_LEVELS=[1,2,3,4,5,6,7,8,9,10];
+async function validateModule(n,scoreFn){
   if(_MODULES_WITH_LEVELS.includes(n)){
     const levDone=(state.exLevels||{})[n]||0;
     if(levDone<3){
@@ -2055,9 +2079,15 @@ function validateModule(n,scoreFn){
       return;
     }
   }
-  const score=scoreFn();
+  // Show loading state while score is computed (may be async AI evaluation)
+  const _el=document.getElementById('m'+n);
+  let _loadBox=_el?.querySelector('.score-result');
+  if(!_loadBox){_loadBox=document.createElement('div');_el?.querySelector('.ccard:last-child')?.appendChild(_loadBox);}
+  _loadBox.className='score-result';
+  _loadBox.innerHTML='<div style="display:flex;align-items:center;gap:.7rem;padding:.4rem 0;"><div class="ai-spinner"></div><span style="font-size:.82rem;color:#6b7280;">Évaluation IA en cours — analyse du contenu de vos réponses…</span></div>';
+  const score=Math.round(await Promise.resolve(scoreFn()));
   state.scores[n]=score;
-  const minScore=n===11?70:60;
+  const minScore=getThreshold(n);
   const pass=score>=minScore;
   if(pass&&!state.completed.includes(n)){state.completed.push(n);state.completed.sort((a,b)=>a-b);}
   save();updateNav();
@@ -2078,6 +2108,7 @@ function validateModule(n,scoreFn){
       ${pass&&n<11?`<div style="font-size:.8rem;color:var(--green);margin-top:.3rem;font-weight:700;">🔓 Module ${n+1} débloqué !</div>`:''}
     </div>`;
   if(pass&&n===11)showCertificate();
+  if(!pass)tryAdaptiveRemediation(n,score,minScore);
 }
 
 /* ── AI Text Formatter ── */
@@ -2167,6 +2198,7 @@ const PDCA_FALLBACKS=[
 let currentPDCAProblem=null;
 
 function generatePDCAProblem(){
+  stopExTimer();
   const key=getKey();
   const card=document.getElementById('pdcaProblemCard');
   card.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du problème...</div><div class="ai-loading-text">L\'IA prépare un scénario industriel réaliste...</div></div>';
@@ -2179,21 +2211,33 @@ function generatePDCAProblem(){
     const pool=PDCA_FALLBACKS.filter(f=>!f.difficulte||f.difficulte===lv.label)||PDCA_FALLBACKS;
     const prob=(pool.length?pool:PDCA_FALLBACKS)[Math.floor(Math.random()*(pool.length||PDCA_FALLBACKS.length))];
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
-    setTimeout(()=>{renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);},700);
+    setTimeout(()=>{
+      renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);
+      const _st1=document.getElementById('genExStatusM1');
+      if(_st1)_st1.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Problème PDCA <b>${lv.label}</b> prêt</div><div id="exTimerM1"><span style="font-size:.72rem;color:#9ca3af;">⏱️ calcul…</span></div><button class="btn btn-ghost btn-sm" onclick="generatePDCAProblem()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau</button></div>`;
+      startExTimer(1,_exDefaultMins(1,lv.idx));
+    },700);
     return;
   }
-  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
-  fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600})})
+  const _pdcaSeed=Math.floor(Math.random()*99999);
+  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\n[Variation #${_pdcaSeed} — entreprise fictive ORIGINALE, problème DIFFÉRENT des précédents.]\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
+  fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:1.0})})
   .then(r=>r.json()).then(data=>{
     const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
     if(!m)throw new Error();
     const prob=JSON.parse(m[0]);
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
     renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);
+    const _st1=document.getElementById('genExStatusM1');
+    if(_st1)_st1.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Problème PDCA <b>${lv.label}</b> généré</div><div id="exTimerM1"><span style="font-size:.72rem;color:#9ca3af;">⏱️ calcul…</span></div><button class="btn btn-ghost btn-sm" onclick="generatePDCAProblem()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau</button></div>`;
+    _estimateExTime(key,prob,1,lv).then(mins=>startExTimer(1,mins));
   }).catch(()=>{
     const prob=PDCA_FALLBACKS[Math.floor(Math.random()*PDCA_FALLBACKS.length)];
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
     renderProblemCard(prob);showPDCAForm();_showExValidateBtn(1);
+    const _st1b=document.getElementById('genExStatusM1');
+    if(_st1b)_st1b.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Problème PDCA <b>${lv.label}</b> prêt</div><div id="exTimerM1"><span style="font-size:.72rem;color:#9ca3af;">⏱️ calcul…</span></div><button class="btn btn-ghost btn-sm" onclick="generatePDCAProblem()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau</button></div>`;
+    _estimateExTime(key,prob,1,lv).then(mins=>startExTimer(1,mins)).catch(()=>startExTimer(1,_exDefaultMins(1,lv.idx)));
   });
 }
 
@@ -2333,6 +2377,55 @@ function scorePDCA(){
     total+=s*f.w/100;
   });
   return Math.max(state.scores[1]||0,Math.round(total));
+}
+
+async function scorePDCAWithAI(){
+  const key=getKey();
+  if(!key)return scorePDCA();
+  const p=state.pdca||{};
+  const problem=state.currentPDCAProblem||currentPDCAProblem;
+  const problemTitle=problem?(problem.titre||problem.probleme||'Exercice PDCA général'):'Exercice PDCA général';
+  const problemCtx=problem?(problem.contexte||problem.description||''):'';
+  const fieldDefs=[
+    {key:'plan1',desc:'Objectif SMART (PLAN)',max:25,val:p.plan1||''},
+    {key:'plan2',desc:'Actions prévues (PLAN)',max:15,val:p.plan2||''},
+    {key:'do1',desc:'Actions réalisées (DO)',max:20,val:p.do1||''},
+    {key:'do2',desc:'Ressources mobilisées (DO)',max:10,val:p.do2||''},
+    {key:'check1',desc:'Résultats mesurés (CHECK)',max:15,val:p.check1||''},
+    {key:'check2',desc:'KPIs utilisés (CHECK)',max:5,val:p.check2||''},
+    {key:'act1',desc:'Standardisation (ACT)',max:7,val:p.act1||''},
+    {key:'act2',desc:'Prochain cycle PDCA (ACT)',max:3,val:p.act2||''}
+  ];
+  const hasContent=fieldDefs.some(f=>f.val.trim().length>3);
+  if(!hasContent)return 0;
+  const prompt=`Tu es un formateur Lean/Six Sigma expert. Évalue la réponse PDCA ci-dessous.
+
+PROBLÈME POSÉ : "${problemTitle}" — ${problemCtx.slice(0,250)}
+
+RÉPONSES DE L'ÉTUDIANT :
+${fieldDefs.map(f=>`• ${f.desc} (max ${f.max}pts) : "${f.val}"`).join('\n')}
+
+RÈGLES D'ÉVALUATION STRICTES :
+1. Charabia, lettres aléatoires, texte sans sens = 0 pts pour ce champ
+2. Hors-sujet total (pas de rapport avec le problème) = 0-2 pts max
+3. Réponse pertinente mais vague ou incomplète = 30-60% du max
+4. Réponse correcte et précise par rapport au problème = 70-100% du max
+5. La longueur ne compte PAS — une phrase précise vaut plus qu'un paragraphe vague
+
+Réponds UNIQUEMENT avec ce JSON (aucun texte avant ou après) :
+{"plan1":X,"plan2":X,"do1":X,"do2":X,"check1":X,"check2":X,"act1":X,"act2":X}
+où X est le score numérique entre 0 et le max de chaque champ.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:120,temperature:0.1})});
+    if(!resp.ok)return scorePDCA();
+    const data=await resp.json();
+    const text=data.choices?.[0]?.message?.content||'';
+    const m=text.match(/\{[\s\S]*?\}/);
+    if(!m)return scorePDCA();
+    const sc=JSON.parse(m[0]);
+    const total=fieldDefs.reduce((sum,f)=>sum+Math.min(f.max,Math.max(0,parseFloat(sc[f.key])||0)),0);
+    return Math.min(100,Math.round(total));
+  }catch(e){return scorePDCA();}
 }
 
 function showPDCACorrection(){
@@ -2809,7 +2902,7 @@ function initIshikawa(){
     c.appendChild(d);
   });
   const effEl=document.getElementById('ishiEffect');
-  if(effEl&&!effEl.value)effEl.value='Taux de rebuts de 8% — Pièces aéronautiques non conformes (PRECISION MAROC)';
+  if(effEl&&!effEl.value)effEl.value='';
   renderIshiTags();
 }
 function addIshiCause(cat){
@@ -2882,6 +2975,52 @@ function scoreIshikawa(){
   const rootCauses=(document.getElementById('ishiRootCauses')?.value||'').trim();
   if(rootCauses.length>30)s+=15;
   return Math.min(100,s);
+}
+
+async function scoreIshikawaWithAI(){
+  const key=getKey();
+  if(!key)return scoreIshikawa();
+  const effect=(document.getElementById('ishiEffect')?.value||'').trim();
+  const rootCauses=(document.getElementById('ishiRootCauses')?.value||'').trim();
+  const rows=window._ishiPrioRows||[];
+  // Collect all causes
+  const causesSummary=ISHI_CATS.map(cat=>{const causes=ishiData[cat]||[];return causes.length?`${cat}: ${causes.join(', ')}`:null;}).filter(Boolean).join('\n');
+  const totalCauses=ISHI_CATS.reduce((s,c)=>s+(ishiData[c]||[]).length,0);
+  if(totalCauses===0&&!effect)return 0;
+  const prompt=`Tu es un formateur Lean Six Sigma. Évalue cet exercice Ishikawa d'un étudiant.
+
+PROBLÈME DÉCRIT PAR L'ÉTUDIANT (max 15pts) : "${effect}"
+CAUSES IDENTIFIÉES (max 55pts, ~8pts par cause pertinente) :
+${causesSummary||'Aucune cause'}
+Total : ${totalCauses} cause(s)
+CAUSES RACINES RÉDIGÉES (max 15pts) : "${rootCauses}"
+MATRICE CRITICITÉ (max 15pts) : ${rows.length} ligne(s) analysée(s)
+
+RÈGLES D'ÉVALUATION :
+- Charabia, lettres sans sens, texte incohérent = 0 pts
+- Problème vague mais compréhensible = 5-10 pts
+- Causes hors-sujet ou inventées = 0-2 pts par cause
+- Causes industriellement plausibles = 6-8 pts par cause (max 55 total)
+- Causes racines gibberish = 0 pts / pertinentes = 10-15 pts
+- Matrice criticité : auto-calculé séparément (${rows.length>=3?15:0} pts)
+
+Réponds UNIQUEMENT avec ce JSON :
+{"effet":X,"causes_score":X,"racines":X}
+où causes_score est entre 0 et 55, effet entre 0 et 15, racines entre 0 et 15.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:80,temperature:0.1})});
+    if(!resp.ok)return scoreIshikawa();
+    const data=await resp.json();
+    const text=data.choices?.[0]?.message?.content||'';
+    const m=text.match(/\{[\s\S]*?\}/);
+    if(!m)return scoreIshikawa();
+    const sc=JSON.parse(m[0]);
+    const matiereScore=Math.min(15,Math.max(0,parseFloat(sc.effet)||0));
+    const causesScore=Math.min(55,Math.max(0,parseFloat(sc.causes_score)||0));
+    const racinesScore=Math.min(15,Math.max(0,parseFloat(sc.racines)||0));
+    const critiqScore=rows.length>=3?15:0;
+    return Math.min(100,Math.round(matiereScore+causesScore+racinesScore+critiqScore));
+  }catch(e){return scoreIshikawa();}
 }
 
 async function analyzeIshikawa(){
@@ -3495,6 +3634,7 @@ function getExLevel(modId){
   return _EX_LEVELS[Math.min(completed,2)];
 }
 function completeExLevel(modId){
+  stopExTimer();
   if(!state.exLevels)state.exLevels={};
   const current=state.exLevels[modId]||0;
   if(current>=3){_refreshExBadge(modId);return;}
@@ -3541,6 +3681,137 @@ function _refreshExBadge(modId){
   }
 }
 
+/* ══════════════════════════════════════════
+   EXERCISE TIMER — chronomètre par exercice
+══════════════════════════════════════════ */
+let _exTimerId=null,_exTimerMod=null,_exTimerLeft=0,_exTimerTotal=300;
+
+function _exDefaultMins(modId,lvIdx){
+  if(modId===11)return 20;
+  const base={1:10,2:7,3:5,4:6,5:4,6:8,7:5,8:6,9:9,10:12}[modId]||5;
+  return Math.round(base*[1,1.6,2.2][lvIdx]||base);
+}
+
+function startExTimer(modId,minutes){
+  stopExTimer();
+  _exTimerMod=modId;
+  _exTimerLeft=Math.max(60,Math.round(minutes*60));
+  _exTimerTotal=_exTimerLeft;
+  _drawExTimer(modId);
+  _exTimerId=setInterval(()=>{
+    _exTimerLeft--;
+    if(_exTimerLeft<=0){stopExTimer();_onExTimeout(modId);}
+    else _drawExTimer(modId);
+  },1000);
+}
+
+function stopExTimer(){
+  if(_exTimerId){clearInterval(_exTimerId);_exTimerId=null;}
+  _exTimerMod=null;
+}
+
+function _drawExTimer(modId){
+  const el=document.getElementById('exTimerM'+modId);if(!el)return;
+  const m=Math.floor(_exTimerLeft/60),s=_exTimerLeft%60;
+  const pct=_exTimerLeft/_exTimerTotal;
+  const color=pct>.5?'#059669':pct>.25?'#d97706':'#dc2626';
+  const ring=Math.round(pct*100);
+  el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:${color}12;border:1.5px solid ${color}40;border-radius:20px;padding:.22rem .65rem;">
+    <svg width="14" height="14" viewBox="0 0 36 36" style="flex-shrink:0;transform:rotate(-90deg);">
+      <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+      <circle cx="18" cy="18" r="15" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${Math.round(94.2*pct)} 94.2" stroke-linecap="round"/>
+    </svg>
+    <span style="font-weight:900;font-size:.78rem;color:${color};letter-spacing:.5px;font-variant-numeric:tabular-nums;">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>
+  </div>`;
+}
+
+async function _onExTimeout(modId){
+  if(modId===11){
+    const timerEl=document.getElementById('exTimerM11');
+    if(timerEl)timerEl.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:20px;padding:.22rem .65rem;font-size:.78rem;font-weight:800;color:#dc2626;">⏰ Temps écoulé !</div>`;
+    await new Promise(r=>setTimeout(r,1500));
+    submitQuiz();
+    return;
+  }
+  const statusEl=document.getElementById('genExStatusM'+modId);
+  if(statusEl)statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:.5rem .8rem;margin-top:.3rem;"><span style="font-size:1rem;">⏰</span><div><div style="font-weight:800;font-size:.8rem;color:#dc2626;">Temps écoulé !</div><div style="font-size:.75rem;color:#6b7280;">Génération d'un nouvel exercice dans 2 secondes…</div></div></div>`;
+  await new Promise(r=>setTimeout(r,2000));
+  if(modId===1)generatePDCAProblem();
+  else if(modId===2)generateModule2Exercise();
+  else if(modId===9)generateAmdecExercise();
+  else generateModuleExercise(modId);
+}
+
+/* ── idem pour modules custom ── */
+let _exTimerCustomId=null,_exTimerCustomIdx=null,_exTimerCustomLeft=0,_exTimerCustomTotal=300;
+
+function startExTimerCustom(i,minutes){
+  if(_exTimerCustomId){clearInterval(_exTimerCustomId);_exTimerCustomId=null;}
+  _exTimerCustomIdx=i;
+  _exTimerCustomLeft=Math.max(60,Math.round(minutes*60));
+  _exTimerCustomTotal=_exTimerCustomLeft;
+  _drawExTimerCustom(i);
+  _exTimerCustomId=setInterval(()=>{
+    _exTimerCustomLeft--;
+    if(_exTimerCustomLeft<=0){clearInterval(_exTimerCustomId);_exTimerCustomId=null;_onExTimeoutCustom(i);}
+    else _drawExTimerCustom(i);
+  },1000);
+}
+
+function _drawExTimerCustom(i){
+  const el=document.getElementById('exTimerCustom'+i);if(!el)return;
+  const m=Math.floor(_exTimerCustomLeft/60),s=_exTimerCustomLeft%60;
+  const pct=_exTimerCustomLeft/_exTimerCustomTotal;
+  const color=pct>.5?'#059669':pct>.25?'#d97706':'#dc2626';
+  el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:${color}12;border:1.5px solid ${color}40;border-radius:20px;padding:.22rem .65rem;">
+    <svg width="14" height="14" viewBox="0 0 36 36" style="flex-shrink:0;transform:rotate(-90deg);">
+      <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+      <circle cx="18" cy="18" r="15" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${Math.round(94.2*pct)} 94.2" stroke-linecap="round"/>
+    </svg>
+    <span style="font-weight:900;font-size:.78rem;color:${color};letter-spacing:.5px;font-variant-numeric:tabular-nums;">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>
+  </div>`;
+}
+
+let _customQuizTimerId=null,_customQuizTimerIdx=null,_customQuizTimerLeft=0,_customQuizTimerTotal=1;
+function startCustomQuizTimer(i,minutes){
+  stopCustomQuizTimer();
+  _customQuizTimerIdx=i;
+  _customQuizTimerLeft=Math.max(60,Math.round(minutes*60));
+  _customQuizTimerTotal=_customQuizTimerLeft;
+  _drawCustomQuizTimer(i);
+  _customQuizTimerId=setInterval(()=>{
+    _customQuizTimerLeft--;
+    if(_customQuizTimerLeft<=0){clearInterval(_customQuizTimerId);_customQuizTimerId=null;
+      const tel=document.getElementById('customQuizTimer'+i);
+      if(tel)tel.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:20px;padding:.22rem .65rem;font-size:.78rem;font-weight:800;color:#dc2626;">⏰ Temps écoulé !</div>`;
+      setTimeout(()=>submitCustomQuiz(),1500);
+    }else _drawCustomQuizTimer(i);
+  },1000);
+}
+function stopCustomQuizTimer(){if(_customQuizTimerId){clearInterval(_customQuizTimerId);_customQuizTimerId=null;}}
+function _drawCustomQuizTimer(i){
+  const el=document.getElementById('customQuizTimer'+i);if(!el)return;
+  const m=Math.floor(_customQuizTimerLeft/60),s=_customQuizTimerLeft%60;
+  const pct=_customQuizTimerLeft/_customQuizTimerTotal;
+  const color=pct>.5?'#059669':pct>.25?'#d97706':'#dc2626';
+  el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:${color}12;border:1.5px solid ${color}40;border-radius:20px;padding:.22rem .65rem;">
+    <svg width="14" height="14" viewBox="0 0 36 36" style="flex-shrink:0;transform:rotate(-90deg);">
+      <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+      <circle cx="18" cy="18" r="15" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${Math.round(94.2*pct)} 94.2" stroke-linecap="round"/>
+    </svg>
+    <span style="font-weight:900;font-size:.78rem;color:${color};letter-spacing:.5px;font-variant-numeric:tabular-nums;">${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</span>
+  </div>`;
+}
+async function _onExTimeoutCustom(i){
+  const feedEl=document.getElementById('customExFeedback'+i);
+  if(feedEl)feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:.5rem .8rem;"><span>⏰</span><div><div style="font-weight:800;font-size:.8rem;color:#dc2626;">Temps écoulé !</div><div style="font-size:.75rem;color:#6b7280;">Génération d'un nouvel exercice…</div></div></div>`;
+  await new Promise(r=>setTimeout(r,2000));
+  // Reset cached exercise for this level and regenerate
+  const mods=getCustomModules();const m=mods[i];
+  if(m&&m.exercices){const done=_getCustomLevDone(i);delete m.exercices[done];mods[i]=m;saveCustomModules(mods);}
+  showCustomExercise(i);
+}
+
 async function generateModuleExercise(modId){
   const key=getKey();
   const statusEl=document.getElementById('genExStatusM'+modId);
@@ -3578,12 +3849,17 @@ async function generateModuleExercise(modId){
     case 8:
       prompt=`Formateur Lean. Génère des TÂCHES SMED pour exercice changement de série. ${lvDesc}${domCtx}\nJSON uniquement:\n{"secteur":"...","entreprise":"Nom fictif","machine":"type machine","duree_actuelle":85,"objectif":40,"contexte":"2 phrases","taches":[{"nom":"Arrêt machine","dur":5,"type":"interne"},{"nom":"Préparation outil","dur":10,"type":"externe"}]}\nRègles: 8-11 tâches, dur en min (2-25), type UNIQUEMENT "interne" ou "externe". Somme ≈ duree_actuelle.`;
       break;
+    case 10:
+      prompt=`Formateur Lean senior. Génère un CAS INDUSTRIEL MULTI-PROBLÈMES pour projet de synthèse Lean/Six Sigma. ${lvDesc}${domCtx}\nJSON uniquement:\n{"secteur":"...","entreprise":"Nom fictif réaliste","probleme":"Texte narratif 5-7 phrases très précis avec chiffres concrets (%, heures, coûts). 3-4 problèmes industriels imbriqués nécessitant plusieurs outils Lean. Commence directement par la description sans introduction.","outils_pertinents":["PDCA","Pareto","Ishikawa"],"kpi1_v":"ex: 12%","kpi1_l":"Taux rebuts","kpi2_v":"ex: 4h","kpi2_l":"Arrêts/jour","kpi3_v":"ex: 180k€","kpi3_l":"Coûts qualité"}\nNiveaux: Débutant=2 problèmes simples 2-3 outils. Intermédiaire=3 problèmes liés 3-4 outils. Avancé=4+ problèmes complexes 5+ outils contraintes fortes.`;
+      break;
   }
+  const _seed=Math.floor(Math.random()*99999);
+  prompt+=`\n[Variation #${_seed} — génère un scénario ORIGINAL, entreprise et secteur différents des exercices précédents.]`;
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
       headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700})
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:750,temperature:1.0})
     });
     const rdata=await resp.json();
     if(!resp.ok)throw new Error(rdata.error?.message||'Erreur API '+resp.status);
@@ -3592,13 +3868,62 @@ async function generateModuleExercise(modId){
     if(!mm)throw new Error('Réponse IA invalide — pas de JSON');
     const ex=JSON.parse(mm[0]);
     _applyModuleExercise(modId,ex,lv);
-    statusEl.innerHTML='<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Scénario <b>'+lv.label+'</b> généré — Résolvez l\'exercice ci-dessous, puis validez ce niveau.</div>';
-    setTimeout(()=>{if(statusEl)statusEl.innerHTML='';},4000);
+    // Show timer placeholder while AI estimates time
+    statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;">
+      <div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Scénario <b>${lv.label}</b> généré — Résolvez l'exercice et validez ce niveau.</div>
+      <div id="exTimerM${modId}"><span style="font-size:.72rem;color:#9ca3af;">⏱️ calcul…</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="stopExTimer();generateModuleExercise(${modId})" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau</button>
+    </div>`;
     _showExValidateBtn(modId);
+    // Async AI time estimation — doesn't block UI
+    _estimateExTime(key,ex,modId,lv).then(mins=>startExTimer(modId,mins));
   }catch(e){
     statusEl.innerHTML=`<div class="alert alert-danger" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">❌ ${_escH(e.message)}</div>`;
   }
   if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
+}
+
+async function _estimateExTime(key,exContent,modId,lv){
+  const moduleDesc={
+    1:'PDCA — remplir 8 champs texte (Plan×2, Do×2, Check×2, Act×2) avec des réponses argumentées',
+    2:'5S — classifier visuellement 18 éléments par glisser-déposer dans la bonne catégorie (Seiri/Seiton/Seiso/Seiketsu/Shitsuke)',
+    3:'Ishikawa 5M — identifier et saisir des causes dans 5 catégories, rédiger les causes racines',
+    4:'Pareto — saisir des données, générer le diagramme, identifier les vitaux et rédiger un plan d\'action',
+    5:'Kanban — organiser des tâches dans les colonnes, définir la limite WIP, calculer le Takt Time',
+    6:'VSM — saisir les étapes du flux, calculer TVA et Lead Time, rédiger l\'état futur',
+    7:'SPC — analyser 20 mesures, tracer la carte de contrôle, détecter les violations des règles de Nelson',
+    8:'SMED — classer des tâches internes/externes, calculer le gain de temps et proposer des améliorations',
+    9:'AMDEC — remplir un tableau (composant, mode, effet, cause, G, O, D, IPR) pour au moins 4 lignes et proposer des actions correctives',
+    10:'Projet intégré Lean — lire un cas multi-problèmes, choisir 3-5 outils Lean et rédiger un plan d\'action détaillé',
+    11:'Quiz Final — répondre à 10 questions QCM à 4 options sur l\'ensemble des outils Lean/Six Sigma (lecture + réflexion + sélection par question)'
+  }[modId]||'exercice Lean';
+  const difficultyDesc={
+    0:'DÉBUTANT : situations claires et non ambiguës, peu de données, une seule bonne réponse évidente par élément → analyse rapide, rédaction courte',
+    1:'INTERMÉDIAIRE : contexte plus complexe, plusieurs données à croiser, certains éléments nécessitent une vraie réflexion → analyse approfondie, rédaction structurée',
+    2:'AVANCÉ : données ambiguës ou contradictoires, raisonnement expert requis, réponses approfondies et justifiées attendues → analyse critique longue, rédaction dense'
+  }[lv.idx]||'';
+  const exStr=typeof exContent==='string'?exContent:JSON.stringify(exContent).replace(/[{}"]/g,' ').replace(/,/g,' ').slice(0,700);
+  const prompt=`Tu es formateur Lean expert. Analyse cet exercice et estime le temps réaliste pour qu'un étudiant le complète.
+
+TYPE D'EXERCICE : ${moduleDesc}
+NIVEAU DE DIFFICULTÉ : ${difficultyDesc}
+CONTENU GÉNÉRÉ :
+${exStr}
+
+Calcule mentalement :
+- Temps lecture + compréhension du contexte et des données
+- Temps de réflexion et analyse selon la complexité réelle du contenu ci-dessus
+- Temps de saisie ou rédaction de toutes les réponses requises
+
+Réponds UNIQUEMENT avec un entier (minutes totales). Rien d'autre.`;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:8,temperature:0.1})});
+    const d=await r.json();
+    const raw=d.choices?.[0]?.message?.content?.trim()||'';
+    const parsed=parseInt(raw.match(/\d+/)?.[0]);
+    if(parsed>0)return Math.max(2,Math.min(35,parsed));
+  }catch(_){}
+  return _exDefaultMins(modId,lv.idx);
 }
 
 function _applyModuleExercise(modId,ex,lv){
@@ -3671,6 +3996,22 @@ function _applyModuleExercise(modId,ex,lv){
       if(ctx)ctx.innerHTML=buildCtx(`${ex.machine?'Machine : '+ex.machine+'. ':''}Durée actuelle : ${ex.duree_actuelle||tot} min. Objectif SMED : <${ex.objectif||'?'} min. ${ex.contexte||''}`,[{v:(ex.duree_actuelle||tot)+' min',l:'Durée actuelle',c:'#ef4444'},{v:'<'+(ex.objectif||'?')+' min',l:'Objectif',c:'#059669'}]);
       break;
     }
+    case 10:{
+      const pt=document.getElementById('capstoneProblemText');
+      const pc=document.getElementById('capstoneProblemCard');
+      const tc=document.getElementById('capstoneToolsCard');
+      const jc=document.getElementById('capstoneJustifCard');
+      if(pt)pt.innerHTML=buildCtx(ex.probleme||ex.description||'',[{v:ex.kpi1_v,l:ex.kpi1_l,c:'#ef4444'},{v:ex.kpi2_v,l:ex.kpi2_l,c:'#d97706'},{v:ex.kpi3_v,l:ex.kpi3_l,c:'#7c3aed'}]);
+      if(pc)pc.style.display='block';
+      if(tc)tc.style.display='block';
+      if(jc)jc.style.display='block';
+      document.querySelectorAll('#capstoneToolGrid input[type=checkbox]').forEach(cb=>cb.checked=false);
+      const justifEl=document.getElementById('capstoneJustif');if(justifEl)justifEl.value='';
+      const planEl=document.getElementById('capstonePlan');if(planEl)planEl.value='';
+      updateCapstoneScore();
+      _showExValidateBtn(10);
+      break;
+    }
   }
 }
 
@@ -3688,20 +4029,30 @@ const FALLBACK=[
   {q:"'Kaizen' désigne :",opts:["Un contrôle qualité","L'amélioration continue","Une méthode de planification","Un type d'audit"],correct:1}
 ];
 async function generateQuiz(){
+  stopExTimer();
   const key=getKey();
   document.getElementById('quizArea').innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du quiz IA...</div></div>';
-  if(!key){quizData=FALLBACK;renderQuiz();return;}
+  if(!key){quizData=FALLBACK;renderQuiz();startExTimer(11,20);return;}
   const domainHintQuiz=state.domain?`\nL'étudiant travaille dans le secteur ${state.domain.secteur} (${state.domain.poste||'ingénieur'} chez ${state.domain.entreprise||'une entreprise'}). Inclus 2 à 3 questions avec des mises en situation concrètes dans CE secteur.`:'';
-  const prompt=`Génère 10 questions QCM en français sur Lean/Six Sigma/PDCA/5S/Ishikawa/Pareto/Kanban/VSM/SPC/SMED pour ingénieurs.${domainHintQuiz} JSON uniquement:\n[{"q":"?","opts":["A","B","C","D"],"correct":0},...]\n10 questions exactes, index correct 0-based.`;
+  const _quizSeed=Math.floor(Math.random()*99999);
+  const prompt=`Génère 10 questions QCM en français sur Lean/Six Sigma/PDCA/5S/Ishikawa/Pareto/Kanban/VSM/SPC/SMED pour ingénieurs.${domainHintQuiz} [Variation #${_quizSeed} — questions ORIGINALES, différentes des sessions précédentes.] JSON uniquement:\n[{"q":"?","opts":["A","B","C","D"],"correct":0},...]\n10 questions exactes, index correct 0-based.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500,temperature:1.0})});
     const data=await resp.json();const text=data.choices[0].message.content;
     const m=text.match(/\[[\s\S]*\]/);
-    quizData=m?JSON.parse(m[0]):FALLBACK;renderQuiz();
-  }catch(e){quizData=FALLBACK;renderQuiz();}
+    quizData=m?JSON.parse(m[0]):FALLBACK;
+  }catch(e){quizData=FALLBACK;}
+  renderQuiz();
+  const qSummary=quizData.slice(0,5).map((q,i)=>`Q${i+1}: ${q.q.slice(0,80)}`).join(' | ');
+  const lv11={idx:1,label:'Quiz Final'};
+  _estimateExTime(key,{questions:qSummary,nb:quizData.length},11,lv11).then(mins=>startExTimer(11,mins)).catch(()=>startExTimer(11,20));
 }
 function renderQuiz(){
   quizAnswers={};let html='';
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding:.5rem .8rem;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;">
+    <div style="font-size:.8rem;font-weight:700;color:#374151;">🎓 Quiz Final — ${quizData.length} questions</div>
+    <div id="exTimerM11"><span style="font-size:.72rem;color:#9ca3af;">⏱️ Démarrage…</span></div>
+  </div>`;
   quizData.forEach((q,qi)=>{
     html+=`<div class="q-block"><div class="q-num">Question ${qi+1} / ${quizData.length}</div><div class="q-text">${q.q}</div>`;
     q.opts.forEach((opt,oi)=>{html+=`<div class="q-opt" id="qo-${qi}-${oi}" onclick="pickQ(${qi},${oi})">${opt}</div>`;});
@@ -3715,6 +4066,7 @@ function pickQ(qi,oi){
   quizData[qi].opts.forEach((_,i)=>document.getElementById(`qo-${qi}-${i}`).classList.toggle('selected',i===oi));
 }
 function submitQuiz(){
+  stopExTimer();
   let ok=0;
   quizData.forEach((q,qi)=>{
     const ans=quizAnswers[qi];
@@ -3802,6 +4154,7 @@ function updateAmdecSummary(){
   </div>`;
 }
 async function generateAmdecExercise(){
+  stopExTimer();
   const btn=document.getElementById('genExBtnM9');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const ctx=document.getElementById('amdecExContext');if(ctx)ctx.innerHTML='<div class="ai-loading">🤖 Génération d\'un contexte industriel…</div>';
   const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
@@ -3812,15 +4165,19 @@ async function generateAmdecExercise(){
     'INTERMÉDIAIRE — Secteur technique (automobile, logistique). Plusieurs composants interagissants, causes multiples à identifier.',
     'AVANCÉ — Secteur exigeant (aéronautique, pharmaceutique). Défaillances ambiguës, effets en cascade, enjeux sécurité critiques.'
   ][lv.idx];
-  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction.`;
+  const _amdecSeed=Math.floor(Math.random()*99999);
+  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction. [Variation #${_amdecSeed} — scénario ORIGINAL, entreprise et secteur différents des précédents.]`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:.8})});
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:1.0})});
     const data=await res.json();
     const txt=data.choices?.[0]?.message?.content||'';
     const lv=getExLevel(9);
     if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.4rem;">${lv.stars} Exercice niveau ${lv.label}</div>${formatAIText(txt)}</div>`;
     amdecRows=[];renderAmdecTable();
+    const _st9=document.getElementById('genExStatusM9');
+    if(_st9)_st9.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Contexte AMDEC <b>${lv.label}</b> généré — Remplissez le tableau, puis validez.</div><div id="exTimerM9"><span style="font-size:.72rem;color:#9ca3af;">⏱️ calcul…</span></div><button class="btn btn-ghost btn-sm" onclick="generateAmdecExercise()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau</button></div>`;
     _showExValidateBtn(9);
+    _estimateExTime(key,{contexte:txt},9,lv).then(mins=>startExTimer(9,mins));
   }catch(e){if(ctx)ctx.innerHTML='<div class="alert alert-warning">Erreur IA. Vérifiez votre clé.</div>';}
   if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
 }
@@ -3853,7 +4210,8 @@ function scoreAmdec(){
 }
 
 /* ══ M10 – CAPSTONE ══ */
-async function generateCapstoneProblem(){
+function generateCapstoneProblem(){generateModuleExercise(10);}
+async function _generateCapstoneProblemLegacy(){
   const btn=document.querySelector('#m10 .btn-primary');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const statusEl=document.getElementById('capstoneGenStatus');if(statusEl)statusEl.textContent='';
   const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
@@ -3920,6 +4278,56 @@ function scoreCapstone(){
   if(justif.length>80)s+=20;if(justif.length>200)s+=10;
   if(plan.length>100)s+=15;if(plan.length>300)s+=10;
   return Math.min(100,s);
+}
+
+async function scoreCapstoneWithAI(){
+  const key=getKey();
+  const tools=[...document.querySelectorAll('#capstoneToolGrid input[type=checkbox]:checked')].map(cb=>cb.closest('label')?.textContent?.trim()||'');
+  const justif=(document.getElementById('capstoneJustif')?.value||'').trim();
+  const plan=(document.getElementById('capstonePlan')?.value||'').trim();
+  const prob=(document.getElementById('capstoneProblemText')?.textContent||'').slice(0,400);
+  // Tool selection is always objective (checkbox), only evaluate text fields with AI
+  let toolScore=0;
+  const toolCount=tools.length;
+  if(toolCount>=2)toolScore+=20;if(toolCount>=3)toolScore+=10;if(toolCount>=4)toolScore+=5;
+  const hasText=(justif.length>5||plan.length>5);
+  if(!key||!hasText)return scoreCapstone();
+  const prompt=`Tu es un expert Lean Six Sigma. Évalue la réponse d'un étudiant pour un cas industriel.
+
+CAS INDUSTRIEL : "${prob}"
+
+OUTILS LEAN CHOISIS : ${tools.join(', ')||'aucun'} (${toolCount} outil(s))
+
+JUSTIFICATION DES OUTILS (max 30pts) :
+"${justif}"
+
+PLAN D'ACTION (max 25pts) :
+"${plan}"
+
+RÈGLES D'ÉVALUATION :
+- Charabia, texte sans rapport, lettres aléatoires = 0 pts
+- Justification vague ou générique sans lien avec le cas = 0-10 pts
+- Justification pertinente liée au cas industriel = 15-25 pts
+- Très bonne justification avec arguments techniques = 26-30 pts
+- Plan d'action flou ou hors-sujet = 0-8 pts
+- Plan réaliste et cohérent avec le cas = 12-20 pts
+- Plan détaillé et complet = 21-25 pts
+
+Réponds UNIQUEMENT avec ce JSON :
+{"justif":X,"plan":X}
+où X est le score entre 0 et le maximum indiqué.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:80,temperature:0.1})});
+    if(!resp.ok)return scoreCapstone();
+    const data=await resp.json();
+    const text=data.choices?.[0]?.message?.content||'';
+    const m=text.match(/\{[\s\S]*?\}/);
+    if(!m)return scoreCapstone();
+    const sc=JSON.parse(m[0]);
+    const probBonus=(prob.length>50)?10:0;
+    const total=probBonus+toolScore+Math.min(30,Math.max(0,parseFloat(sc.justif)||0))+Math.min(25,Math.max(0,parseFloat(sc.plan)||0));
+    return Math.min(100,Math.round(total));
+  }catch(e){return scoreCapstone();}
 }
 
 /* ══ CERTIFICATE ══ */
@@ -3989,13 +4397,15 @@ document.addEventListener('keydown',function(e){
 });
 
 function admTab(name){
-  ['roster','import','access'].forEach(t=>{
+  ['roster','import','access','gen'].forEach(t=>{
     const tab=document.getElementById('adm-tab-'+t);
     const panel=document.getElementById('adm-panel-'+t);
     if(tab)tab.classList.toggle('active',t===name);
     if(panel)panel.style.display=t===name?'block':'none';
   });
   if(name==='roster')renderRoster();
+  if(name==='access')renderAdminAccess();
+  if(name==='gen')renderCustomModuleList();
 }
 
 function getRoster(){return JSON.parse(localStorage.getItem('greenlab_admin_roster')||'[]');}
@@ -4303,8 +4713,43 @@ ${txt.slice(0,4000)}`;
     console.error(e);
   }
 }
-function cvStartModules(){closeCVModal();}
+function cvStartModules(){
+  const key=getKey();
+  const recoPanel=document.getElementById('cvRecoPanel');
+  if(state.domain&&key&&recoPanel){
+    recoPanel.style.display='block';
+    recoPanel.innerHTML='<div class="ai-wrap" style="margin:0;"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse de votre profil pour personnaliser votre parcours…</div></div>';
+    genererRecommandationCV().then(reco=>{
+      if(!reco||!reco.length){closeCVModal();return;}
+      state.cvReco=reco;save();
+      recoPanel.innerHTML=`<div style="background:#faf5ff;border:2px solid #7c3aed;border-radius:12px;padding:.9rem 1rem;">
+        <div style="font-weight:800;color:#4c1d95;font-size:.85rem;margin-bottom:.6rem;">🎯 Parcours recommandé pour votre profil</div>
+        ${reco.slice(0,7).map((r,i)=>{const mod=MODULES.find(m=>m.id===r.id);return mod?`<div style="display:flex;gap:.5rem;align-items:flex-start;margin-bottom:.4rem;"><span style="font-size:.68rem;font-weight:900;color:#fff;background:#7c3aed;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</span><div><div style="font-size:.77rem;font-weight:800;color:#4c1d95;">${mod.icon} M${mod.id} — ${mod.name}</div><div style="font-size:.72rem;color:#6b7280;margin-top:.1rem;">${_escH(r.justification||'')}</div></div></div>`:'';}).join('')}
+        <div style="display:flex;gap:.5rem;margin-top:.8rem;">
+          <button class="btn btn-purple btn-sm" onclick="cvApplyParcours()" style="flex:2;">✅ Suivre ce parcours</button>
+          <button class="btn btn-ghost btn-sm" onclick="cvClearFilter();closeCVModal();" style="flex:1;font-size:.72rem;">Ordre normal</button>
+        </div>
+      </div>`;
+    });
+    return;
+  }
+  closeCVModal();
+}
 function cvSkip(){state.domain=null;save();closeCVModal();}
+
+async function genererRecommandationCV(){
+  const key=getKey();
+  if(!key||!state.domain)return null;
+  const actifNames=MODULES.filter(m=>isModuleActive(m.id)).map(m=>`M${m.id}: ${m.name}`).join(', ');
+  const prompt=`Tu es un conseiller pédagogique Lean/Six Sigma. Voici le profil d'un étudiant :\n- Poste : ${state.domain.poste||'ingénieur'}\n- Entreprise : ${state.domain.entreprise||'industrie'}\n- Secteur : ${state.domain.secteur||'industrie'}\n- Contexte : ${state.domain.contexte||''}\n\nModules disponibles : ${actifNames}\n\nRecommande 7 modules prioritaires pour CE profil. JSON uniquement : [{"id":1,"justification":"une phrase"},...] (exactement 7 items, id = numéro du module parmi ceux disponibles)`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700})});
+    const data=await resp.json();
+    const text=data.choices[0].message.content;
+    const m=text.match(/\[[\s\S]*\]/);
+    return m?JSON.parse(m[0]):null;
+  }catch(e){return null;}
+}
 
 /* ══ BADGES ══ */
 const BADGES=[
@@ -4440,6 +4885,7 @@ let fiveS_customItems=null,_m2LastEx=null;
 function getM2Level(){return getExLevel(2);}
 function _refreshM2Badge(){_refreshExBadge(2);}
 async function generateModule2Exercise(){
+  stopExTimer();
   const key=getKey();
   if(!key){alert('⚠️ Clé API requise dans l\'en-tête de la page.');return;}
   const btn=document.getElementById('genExBtnM2');
@@ -4450,15 +4896,17 @@ async function generateModule2Exercise(){
   const lvDescs=['Niveau DÉBUTANT : atelier avec des situations claires et non ambiguës, chaque item correspond évidemment à 1 seul S.','Niveau INTERMÉDIAIRE : atelier avec contexte détaillé mais certains items moins évidents (matériaux périmés mais encore partiellement utilisés, etc.).','Niveau AVANCÉ : certains items peuvent être ambigus (appartenir à 2 S), pas de contexte textuel évident — seulement le nom et la zone.'];
   const lvDesc=lvDescs[lv.idx];
   const domCtx=state.domain?` L'étudiant est ${state.domain.poste||'ingénieur'} dans le secteur ${state.domain.secteur||'industriel'} chez ${state.domain.entreprise||'une entreprise'}. Adapte le secteur et les matériaux à ce contexte métier.`:'';
+  const _m2Seed=Math.floor(Math.random()*99999);
   const prompt=`Tu es expert Lean 5S. Génère un exercice de classification 5S pour un atelier industriel fictif.
 ${lvDesc}${domCtx}
+[Variation #${_m2Seed} — entreprise et secteur DIFFÉRENTS des exercices précédents, items originaux.]
 
 Réponds UNIQUEMENT avec un JSON valide (aucun texte avant ou après) :
 {"entreprise":"Nom","secteur":"secteur","contexte":"description courte 2 phrases","items":[{"id":"a","emoji":"🔨","name":"Nom court","context":"Situation (1-2 phrases)","correct":"seiri","zone":"usinage"},{"id":"b",...},...]}
 
 Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri, seiton, seiso, seiketsu, shitsuke. Minimum 3 items par catégorie. Les zones doivent être parmi : usinage, stockage, controle, allee, bureau, vestiaire.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:0.8})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:1.0})});
     if(!resp.ok)throw new Error((await resp.json()).error?.message||resp.statusText);
     const data=await resp.json();
     const raw=data.choices[0].message.content;
@@ -4468,12 +4916,12 @@ Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri,
     const VALID_S=['seiri','seiton','seiso','seiketsu','shitsuke'];
     ex.items=ex.items.filter(it=>VALID_S.includes(it.correct));
     if(ex.items.length<12)throw new Error('Trop peu d\'items valides');
-    if(status)status.innerHTML=`<div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;">✅ Atelier <b>${lv.label}</b> généré — Classifiez les éléments puis validez ce niveau.</div>`;
-    setTimeout(()=>{if(status)status.innerHTML='';},4000);
+    if(status)status.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;"><div class="alert alert-success" style="margin:0;padding:.3rem .7rem;font-size:.76rem;flex:1;">✅ Atelier 5S <b>${lv.label}</b> généré — Classifiez les éléments puis validez.</div><div id="exTimerM2"><span style="font-size:.72rem;color:#9ca3af;">⏱️ calcul…</span></div><button class="btn btn-ghost btn-sm" onclick="generateModule2Exercise()" style="font-size:.75rem;white-space:nowrap;flex-shrink:0;">🔄 Nouveau</button></div>`;
     _m2LastEx=ex;
     _applyM2Exercise(ex,lv);
     _showExValidateBtn(2);
     checkBadges();
+    _estimateExTime(key,ex,2,lv).then(mins=>startExTimer(2,mins));
   }catch(e){
     if(status)status.innerHTML=`<div style="font-size:.74rem;color:#dc2626;">❌ Erreur : ${_escH(e.message)}</div>`;
   }finally{
@@ -4955,6 +5403,667 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(rb)rb.textContent=Object.keys(state.feedbacks||{}).length;
 });
 
+/* ══════════════════════════════════════════
+   F1 — REMÉDIATION ADAPTATIVE
+══════════════════════════════════════════ */
+function tryAdaptiveRemediation(n,score,minScore){
+  const el=document.getElementById('m'+n);
+  if(!el)return;
+  let box=el.querySelector('.remediation-box');
+  if(!box){
+    box=document.createElement('div');
+    box.className='remediation-box';
+    box.style.cssText='margin-top:.9rem;';
+    const last=el.querySelector('.ccard:last-child');
+    if(last)last.after(box);else el.appendChild(box);
+  }
+  const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
+  const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
+  const color={'débutant':'#dc2626','intermédiaire':'#d97706','avancé avec lacunes':'#2563eb'}[niveau];
+  const modName=_moduleNames[n]||'ce module';
+  box.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.85rem 1.1rem;background:linear-gradient(135deg,#fafaf9,#fff7ed);border-radius:14px;border:1.5px solid ${color}45;">
+    <div>
+      <div style="font-size:.7rem;font-weight:800;color:${color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Cours personnalisé disponible — ${niveauLabel}</div>
+      <div style="font-size:.8rem;color:#6b7280;line-height:1.5;">Un cours IA adapté à votre niveau a été préparé pour vous aider à maîtriser <strong style="color:#374151;">${modName}</strong>.</div>
+    </div>
+    <button onclick="openRemediationPage(${n},${score},${minScore})" style="background:${color};color:#fff;border:none;border-radius:10px;padding:.6rem 1.2rem;font-weight:800;font-size:.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">📚 Voir mon cours personnalisé →</button>
+  </div>`;
+}
+
+function openRemediationPage(n,score,minScore){
+  const ov=document.getElementById('remediationOverlay');
+  if(!ov)return;
+  ov.style.display='flex';
+  document.body.style.overflow='hidden';
+  generateRemediationCourse(n,score,minScore);
+}
+
+function closeRemediationPage(){
+  const ov=document.getElementById('remediationOverlay');
+  if(ov)ov.style.display='none';
+  document.body.style.overflow='';
+}
+
+/* Contexte pédagogique précis par module — injecté dans le prompt du cours de rattrapage */
+const _REM_CTX={
+  1:{
+    concepts:'Objectif SMART (Spécifique Mesurable Atteignable Réaliste Temporel) | Plan = définir la cible + les actions | Do = exécuter EXACTEMENT ce qui était planifié | Check = mesurer les résultats avec des KPIs chiffrés | Act = standardiser si succès ou redéfinir le Plan si échec',
+    pitfalls:'1) Agir avant de Planifier (Do sans Plan) — 2) Objectif non SMART (ex: "améliorer la qualité" sans chiffre) — 3) Check sans KPI défini à l\'avance — 4) Ne pas standardiser à l\'étape ACT = le problème revient — 5) Confondre ACT (standardiser) avec DO (agir)',
+    formulas:'SMART = Spécifique + Mesurable + Atteignable + Réaliste + Temporel | Taux d\'amélioration = (Valeur finale - Valeur initiale) / Valeur initiale × 100%',
+    example:'Atelier PRECISION MAROC : 8% de rebuts sur CNC. Plan = objectif SMART "Réduire les rebuts de 8% à 3% en 3 mois par formation opérateurs + maintenance préventive". Do = sessions de formation + plan de maintenance. Check = mesure hebdomadaire du taux de rebuts (KPI). Act = si 3% atteint : standardisation de la procédure de maintenance.',
+    tools:'Rapport A3 | Fiche de suivi KPI | Tableau de bord | Diagramme de Gantt (Plan)'
+  },
+  2:{
+    concepts:'Seiri = TRIER — éliminer tout ce qui est inutile (étiquette rouge) | Seiton = RANGER — une place pour chaque chose, chaque chose à sa place | Seiso = NETTOYER ET INSPECTER — le nettoyage révèle les anomalies | Seiketsu = STANDARDISER — formaliser les règles en procédures visuelles | Shitsuke = MAINTENIR — discipline quotidienne et audits réguliers',
+    pitfalls:'1) Ranger des choses inutiles (faire Seiton avant Seiri) — 2) Confondre Seiso avec un simple nettoyage (Seiso = inspecter aussi) — 3) Faire le 5S une seule fois sans Seiketsu = rechute en 2 semaines — 4) Négliger Shitsuke = tout revient à l\'état initial — 5) Appliquer le 5S sans impliquer les opérateurs',
+    formulas:'Score 5S = Σ(points obtenus par S) / 5 × 100% | Surface récupérée (m²) = surface des éléments éliminés | Temps de recherche économisé (min/jour)',
+    example:'Zone usinage PRECISION MAROC : Seiri = tag rouge sur 8 marteaux inutilisés (18 mois sans usage) + fûts d\'huile périmés. Seiton = emplacement dédié pour chaque outil avec marquage sol. Seiso = nettoyage quotidien 5min des CNC révèle fuite huile M3. Seiketsu = affichage photo "avant/après" + check-list. Shitsuke = audit 5S hebdomadaire noté.',
+    tools:'Étiquette rouge (red tag) | Marquage au sol | Standard de nettoyage (fiche photo) | Grille d\'audit 5S (0-5 par S)'
+  },
+  3:{
+    concepts:'5 catégories obligatoires : Matière (matériaux, composants) | Méthode (procédures, gammes) | Main-d\'œuvre (compétences, formation) | Machines (équipements, maintenance) | Milieu (environnement, température, bruit) | L\'effet = le problème précis à résoudre | Causes racines = répondre à "Pourquoi ?" 5 fois (méthode 5 Pourquoi)',
+    pitfalls:'1) Moins de 3 causes par catégorie (analyse superficielle) — 2) Confondre cause et effet (écrire l\'effet comme cause) — 3) S\'arrêter à la cause apparente sans aller jusqu\'à la cause racine — 4) Oublier la catégorie Milieu (environnement physique souvent négligé) — 5) Ne pas prioriser les causes (toutes les mêmes poids)',
+    formulas:'Criticité cause = Fréquence × Impact (1-5 chacun) | Indice de priorité = Criticité / Σ(toutes criticités) × 100%',
+    example:'PRECISION MAROC 8% rebuts : Effet = "Taux de rebuts 8% sur pièces aluminium aéronautique". Matière = "Alliages Al hors tolérance" + "Lubrifiant contaminé". Méthode = "Procédures CNC non affichées" + "Réglages non standardisés". Main-d\'œuvre = "12 opérateurs sans formation 5S". Machines = "M7 en panne 8 mois" + "Fuite huile M3". Milieu = "Copeaux au sol" + "Instruments entassés". 5 Pourquoi sur "M7 en panne" → absence de maintenance préventive documentée.',
+    tools:'Diagramme en arête de poisson (dessin) | Méthode 5 Pourquoi | Vote pondéré pour prioriser | Matrice Fréquence × Impact'
+  },
+  4:{
+    concepts:'Règle 80/20 = 80% des problèmes viennent de 20% des causes | Vitaux peu nombreux = les 20% de causes à traiter en priorité | Trivials nombreux = les 80% de causes mineures | Courbe cumulée = pourcentage cumulé des fréquences | Seuil 80% = ligne de démarcation vitaux/trivials',
+    pitfalls:'1) Ne pas trier les données par ordre DÉCROISSANT avant de tracer — 2) Oublier de tracer la ligne horizontale à 80% — 3) Traiter les causes triviales avant les vitales — 4) Confondre fréquence (nombre d\'occurrences) et gravité (coût ou impact) — 5) Trop de catégories (regrouper si > 8)',
+    formulas:'% cumulé[i] = Σ(fréquences 1 à i) / Σ(toutes fréquences) × 100 | Règle : traiter les causes dont le % cumulé ≤ 80%',
+    example:'PRECISION MAROC défauts : Défaut soudure=45 | Mauvais alignement=30 | Rayures=15 | Dimensions HT=8 | Autres=5. Total=103. Cumul% : soudure=43.7% | +alignement=72.8% | +rayures=87.4%. → Vitaux = soudure + alignement (2 causes = 73% des défauts). Plan d\'action : action 1 sur défaut de soudure (revoir procédure + formation), action 2 sur alignement (calibration machines).',
+    tools:'Tableau trié (ordre décroissant) | Diagramme bâtons + courbe cumulée | Ligne rouge à 80% | Matrice gains/efforts pour plan d\'action'
+  },
+  5:{
+    concepts:'Flux tiré = on produit uniquement sur demande réelle (signal Kanban) ≠ flux poussé = on produit selon prévisions | WIP (Work In Progress) = nombre de tâches en cours simultanément | Limite WIP = règle impérative pour éviter les goulots | Takt Time = temps disponible / demande client = rythme de production requis | Little\'s Law : Lead Time = WIP × Cycle Time',
+    pitfalls:'1) WIP trop élevé → accumulation → délais → goulots — 2) Augmenter le WIP quand ça déborde (mauvais réflexe — chercher la cause racine) — 3) Pas de limite WIP = les problèmes restent invisibles — 4) Confondre Cycle Time (temps pour 1 pièce) et Takt Time (rythme client) — 5) Mettre toutes les tâches "En cours" en même temps',
+    formulas:'Takt Time = Temps disponible par période / Demande client par période | Little\'s Law : Lead Time = WIP × Cycle Time | Efficacité = Tâches terminées / Tâches démarrées × 100%',
+    example:'PRECISION MAROC : Demande = 200 pièces/jour | Temps disponible = 7h = 420 min | Takt Time = 420/200 = 2,1 min/pièce. WIP optimal = 3 (avec 3 CNC actives). Si WIP = 6 alors Lead Time double. Signal Kanban = quand une tâche passe en "Terminé", une nouvelle entre en "En cours" (jamais plus que la limite).',
+    tools:'Tableau Kanban 3 colonnes | Carte Kanban physique ou numérique | Calcul Takt Time | Indicateurs : Lead Time moyen, Throughput, CFD (Cumulative Flow Diagram)'
+  },
+  6:{
+    concepts:'Flux de valeur = toutes les étapes de la commande du client à la livraison | Taux de Valeur Ajoutée (TVA) = temps VA / Lead Time total × 100% | En industrie typique : TVA = 1 à 5% (normal) | Temps VA = étapes qui transforment réellement le produit | Temps NVA = attentes, transports, contrôles non transformants | État futur = VSM amélioré après suppression des gaspillages',
+    pitfalls:'1) Confondre temps de cycle (transformation) et temps d\'attente (stock inter-opérations) — 2) Oublier les stocks dans le Lead Time total (souvent 80% du Lead Time) — 3) Penser que TVA = 1% est mauvais (c\'est courant en industrie) — 4) Vouloir tout améliorer simultanément (prioriser le goulot) — 5) Oublier le flux d\'information (commandes, OF) sur le VSM',
+    formulas:'Lead Time total = Σ(temps de cycle) + Σ(temps d\'attente) | TVA = Σ(temps VA) / Lead Time total × 100% | Gain potentiel = NVA à éliminer (temps d\'attente principalement)',
+    example:'PRECISION MAROC flux : Réception(cycle 15min, attente 120min) → Découpe(8min, 30min) → Soudure(12min, 60min) → Contrôle(5min, 10min) → Expédition(3min, 0min). Lead Time = (15+8+12+5+3) + (120+30+60+10) = 43 + 220 = 263 min. VA = 8+12 = 20 min (découpe+soudure). TVA = 20/263 = 7,6%. Amélioration : réduire attente Réception (120→30 min) par livraison synchronisée → Lead Time = 173 min, TVA = 11,6%.',
+    tools:'Symboles VSM standards | Calcul TVA | 7 gaspillages MUDA (surproduction, attentes, transport, surtraitement, stocks, mouvements, défauts) | Kaizen burst | Diagramme spaghetti'
+  },
+  7:{
+    concepts:'Limites de contrôle = UCL/LCL calculées statistiquement (±3σ) ≠ tolérances client | Causes communes = variabilité normale inhérente au procédé | Causes spéciales = anomalies à identifier et éliminer | 8 règles de Nelson = critères pour détecter l\'instabilité | Cpk = capabilité = aptitude à respecter les tolérances client (Cpk ≥ 1,33 requis)',
+    pitfalls:'1) Confondre limites de contrôle (statistiques) et tolérances client (spécifications) — 2) Réagir à chaque point individuel hors limites sans vérifier les règles de Nelson (sur-ajustement) — 3) Calculer les limites sur un procédé non encore maîtrisé — 4) Ignorer les tendances (7 points consécutifs à la hausse = règle Nelson 2) — 5) Cpk < 1 = procédé incapable même si certains points sont dans les limites',
+    formulas:'UCL = X̄ + 3σ | LCL = X̄ - 3σ | Cp = (LSS - LIS) / 6σ | Cpk = min[(LSS - X̄), (X̄ - LIS)] / 3σ | σ estimé = R̄ / d2',
+    example:'Pièces CNC PRECISION MAROC : diamètre cible 25mm ±0.1mm. 20 mesures : X̄=25.002mm, σ=0.028mm. UCL=25.002+3×0.028=25.086mm. LCL=24.918mm. Tolérances client : LSS=25.1mm, LIS=24.9mm. Cp=(0.2)/(6×0.028)=1.19. Cpk=min[(25.1-25.002),(25.002-24.9)]/(3×0.028)=min[0.098,0.102]/0.084=1.17. Procédé capable mais à surveiller (Cpk≥1.33 recommandé).',
+    tools:'Carte X̄-R | Carte p (défauts en %) | 8 règles de Nelson | Indice Cpk | Histogramme de distribution'
+  },
+  8:{
+    concepts:'Opérations INTERNES = réalisables UNIQUEMENT machine arrêtée (démontage outillage) | Opérations EXTERNES = réalisables machine EN MARCHE (préparation outils, réglages préliminaires) | Étape 1 : Distinguer interne/externe | Étape 2 : Convertir le maximum d\'internes en externes | Étape 3 : Réduire les internes restants | Étape 4 : Standardiser | Objectif SMED : changement < 10 min',
+    pitfalls:'1) Améliorer les opérations internes sans d\'abord les convertir en externes — 2) Confondre SMED et maintenance (SMED = changement série, pas réparation) — 3) Ne pas observer et chronométrer chaque opération séparément — 4) Négliger les temps de déplacement et de recherche d\'outillage — 5) Ne pas impliquer les opérateurs dans l\'analyse',
+    formulas:'Gain SMED = (Temps de changement initial - Temps de changement final) / Temps de changement initial × 100% | Gain de capacité = Gain SMED × Nombre de changements/jour | Taille de lot minimale possible = Demande × (Temps changement / Takt Time)',
+    example:'Presse PRECISION MAROC : Changement série initial = 45 min. Analyse : Internes=38min (démontage moule 15min, réglage hauteur 8min, serrage boulons 10min, nettoyage plateau 5min). Externes=7min (préparer moule suivant). Conversion : préparer moule pendant production (externe). Réduire : remplacement boulons par serrage rapide (-7min), montage en parallèle 2 opérateurs (-5min). Nouveau temps = 21 min → Gain = 53%.',
+    tools:'Chronométrage vidéo | Tableau séparation internes/externes | Diagramme de Gantt SMED | Chariot porte-outils dédié | Check-list de préparation'
+  },
+  9:{
+    concepts:'IPR (Indice de Priorité de Risque) = Gravité (G) × Occurrence (O) × Détectabilité (D) | Cotation sur 10 chacun | IPR ≥ 100 = action corrective OBLIGATOIRE | Gravité = impact sur client (1=négligeable, 10=danger) | Occurrence = probabilité d\'apparition (1=improbable, 10=certain) | Détectabilité = capacité à détecter AVANT livraison (1=BIEN détecté, 10=INDÉTECTABLE — attention au sens inversé !)',
+    pitfalls:'1) Confondre mode de défaillance (COMMENT ça tombe en panne) et effet (CONSÉQUENCE) et cause (POURQUOI) — 2) Inverser le sens de D : D=1 signifie BIEN détecté (faible risque), D=10 = indétectable (risque maximum) — 3) Tout coter G=9 ou G=10 (perd la discrimination) — 4) Oublier le plan d\'action pour tout IPR ≥ 100 — 5) Ne pas réévaluer l\'IPR après action corrective',
+    formulas:'IPR = G × O × D (multiplication, pas addition !) | IPR ≥ 100 → action obligatoire | IPR ≥ 200 → action urgente | Après action : recalculer IPR avec nouveaux G\'×O\'×D\'',
+    example:'Composant joint d\'étanchéité moteur : Mode = "Fissuration du joint". Effet = "Fuite huile → arrêt moteur". Cause = "Vieillissement accéléré par surchauffe". G=8 (arrêt moteur dangereux). O=4 (fissuration tous les 50 000 km). D=6 (détection difficile sans démontage). IPR=8×4×6=192 → ACTION URGENTE. Action : contrôle ultrason tous les 20 000 km + joint amélioré. Nouveau : O=2, D=3. IPR=8×2×3=48 → acceptable.',
+    tools:'Tableau AMDEC (composant, mode, effet, cause, G, O, D, IPR, action) | Grilles de cotation standardisées (AFNOR) | Matrice de criticité G×O | Plan d\'action SMART post-AMDEC'
+  },
+  10:{
+    concepts:'Démarche Lean intégrée : 1) DÉFINIR le problème (VSM état actuel, Pareto des défauts) → 2) MESURER (SPC, données quantifiées) → 3) ANALYSER (Ishikawa, 5 Pourquoi) → 4) AMÉLIORER (5S, SMED, Kanban) → 5) CONTRÔLER (cartes de contrôle, audits) | Cohérence outils = chaque outil répond à un problème spécifique identifié | Séquençage = 5S d\'abord (fondation), puis les outils spécifiques',
+    pitfalls:'1) Choisir des outils au hasard sans lien avec les problèmes diagnostiqués — 2) Plan d\'action sans responsable, sans date, sans indicateur de suivi — 3) Commencer par des outils avancés sans la fondation 5S — 4) Ne pas quantifier les gains attendus (en %, en €, en heures) — 5) Ignorer la résistance au changement (plan de conduite du changement manquant)',
+    formulas:'ROI = (Gains annuels - Coûts mise en œuvre) / Coûts mise en œuvre × 100% | Gain SMED + 5S + Kanban = réduction Lead Time global | Priorité = Impact × Facilité (matrice gains/efforts)',
+    example:'PRECISION MAROC (8% rebuts + pannes + retards) : Diagnostic VSM → Lead Time 263min, TVA 7.6%. Pareto → soudure (44%) + alignement (29%) = 73% défauts. Ishikawa → causes racines : formation insuffisante + maintenance absente. Plan : Mois 1 = Chantier 5S (fondation). Mois 2 = SMED changements série (-50%). Mois 3 = Formation opérateurs + Kanban. Mois 4 = SPC sur postes critiques. KPIs : taux rebuts cible 2%, Lead Time cible 100min.',
+    tools:'A3 de synthèse | VSM état actuel + état futur | Matrice gains/efforts | Plan de déploiement Gantt | Tableau de bord KPIs (rebuts, Lead Time, OEE)'
+  },
+  11:{
+    concepts:'Récapitulatif complet : PDCA (roue d\'amélioration) | 5S (fondation organisationnelle) | Ishikawa (diagnostic causes) | Pareto (priorisation 80/20) | Kanban (flux tiré + WIP) | VSM (cartographie flux de valeur + TVA) | SPC (maîtrise statistique + Cpk) | SMED (réduction temps changement) | AMDEC (prévention défaillances + IPR) | Liens entre outils : 5S avant tout | Pareto → Ishikawa → PDCA | VSM révèle les gaspillages → outils spécifiques',
+    pitfalls:'Confondre IPR = G×O×D (pas G+O+D) | D=1 = BIEN détecté (pas mal détecté) | TVA typique industrie = 1-5% (pas une erreur si faible) | Takt Time = disponible/demande (pas demande/disponible) | Flux tiré ≠ flux poussé | Cpk ≥ 1.33 requis (pas 1.0) | Seiso = nettoyer ET inspecter (pas juste nettoyer)',
+    formulas:'IPR=G×O×D | TVA=ΣVA/Lead Time×100% | Takt Time=Disponible/Demande | Cpk=min[(LSS-X̄),(X̄-LIS)]/3σ | SMED Gain=(Ti-Tf)/Ti×100% | Pareto % cumulé=Σfi/Σtotal×100%',
+    example:'Questions types : "IPR = 8×3×6 = ?" (=144 ≥ 100 → action obligatoire) | "Takt Time si 480min dispo et 120 pièces demandées = ?" (=4min/pièce) | "TVA si VA=20min et Lead Time=400min = ?" (=5%) | "Un WIP trop élevé provoque quoi ?" (goulots + délais + Lead Time accru)',
+    tools:'Fiches mémo par module | Tableau synoptique des 9 outils | Formules clés compilées | Cas d\'application types'
+  }
+};
+
+async function generateRemediationCourse(n,score,minScore){
+  const body=document.getElementById('remOverlayBody');
+  const titleEl=document.getElementById('remOverlayTitle');
+  const subEl=document.getElementById('remOverlaySub');
+  const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
+  const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
+  const color={'débutant':'#dc2626','intermédiaire':'#d97706','avancé avec lacunes':'#2563eb'}[niveau];
+  const modName=_moduleNames[n]||'ce module';
+  if(titleEl)titleEl.innerHTML=`📚 Cours personnalisé — <span style="color:${color};">${modName}</span>`;
+  if(subEl)subEl.innerHTML=`Niveau détecté : <span style="font-weight:800;color:${color};">${niveauLabel}</span> &nbsp;·&nbsp; Score : ${score}% / ${minScore}% requis`;
+  if(!body)return;
+  body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem 1rem;color:#6b7280;"><div class="ai-spinner"></div><span style="font-size:.88rem;">Génération de votre cours personnalisé en cours…</span></div>`;
+  const key=getKey();
+  if(!key){
+    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Groq requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
+    return;
+  }
+  const ctx=_REM_CTX[n]||{concepts:modName,pitfalls:'Erreurs communes',formulas:'',example:'Cas industriel',tools:'Outils associés'};
+  const domCtx=state.domain?`\nContexte étudiant : ${state.domain.poste||'ingénieur'} dans le secteur ${state.domain.secteur} — adapte les exemples à ce secteur.`:'';
+  const base=`Tu es un formateur Lean/Six Sigma expert. Un étudiant FST Tanger a obtenu ${score}% au module "${modName}" (seuil requis : ${minScore}%). Tu dois générer un cours de rattrapage complet et très détaillé.${domCtx}
+
+CONTENU PÉDAGOGIQUE DU MODULE (à utiliser dans ton cours) :
+• Concepts clés : ${ctx.concepts}
+• Erreurs typiques : ${ctx.pitfalls}
+• Formules importantes : ${ctx.formulas}
+• Exemple industriel de référence : ${ctx.example}
+• Outils associés : ${ctx.tools}`;
+
+  const sections={
+    'débutant':`${base}
+
+L'étudiant est DÉBUTANT sur ce sujet. Génère un cours très accessible EXACTEMENT avec ces 6 sections (titres exacts) :
+
+## 📖 Concepts fondamentaux
+Explique chaque concept clé listé ci-dessus de façon très simple et claire. Pour chaque concept, donne une analogie du quotidien ou une image concrète. Détaille bien chaque notion en 3-5 lignes minimum.
+
+## ❌ Erreurs fréquentes à éviter
+Pour chacune des erreurs typiques listées ci-dessus, explique pourquoi c'est une erreur, ce que ça provoque dans la réalité industrielle, et comment l'éviter. Minimum 3 lignes par erreur.
+
+## 🔢 Exemple complet pas-à-pas
+Reprends l'exemple industriel de référence et développe-le entièrement. Montre chaque étape numérotée avec des calculs réels si applicable. L'étudiant doit pouvoir reproduire cet exemple.
+
+## 📐 Formules et méthodes à maîtriser
+Explique chaque formule ou méthode, donne sa définition, ses variables, et un exemple numérique d'application. Explique le sens physique/industriel de chaque résultat.
+
+## 💡 Règles d'or à retenir
+5 règles essentielles formulées de façon mémorable. Propose une astuce mnémotechnique ou un moyen de retenir les concepts clés.
+
+## 🎯 Exercice de vérification
+Un exercice pratique complet à faire maintenant avec des données chiffrées. Fournis les étapes de résolution attendues et les résultats corrects pour l'auto-correction.`,
+
+    'intermédiaire':`${base}
+
+L'étudiant est INTERMÉDIAIRE. Il connaît les bases mais a des lacunes. Génère un cours ciblé EXACTEMENT avec ces 6 sections :
+
+## 📌 Points à consolider
+Pour chaque concept clé, identifie les nuances et subtilités que les étudiants intermédiaires maîtrisent mal. Explique la différence entre une compréhension superficielle et une vraie maîtrise. Minimum 4 lignes par point.
+
+## ❌ Pièges du niveau intermédiaire
+Les erreurs subtiles (pas les erreurs basiques) spécifiques à ce niveau. Pour chaque piège, donne un contre-exemple industriel concret où cette erreur a causé un problème réel.
+
+## 🔢 Cas industriel complet avec variantes
+Développe l'exemple de référence EN DÉTAIL puis propose une variante avec des données différentes. L'étudiant doit voir comment adapter la méthode à des situations légèrement différentes.
+
+## 📐 Approfondissement des formules
+Au-delà de la formule de base : cas limites, interprétation des résultats extrêmes, liens entre les indicateurs. Propose des calculs croisés entre formules.
+
+## 💡 Liens avec les autres outils Lean
+Comment ${modName} s'articule avec les autres modules du parcours. Quand utiliser cet outil plutôt qu'un autre. Synergies et séquençage dans une démarche globale.
+
+## 🎯 Exercice de consolidation
+Un exercice de niveau intermédiaire avec contexte réaliste et données ambiguës. Fournis les critères d'évaluation détaillés et les pièges dans les données.`,
+
+    'avancé avec lacunes':`${base}
+
+L'étudiant est de NIVEAU AVANCÉ mais a des lacunes spécifiques. Génère un cours expert EXACTEMENT avec ces 6 sections :
+
+## 🎯 Subtilités avancées
+Les points précis que même les étudiants avancés manquent. Aborde les cas limites, les situations atypiques, les exceptions aux règles générales. Références aux normes ou pratiques industrielles réelles.
+
+## ⚠️ Pièges des praticiens confirmés
+Les erreurs commises par des professionnels expérimentés. Pour chaque piège, décris un cas d'entreprise réel (ou réaliste) où cette erreur a eu des conséquences mesurables (coût, qualité, délais).
+
+## 🔢 Cas complexe multi-contraintes
+Un cas industriel avancé avec données contradictoires, contraintes multiples, ou situation non-standard. Montre le raisonnement expert pour naviguer l'ambiguïté et prendre la meilleure décision.
+
+## 📐 Maîtrise avancée des indicateurs
+Interactions entre indicateurs, sensibilité aux données d'entrée, limites de validité des modèles. Analyse critique des résultats (quand faut-il remettre en question les calculs ?).
+
+## 💡 Intégration stratégique dans la démarche Lean
+Vision systémique : comment ${modName} s'inscrit dans une transformation Lean complète. Impact sur la performance globale (OEE, Lead Time, qualité, coûts). Témoignages de déploiements industriels.
+
+## 🎯 Challenge expert
+Un problème complexe avec données partielles ou contradictoires, nécessitant jugement expert. Donne le cheminement de résolution attendu et souligne les décisions clés non triviales.`
+  };
+
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:sections[niveau]}],max_tokens:2000,temperature:0.4})});
+    if(!resp.ok){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">Erreur API ('+resp.status+'). Vérifiez votre clé API.</div>';return;}
+    const data=await resp.json();
+    const text=data.choices?.[0]?.message?.content||'';
+    body.innerHTML=_renderRemCourse(text,modName,score,minScore,niveau,color,n);
+  }catch(e){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">Erreur réseau. Vérifiez votre connexion et réessayez.</div>';}
+}
+
+function _renderRemCourse(text,modName,score,minScore,niveau,color,n){
+  const sectionColors=['#7c3aed','#dc2626','#0284c7','#d97706','#059669'];
+  const sections=text.split(/(?=^## )/m).filter(s=>s.trim());
+  let html=`<div style="background:linear-gradient(135deg,${color}14,${color}07);border-radius:14px;padding:1rem 1.3rem;border-left:4px solid ${color};margin-bottom:1.5rem;display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;">
+    <div>
+      <div style="font-size:.72rem;font-weight:800;color:${color};margin-bottom:.2rem;text-transform:uppercase;letter-spacing:.4px;">Votre résultat</div>
+      <div style="font-size:.88rem;color:#374151;">Score obtenu : <strong style="color:${color};">${score}%</strong> — Minimum requis : <strong>${minScore}%</strong></div>
+    </div>
+    <div style="font-size:.8rem;color:#6b7280;border-left:1.5px solid ${color}30;padding-left:1rem;">Ce cours est entièrement généré par IA et adapté à votre niveau. Lisez chaque section attentivement avant de réessayer le module.</div>
+  </div>`;
+  if(sections.length>=2){
+    sections.forEach((sec,i)=>{
+      const lines=sec.split('\n');
+      const titleLine=lines[0].replace(/^##\s*/,'').trim();
+      const content=lines.slice(1).join('\n').trim();
+      const sc=sectionColors[i%sectionColors.length];
+      html+=`<div style="margin-bottom:1.2rem;border-radius:14px;border:1.5px solid ${sc}25;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.04);">
+        <div style="background:${sc}10;padding:.75rem 1.1rem;border-bottom:1.5px solid ${sc}20;">
+          <div style="font-weight:900;font-size:.9rem;color:${sc};">${titleLine}</div>
+        </div>
+        <div style="padding:.95rem 1.2rem;font-size:.84rem;line-height:1.9;color:#374151;">${formatAIText(content)}</div>
+      </div>`;
+    });
+  }else{
+    html+=`<div style="font-size:.85rem;line-height:1.9;color:#374151;">${formatAIText(text)}</div>`;
+  }
+  html+=`<div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;padding-top:.8rem;border-top:1.5px solid #f1f5f9;margin-top:.8rem;">
+    <button onclick="closeRemediationPage()" style="background:#f1f5f9;color:#374151;border:none;border-radius:12px;padding:.7rem 1.6rem;font-weight:800;font-size:.82rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">← Retour au module</button>
+  </div>`;
+  return html;
+}
+
+/* ══════════════════════════════════════════
+   F2 — CONFIG ADMIN : SEUILS & TOGGLES
+══════════════════════════════════════════ */
+function renderAdminAccess(){
+  const cfg=getAdminConfig();
+  const t=document.getElementById('admThresholdGlobal');
+  const tq=document.getElementById('admThresholdQuiz');
+  if(t)t.value=cfg.defaultThreshold!=null?cfg.defaultThreshold:60;
+  if(tq)tq.value=cfg.quizThreshold!=null?cfg.quizThreshold:70;
+  renderModuleToggles();
+}
+function saveThresholds(){
+  const cfg=getAdminConfig();
+  cfg.defaultThreshold=Math.min(100,Math.max(1,parseInt(document.getElementById('admThresholdGlobal').value)||60));
+  cfg.quizThreshold=Math.min(100,Math.max(1,parseInt(document.getElementById('admThresholdQuiz').value)||70));
+  saveAdminConfig(cfg);
+  const msg=document.getElementById('admThresholdMsg');
+  if(msg){msg.innerHTML='<span style="color:#059669;font-weight:700;">✅ Seuil sauvegardé.</span>';setTimeout(()=>{if(msg)msg.innerHTML='';},2000);}
+}
+function renderModuleToggles(){
+  const wrap=document.getElementById('moduleToggleList');
+  if(!wrap)return;
+  wrap.innerHTML=MODULES.map(m=>{
+    const active=isModuleActive(m.id);
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:${active?'#f0fdf4':'#fef2f2'};border:1px solid ${active?'#86efac':'#fca5a5'};">
+      <div style="display:flex;align-items:center;gap:.45rem;"><span>${m.icon}</span><span style="font-size:.76rem;font-weight:700;color:${active?'#166534':'#991b1b'};">M${m.id} — ${m.name}</span></div>
+      <button onclick="toggleModuleActive(${m.id})" style="font-size:.68rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;border:none;cursor:pointer;background:${active?'#059669':'#dc2626'};color:#fff;">${active?'Actif ✓':'Inactif'}</button>
+    </div>`;
+  }).join('');
+}
+function toggleModuleActive(n){
+  const cfg=getAdminConfig();
+  if(!cfg.moduleToggles)cfg.moduleToggles={};
+  cfg.moduleToggles[n]=!isModuleActive(n);
+  saveAdminConfig(cfg);
+  renderModuleToggles();
+  updateNav();
+}
+
+/* ══════════════════════════════════════════
+   F3 — GÉNÉRATEUR DE MODULE NO-CODE
+══════════════════════════════════════════ */
+let _genPreviewData=null;
+async function generateCustomModule(){
+  const key=getKey();
+  const title=(document.getElementById('genTitle')?.value||'').trim();
+  const desc=(document.getElementById('genDesc')?.value||'').trim();
+  const level=document.getElementById('genLevel')?.value||'intermédiaire';
+  const dur=(document.getElementById('genDuration')?.value||'~20 min').trim();
+  const prev=document.getElementById('genPreview');
+  const msg=document.getElementById('admGenMsg');
+  if(!title||!desc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et la description.</span>';return;}
+  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
+  if(msg)msg.innerHTML='';
+  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
+  const prompt=`Tu es un expert Lean/Six Sigma. Crée un module pédagogique complet sur "${title}" pour ingénieurs de niveau ${level}.\nObjectifs : ${desc}\n\nRéponds UNIQUEMENT en JSON valide (pas de texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte (1 phrase)","duree":"${dur||'~20 min'}","sections":[{"titre":"...","contenu":"Contenu détaillé (4-5 paragraphes, exemples industriels, emojis)"},{"titre":"...","contenu":"..."},{"titre":"...","contenu":"..."}],"quiz":[{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1},{"q":"?","opts":["A","B","C","D"],"correct":2},{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1}]}\n\n3 sections obligatoires, 5 questions quiz. JSON uniquement.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2500})});
+    const data=await resp.json();
+    const text=data.choices[0].message.content;
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('JSON introuvable dans la réponse IA');
+    _genPreviewData=JSON.parse(m[0]);
+    _renderGenPreview(_genPreviewData,dur,level);
+  }catch(e){if(prev)prev.innerHTML=`<span style="color:#dc2626;font-size:.78rem;">❌ Erreur : ${_escH(e.message)}</span>`;}
+}
+function _renderGenPreview(d,dur,level){
+  const prev=document.getElementById('genPreview');
+  if(!prev)return;
+  prev.innerHTML=`<div style="border:2px solid #7c3aed;border-radius:12px;padding:1rem;background:#faf5ff;margin-top:.6rem;">
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;">
+      <span style="font-size:1.6rem;">${d.icone||'🧩'}</span>
+      <div><div style="font-weight:900;font-size:.92rem;color:#4c1d95;">${_escH(d.titre)}</div><div style="font-size:.72rem;color:#7c3aed;">Niveau ${level} · ${d.duree||dur}</div></div>
+    </div>
+    <div style="font-size:.77rem;color:#6b7280;margin-bottom:.7rem;">${_escH(d.desc||'')}</div>
+    ${(d.sections||[]).slice(0,3).map(s=>`<div style="margin-bottom:.5rem;"><div style="font-weight:800;font-size:.77rem;color:#4c1d95;">📌 ${_escH(s.titre)}</div><div style="font-size:.73rem;color:#374151;line-height:1.5;margin-top:.15rem;">${_escH((s.contenu||'').slice(0,180))}${(s.contenu||'').length>180?'…':''}</div></div>`).join('')}
+    <div style="font-size:.73rem;color:#7c3aed;font-weight:700;margin-top:.5rem;">📝 ${(d.quiz||[]).length} questions de quiz incluses</div>
+    <div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">
+      <button class="btn btn-purple btn-sm" onclick="publishCustomModule()">✅ Publier ce module</button>
+      <button class="btn btn-ghost btn-sm" onclick="generateCustomModule()">🔄 Régénérer</button>
+    </div>
+  </div>`;
+}
+function publishCustomModule(){
+  if(!_genPreviewData)return;
+  const mods=getCustomModules();
+  _genPreviewData.active=true;
+  mods.push(_genPreviewData);
+  saveCustomModules(mods);
+  const msg=document.getElementById('admGenMsg');
+  if(msg)msg.innerHTML='<span style="color:#059669;font-weight:700;">✅ Module publié ! Il apparaît maintenant dans la liste des modules.</span>';
+  const prev=document.getElementById('genPreview');
+  if(prev)prev.innerHTML='';
+  const t=document.getElementById('genTitle');if(t)t.value='';
+  const desc=document.getElementById('genDesc');if(desc)desc.value='';
+  _genPreviewData=null;
+  renderCustomModuleList();
+  updateNav();
+}
+function renderCustomModuleList(){
+  const wrap=document.getElementById('customModuleList');
+  const empty=document.getElementById('customModuleEmpty');
+  const mods=getCustomModules();
+  if(!wrap)return;
+  if(!mods.length){if(empty)empty.style.display='block';wrap.innerHTML='';return;}
+  if(empty)empty.style.display='none';
+  wrap.innerHTML=mods.map((m,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:#faf5ff;border:1px solid #ddd6fe;">
+    <span style="font-size:.76rem;font-weight:700;color:#4c1d95;">${m.icone||'🧩'} ${_escH(m.titre)}</span>
+    <div style="display:flex;gap:.3rem;">
+      <button onclick="toggleCustomModuleActive(${i})" style="font-size:.67rem;font-weight:800;padding:.16rem .45rem;border-radius:5px;border:none;cursor:pointer;background:${m.active!==false?'#7c3aed':'#94a3b8'};color:#fff;">${m.active!==false?'Visible':'Masqué'}</button>
+      <button onclick="deleteCustomModule(${i})" style="font-size:.67rem;padding:.16rem .4rem;border-radius:5px;border:none;cursor:pointer;background:#fee2e2;color:#dc2626;">🗑</button>
+    </div>
+  </div>`).join('');
+}
+function toggleCustomModuleActive(i){const mods=getCustomModules();if(!mods[i])return;mods[i].active=mods[i].active===false;saveCustomModules(mods);renderCustomModuleList();updateNav();}
+function deleteCustomModule(i){if(!confirm('Supprimer ce module ?'))return;const mods=getCustomModules();mods.splice(i,1);saveCustomModules(mods);renderCustomModuleList();updateNav();}
+
+let _customModIdx=null,_customModQuizAnswers={};
+
+/* ── Custom module helpers ── */
+function _getCustomLevDone(i){return(state.exLevels||{})['c'+i]||0;}
+function _renderCustomExBadge(i){
+  const el=document.getElementById('customExBadge'+i);if(!el)return;
+  const done=_getCustomLevDone(i);
+  el.innerHTML=_EX_LEVELS.map((lv,j)=>{const isDone=j<done,isCur=j===done&&done<3;return`<span style="font-size:.72rem;font-weight:800;padding:.2rem .6rem;border-radius:12px;background:${isDone?lv.color+'25':isCur?lv.color+'15':'#f1f5f9'};color:${isDone||isCur?lv.color:'#94a3b8'};border:1.5px solid ${isDone?lv.color:isCur?lv.color+'88':'#e2e8f0'};">${isDone?'✓ ':isCur?'→ ':''}${lv.label}${isDone?' ✓':isCur?' (en cours)':' 🔒'}</span>`;}).join(' ');
+}
+
+function goCustomModule(i){
+  const mods=getCustomModules();
+  const m=mods[i];if(!m)return;
+  _customModIdx=i;_customModQuizAnswers={};
+  _moduleLeave();_moduleActiveId='c'+(i+1);_moduleStartTs=Date.now();
+  const sec=document.getElementById('m-custom');if(!sec)return;
+  const done=_getCustomLevDone(i);
+  // Stepper HTML
+  const stepperHtml=`<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;" id="customExBadge${i}"></div>`;
+  // Quiz HTML
+  const qHtml=m.quiz&&m.quiz.length?(`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding:.5rem .8rem;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;"><div style="font-size:.8rem;font-weight:700;color:#374151;">📝 Quiz — ${m.quiz.length} questions</div><div id="customQuizTimer${i}"><span style="font-size:.72rem;color:#9ca3af;">⏱️ Démarrage…</span></div></div><div class="q-wrap">${m.quiz.map((q,qi)=>`<div class="q-block"><div class="q-num">Question ${qi+1} / ${m.quiz.length}</div><div class="q-text">${_escH(q.q)}</div>${q.opts.map((o,oi)=>`<div class="q-opt" id="cmq-${qi}-${oi}" onclick="pickCustomQ(${qi},${oi})">${_escH(o)}</div>`).join('')}</div>`).join('')}</div><div class="btn-row" style="margin-top:.8rem;"><button class="btn btn-purple" onclick="submitCustomQuiz()">📊 Valider le quiz</button></div><div id="customQuizScore"></div>`):'<div style="font-size:.8rem;color:#6b7280;">Aucune question de quiz pour ce module.</div>';
+  sec.innerHTML=`
+    <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);">
+      <div style="font-size:2.5rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
+      <h1 style="font-size:1.6rem;margin-bottom:.4rem;">${_escH(m.titre)}</h1>
+      <p style="opacity:.85;">${_escH(m.desc||'')}</p>
+      <div style="font-size:.78rem;opacity:.7;margin-top:.3rem;">⏱️ ${m.duree||'~20 min'}</div>
+    </div>
+
+    <div class="ccard">
+      <div class="ccard-title">📖 Contenu du module</div>
+      ${(m.sections||[]).map(s=>`<div style="margin-bottom:1.2rem;"><h3 style="color:#4c1d95;margin-bottom:.5rem;font-size:.92rem;">📌 ${_escH(s.titre)}</h3><div style="line-height:1.75;color:#374151;font-size:.85rem;">${(s.contenu||'').replace(/\n/g,'<br>')}</div></div>`).join('<hr style="border:none;border-top:1px solid #ede9fe;margin:1.1rem 0;">')}
+    </div>
+
+    <div class="ccard">
+      <div class="ccard-title">🎯 Exercices progressifs — 3 niveaux</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Complétez les 3 niveaux avant de valider le module. L'IA génère un exercice adapté à votre niveau actuel.</div>
+      ${stepperHtml}
+      <div id="customExContent${i}"></div>
+      <div id="customExStatus${i}" style="margin-top:.5rem;"></div>
+    </div>
+
+    <div class="ccard">
+      <div class="ccard-title">📝 Quiz de validation</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Répondez au quiz pour obtenir votre score de module. Complétez d'abord les 3 niveaux d'exercices.</div>
+      ${qHtml}
+    </div>
+
+    <div class="ccard">
+      <div class="btn-row">
+        <div id="customValidateBtn${i}"></div>
+        <button class="btn btn-ghost" onclick="showSection('home');updateNav();">← Retour aux modules</button>
+      </div>
+      <div id="customScoreResult${i}"></div>
+    </div>`;
+  showSection('m-custom');
+  // Init state
+  _renderCustomExBadge(i);
+  if(m.quiz&&m.quiz.length) startCustomQuizTimer(i, Math.max(8, m.quiz.length*2));
+  if(done<3)showCustomExercise(i);
+  else{
+    const cec=document.getElementById('customExContent'+i);
+    if(cec)cec.innerHTML='<div style="color:#059669;font-weight:700;font-size:.82rem;padding:.5rem 0;">✅ Les 3 niveaux sont complétés !</div>';
+    showCustomValidateBtn(i);
+  }
+}
+
+async function showCustomExercise(i){
+  const mods=getCustomModules();const m=mods[i];if(!m)return;
+  const done=_getCustomLevDone(i);if(done>=3)return;
+  const lv=_EX_LEVELS[done];
+  const el=document.getElementById('customExContent'+i);if(!el)return;
+  el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.5rem;">${lv.stars} Exercice niveau ${lv.label}</div><div class="ai-spinner" style="margin:.8rem auto;display:block;"></div></div>`;
+  const key=getKey();
+  if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer l\'exercice.</div>';return;}
+  // Use cached exercise or generate
+  const cached=m.exercices&&m.exercices[done];
+  let exData=cached;
+  if(!exData){
+    const levelDesc=['débutant (compréhension de base, question simple)','intermédiaire (application pratique avec données)','avancé (analyse critique, cas complexe)'][done];
+    const sectionsText=(m.sections||[]).map(s=>s.titre+': '+(s.contenu||'').slice(0,200)).join('\n');
+    const prompt=`Génère un exercice de niveau ${levelDesc} sur le module "${m.titre}" pour étudiant Lean/Génie Industriel.\nContenu du module:\n${sectionsText}\n\nJSON strict uniquement: {"question":"Question claire","context":"Données ou contexte fourni (optionnel, peut être vide)","expectedAnswer":"Éléments de réponse attendus","tempsMinutes":X}\nOù tempsMinutes = entier = minutes estimées pour résoudre cet exercice (Débutant 3-5 min, Intermédiaire 5-10 min, Avancé 10-18 min).\n\nJSON uniquement, pas de texte autour.`;
+    try{
+      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:0.5})});
+      const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+      const jm=text.match(/\{[\s\S]*?\}/);
+      exData=jm?JSON.parse(jm[0]):{question:`Décrivez l'application de "${m.titre}" dans un contexte industriel — niveau ${lv.label}.`,context:'',expectedAnswer:''};
+      // Cache
+      const allMods=getCustomModules();if(!allMods[i].exercices)allMods[i].exercices={};allMods[i].exercices[done]=exData;saveCustomModules(allMods);
+    }catch(e){exData={question:`Décrivez les concepts clés de "${m.titre}" et leur application pratique.`,context:'',expectedAnswer:''};}
+  }
+  el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};">
+    <div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.5rem;">${lv.stars} Exercice niveau ${lv.label}</div>
+    <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">${_escH(exData.question||'')}</div>
+    ${exData.context?`<div style="font-size:.78rem;color:#6b7280;margin-bottom:.7rem;padding:.5rem .7rem;background:#fff;border-radius:8px;border:1px solid #e2e8f0;">${_escH(exData.context)}</div>`:''}
+    <textarea id="customExAnswer${i}" placeholder="Rédigez votre réponse ici…" style="width:100%;min-height:88px;border:1.5px solid ${lv.border};border-radius:8px;padding:.5rem .7rem;font-size:.82rem;box-sizing:border-box;resize:vertical;outline:none;font-family:inherit;" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-gold btn-sm" onclick="evalCustomAnswer(${i})">🤖 Feedback IA</button>
+      <button class="btn btn-green btn-sm" onclick="completeCustomExLevel(${i})">✅ Valider ce niveau ${lv.stars}</button>
+      <div id="exTimerCustom${i}" style="margin-left:auto;" title="Temps estimé par l'IA"></div>
+    </div>
+    <div id="customExFeedback${i}" style="margin-top:.6rem;"></div>
+  </div>`;
+  // AI estimates time based on actual exercise content
+  const _ck=getKey();
+  if(_ck){
+    _estimateExTimeCustom(_ck,exData,m.titre,_EX_LEVELS[done]).then(mins=>startExTimerCustom(i,mins));
+  }else{
+    startExTimerCustom(i,[4,7,13][done]||5);
+  }
+}
+
+async function _estimateExTimeCustom(key,exData,titre,lv){
+  const prompt=`Tu es formateur expert. Voici un exercice pédagogique de niveau ${lv.label} sur le module "${titre}".
+
+QUESTION : "${exData.question||''}"
+CONTEXTE : "${exData.context||''}"
+RÉPONSE ATTENDUE : "${exData.expectedAnswer||''}"
+
+Estime le temps total réaliste en minutes pour un étudiant de niveau ${lv.label} :
+1. Lecture + compréhension du contexte
+2. Réflexion + analyse
+3. Rédaction de la réponse complète
+
+Réponds UNIQUEMENT avec un entier (total en minutes). Rien d'autre.`;
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:10,temperature:0.2})});
+    const d=await r.json();const raw=d.choices?.[0]?.message?.content?.trim()||'';
+    const parsed=parseInt(raw.match(/\d+/)?.[0]);
+    if(parsed>0)return Math.max(2,Math.min(25,parsed));
+  }catch(_){}
+  return [4,7,13][lv.idx]||5;
+}
+
+async function evalCustomAnswer(i){
+  const mods=getCustomModules();const m=mods[i];if(!m)return;
+  const done=_getCustomLevDone(i);const lv=_EX_LEVELS[Math.min(done,2)];
+  const answer=(document.getElementById('customExAnswer'+i)?.value||'').trim();
+  const feedEl=document.getElementById('customExFeedback'+i);
+  const key=getKey();
+  if(!feedEl)return;
+  if(!answer){feedEl.innerHTML='<div class="alert alert-warning">Rédigez votre réponse avant d\'évaluer.</div>';return;}
+  if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  feedEl.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#6b7280;"><div class="ai-spinner"></div>Évaluation en cours…</div>';
+  const exData=(m.exercices&&m.exercices[done])||{};
+  const prompt=`Tu es formateur expert en "${m.titre}". Évalue cette réponse d'étudiant de niveau ${lv.label}.\n\nQuestion : "${exData.question||''}"\nRéponse attendue : "${exData.expectedAnswer||''}"\nRéponse étudiant : "${answer}"\n\nDonne un feedback court (3-4 lignes max) : points corrects ✅, points manquants ❌, 1 conseil d'amélioration 💡. Si du charabia ou hors-sujet : dis-le clairement. Sois encourageant mais honnête.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:220,temperature:0.4})});
+    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>`;
+  }catch(e){feedEl.innerHTML='<div class="alert alert-warning">Erreur lors de l\'évaluation.</div>';}
+}
+
+function completeCustomExLevel(i){
+  if(_exTimerCustomId){clearInterval(_exTimerCustomId);_exTimerCustomId=null;}
+  if(!state.exLevels)state.exLevels={};
+  const current=_getCustomLevDone(i);if(current>=3)return;
+  state.exLevels['c'+i]=current+1;save();
+  _renderCustomExBadge(i);
+  const done=current+1;
+  const statusEl=document.getElementById('customExStatus'+i);
+  if(done>=3){
+    const el=document.getElementById('customExContent'+i);
+    if(el)el.innerHTML='<div style="color:#059669;font-weight:800;font-size:.84rem;padding:.5rem 0;">🎉 Les 3 niveaux sont complétés — vous pouvez maintenant valider le module !</div>';
+    if(statusEl)statusEl.innerHTML='';
+    showCustomValidateBtn(i);
+  }else{
+    const nextLv=_EX_LEVELS[done];
+    if(statusEl)statusEl.innerHTML=`<div style="color:${_EX_LEVELS[done-1].color};font-weight:700;font-size:.78rem;text-align:center;padding:.3rem 0;">✓ Niveau ${_EX_LEVELS[done-1].label} validé — passez au niveau ${nextLv.label} ${nextLv.stars}</div>`;
+    showCustomExercise(i);
+  }
+}
+
+function showCustomValidateBtn(i){
+  const el=document.getElementById('customValidateBtn'+i);if(!el)return;
+  const done=_getCustomLevDone(i);
+  el.innerHTML=done>=3?`<button class="btn btn-green" onclick="validateCustomModule(${i})">✅ Valider le module</button>`:'';
+}
+
+async function validateCustomModule(i){
+  const mods=getCustomModules();const m=mods[i];if(!m)return;
+  const levDone=_getCustomLevDone(i);
+  const box=document.getElementById('customScoreResult'+i);if(!box)return;
+  if(levDone<3){
+    box.innerHTML=`<div class="score-result fail" style="margin-top:.8rem;"><div style="flex:1;"><div style="font-weight:800;color:var(--red);">🔒 Complétez d'abord les 3 niveaux d'exercices</div><div style="font-size:.8rem;color:#6b7280;margin-top:.2rem;">Niveau suivant : ${_EX_LEVELS[levDone]?.label}</div></div></div>`;
+    return;
+  }
+  box.innerHTML='<div style="display:flex;align-items:center;gap:.7rem;padding:.5rem 0;"><div class="ai-spinner"></div><span style="font-size:.82rem;color:#6b7280;">Évaluation IA en cours…</span></div>';
+  const score=state.scores['c'+i]||0;
+  const minScore=getThreshold(0);const pass=score>=minScore;
+  const encouragement=pass?(score>=90?'🏆 Excellent !':score>=75?'⭐ Très bien !':'✅ Module validé !'):(score>=40?'💪 Presque — révisez et réessayez.':'📖 Relisez le contenu et réessayez.');
+  box.innerHTML=`<div class="score-result ${pass?'pass':'fail'}" style="margin-top:.8rem;">
+    <div class="score-ring" style="color:${pass?'var(--green)':'var(--red)'};">${score}%</div>
+    <div style="flex:1;">
+      <div style="font-weight:800;font-size:1rem;color:${pass?'var(--green)':'var(--red)'};">${encouragement}</div>
+      <div style="font-size:.8rem;color:var(--gray400);margin-top:.2rem;">Score : ${score}% — Minimum requis : ${minScore}%</div>
+      ${!pass?`<div style="font-size:.8rem;color:var(--red);margin-top:.3rem;">Score insuffisant. Révisez le contenu et repassez le quiz.</div>`:''}
+    </div>
+  </div>`;
+  if(!pass)_tryRemCustom(i,score,minScore,m);
+}
+
+function _tryRemCustom(i,score,minScore,m){
+  const sec=document.getElementById('m-custom');if(!sec)return;
+  let box=sec.querySelector('.remediation-box');
+  if(!box){box=document.createElement('div');box.className='remediation-box';box.style.cssText='margin-top:.9rem;';sec.appendChild(box);}
+  const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
+  const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
+  const color={'débutant':'#dc2626','intermédiaire':'#d97706','avancé avec lacunes':'#2563eb'}[niveau];
+  box.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.85rem 1.1rem;background:linear-gradient(135deg,#fafaf9,#fff7ed);border-radius:14px;border:1.5px solid ${color}45;">
+    <div>
+      <div style="font-size:.7rem;font-weight:800;color:${color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Cours personnalisé — ${niveauLabel}</div>
+      <div style="font-size:.8rem;color:#6b7280;">Un cours IA adapté à votre niveau pour maîtriser <strong style="color:#374151;">${_escH(m.titre)}</strong>.</div>
+    </div>
+    <button onclick="_openRemCustom(${i},${score},${minScore})" style="background:${color};color:#fff;border:none;border-radius:10px;padding:.6rem 1.2rem;font-weight:800;font-size:.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0;">📚 Voir mon cours personnalisé →</button>
+  </div>`;
+}
+
+function _openRemCustom(i,score,minScore){
+  const mods=getCustomModules();const m=mods[i];if(!m)return;
+  const ov=document.getElementById('remediationOverlay');if(!ov)return;
+  ov.style.display='flex';document.body.style.overflow='hidden';
+  _genRemCustom(i,score,minScore,m);
+}
+
+async function _genRemCustom(i,score,minScore,m){
+  const body=document.getElementById('remOverlayBody');
+  const titleEl=document.getElementById('remOverlayTitle');
+  const subEl=document.getElementById('remOverlaySub');
+  const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
+  const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
+  const color={'débutant':'#dc2626','intermédiaire':'#d97706','avancé avec lacunes':'#2563eb'}[niveau];
+  if(titleEl)titleEl.innerHTML=`📚 Cours personnalisé — <span style="color:${color};">${_escH(m.titre)}</span>`;
+  if(subEl)subEl.innerHTML=`Niveau : <span style="font-weight:800;color:${color};">${niveauLabel}</span> &nbsp;·&nbsp; Score : ${score}% / ${minScore}% requis`;
+  if(!body)return;
+  body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem;color:#6b7280;"><div class="ai-spinner"></div><span>Génération du cours personnalisé…</span></div>`;
+  const key=getKey();
+  if(!key){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API requise.</div>';return;}
+  const sectionsText=(m.sections||[]).map(s=>`### ${_escH(s.titre)}\n${(s.contenu||'').slice(0,300)}`).join('\n\n');
+  const domCtx=state.domain?`\nContexte étudiant : secteur ${state.domain.secteur}.`:'';
+  const levelSections={
+    'débutant':`## 📖 Concepts fondamentaux\n## ❌ Erreurs fréquentes au niveau débutant\n## 🔢 Exemple concret pas-à-pas\n## 📐 Points essentiels à mémoriser\n## 💡 Règles d'or\n## 🎯 Mini-exercice de vérification (avec réponses)`,
+    'intermédiaire':`## 📌 Points clés à consolider\n## ❌ Pièges du niveau intermédiaire\n## 🔢 Cas pratique complet avec données\n## 📐 Approfondissements\n## 💡 Liens avec d'autres notions\n## 🎯 Exercice de consolidation (avec critères d'évaluation)`,
+    'avancé avec lacunes':`## 🎯 Subtilités avancées\n## ⚠️ Pièges des praticiens confirmés\n## 🔢 Cas complexe multi-contraintes\n## 📐 Maîtrise avancée\n## 💡 Intégration dans une démarche globale\n## 🎯 Challenge expert (avec démarche attendue)`
+  };
+  const prompt=`Tu es formateur expert. Un étudiant a obtenu ${score}% au module "${m.titre}" (seuil: ${minScore}%).${domCtx}\n\nCONTENU DU MODULE :\n${sectionsText}\n\nGénère un cours de rattrapage très détaillé et complet (minimum 600 mots) EXACTEMENT avec ces 6 sections :\n${levelSections[niveau]}\n\nChaque section doit être développée avec des exemples concrets liés au contenu du module. Sois très pédagogique.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2000,temperature:0.4})});
+    if(!resp.ok){body.innerHTML='<div class="alert alert-warning">Erreur API.</div>';return;}
+    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    body.innerHTML=_renderRemCourse(text,m.titre,score,minScore,niveau,color,'c'+i);
+  }catch(e){body.innerHTML='<div class="alert alert-warning">Erreur réseau.</div>';}
+}
+
+function pickCustomQ(qi,oi){
+  _customModQuizAnswers[qi]=oi;
+  const m=getCustomModules()[_customModIdx];
+  if(!m||!m.quiz||!m.quiz[qi])return;
+  m.quiz[qi].opts.forEach((_,oi2)=>{const el=document.getElementById(`cmq-${qi}-${oi2}`);if(el)el.classList.toggle('selected',oi2===oi);});
+}
+function submitCustomQuiz(){
+  stopCustomQuizTimer();
+  const i=_customModIdx;const m=getCustomModules()[i];
+  if(!m||!m.quiz)return;
+  let ok=0;
+  m.quiz.forEach((q,qi)=>{
+    const ans=_customModQuizAnswers[qi];
+    q.opts.forEach((_,oi)=>{const el=document.getElementById(`cmq-${qi}-${oi}`);if(!el)return;if(oi===q.correct)el.classList.add('correct');else if(ans===oi)el.classList.add('wrong');});
+    if(ans===q.correct)ok++;
+  });
+  const pct=Math.round(ok/m.quiz.length*100);
+  // Save score for validateCustomModule
+  if(!state.scores)state.scores={};state.scores['c'+i]=pct;save();
+  const minSc=getThreshold(0);const pass=pct>=minSc;
+  const el=document.getElementById('customQuizScore');
+  if(el)el.innerHTML=`<div style="margin-top:1rem;padding:1rem;border-radius:10px;background:${pass?'#f0fdf4':'#fef2f2'};border:2px solid ${pass?'#6ee7b7':'#fca5a5'};">
+    <div style="font-weight:900;font-size:1.1rem;color:${pass?'var(--green)':'var(--red)'};">${pass?'✅ '+ok+'/'+m.quiz.length+' — Excellent !':'❌ '+ok+'/'+m.quiz.length+' bonnes réponses'}</div>
+    <div style="font-size:.8rem;color:#6b7280;margin-top:.2rem;">Score : ${pct}% — seuil requis : ${minSc}%</div>
+    ${pass?'<div style="font-size:.8rem;color:#059669;margin-top:.3rem;font-weight:700;">Vous pouvez maintenant valider le module ✓</div>':'<div style="font-size:.8rem;color:var(--red);margin-top:.3rem;">Révisez le contenu et repassez le quiz.</div>'}
+  </div>`;
+  _customModQuizAnswers={};
+  // Show validate button if levels done
+  showCustomValidateBtn(i);
+}
+
 </script>
 
 <!-- ═══════════ CV WELCOME MODAL ═══════════ -->
@@ -4972,7 +6081,7 @@ window.addEventListener('DOMContentLoaded',()=>{
         <input type="password" id="cvApiKey" placeholder="gsk_..." oninput="cvSyncKey(this.value)"
           style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:.45rem .7rem;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:border .2s;box-sizing:border-box;"
           onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#c4b5fd'">
-        <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <strong>console.groq.com</strong> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
+        <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">console.groq.com</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
       </div>
       <!-- ÉTAPE 2 : Dépôt CV -->
       <div style="font-size:.78rem;font-weight:800;color:#374151;margin-bottom:.4rem;">📄 Étape 2 — Déposez votre CV (PDF)</div>
@@ -4991,6 +6100,7 @@ window.addEventListener('DOMContentLoaded',()=>{
       <div style="margin-top:.8rem;padding:.8rem 1rem;background:#f0fdf4;border-radius:10px;border:1.5px solid #86efac;font-size:.75rem;color:#166534;line-height:1.6;">
         💡 <strong>Pourquoi votre CV ?</strong> L'IA utilisera votre dernière expérience professionnelle pour générer des exercices Lean dans votre secteur réel (automobile, aéronautique, logistique…). Vos données restent dans votre navigateur.
       </div>
+      <div id="cvRecoPanel" style="display:none;margin-top:.7rem;"></div>
       <div class="cv-actions">
         <button class="btn btn-purple" onclick="cvStartModules()" style="flex:2;">🚀 Commencer les modules</button>
         <button class="btn btn-ghost" onclick="cvSkip()" style="flex:1;font-size:.78rem;color:#94a3b8;">Continuer sans CV</button>
@@ -4998,6 +6108,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     </div>
   </div>
 </div>
+
+<!-- ═══════════ SECTION MODULE CUSTOM ═══════════ -->
+<div id="m-custom" class="section"></div>
 
 <!-- ═══════════ ADMIN DASHBOARD MODAL ═══════════ -->
 <div id="adminModal">
@@ -5011,8 +6124,9 @@ window.addEventListener('DOMContentLoaded',()=>{
     </div>
     <div class="adm-tabs">
       <button class="adm-tab active" id="adm-tab-roster" onclick="admTab('roster')">📊 Étudiants (<span id="rosterCount">0</span>)</button>
-      <button class="adm-tab" id="adm-tab-import" onclick="admTab('import')">📥 Importer codes</button>
-      <button class="adm-tab" id="adm-tab-access" onclick="admTab('access')">🔓 Accès modules</button>
+      <button class="adm-tab" id="adm-tab-import" onclick="admTab('import')">📥 Importer</button>
+      <button class="adm-tab" id="adm-tab-access" onclick="admTab('access')">⚙️ Config</button>
+      <button class="adm-tab" id="adm-tab-gen" onclick="admTab('gen')">🧩 Générateur</button>
     </div>
     <!-- PANEL: ROSTER -->
     <div id="adm-panel-roster" class="adm-panel">
@@ -5040,23 +6154,103 @@ window.addEventListener('DOMContentLoaded',()=>{
         <div id="admBulkMsg" style="margin-top:.5rem;"></div>
       </div>
     </div>
-    <!-- PANEL: ACCESS -->
+    <!-- PANEL: ACCESS / CONFIG -->
     <div id="adm-panel-access" class="adm-panel" style="display:none;">
-      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.4rem;">Contrôle d'accès administrateur</div>
-      <div style="font-size:.8rem;color:#6b7280;margin-bottom:1.2rem;line-height:1.6;">Ces actions modifient votre propre session sur cet ordinateur (pas celles des étudiants).</div>
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
-        <div style="flex:1;min-width:200px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:12px;padding:1rem;">
-          <div style="font-weight:800;color:#166534;margin-bottom:.35rem;">🔓 Débloquer tous les modules</div>
-          <div style="font-size:.77rem;color:#15803d;margin-bottom:.8rem;">Accès immédiat aux 9 modules avec score 100% — pour tests et démonstrations.</div>
+      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.4rem;">⚙️ Configuration pédagogique</div>
+
+      <!-- Threshold -->
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:.9rem 1rem;margin-bottom:1rem;">
+        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.3rem;">🎯 Seuil de validation</div>
+        <div style="font-size:.75rem;color:#6b7280;margin-bottom:.7rem;">Score minimum requis pour valider un module (tous les étudiants, toutes les sessions futures).</div>
+        <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;">
+          <label style="font-size:.78rem;font-weight:700;color:#374151;">Modules 1-10 :</label>
+          <input type="number" id="admThresholdGlobal" min="1" max="100" value="60" style="width:64px;padding:.3rem .5rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;font-weight:700;text-align:center;">
+          <span style="font-size:.78rem;color:#6b7280;">%</span>
+          <label style="font-size:.78rem;font-weight:700;color:#374151;margin-left:.8rem;">Quiz final :</label>
+          <input type="number" id="admThresholdQuiz" min="1" max="100" value="70" style="width:64px;padding:.3rem .5rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.85rem;font-weight:700;text-align:center;">
+          <span style="font-size:.78rem;color:#6b7280;">%</span>
+          <button class="btn btn-purple btn-sm" onclick="saveThresholds()" style="margin-left:auto;">💾 Sauvegarder</button>
+        </div>
+        <div id="admThresholdMsg" style="margin-top:.4rem;font-size:.75rem;"></div>
+      </div>
+
+      <!-- Module Toggles -->
+      <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:.9rem 1rem;margin-bottom:1rem;">
+        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.3rem;">🔀 Modules actifs</div>
+        <div style="font-size:.75rem;color:#6b7280;margin-bottom:.7rem;">Masquez les modules que vous n'avez pas encore enseignés. Les modules inactifs sont invisibles pour les étudiants.</div>
+        <div id="moduleToggleList"></div>
+      </div>
+
+      <!-- Quick actions -->
+      <div style="display:flex;gap:.8rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:.8rem;">
+          <div style="font-weight:800;color:#166534;font-size:.8rem;margin-bottom:.3rem;">🔓 Débloquer tous les modules</div>
+          <div style="font-size:.72rem;color:#15803d;margin-bottom:.6rem;">Score 100% partout — pour tests et démonstrations.</div>
           <button class="btn btn-green btn-sm" onclick="adminUnlockAll()">Débloquer tout</button>
         </div>
-        <div style="flex:1;min-width:200px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:12px;padding:1rem;">
-          <div style="font-weight:800;color:#991b1b;margin-bottom:.35rem;">🔄 Réinitialiser la progression</div>
-          <div style="font-size:.77rem;color:#b91c1c;margin-bottom:.8rem;">Efface toute la progression sur cet ordinateur — utile pour tester comme un étudiant.</div>
+        <div style="flex:1;min-width:180px;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:.8rem;">
+          <div style="font-weight:800;color:#991b1b;font-size:.8rem;margin-bottom:.3rem;">🔄 Réinitialiser la progression</div>
+          <div style="font-size:.72rem;color:#b91c1c;margin-bottom:.6rem;">Efface toute la progression sur cet ordinateur.</div>
           <button class="btn btn-red btn-sm" onclick="adminResetProgress()">Réinitialiser</button>
         </div>
       </div>
       <div id="admAccessMsg" style="margin-top:.9rem;"></div>
+    </div>
+
+    <!-- PANEL: GENERATOR -->
+    <div id="adm-panel-gen" class="adm-panel" style="display:none;">
+      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.25rem;">🧩 Générateur de module no-code</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-bottom:1rem;line-height:1.5;">Créez un module personnalisé sans programmer. L'IA génère le cours, les exercices et le quiz.</div>
+      <div style="display:flex;flex-direction:column;gap:.65rem;">
+        <div>
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Titre du module *</label>
+          <input type="text" id="genTitle" placeholder="ex: Lean Healthcare, TPM, 8D, DMAIC..." style="width:100%;padding:.45rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.84rem;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+        <div>
+          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Description / Objectifs pédagogiques *</label>
+          <textarea id="genDesc" placeholder="Décrivez ce que l'étudiant apprendra et pratiquera dans ce module..." style="width:100%;min-height:72px;padding:.45rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <div style="display:flex;gap:.7rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:110px;">
+            <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Niveau</label>
+            <select id="genLevel" style="width:100%;padding:.4rem .55rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;">
+              <option value="débutant">Débutant</option>
+              <option value="intermédiaire" selected>Intermédiaire</option>
+              <option value="avancé">Avancé</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:110px;">
+            <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Durée estimée</label>
+            <input type="text" id="genDuration" placeholder="~30 min" style="width:100%;padding:.4rem .55rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;box-sizing:border-box;">
+          </div>
+        </div>
+        <button class="btn btn-purple" onclick="generateCustomModule()" style="margin-top:.2rem;">✨ Générer avec l'IA</button>
+      </div>
+      <div id="admGenMsg" style="margin-top:.5rem;font-size:.78rem;"></div>
+      <div id="genPreview" style="margin-top:.8rem;"></div>
+
+      <!-- Custom module list -->
+      <div style="margin-top:1.3rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
+        <div style="font-weight:700;font-size:.8rem;color:#374151;margin-bottom:.5rem;">Modules publiés</div>
+        <div id="customModuleList"></div>
+        <div id="customModuleEmpty" style="font-size:.75rem;color:#94a3b8;display:none;">Aucun module créé pour l'instant.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REMEDIATION OVERLAY ══ -->
+<div class="rem-overlay" id="remediationOverlay" style="display:none;" onclick="if(event.target===this)closeRemediationPage()">
+  <div class="rem-page">
+    <div class="rem-header">
+      <div style="flex:1;min-width:0;">
+        <div id="remOverlayTitle" class="rem-header-title">📚 Cours personnalisé</div>
+        <div id="remOverlaySub" class="rem-header-sub">Adapté à votre niveau de maîtrise</div>
+      </div>
+      <button class="rem-close" onclick="closeRemediationPage()">✕ Fermer</button>
+    </div>
+    <div class="rem-body" id="remOverlayBody">
+      <div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem;color:#6b7280;"><div class="ai-spinner"></div><span>Chargement…</span></div>
     </div>
   </div>
 </div>
