@@ -848,41 +848,13 @@ textarea{resize:vertical;min-height:80px;}
     </div>
   </div>
 
-  <!-- Session widget -->
-  <div style="background:#fff;border-radius:14px;padding:1.2rem 1.5rem;box-shadow:var(--shadow);margin-bottom:1.5rem;border:1px solid var(--gray200);">
-    <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--gray400);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;">
-      🔐 Session &amp; Progression
-      <div style="flex:1;height:1px;background:var(--gray200);"></div>
+  <!-- Rapport PDF -->
+  <div style="background:#fff;border-radius:14px;padding:1rem 1.5rem;box-shadow:var(--shadow);margin-bottom:1.5rem;border:1px solid var(--gray200);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+    <div>
+      <div style="font-weight:700;font-size:.85rem;color:#374151;">📋 Rapport de progression PDF</div>
+      <div style="font-size:.74rem;color:#6b7280;margin-top:.2rem;">Exportez tous vos scores et feedbacks IA en PDF.</div>
     </div>
-    <div style="display:flex;gap:1.5rem;flex-wrap:wrap;">
-      <div style="flex:1;min-width:220px;">
-        <div style="font-weight:700;font-size:.82rem;color:#374151;margin-bottom:.3rem;">💾 Sauvegarder ma session</div>
-        <div style="font-size:.74rem;color:#6b7280;margin-bottom:.6rem;line-height:1.5;">Génère votre code de session (votre prénom). Utilisez-le pour récupérer votre progression.</div>
-        <button class="btn btn-primary btn-sm" onclick="exportSession()">Générer mon code</button>
-        <div id="exportResult" style="margin-top:.6rem;"></div>
-      </div>
-      <div style="width:1px;background:var(--gray200);flex-shrink:0;align-self:stretch;"></div>
-      <div style="flex:1;min-width:220px;">
-        <div style="font-weight:700;font-size:.82rem;color:#374151;margin-bottom:.3rem;">📥 Récupérer ma session</div>
-        <div style="font-size:.74rem;color:#6b7280;margin-bottom:.6rem;line-height:1.5;">Entrez votre prénom pour retrouver exactement votre progression sur cet ordinateur.</div>
-        <input type="text" id="importCode" placeholder="Votre prénom…" style="width:100%;border:1.5px solid var(--gray200);border-radius:8px;padding:.45rem .6rem;font-size:.85rem;font-weight:700;font-family:'Inter',sans-serif;outline:none;transition:border .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--gray200)'" onkeydown="if(event.key==='Enter')importSession()">
-        <button class="btn btn-green btn-sm" onclick="importSession()" style="margin-top:.4rem;">Récupérer ma session</button>
-        <div id="importResult" style="margin-top:.4rem;"></div>
-      </div>
-      <div style="width:1px;background:var(--gray200);flex-shrink:0;align-self:stretch;"></div>
-      <div style="flex:1;min-width:220px;">
-        <div style="font-weight:700;font-size:.82rem;color:#374151;margin-bottom:.3rem;">📤 Envoyer au professeur</div>
-        <div style="font-size:.74rem;color:#6b7280;margin-bottom:.6rem;line-height:1.5;">Générez un code unique à envoyer à votre prof pour qu'il suive votre progression dans le dashboard.</div>
-        <button class="btn btn-purple btn-sm" onclick="exportForProfessor()">Générer mon code prof</button>
-        <div id="profExportResult" style="margin-top:.6rem;"></div>
-      </div>
-      <div style="width:1px;background:var(--gray200);flex-shrink:0;align-self:stretch;"></div>
-      <div style="flex:1;min-width:220px;">
-        <div style="font-weight:700;font-size:.82rem;color:#374151;margin-bottom:.3rem;">📋 Rapport PDF</div>
-        <div style="font-size:.74rem;color:#6b7280;margin-bottom:.6rem;line-height:1.5;">Exportez tous vos résultats en PDF — scores de chaque module et feedbacks IA inclus.</div>
-        <button class="btn btn-sm" style="background:#059669;color:#fff;" onclick="downloadResultsPDF()">📥 Télécharger le PDF</button>
-      </div>
-    </div>
+    <button class="btn btn-sm" style="background:#059669;color:#fff;flex-shrink:0;" onclick="downloadResultsPDF()">📥 Télécharger le PDF</button>
   </div>
 
   <!-- Manuels -->
