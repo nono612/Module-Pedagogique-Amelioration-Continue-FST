@@ -725,7 +725,10 @@ textarea{resize:vertical;min-height:80px;}
         </div>
         <div style="margin-bottom:.5rem;">
           <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Mot de passe</label>
-          <input type="password" id="authPassword" placeholder="••••••••" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')authLogin()">
+          <div style="position:relative;">
+            <input type="password" id="authPassword" placeholder="••••••••" style="width:100%;padding:.65rem 2.6rem .65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')authLogin()">
+            <button type="button" onclick="togglePwd('authPassword',this)" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:#94a3b8;padding:0;line-height:1;">👁</button>
+          </div>
         </div>
         <div style="text-align:right;margin-bottom:1.2rem;">
           <button onclick="authForgotPassword()" style="font-size:.75rem;color:#7c3aed;background:none;border:none;cursor:pointer;font-weight:600;">Mot de passe oublié ?</button>
@@ -745,7 +748,10 @@ textarea{resize:vertical;min-height:80px;}
         </div>
         <div style="margin-bottom:.9rem;">
           <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Mot de passe</label>
-          <input type="password" id="authPasswordReg" placeholder="Minimum 6 caractères" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')authRegister()">
+          <div style="position:relative;">
+            <input type="password" id="authPasswordReg" placeholder="Minimum 6 caractères" style="width:100%;padding:.65rem 2.6rem .65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')authRegister()">
+            <button type="button" onclick="togglePwd('authPasswordReg',this)" style="position:absolute;right:.65rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:#94a3b8;padding:0;line-height:1;">👁</button>
+          </div>
         </div>
         <button onclick="authRegister()" style="width:100%;padding:.75rem;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border:none;border-radius:12px;font-size:.88rem;font-weight:800;cursor:pointer;">Créer mon compte →</button>
         <div id="authMsgRegister" style="margin-top:.8rem;font-size:.78rem;text-align:center;min-height:1.1rem;"></div>
@@ -1886,6 +1892,12 @@ function authSwitchTab(tab){
   document.getElementById('authTabRegister').style.cssText=tab==='register'?'flex:1;padding:.8rem;font-size:.82rem;font-weight:800;color:#7c3aed;background:#fff;border:none;cursor:pointer;border-bottom:2px solid #7c3aed;margin-bottom:-2px;':'flex:1;padding:.8rem;font-size:.82rem;font-weight:700;color:#94a3b8;background:#fff;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;';
 }
 
+function togglePwd(inputId,btn){
+  const inp=document.getElementById(inputId);if(!inp)return;
+  if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}
+  else{inp.type='password';btn.textContent='👁';}
+}
+
 async function authLogin(){
   const email=(document.getElementById('authEmail')?.value||'').trim();
   const pwd=document.getElementById('authPassword')?.value||'';
@@ -1893,7 +1905,13 @@ async function authLogin(){
   if(!email||!pwd){if(msg)msg.innerHTML='<span style="color:#dc2626;">Remplissez tous les champs.</span>';return;}
   if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Connexion…</span>';
   const{data,error}=await _sb.auth.signInWithPassword({email,password:pwd});
-  if(error){if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':error.message}</span>`;return;}
+  if(error){
+    let errMsg='Email ou mot de passe incorrect.';
+    if(error.message?.includes('Email not confirmed'))errMsg='Confirmez votre email avant de vous connecter (vérifiez votre boîte mail).';
+    if(error.message?.includes('Invalid login credentials'))errMsg='Email ou mot de passe incorrect.';
+    if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${errMsg}</span>`;
+    return;
+  }
   await _onAuthSuccess(data.user);
 }
 
@@ -1920,7 +1938,7 @@ async function authForgotPassword(){
   const msg=document.getElementById('authMsgLogin');
   if(!email){if(msg)msg.innerHTML='<span style="color:#dc2626;">Entrez votre email d\'abord.</span>';return;}
   if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Envoi…</span>';
-  const{error}=await _sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  const{error}=await _sb.auth.resetPasswordForEmail(email,{redirectTo:'https://nono612.github.io/Module-Pedagogique-Amelioration-Continue-FST/'});
   if(error){if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message}</span>`;return;}
   if(msg)msg.innerHTML='<span style="color:#059669;">✅ Email envoyé ! Vérifiez votre boîte mail.</span>';
 }
@@ -1960,6 +1978,10 @@ async function _onAuthSuccess(user,forcedName){
   // Charge config partagée
   await Promise.all([_sbPullAdminConfig(),_sbPullCustomModules()]);
   renderGrid&&renderGrid();
+  // Si pas encore de CV → ouvre le modal CV automatiquement
+  if(!profile?.cv_domain&&!state.domain){
+    setTimeout(()=>{if(typeof showCVModal==='function')showCVModal();},600);
+  }
 }
 
 /* Vérifie session existante au chargement */
