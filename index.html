@@ -884,6 +884,21 @@ textarea{resize:vertical;min-height:80px;}
     </div>
   </div>
 
+  <!-- Parcours IA personnalisé -->
+  <div style="background:#fff;border-radius:14px;padding:1rem 1.5rem;box-shadow:var(--shadow);margin-bottom:1.5rem;border:1px solid var(--gray200);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;margin-bottom:.5rem;">
+      <div>
+        <div style="font-weight:700;font-size:.85rem;color:#374151;">✨ Parcours personnalisé IA</div>
+        <div style="font-size:.74rem;color:#6b7280;margin-top:.15rem;">L'IA analyse votre profil et vous propose un ordre optimal d'apprentissage.</div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="btn btn-sm" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;" onclick="generateAIParcours()">✨ Générer mon parcours</button>
+        <button id="btnRegenParcours" class="btn btn-sm" style="display:none;background:#f1f5f9;color:#374151;" onclick="generateAIParcours()">🔄 Autre proposition</button>
+      </div>
+    </div>
+    <div id="aiParcoursResult" style="display:none;margin-top:.8rem;"></div>
+  </div>
+
   <!-- Module grid -->
   <div class="mod-grid" id="moduleGrid"></div>
 
@@ -1929,7 +1944,7 @@ async function authRegister(){
     // Crée le profil immédiatement
     await _sb.from('profiles').upsert({user_id:data.user.id,display_name:name,api_key:'',cv_domain:null},{onConflict:'user_id'});
     if(msg)msg.innerHTML='<span style="color:#059669;">✅ Compte créé ! Vérifiez vos emails si demandé.</span>';
-    await _onAuthSuccess(data.user,name);
+    await _onAuthSuccess(data.user,name,true);
   }
 }
 
@@ -1954,7 +1969,7 @@ async function authLogout(){
   const kf=document.getElementById('apiKey');if(kf)kf.value='';
 }
 
-async function _onAuthSuccess(user,forcedName){
+async function _onAuthSuccess(user,forcedName,isNewReg=false){
   _currentUser=user;
   // Charge le profil
   const{data:profile}=await _sb.from('profiles').select('*').eq('user_id',user.id).maybeSingle();
@@ -1978,8 +1993,8 @@ async function _onAuthSuccess(user,forcedName){
   // Charge config partagée
   await Promise.all([_sbPullAdminConfig(),_sbPullCustomModules()]);
   renderGrid&&renderGrid();
-  // Si pas encore de CV → ouvre le modal CV automatiquement
-  if(!profile?.cv_domain&&!state.domain){
+  // Modal CV uniquement à la première inscription
+  if(isNewReg&&!profile?.cv_domain&&!state.domain){
     setTimeout(()=>{if(typeof showCVModal==='function')showCVModal();},600);
   }
 }
@@ -2269,6 +2284,49 @@ function updateNav(){
 function _prevCVModule(recoIds,currentId){const idx=recoIds.indexOf(currentId);if(idx<=0)return null;return recoIds[idx-1];}
 function cvApplyParcours(){state.cvFilter=true;state.cvRecoIds=(state.cvReco||[]).map(r=>r.id);save();closeCVModal();renderGrid();updateNav();}
 function cvClearFilter(){state.cvFilter=false;state.cvRecoIds=[];save();renderGrid();updateNav();}
+
+async function generateAIParcours(){
+  const key=(document.getElementById('apiKey')?.value||'').trim()||sessionStorage.getItem('ac_groq_key')||'';
+  if(!key){alert('Entrez votre clé API Groq en haut du site d\'abord.');return;}
+  const panel=document.getElementById('aiParcoursResult');
+  const btnRegen=document.getElementById('btnRegenParcours');
+  if(panel){panel.style.display='block';panel.innerHTML='<div class="ai-wrap" style="margin:0;"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse de votre profil en cours…</div></div>';}
+  const domain=state.domain||'Génie Industriel';
+  const completed=state.completed||[];
+  const scores=state.scores||{};
+  const doneStr=completed.map(id=>{const m=MODULES.find(x=>x.id===id);return m?`${m.titre} (score: ${scores[m.id]||'?'}%)`:''}).filter(Boolean).join(', ')||'Aucun module validé';
+  const todoStr=MODULES.filter(m=>!completed.includes(m.id)).map(m=>`M${m.id}: ${m.titre}`).join('\n');
+  const prompt=`Tu es un expert pédagogique en amélioration continue et génie industriel.\n\nProfil étudiant :\n- Domaine : ${domain}\n- Modules déjà validés : ${doneStr}\n- Modules restants :\n${todoStr}\n\nPropose un parcours d'apprentissage personnalisé et optimal pour cet étudiant. Réponds UNIQUEMENT en JSON strict, sans texte avant ou après :\n{\n  "intro": "phrase d'accroche personnalisée selon le domaine et la progression",\n  "parcours": [\n    {"module": "M1", "titre": "...", "raison": "pourquoi ce module maintenant en 1 phrase courte"}\n  ],\n  "conseil": "un conseil concret et motivant pour cet étudiant"\n}`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1000,temperature:0.8})});
+    const data=await resp.json();
+    const raw=data.choices?.[0]?.message?.content||'';
+    const jsonMatch=raw.match(/\{[\s\S]*\}/);
+    if(!jsonMatch)throw new Error('Réponse IA invalide');
+    const result=JSON.parse(jsonMatch[0]);
+    if(panel){
+      panel.innerHTML=`
+        <div style="background:#f5f3ff;border-radius:10px;padding:.9rem 1rem;margin-bottom:.9rem;border-left:4px solid #7c3aed;">
+          <div style="font-size:.82rem;color:#5b21b6;font-style:italic;">"${result.intro}"</div>
+        </div>
+        <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#6b7280;margin-bottom:.6rem;">📍 Ordre recommandé par l'IA</div>
+        ${(result.parcours||[]).map((p,i)=>`
+          <div style="display:flex;gap:.8rem;align-items:flex-start;padding:.65rem .8rem;border-radius:8px;background:${i===0?'#eff6ff':'#f9fafb'};margin-bottom:.4rem;border:1px solid ${i===0?'#93c5fd':'#e5e7eb'};">
+            <div style="width:26px;height:26px;border-radius:50%;background:${i===0?'#2563eb':'#e2e8f0'};color:${i===0?'#fff':'#374151'};display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;">${i+1}</div>
+            <div>
+              <div style="font-weight:700;font-size:.82rem;color:#1e293b;">${p.module} — ${p.titre}</div>
+              <div style="font-size:.73rem;color:#64748b;margin-top:.15rem;">${p.raison}</div>
+            </div>
+          </div>`).join('')}
+        ${result.conseil?`<div style="background:#f0fdf4;border-radius:8px;padding:.75rem 1rem;margin-top:.6rem;border-left:3px solid #059669;font-size:.78rem;color:#065f46;">💡 ${result.conseil}</div>`:''}
+      `;
+      if(btnRegen)btnRegen.style.display='inline-flex';
+    }
+  }catch(e){
+    if(panel)panel.innerHTML=`<div style="color:#dc2626;font-size:.8rem;padding:.5rem;">❌ Erreur : ${e.message}</div>`;
+  }
+}
+
 function renderGrid(){
   const g=document.getElementById('moduleGrid');g.innerHTML='';
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
