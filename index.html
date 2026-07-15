@@ -5193,14 +5193,28 @@ function renderRoster(){
   const cnt=document.getElementById('rosterCount');if(cnt)cnt.textContent=roster.length;
   const wrap=document.getElementById('rosterTableWrap');if(!wrap)return;
   if(!roster.length){
-    wrap.innerHTML='<div style="text-align:center;padding:3rem 1rem;color:#94a3b8;"><div style="font-size:2.8rem;margin-bottom:.7rem;">📭</div><div style="font-size:.9rem;font-weight:700;color:#64748b;">Aucun étudiant importé</div><div style="font-size:.78rem;margin-top:.4rem;">Utilisez l\'onglet "Importer codes" pour ajouter des étudiants.</div></div>';
+    wrap.innerHTML='<div style="text-align:center;padding:3rem 1rem;color:#94a3b8;"><div style="font-size:2.8rem;margin-bottom:.7rem;">📭</div><div style="font-size:.9rem;font-weight:700;color:#64748b;">Aucun étudiant importé</div><div style="font-size:.78rem;margin-top:.4rem;">Rafraîchissez depuis le cloud pour voir les étudiants connectés.</div></div>';
     return;
   }
-  const MN=['PDCA','5S','Ishi.','Pareto','Kanban','VSM','SPC','SMED','AMDEC','Projet','Quiz'];
-  // Summary stats
-  const allAvgs=roster.map(s=>{const vals=Object.values(s.s||{});return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;});
-  const classAvg=Math.round(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length);
-  const done9=roster.filter(s=>(s.c||[]).length===11).length;
+  // Colonnes standards
+  const STD_NAMES=['PDCA','5S','Ishi.','Pareto','Kanban','VSM','SPC','SMED','AMDEC','Projet','Quiz'];
+  // Colonnes custom : modules du prof + ceux détectés dans les données étudiants
+  const knownCustom=getCustomModules().filter(cm=>cm.active!==false);
+  const customKeysFromData=new Set();
+  roster.forEach(s=>{Object.keys(s.s||{}).forEach(k=>{if(String(k).startsWith('c'))customKeysFromData.add(k);});});
+  const customCols=[];
+  knownCustom.forEach((cm,i)=>customCols.push({key:`c${i}`,label:cm.titre.length>9?cm.titre.slice(0,8)+'…':cm.titre,titre:cm.titre}));
+  customKeysFromData.forEach(k=>{if(!customCols.find(c=>c.key===k))customCols.push({key:k,label:`Custom ${Number(k.replace('c',''))+1}`,titre:`Module personnalisé ${Number(k.replace('c',''))+1}`});});
+  const totalCols=11+customCols.length;
+  // Stats globales
+  const allAvgs=roster.map(s=>{const vals=Object.values(s.s||{}).filter(v=>typeof v==='number');return vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;});
+  const classAvg=allAvgs.length?Math.round(allAvgs.reduce((a,b)=>a+b,0)/allAvgs.length):0;
+  const doneAll=roster.filter(s=>{
+    const sc=s.s||{},done=s.c||[];
+    const stdOk=done.length===11;
+    const custOk=customCols.every(c=>(sc[c.key]||0)>=60);
+    return stdOk&&(customCols.length===0||custOk);
+  }).length;
   let html=`<div style="display:flex;gap:.8rem;margin-bottom:1.1rem;flex-wrap:wrap;">
     <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:.6rem 1rem;flex:1;min-width:90px;text-align:center;">
       <div style="font-size:1.4rem;font-weight:900;color:#0284c7;">${roster.length}</div>
@@ -5211,24 +5225,34 @@ function renderRoster(){
       <div style="font-size:.7rem;color:#047857;font-weight:700;">Moyenne classe</div>
     </div>
     <div style="background:#faf5ff;border:1px solid #ddd6fe;border-radius:10px;padding:.6rem 1rem;flex:1;min-width:90px;text-align:center;">
-      <div style="font-size:1.4rem;font-weight:900;color:#7c3aed;">${done9}</div>
+      <div style="font-size:1.4rem;font-weight:900;color:#7c3aed;">${doneAll}</div>
       <div style="font-size:.7rem;color:#6d28d9;font-weight:700;">Parcours complets</div>
     </div>
   </div>`;
   html+=`<div style="overflow-x:auto;"><table class="rst-table"><thead><tr>
     <th>Étudiant</th><th>Progression</th>
-    ${MN.map((n,i)=>`<th title="Module ${i+1} — ${n}">${n}</th>`).join('')}
+    ${STD_NAMES.map((n,i)=>`<th title="Module ${i+1} — ${n}">${n}</th>`).join('')}
+    ${customCols.map(c=>`<th title="${_escH(c.titre)}" style="color:#7c3aed;border-top:2px solid #7c3aed;">${_escH(c.label)}</th>`).join('')}
     <th>Moy.</th><th>Date</th><th></th>
   </tr></thead><tbody>`;
   roster.forEach((s,idx)=>{
     const done=s.c||[],sc=s.s||{};
-    const pct=Math.round(done.length/11*100);
-    const avg=Object.keys(sc).length?Math.round(Object.values(sc).reduce((a,b)=>a+b,0)/Object.keys(sc).length):0;
-    const date=s.d?new Date(s.d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
+    const stdDone=done.length;
+    const custDone=customCols.filter(c=>(sc[c.key]||0)>=60).length;
+    const totalDone=stdDone+custDone;
+    const pct=totalCols>0?Math.round(totalDone/totalCols*100):0;
+    const allScores=Object.values(sc).filter(v=>typeof v==='number');
+    const avg=allScores.length?Math.round(allScores.reduce((a,b)=>a+b,0)/allScores.length):0;
+    const date=s.date||'—';
     const barColor=pct>=70?'#059669':pct>=40?'#d97706':'#94a3b8';
-    const cells=Array.from({length:11},(_,i)=>{
+    const stdCells=Array.from({length:11},(_,i)=>{
       const m=i+1,isDone=done.includes(m),score=sc[m];
       if(score!=null)return `<td><span class="m-cell ${isDone?'m-done':'m-part'}">${isDone?'✓ ':''}${score}%</span></td>`;
+      return '<td><span class="m-cell m-none">—</span></td>';
+    });
+    const custCells=customCols.map(c=>{
+      const score=sc[c.key];const isDone=score>=60;
+      if(score!=null)return `<td><span class="m-cell ${isDone?'m-done':'m-part'}" style="border-color:#7c3aed20;">${isDone?'✓ ':''}${score}%</span></td>`;
       return '<td><span class="m-cell m-none">—</span></td>';
     });
     html+=`<tr>
@@ -5237,9 +5261,9 @@ function renderRoster(){
         <div style="width:56px;height:7px;background:#f1f5f9;border-radius:4px;overflow:hidden;flex-shrink:0;">
           <div style="width:${pct}%;height:100%;background:${barColor};border-radius:4px;transition:width .4s;"></div>
         </div>
-        <span style="font-size:.72rem;font-weight:700;color:${barColor};">${done.length}/11</span>
+        <span style="font-size:.72rem;font-weight:700;color:${barColor};">${totalDone}/${totalCols}</span>
       </div></td>
-      ${cells.join('')}
+      ${stdCells.join('')}${custCells.join('')}
       <td><span style="font-weight:800;font-size:.8rem;color:${avg>=60?'#059669':'#94a3b8'};">${avg?avg+'%':'—'}</span></td>
       <td style="color:#94a3b8;font-size:.72rem;white-space:nowrap;">${date}</td>
       <td><button onclick="removeStudent(${idx})" style="border:none;background:none;color:#f87171;cursor:pointer;font-size:.85rem;padding:.1rem .3rem;border-radius:5px;" title="Supprimer">🗑</button></td>
