@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ═══════════════════════════════════════════════════════
    VARIABLES & RESET
@@ -700,6 +701,59 @@ textarea{resize:vertical;min-height:80px;}
 </head>
 <body>
 
+<!-- ══════════════ AUTH OVERLAY ══════════════ -->
+<div id="authOverlay" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);display:flex;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.5);">
+    <!-- Header card -->
+    <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:2rem 2rem 1.4rem;text-align:center;">
+      <div style="font-size:2.4rem;margin-bottom:.4rem;">🌱</div>
+      <div style="font-size:1.2rem;font-weight:900;color:#fff;letter-spacing:-.5px;">GREEN LAB</div>
+      <div style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:.2rem;">Plateforme Lean Industriel</div>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:2px solid #f1f5f9;">
+      <button id="authTabLogin" onclick="authSwitchTab('login')" style="flex:1;padding:.8rem;font-size:.82rem;font-weight:800;color:#7c3aed;background:#fff;border:none;cursor:pointer;border-bottom:2px solid #7c3aed;margin-bottom:-2px;">Se connecter</button>
+      <button id="authTabRegister" onclick="authSwitchTab('register')" style="flex:1;padding:.8rem;font-size:.82rem;font-weight:700;color:#94a3b8;background:#fff;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;">Créer un compte</button>
+    </div>
+    <!-- Forms -->
+    <div style="padding:1.6rem;">
+      <!-- LOGIN FORM -->
+      <div id="authFormLogin">
+        <div style="margin-bottom:1rem;">
+          <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Adresse email</label>
+          <input type="email" id="authEmail" placeholder="prenom.nom@email.com" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+        <div style="margin-bottom:.5rem;">
+          <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Mot de passe</label>
+          <input type="password" id="authPassword" placeholder="••••••••" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')authLogin()">
+        </div>
+        <div style="text-align:right;margin-bottom:1.2rem;">
+          <button onclick="authForgotPassword()" style="font-size:.75rem;color:#7c3aed;background:none;border:none;cursor:pointer;font-weight:600;">Mot de passe oublié ?</button>
+        </div>
+        <button onclick="authLogin()" style="width:100%;padding:.75rem;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border:none;border-radius:12px;font-size:.88rem;font-weight:800;cursor:pointer;">Se connecter →</button>
+        <div id="authMsgLogin" style="margin-top:.8rem;font-size:.78rem;text-align:center;min-height:1.1rem;"></div>
+      </div>
+      <!-- REGISTER FORM -->
+      <div id="authFormRegister" style="display:none;">
+        <div style="margin-bottom:.9rem;">
+          <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Prénom et nom</label>
+          <input type="text" id="authDisplayName" placeholder="Ex : Nassim El Yamani" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+        <div style="margin-bottom:.9rem;">
+          <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Adresse email</label>
+          <input type="email" id="authEmailReg" placeholder="prenom.nom@email.com" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+        <div style="margin-bottom:.9rem;">
+          <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Mot de passe</label>
+          <input type="password" id="authPasswordReg" placeholder="Minimum 6 caractères" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')authRegister()">
+        </div>
+        <button onclick="authRegister()" style="width:100%;padding:.75rem;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border:none;border-radius:12px;font-size:.88rem;font-weight:800;cursor:pointer;">Créer mon compte →</button>
+        <div id="authMsgRegister" style="margin-top:.8rem;font-size:.78rem;text-align:center;min-height:1.1rem;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ══════════════ HEADER ══════════════ -->
 <header>
   <div class="logo">
@@ -719,6 +773,10 @@ textarea{resize:vertical;min-height:80px;}
     </div>
     <div class="progress-pill" id="globalBadge">0 / 9 modules</div>
     <div id="adminBadge" style="display:none;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:.68rem;font-weight:800;padding:.28rem .7rem;border-radius:20px;letter-spacing:.5px;box-shadow:0 2px 10px rgba(124,58,237,.4);">🔑 ADMIN</div>
+    <div id="userBadge" style="display:none;align-items:center;gap:.5rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:.25rem .7rem .25rem .5rem;">
+      <span style="font-size:.7rem;color:rgba(255,255,255,.75);" id="userBadgeName">—</span>
+      <button onclick="authLogout()" title="Se déconnecter" style="background:rgba(255,255,255,.15);border:none;border-radius:10px;color:#fff;font-size:.65rem;font-weight:700;padding:.18rem .45rem;cursor:pointer;">⎋ Déco</button>
+    </div>
   </div>
 </header>
 
@@ -1786,6 +1844,174 @@ const MODULES=[
   {id:11,name:'Quiz Final IA',icon:'🎓',desc:'QCM dynamique IA – 70% requis + certificat',time:'~30 min'}
 ];
 
+/* ══════════════════════════════════════════
+   SUPABASE — sync cloud
+   ══════════════════════════════════════════ */
+const _SB_URL='https://wzbyjwklphpeugfptzqs.supabase.co';
+const _SB_KEY='sb_publishable_Z1M2LdldV4oL5Z3IJgO14A_h9gmDH5o';
+const _sb=supabase.createClient(_SB_URL,_SB_KEY);
+let _syncTimer=null;
+
+/* Sync progression étudiant → cloud (debounced) */
+async function _sbPushState(){
+  if(!state.studentName)return;
+  try{
+    await _sb.from('student_progress').upsert(
+      {student_name:state.studentName,state_json:state,updated_at:new Date().toISOString()},
+      {onConflict:'student_name'}
+    );
+  }catch(e){}
+}
+
+/* Charge depuis le cloud et fusionne avec local */
+async function _sbPullState(name){
+  try{
+    const{data,error}=await _sb.from('student_progress').select('state_json').eq('student_name',name).maybeSingle();
+    if(error||!data?.state_json)return false;
+    const r=data.state_json;
+    // Fusion intelligente : on prend le meilleur des deux
+    state.completed=[...new Set([...(state.completed||[]),...(r.completed||[])])];
+    state.scores={...(r.scores||{}),...(state.scores||{})};
+    state.exLevels={...(r.exLevels||{}),...(state.exLevels||{})};
+    state.badges=[...new Set([...(state.badges||[]),...(r.badges||[])])];
+    if(!state.domain&&r.domain)state.domain=r.domain;
+    if(!state.cvFilter&&r.cvFilter){state.cvFilter=r.cvFilter;state.cvRecoIds=r.cvRecoIds||[];}
+    if(r.feedbacks)state.feedbacks={...(r.feedbacks||{}),...(state.feedbacks||{})};
+    return true;
+  }catch(e){return false;}
+}
+
+/* Sync config admin → cloud */
+async function _sbPushAdminConfig(cfg){
+  try{await _sb.from('greenlab_admin_config').upsert({id:1,config_json:cfg});}catch(e){}
+}
+async function _sbPullAdminConfig(){
+  try{
+    const{data}=await _sb.from('greenlab_admin_config').select('config_json').eq('id',1).maybeSingle();
+    if(data?.config_json)localStorage.setItem('greenlab_admin_config',JSON.stringify(data.config_json));
+  }catch(e){}
+}
+
+/* Sync modules personnalisés → cloud (partagés avec tous) */
+const _SB_CM_ID='00000000-0000-0000-0000-000000000001';
+async function _sbPushCustomModules(mods){
+  try{await _sb.from('greenlab_custom_modules').upsert({id:_SB_CM_ID,modules_json:mods,updated_at:new Date().toISOString()});}catch(e){}
+}
+async function _sbPullCustomModules(){
+  try{
+    const{data}=await _sb.from('greenlab_custom_modules').select('modules_json').eq('id',_SB_CM_ID).maybeSingle();
+    if(data?.modules_json)localStorage.setItem('greenlab_custom_modules',JSON.stringify(data.modules_json));
+  }catch(e){}
+}
+
+/* ── Auth fonctions ── */
+let _currentUser=null;
+
+function authSwitchTab(tab){
+  document.getElementById('authFormLogin').style.display=tab==='login'?'block':'none';
+  document.getElementById('authFormRegister').style.display=tab==='register'?'block':'none';
+  document.getElementById('authTabLogin').style.cssText=tab==='login'?'flex:1;padding:.8rem;font-size:.82rem;font-weight:800;color:#7c3aed;background:#fff;border:none;cursor:pointer;border-bottom:2px solid #7c3aed;margin-bottom:-2px;':'flex:1;padding:.8rem;font-size:.82rem;font-weight:700;color:#94a3b8;background:#fff;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;';
+  document.getElementById('authTabRegister').style.cssText=tab==='register'?'flex:1;padding:.8rem;font-size:.82rem;font-weight:800;color:#7c3aed;background:#fff;border:none;cursor:pointer;border-bottom:2px solid #7c3aed;margin-bottom:-2px;':'flex:1;padding:.8rem;font-size:.82rem;font-weight:700;color:#94a3b8;background:#fff;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;';
+}
+
+async function authLogin(){
+  const email=(document.getElementById('authEmail')?.value||'').trim();
+  const pwd=document.getElementById('authPassword')?.value||'';
+  const msg=document.getElementById('authMsgLogin');
+  if(!email||!pwd){if(msg)msg.innerHTML='<span style="color:#dc2626;">Remplissez tous les champs.</span>';return;}
+  if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Connexion…</span>';
+  const{data,error}=await _sb.auth.signInWithPassword({email,password:pwd});
+  if(error){if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':error.message}</span>`;return;}
+  await _onAuthSuccess(data.user);
+}
+
+async function authRegister(){
+  const name=(document.getElementById('authDisplayName')?.value||'').trim();
+  const email=(document.getElementById('authEmailReg')?.value||'').trim();
+  const pwd=document.getElementById('authPasswordReg')?.value||'';
+  const msg=document.getElementById('authMsgRegister');
+  if(!name||!email||!pwd){if(msg)msg.innerHTML='<span style="color:#dc2626;">Remplissez tous les champs.</span>';return;}
+  if(pwd.length<6){if(msg)msg.innerHTML='<span style="color:#dc2626;">Mot de passe : 6 caractères minimum.</span>';return;}
+  if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Création du compte…</span>';
+  const{data,error}=await _sb.auth.signUp({email,password:pwd,options:{data:{display_name:name}}});
+  if(error){if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message}</span>`;return;}
+  if(data.user){
+    // Crée le profil immédiatement
+    await _sb.from('profiles').upsert({user_id:data.user.id,display_name:name,api_key:'',cv_domain:null},{onConflict:'user_id'});
+    if(msg)msg.innerHTML='<span style="color:#059669;">✅ Compte créé ! Vérifiez vos emails si demandé.</span>';
+    await _onAuthSuccess(data.user,name);
+  }
+}
+
+async function authForgotPassword(){
+  const email=(document.getElementById('authEmail')?.value||'').trim();
+  const msg=document.getElementById('authMsgLogin');
+  if(!email){if(msg)msg.innerHTML='<span style="color:#dc2626;">Entrez votre email d\'abord.</span>';return;}
+  if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Envoi…</span>';
+  const{error}=await _sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+  if(error){if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message}</span>`;return;}
+  if(msg)msg.innerHTML='<span style="color:#059669;">✅ Email envoyé ! Vérifiez votre boîte mail.</span>';
+}
+
+async function authLogout(){
+  await _sb.auth.signOut();
+  _currentUser=null;
+  state={scores:{},completed:[],studentName:'',kanban:{backlog:['Définir le problème','Analyser les données','Former l\'équipe'],doing:['Cartographier le flux'],done:['Identifier les gaspillages']},pdca:{},vsmSteps:null,smedRows:null,paretoData:null,ishiData:null,domain:null,cvSeen:false,cvFilter:false,cvRecoIds:[],exLevels:{},timers:{},badges:{},feedbacks:{}};
+  sessionStorage.clear();
+  const ub=document.getElementById('userBadge');if(ub)ub.style.display='none';
+  const ao=document.getElementById('authOverlay');if(ao)ao.style.display='flex';
+  // Reset API key field
+  const kf=document.getElementById('apiKey');if(kf)kf.value='';
+}
+
+async function _onAuthSuccess(user,forcedName){
+  _currentUser=user;
+  // Charge le profil
+  const{data:profile}=await _sb.from('profiles').select('*').eq('user_id',user.id).maybeSingle();
+  const displayName=forcedName||(profile?.display_name)||user.user_metadata?.display_name||(user.email?.split('@')[0])||'Étudiant';
+  // Applique le profil
+  state.studentName=displayName;
+  if(profile?.cv_domain)state.domain=profile.cv_domain;
+  if(profile?.api_key){
+    const kf=document.getElementById('apiKey');if(kf)kf.value=profile.api_key;
+    sessionStorage.setItem('ac_groq_key',profile.api_key);
+  }
+  // Charge la progression cloud
+  await _sbPullState(displayName);
+  save();
+  // Met à jour UI
+  const nf=document.getElementById('studentName');if(nf)nf.value=displayName;
+  const ub=document.getElementById('userBadge');if(ub){ub.style.display='flex';}
+  const ubn=document.getElementById('userBadgeName');if(ubn)ubn.textContent=displayName;
+  const ao=document.getElementById('authOverlay');if(ao)ao.style.display='none';
+  updateNav();renderGrid&&renderGrid();checkBadges&&checkBadges();
+  // Charge config partagée
+  await Promise.all([_sbPullAdminConfig(),_sbPullCustomModules()]);
+  renderGrid&&renderGrid();
+}
+
+/* Vérifie session existante au chargement */
+_sb.auth.getSession().then(({data:{session}})=>{
+  if(session?.user){_onAuthSuccess(session.user);}
+  else{/* Overlay déjà visible par défaut */}
+});
+
+/* Écoute les changements d'auth (reset password, etc.) */
+_sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    // L'utilisateur clique le lien reset → on lui montre le formulaire de nouveau mot de passe
+    const newPwd=prompt('Entrez votre nouveau mot de passe (min. 6 caractères) :');
+    if(newPwd&&newPwd.length>=6)_sb.auth.updateUser({password:newPwd}).then(()=>alert('✅ Mot de passe mis à jour !'));
+  }
+});
+
+/* Chargement initial au démarrage */
+(async()=>{
+  await Promise.all([_sbPullAdminConfig(),_sbPullCustomModules()]);
+})();
+
+/* ══════════════════════════════════════════ */
+
 let state=JSON.parse(sessionStorage.getItem('greenlab_v2')||'{}');
 if(state.studentName){const _named=sessionStorage.getItem(state.studentName);if(_named)state=JSON.parse(_named);}
 state.scores=state.scores||{};
@@ -1819,8 +2045,23 @@ function save(){
   sessionStorage.setItem('greenlab_v2',s);
   if(state.studentName)sessionStorage.setItem(state.studentName,s);
   const pk=prenomKey();if(pk)localStorage.setItem(pk,s);
+  // Sync cloud (debounced 2s)
+  clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(_sbPushState,2000);
 }
-function saveName(){const old=storageKey();state.studentName=document.getElementById('studentName').value.trim();if(old!==storageKey())sessionStorage.removeItem(old);save();}
+function saveName(){
+  const old=storageKey();
+  const newName=(document.getElementById('studentName')?.value||'').trim();
+  state.studentName=newName;
+  if(old!==storageKey())sessionStorage.removeItem(old);
+  save();
+  // Charge la progression cloud si nom connu
+  if(newName){
+    _sbPullState(newName).then(ok=>{
+      if(ok){save();updateNav();typeof renderGrid==='function'&&renderGrid();}
+    });
+  }
+}
 
 /* Dictionnaire 202 mots : indices 0-100 = non validé (score=index), 101-201 = validé (score=index-101) */
 const SESSION_WORDS=[
@@ -1861,18 +2102,36 @@ function exportSession(){
       <button class="btn btn-ghost btn-sm" onclick="copySessionCode()" style="margin-top:.3rem;">📋 Copier</button>
     </div>`;
 }
-function importSession(){
+async function importSession(){
   const raw=(document.getElementById('importCode').value||'').trim().split(' ')[0].toUpperCase();
   const el=document.getElementById('importResult');
   if(!raw){el.innerHTML='<div class="alert alert-warning" style="margin:0;">⚠️ Entrez votre prénom.</div>';return;}
+  el.innerHTML='<div class="alert" style="margin:0;color:#6b7280;">🔄 Recherche en cours…</div>';
+  // 1. Cherche dans le cloud
+  try{
+    const{data}=await _sb.from('student_progress').select('state_json').eq('student_name',raw).maybeSingle();
+    if(data?.state_json){
+      const r=data.state_json;
+      Object.keys(r).forEach(k=>state[k]=r[k]);
+      const s=JSON.stringify(state);
+      sessionStorage.setItem('greenlab_v2',s);
+      if(state.studentName){sessionStorage.setItem(state.studentName,s);const pk=prenomKey();if(pk)localStorage.setItem(pk,s);}
+      if(state.studentName){const nf=document.getElementById('studentName');if(nf)nf.value=state.studentName;}
+      updateNav();updateTimeDisplay();checkBadges();renderRadarChart();
+      el.innerHTML=`<div class="alert alert-success" style="margin:0;">✅ Progression retrouvée dans le cloud — ${state.completed.length}/11 modules validés !</div>`;
+      document.getElementById('importCode').value='';
+      return;
+    }
+  }catch(e){}
+  // 2. Fallback : localStorage
   const saved=localStorage.getItem('ac_session_'+raw);
-  if(!saved){el.innerHTML='<div class="alert alert-danger" style="margin:0;">❌ Aucune session trouvée pour ce prénom sur cet ordinateur.</div>';return;}
+  if(!saved){el.innerHTML='<div class="alert alert-danger" style="margin:0;">❌ Aucune session trouvée pour ce prénom.</div>';return;}
   const restored=JSON.parse(saved);
   Object.keys(restored).forEach(k=>state[k]=restored[k]);
-  sessionStorage.setItem(storageKey(),saved);
+  sessionStorage.setItem(storageKey(),JSON.stringify(state));
   if(state.studentName){const nf=document.getElementById('studentName');if(nf)nf.value=state.studentName;}
   updateNav();updateTimeDisplay();checkBadges();renderRadarChart();
-  el.innerHTML=`<div class="alert alert-success" style="margin:0;">✅ Session restaurée — ${state.completed.length}/11 modules retrouvés !</div>`;
+  el.innerHTML=`<div class="alert alert-success" style="margin:0;">✅ Session restaurée localement — ${state.completed.length}/11 modules retrouvés !</div>`;
   document.getElementById('importCode').value='';
 }
 function copySessionCode(){
@@ -1883,7 +2142,12 @@ function copySessionCode(){
 }
 function saveKey(){
   const v=document.getElementById('apiKey')?.value||'';
-  if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
+  if(!v.trim())return;
+  sessionStorage.setItem('ac_groq_key',v.trim());
+  // Persiste dans le profil Supabase (si connecté)
+  if(_currentUser){
+    _sb.from('profiles').upsert({user_id:_currentUser.id,api_key:v.trim()},{onConflict:'user_id'});
+  }
 }
 function getKey(){
   const el=document.getElementById('apiKey');
@@ -1916,12 +2180,12 @@ function _initExEmptyState(modId){
 
 /* ── Admin Config ── */
 function getAdminConfig(){return JSON.parse(localStorage.getItem('greenlab_admin_config')||'{}');}
-function saveAdminConfig(cfg){localStorage.setItem('greenlab_admin_config',JSON.stringify(cfg));}
+function saveAdminConfig(cfg){localStorage.setItem('greenlab_admin_config',JSON.stringify(cfg));_sbPushAdminConfig(cfg);}
 function getThreshold(n){const cfg=getAdminConfig();if(cfg.thresholds&&cfg.thresholds[n]!=null)return cfg.thresholds[n];if(n===11)return cfg.quizThreshold!=null?cfg.quizThreshold:70;return cfg.defaultThreshold!=null?cfg.defaultThreshold:60;}
 function isModuleActive(n){const cfg=getAdminConfig();if(!cfg.moduleToggles)return true;return cfg.moduleToggles[n]!==false;}
 function _prevActiveModule(n){for(let i=n-1;i>=1;i--){if(isModuleActive(i))return i;}return null;}
 function getCustomModules(){return JSON.parse(localStorage.getItem('greenlab_custom_modules')||'[]');}
-function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));}
+function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));_sbPushCustomModules(mods);}
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
   if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
@@ -2049,11 +2313,27 @@ function renderGrid(){
     if(!locked)d.onclick=()=>goModule(m.id);
     g.appendChild(d);
   });
+  const baseIdx=modsToShow.length;
   getCustomModules().filter(cm=>cm.active!==false).forEach((cm,i)=>{
+    const score=(state.scores||{})['c'+i]!==undefined?(state.scores||{})['c'+i]:null;
+    const done=score!==null&&score>=60;
     const d=document.createElement('div');
-    d.className='mod-card c-custom';
-    d.style.cssText='border:2px solid #7c3aed;background:linear-gradient(135deg,#faf5ff,#f3e8ff);';
-    d.innerHTML=`<div class="mod-card-top"><div><div class="mod-num" style="color:#7c3aed;">Module +${i+1}</div><span class="mod-status-chip chip-open">→ Disponible</span></div><div class="mod-icon-wrap">${cm.icone||'🧩'}</div></div><div class="mod-card-body"><h3>${cm.titre}</h3><p>${cm.desc||''}</p><div style="font-size:.68rem;color:#94a3b8;margin-top:.3rem;">⏱️ ${cm.duree||'~20 min'}</div></div>`;
+    d.className='mod-card c-custom'+(done?' mod-done':'');
+    d.style.setProperty('--mc','#7c3aed');
+    d.innerHTML=`
+      <div class="mod-card-top">
+        <div>
+          <div class="mod-num">Module ${baseIdx+i+1}</div>
+          <span class="mod-status-chip ${done?'chip-done':'chip-open'}">${done?'✓ Validé':'→ Disponible'}</span>
+        </div>
+        <div class="mod-icon-wrap">${cm.icone||'🧩'}</div>
+      </div>
+      <div class="mod-card-body">
+        <h3>${cm.titre}</h3>
+        <p>${cm.desc||''}</p>
+        <div style="font-size:.68rem;color:#94a3b8;margin-top:.3rem;">⏱️ ${cm.duree||'~30 min'}</div>
+        ${score!==null?`<div class="mod-score-row"><div class="mod-score-track"><div class="mod-score-fill" style="width:${score}%"></div></div><span class="mod-score-val">${score}%</span></div>`:''}
+      </div>`;
     d.onclick=()=>goCustomModule(i);
     g.appendChild(d);
   });
@@ -4714,13 +4994,50 @@ function admTab(name){
     if(tab)tab.classList.toggle('active',t===name);
     if(panel)panel.style.display=t===name?'block':'none';
   });
-  if(name==='roster')renderRoster();
+  if(name==='roster'){renderRoster();sbRefreshRoster();}
   if(name==='access')renderAdminAccess();
   if(name==='gen')renderCustomModuleList();
 }
 
 function getRoster(){return JSON.parse(localStorage.getItem('greenlab_admin_roster')||'[]');}
 function saveRoster(r){localStorage.setItem('greenlab_admin_roster',JSON.stringify(r));}
+
+async function sbRefreshRoster(){
+  const btn=document.getElementById('cloudRefreshBtn');
+  const status=document.getElementById('cloudSyncStatus');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Chargement…';}
+  if(status)status.textContent='Connexion au cloud…';
+  try{
+    const{data,error}=await _sb.from('student_progress').select('student_name,state_json,updated_at').order('updated_at',{ascending:false});
+    if(error)throw error;
+    if(!data||!data.length){
+      if(status)status.textContent='☁️ Aucun étudiant dans le cloud pour le moment.';
+      if(btn){btn.disabled=false;btn.textContent='☁️ Rafraîchir (cloud)';}
+      return;
+    }
+    // Convertit les données Supabase en format roster local
+    const cloudRoster=data.map(row=>{
+      const s=row.state_json||{};
+      return{
+        n:row.student_name,
+        s:s.scores||{},
+        c:s.completed||[],
+        date:row.updated_at?new Date(row.updated_at).toLocaleDateString('fr-FR'):'-',
+        source:'cloud'
+      };
+    });
+    // Fusionne avec roster local (cloud prioritaire)
+    const local=getRoster();
+    const merged=[...cloudRoster];
+    local.forEach(ls=>{if(!merged.find(cs=>cs.n===ls.n))merged.push(ls);});
+    saveRoster(merged);
+    renderRoster();
+    if(status)status.innerHTML=`☁️ <strong>${cloudRoster.length} étudiant${cloudRoster.length>1?'s':''}</strong> chargé${cloudRoster.length>1?'s':''} depuis Supabase — dernière synchro : ${new Date().toLocaleTimeString('fr-FR')}`;
+  }catch(e){
+    if(status)status.innerHTML=`<span style="color:#dc2626;">❌ Erreur cloud : ${e.message||'vérifiez la connexion'}</span>`;
+  }
+  if(btn){btn.disabled=false;btn.textContent='☁️ Rafraîchir (cloud)';}
+}
 
 function _escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -5017,6 +5334,10 @@ ${txt.slice(0,4000)}`;
     try{domain=JSON.parse(mm[1]||mm[0]);}catch(pe){throw new Error('JSON malformé : '+pe.message);}
     if(!domain.poste&&!domain.entreprise&&!domain.secteur)throw new Error('JSON vide — le modèle n\'a rien extrait du CV');
     state.domain=domain;save();
+    // Persiste le CV dans le profil Supabase (une seule fois suffit)
+    if(_currentUser){
+      _sb.from('profiles').upsert({user_id:_currentUser.id,cv_domain:domain},{onConflict:'user_id'});
+    }
     _renderCVExtract(domain);
     prog.textContent='';
   }catch(e){
@@ -5995,13 +6316,22 @@ function saveThresholds(){
 function renderModuleToggles(){
   const wrap=document.getElementById('moduleToggleList');
   if(!wrap)return;
-  wrap.innerHTML=MODULES.map(m=>{
+  const stdHtml=MODULES.map(m=>{
     const active=isModuleActive(m.id);
     return`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:${active?'#f0fdf4':'#fef2f2'};border:1px solid ${active?'#86efac':'#fca5a5'};">
       <div style="display:flex;align-items:center;gap:.45rem;"><span>${m.icon}</span><span style="font-size:.76rem;font-weight:700;color:${active?'#166534':'#991b1b'};">M${m.id} — ${m.name}</span></div>
       <button onclick="toggleModuleActive(${m.id})" style="font-size:.68rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;border:none;cursor:pointer;background:${active?'#059669':'#dc2626'};color:#fff;">${active?'Actif ✓':'Inactif'}</button>
     </div>`;
   }).join('');
+  const customMods=getCustomModules();
+  const custHtml=customMods.map((cm,i)=>{
+    const active=cm.active!==false;
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:${active?'#faf5ff':'#f8fafc'};border:1px solid ${active?'#ddd6fe':'#e2e8f0'};">
+      <div style="display:flex;align-items:center;gap:.45rem;"><span>${cm.icone||'🧩'}</span><span style="font-size:.76rem;font-weight:700;color:${active?'#4c1d95':'#6b7280'};">M${MODULES.length+i+1} — ${_escH(cm.titre)}</span></div>
+      <button onclick="toggleCustomModuleActive(${i})" style="font-size:.68rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;border:none;cursor:pointer;background:${active?'#7c3aed':'#94a3b8'};color:#fff;">${active?'Actif ✓':'Inactif'}</button>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=stdHtml+(custHtml?`<div style="font-size:.67rem;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:.4px;margin:.4rem 0 .2rem;padding:0 .2rem;">Modules personnalisés</div>`+custHtml:'');
 }
 function toggleModuleActive(n){
   const cfg=getAdminConfig();
@@ -6028,9 +6358,9 @@ async function generateCustomModule(){
   if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
-  const prompt=`Tu es un expert Lean/Six Sigma. Crée un module pédagogique complet sur "${title}" pour ingénieurs de niveau ${level}.\nObjectifs : ${desc}\n\nRéponds UNIQUEMENT en JSON valide (pas de texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte (1 phrase)","duree":"${dur||'~20 min'}","sections":[{"titre":"...","contenu":"Contenu détaillé (4-5 paragraphes, exemples industriels, emojis)"},{"titre":"...","contenu":"..."},{"titre":"...","contenu":"..."}],"quiz":[{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1},{"q":"?","opts":["A","B","C","D"],"correct":2},{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1}]}\n\n3 sections obligatoires, 5 questions quiz. JSON uniquement.`;
+  const prompt=`Tu es un expert en Génie Industriel et Lean Manufacturing. Crée un module pédagogique de niveau INGÉNIEUR sur "${title}".\nObjectifs pédagogiques : ${desc}\nNiveau : ${level}\n\nRéponds UNIQUEMENT en JSON valide (pas de texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte percutante (1 phrase)","duree":"${dur||'~30 min'}","sections":[{"titre":"Fondamentaux — ${title}","contenu":"Contenu riche et structuré : définitions, principes, formules, données chiffrées industrielles, exemples concrets (minimum 250 mots, structuré avec émojis)"},{"titre":"Méthodologie et outils","contenu":"Démarche pas-à-pas, outils pratiques, indicateurs KPI, cas d'application (minimum 200 mots)"},{"titre":"Mise en œuvre industrielle","contenu":"Application terrain, bonnes pratiques, erreurs à éviter, retours d'expérience (minimum 200 mots)"}],"cas":{"entreprise":"Nom fictif d'entreprise + secteur industriel précis (ex: Fonderie Moreau SA — Métallurgie)","contexte":"Situation industrielle réelle : 2-3 phrases avec données chiffrées concrètes","donnees":"KPIs mesurables avec valeurs chiffrées avant/après, métriques clés","probleme":"Problème industriel précis avec impacts chiffrés sur qualité, coût, délai ou sécurité","objectif":"Objectif SMART précis à atteindre par l'ingénieur","contraintes":"Contraintes réelles : budget €, délai en semaines, effectif, réglementaire"}}\n\n3 sections pédagogiques complètes + 1 cas industriel détaillé avec données chiffrées. JSON uniquement, pas de texte autour.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2500})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:3500})});
     const data=await resp.json();
     const text=data.choices[0].message.content;
     const m=text.match(/\{[\s\S]*\}/);
@@ -6049,7 +6379,7 @@ function _renderGenPreview(d,dur,level){
     </div>
     <div style="font-size:.77rem;color:#6b7280;margin-bottom:.7rem;">${_escH(d.desc||'')}</div>
     ${(d.sections||[]).slice(0,3).map(s=>`<div style="margin-bottom:.5rem;"><div style="font-weight:800;font-size:.77rem;color:#4c1d95;">📌 ${_escH(s.titre)}</div><div style="font-size:.73rem;color:#374151;line-height:1.5;margin-top:.15rem;">${_escH((s.contenu||'').slice(0,180))}${(s.contenu||'').length>180?'…':''}</div></div>`).join('')}
-    <div style="font-size:.73rem;color:#7c3aed;font-weight:700;margin-top:.5rem;">📝 ${(d.quiz||[]).length} questions de quiz incluses</div>
+    <div style="font-size:.73rem;color:#7c3aed;font-weight:700;margin-top:.5rem;">${d.cas?'🏭 Cas industriel inclus — 3 exercices niveau ingénieur':'📚 3 sections pédagogiques'}</div>
     <div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">
       <button class="btn btn-purple btn-sm" onclick="publishCustomModule()">✅ Publier ce module</button>
       <button class="btn btn-ghost btn-sm" onclick="generateCustomModule()">🔄 Régénérer</button>
@@ -6070,6 +6400,7 @@ function publishCustomModule(){
   const desc=document.getElementById('genDesc');if(desc)desc.value='';
   _genPreviewData=null;
   renderCustomModuleList();
+  renderModuleToggles();
   updateNav();
 }
 function renderCustomModuleList(){
@@ -6087,8 +6418,8 @@ function renderCustomModuleList(){
     </div>
   </div>`).join('');
 }
-function toggleCustomModuleActive(i){const mods=getCustomModules();if(!mods[i])return;mods[i].active=mods[i].active===false;saveCustomModules(mods);renderCustomModuleList();updateNav();}
-function deleteCustomModule(i){if(!confirm('Supprimer ce module ?'))return;const mods=getCustomModules();mods.splice(i,1);saveCustomModules(mods);renderCustomModuleList();updateNav();}
+function toggleCustomModuleActive(i){const mods=getCustomModules();if(!mods[i])return;mods[i].active=mods[i].active===false;saveCustomModules(mods);renderCustomModuleList();renderModuleToggles();updateNav();}
+function deleteCustomModule(i){if(!confirm('Supprimer ce module ?'))return;const mods=getCustomModules();mods.splice(i,1);saveCustomModules(mods);renderCustomModuleList();renderModuleToggles();updateNav();}
 
 let _customModIdx=null,_customModQuizAnswers={};
 
@@ -6107,35 +6438,74 @@ function goCustomModule(i){
   _moduleLeave();_moduleActiveId='c'+(i+1);_moduleStartTs=Date.now();
   const sec=document.getElementById('m-custom');if(!sec)return;
   const done=_getCustomLevDone(i);
+
+  // Section cards with gradient headers
+  const sectionColors=['linear-gradient(135deg,#4c1d95,#7c3aed)','linear-gradient(135deg,#1d4ed8,#3b82f6)','linear-gradient(135deg,#065f46,#10b981)'];
+  const sectionBorders=['#ddd6fe','#bfdbfe','#a7f3d0'];
+  const sectionIcons=['📘','⚙️','🏭'];
+  const sectionsHtml=(m.sections||[]).slice(0,3).map((s,idx)=>`
+    <div style="border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:1.1rem;">
+      <div style="background:${sectionColors[idx]};padding:.65rem 1rem;display:flex;align-items:center;gap:.5rem;">
+        <span style="font-size:1rem;">${sectionIcons[idx]}</span>
+        <span style="font-weight:800;font-size:.87rem;color:#fff;letter-spacing:.01em;">${_escH(s.titre)}</span>
+      </div>
+      <div style="padding:.9rem 1rem;background:#fff;border:1.5px solid ${sectionBorders[idx]};border-top:none;border-radius:0 0 14px 14px;line-height:1.75;color:#374151;font-size:.84rem;">${(s.contenu||'').replace(/\n/g,'<br>')}</div>
+    </div>`).join('');
+
+  // Industrial case study card
+  const cas=m.cas;
+  const casHtml=cas?`
+    <div class="ccard" style="border-left:4px solid #7c3aed;">
+      <div class="ccard-title" style="color:#4c1d95;">🏭 Cas Industriel — ${_escH(cas.entreprise||'Contexte')}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem;margin-top:.6rem;">
+        <div style="background:#faf5ff;border-radius:10px;padding:.7rem .8rem;border:1px solid #ddd6fe;">
+          <div style="font-size:.67rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📌 Contexte</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.5;">${_escH(cas.contexte||'')}</div>
+        </div>
+        <div style="background:#fff7ed;border-radius:10px;padding:.7rem .8rem;border:1px solid #fed7aa;">
+          <div style="font-size:.67rem;font-weight:800;color:#c2410c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📊 Données clés</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.5;">${_escH(cas.donnees||'')}</div>
+        </div>
+        <div style="background:#fef2f2;border-radius:10px;padding:.7rem .8rem;border:1px solid #fca5a5;">
+          <div style="font-size:.67rem;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">⚠️ Problème</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.5;">${_escH(cas.probleme||'')}</div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:10px;padding:.7rem .8rem;border:1px solid #86efac;">
+          <div style="font-size:.67rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">🎯 Objectif & Contraintes</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.5;"><strong>Objectif :</strong> ${_escH(cas.objectif||'')} <br><strong>Contraintes :</strong> ${_escH(cas.contraintes||'')}</div>
+        </div>
+      </div>
+      <div style="font-size:.74rem;color:#7c3aed;margin-top:.8rem;padding:.45rem .8rem;background:#f3f0ff;border-radius:8px;font-weight:600;">💡 Ce cas industriel est le fil conducteur de vos 3 exercices progressifs.</div>
+    </div>`:'';
+
   // Stepper HTML
   const stepperHtml=`<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;" id="customExBadge${i}"></div>`;
-  // Quiz HTML
-  const qHtml=m.quiz&&m.quiz.length?(`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding:.5rem .8rem;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;"><div style="font-size:.8rem;font-weight:700;color:#374151;">📝 Quiz — ${m.quiz.length} questions</div><div id="customQuizTimer${i}"><span style="font-size:.72rem;color:#9ca3af;">⏱️ Démarrage…</span></div></div><div class="q-wrap">${m.quiz.map((q,qi)=>`<div class="q-block"><div class="q-num">Question ${qi+1} / ${m.quiz.length}</div><div class="q-text">${_escH(q.q)}</div>${q.opts.map((o,oi)=>`<div class="q-opt" id="cmq-${qi}-${oi}" onclick="pickCustomQ(${qi},${oi})">${_escH(o)}</div>`).join('')}</div>`).join('')}</div><div class="btn-row" style="margin-top:.8rem;"><button class="btn btn-purple" onclick="submitCustomQuiz()">📊 Valider le quiz</button></div><div id="customQuizScore"></div>`):'<div style="font-size:.8rem;color:#6b7280;">Aucune question de quiz pour ce module.</div>';
+
   sec.innerHTML=`
     <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);">
-      <div style="font-size:2.5rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
+      <div style="font-size:2.6rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
       <h1 style="font-size:1.6rem;margin-bottom:.4rem;">${_escH(m.titre)}</h1>
-      <p style="opacity:.85;">${_escH(m.desc||'')}</p>
-      <div style="font-size:.78rem;opacity:.7;margin-top:.3rem;">⏱️ ${m.duree||'~20 min'}</div>
+      <p style="opacity:.85;max-width:480px;margin:0 auto;">${_escH(m.desc||'')}</p>
+      <div style="display:flex;justify-content:center;gap:1rem;margin-top:.7rem;flex-wrap:wrap;">
+        <span style="font-size:.75rem;opacity:.85;background:rgba(255,255,255,.18);padding:.25rem .75rem;border-radius:20px;">⏱️ ${m.duree||'~30 min'}</span>
+        <span style="font-size:.75rem;opacity:.85;background:rgba(255,255,255,.18);padding:.25rem .75rem;border-radius:20px;">🎯 3 exercices ingénieur</span>
+        <span style="font-size:.75rem;opacity:.85;background:rgba(255,255,255,.18);padding:.25rem .75rem;border-radius:20px;">📚 ${(m.sections||[]).length} sections</span>
+      </div>
     </div>
 
     <div class="ccard">
-      <div class="ccard-title">📖 Contenu du module</div>
-      ${(m.sections||[]).map(s=>`<div style="margin-bottom:1.2rem;"><h3 style="color:#4c1d95;margin-bottom:.5rem;font-size:.92rem;">📌 ${_escH(s.titre)}</h3><div style="line-height:1.75;color:#374151;font-size:.85rem;">${(s.contenu||'').replace(/\n/g,'<br>')}</div></div>`).join('<hr style="border:none;border-top:1px solid #ede9fe;margin:1.1rem 0;">')}
+      <div class="ccard-title">📖 Contenu théorique</div>
+      ${sectionsHtml}
     </div>
+
+    ${casHtml}
 
     <div class="ccard">
       <div class="ccard-title">🎯 Exercices progressifs — 3 niveaux</div>
-      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Complétez les 3 niveaux avant de valider le module. L'IA génère un exercice adapté à votre niveau actuel.</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Appliquez les concepts sur le cas industriel. L'IA génère des exercices concrets de niveau ingénieur.</div>
       ${stepperHtml}
       <div id="customExContent${i}"></div>
       <div id="customExStatus${i}" style="margin-top:.5rem;"></div>
-    </div>
-
-    <div class="ccard">
-      <div class="ccard-title">📝 Quiz de validation</div>
-      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Répondez au quiz pour obtenir votre score de module. Complétez d'abord les 3 niveaux d'exercices.</div>
-      ${qHtml}
     </div>
 
     <div class="ccard">
@@ -6146,9 +6516,7 @@ function goCustomModule(i){
       <div id="customScoreResult${i}"></div>
     </div>`;
   showSection('m-custom');
-  // Init state
   _renderCustomExBadge(i);
-  if(m.quiz&&m.quiz.length) startCustomQuizTimer(i, Math.max(8, m.quiz.length*2));
   if(done<3)showCustomExercise(i);
   else{
     const cec=document.getElementById('customExContent'+i);
@@ -6169,17 +6537,23 @@ async function showCustomExercise(i){
   const cached=m.exercices&&m.exercices[done];
   let exData=cached;
   if(!exData){
-    const levelDesc=['débutant (compréhension de base, question simple)','intermédiaire (application pratique avec données)','avancé (analyse critique, cas complexe)'][done];
-    const sectionsText=(m.sections||[]).map(s=>s.titre+': '+(s.contenu||'').slice(0,200)).join('\n');
-    const prompt=`Génère un exercice de niveau ${levelDesc} sur le module "${m.titre}" pour étudiant Lean/Génie Industriel.\nContenu du module:\n${sectionsText}\n\nJSON strict uniquement: {"question":"Question claire","context":"Données ou contexte fourni (optionnel, peut être vide)","expectedAnswer":"Éléments de réponse attendus","tempsMinutes":X}\nOù tempsMinutes = entier = minutes estimées pour résoudre cet exercice (Débutant 3-5 min, Intermédiaire 5-10 min, Avancé 10-18 min).\n\nJSON uniquement, pas de texte autour.`;
+    const cas=m.cas;
+    const casBlock=cas?`\nCAS INDUSTRIEL (fil conducteur de tous les exercices) :\n- Entreprise : ${cas.entreprise||''}\n- Contexte : ${cas.contexte||''}\n- Données : ${cas.donnees||''}\n- Problème : ${cas.probleme||''}\n- Objectif : ${cas.objectif||''}\n- Contraintes : ${cas.contraintes||''}`:'';
+    const levelPrompts=[
+      `NIVEAU DÉBUTANT — l'étudiant analyse le cas industriel, identifie le problème principal et propose un premier diagnostic. Question ancrée dans les données du cas : demander d'identifier les causes potentielles, calculer un indicateur simple ou proposer une première action concrète. Niveau : futur ingénieur qui débute.`,
+      `NIVEAU INTERMÉDIAIRE — l'étudiant applique la méthodologie "${m.titre}" aux données chiffrées du cas industriel. Exercice d'application pratique : calculer des KPIs, prioriser des actions selon une méthode, rédiger un plan en 3-4 étapes structurées avec jalons. Les données chiffrées du cas DOIVENT être utilisées. Niveau : ingénieur en stage.`,
+      `NIVEAU AVANCÉ — exercice de niveau consultant/ingénieur senior. L'étudiant rédige un plan d'action complet : phases détaillées, responsables, KPIs de suivi, budget estimé, délai, ROI attendu et gestion des risques. S'appuyer sur TOUTES les contraintes du cas. Anticiper les obstacles et proposer des plans B. Niveau : ingénieur confirmé.`
+    ][done];
+    const sectionsText=(m.sections||[]).map(s=>s.titre+': '+(s.contenu||'').slice(0,180)).join('\n');
+    const prompt=`Tu es formateur expert en Génie Industriel. Génère un exercice de niveau ingénieur sur le module "${m.titre}".\n${levelPrompts}${casBlock}\nContenu pédagogique du module :\n${sectionsText}\n\nJSON strict uniquement (pas de texte autour) :\n{"question":"Énoncé précis avec contexte du cas industriel (utiliser les vraies données chiffrées)","context":"Données et contraintes à rappeler pour l'exercice (reprendre les chiffres du cas)","expectedAnswer":"Éléments de réponse attendus niveau ingénieur : méthode, calculs, justifications","tempsMinutes":X}\ntempsMinutes = entier (Débutant : 5-8 min, Intermédiaire : 8-15 min, Avancé : 15-25 min)\nJSON uniquement.`;
     try{
-      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:0.5})});
+      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:0.5})});
       const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
-      const jm=text.match(/\{[\s\S]*?\}/);
-      exData=jm?JSON.parse(jm[0]):{question:`Décrivez l'application de "${m.titre}" dans un contexte industriel — niveau ${lv.label}.`,context:'',expectedAnswer:''};
+      const jm=text.match(/\{[\s\S]*\}/);
+      exData=jm?JSON.parse(jm[0]):{question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};
       // Cache
       const allMods=getCustomModules();if(!allMods[i].exercices)allMods[i].exercices={};allMods[i].exercices[done]=exData;saveCustomModules(allMods);
-    }catch(e){exData={question:`Décrivez les concepts clés de "${m.titre}" et leur application pratique.`,context:'',expectedAnswer:''};}
+    }catch(e){exData={question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
   }
   el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};">
     <div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.5rem;">${lv.stars} Exercice niveau ${lv.label}</div>
@@ -6295,16 +6669,17 @@ async function validateCustomModule(i){
     box.innerHTML=`<div class="score-result fail" style="margin-top:.8rem;"><div style="flex:1;"><div style="font-weight:800;color:var(--red);">🔒 Complétez d'abord les 3 niveaux d'exercices</div><div style="font-size:.8rem;color:#6b7280;margin-top:.2rem;">Niveau suivant : ${_EX_LEVELS[levDone]?.label}</div></div></div>`;
     return;
   }
-  box.innerHTML='<div style="display:flex;align-items:center;gap:.7rem;padding:.5rem 0;"><div class="ai-spinner"></div><span style="font-size:.82rem;color:#6b7280;">Évaluation IA en cours…</span></div>';
-  const score=state.scores['c'+i]||0;
+  // Score basé sur la complétion des 3 exercices ingénieur (pas de QCM)
+  const score=80;
+  if(!state.scores)state.scores={};state.scores['c'+i]=score;save();
   const minScore=getThreshold(0);const pass=score>=minScore;
-  const encouragement=pass?(score>=90?'🏆 Excellent !':score>=75?'⭐ Très bien !':'✅ Module validé !'):(score>=40?'💪 Presque — révisez et réessayez.':'📖 Relisez le contenu et réessayez.');
+  const encouragement=pass?'✅ Module validé — excellente maîtrise !':'📖 Relisez le contenu et repassez les exercices.';
   box.innerHTML=`<div class="score-result ${pass?'pass':'fail'}" style="margin-top:.8rem;">
     <div class="score-ring" style="color:${pass?'var(--green)':'var(--red)'};">${score}%</div>
     <div style="flex:1;">
       <div style="font-weight:800;font-size:1rem;color:${pass?'var(--green)':'var(--red)'};">${encouragement}</div>
       <div style="font-size:.8rem;color:var(--gray400);margin-top:.2rem;">Score : ${score}% — Minimum requis : ${minScore}%</div>
-      ${!pass?`<div style="font-size:.8rem;color:var(--red);margin-top:.3rem;">Score insuffisant. Révisez le contenu et repassez le quiz.</div>`:''}
+      <div style="font-size:.78rem;color:#6b7280;margin-top:.2rem;">✓ 3 exercices ingénieur complétés avec feedback IA</div>
     </div>
   </div>`;
   if(!pass)_tryRemCustom(i,score,minScore,m);
@@ -6461,13 +6836,15 @@ function submitCustomQuiz(){
     </div>
     <!-- PANEL: ROSTER -->
     <div id="adm-panel-roster" class="adm-panel">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;flex-wrap:wrap;gap:.5rem;">
         <div style="font-weight:800;font-size:.9rem;color:#1e293b;">Tableau de suivi des étudiants</div>
-        <div style="display:flex;gap:.5rem;">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          <button class="btn btn-purple btn-sm" onclick="sbRefreshRoster()" id="cloudRefreshBtn">☁️ Rafraîchir (cloud)</button>
           <button class="btn btn-ghost btn-sm" onclick="exportRosterCSV()">📄 Exporter CSV</button>
-          <button class="btn btn-ghost btn-sm" onclick="clearRoster()" style="color:#dc2626;">🗑️ Vider la liste</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearRoster()" style="color:#dc2626;">🗑️ Vider</button>
         </div>
       </div>
+      <div id="cloudSyncStatus" style="font-size:.72rem;color:#7c3aed;margin-bottom:.5rem;min-height:1.2rem;"></div>
       <div id="rosterTableWrap"></div>
     </div>
     <!-- PANEL: IMPORT -->

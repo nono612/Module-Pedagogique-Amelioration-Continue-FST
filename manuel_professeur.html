@@ -96,7 +96,7 @@ tr:nth-child(even) td{background:var(--gray50);}
     <div class="cover-meta">
       <div><strong>Accès dashboard</strong>Mot de passe : <span style="color:#6ee7b7;font-family:monospace;font-size:1rem;">prof2024</span></div>
       <div><strong>Plateforme</strong>Outils pédagogiques · GitHub Pages</div>
-      <div><strong>Version</strong>2026 · IA Claude intégrée</div>
+      <div><strong>Version</strong>2026 · IA Groq intégrée</div>
     </div>
   </div>
 </div>
@@ -107,7 +107,7 @@ tr:nth-child(even) td{background:var(--gray50);}
     <li class="toc-section"><a href="#s1"><span class="toc-num">1</span> Présentation de la plateforme pour le professeur</a></li>
     <li class="toc-section"><a href="#s2"><span class="toc-num" style="background:var(--green);">2</span> Déployer la plateforme dans votre cours</a></li>
     <li class="toc-section sub"><a href="#s2a">2.1 URL d'accès et prérequis</a></li>
-    <li class="toc-section sub"><a href="#s2b">2.2 Obtenir et distribuer les clés API Claude</a></li>
+    <li class="toc-section sub"><a href="#s2b">2.2 Obtenir et distribuer les clés API Groq</a></li>
     <li class="toc-section sub"><a href="#s2c">2.3 Checklist de démarrage de séance</a></li>
     <li class="toc-section"><a href="#s3"><span class="toc-num">3</span> L'Espace Professeur — Tableau de bord classe</a></li>
     <li class="toc-section sub"><a href="#s3a">3.1 Comment y accéder</a></li>
@@ -149,7 +149,7 @@ tr:nth-child(even) td{background:var(--gray50);}
       <h3>👨‍🏫 Ce que vous faites en tant que professeur</h3>
       <ul>
         <li>Partagez l'URL avec vos étudiants</li>
-        <li>Distribuez une clé API Claude à votre classe</li>
+        <li>Distribuez une clé API Groq à votre classe</li>
         <li>Demandez aux étudiants de vous envoyer leur nom en fin de séance</li>
         <li>Saisissez les noms dans l'Espace Professeur</li>
         <li>Consultez le tableau de classe et exportez en CSV</li>
@@ -235,8 +235,8 @@ tr:nth-child(even) td{background:var(--gray50);}
     <table>
       <tr><th>Élément</th><th>Requis</th><th>Détails</th></tr>
       <tr><td>Navigateur web</td><td>✅ Oui</td><td>Chrome, Firefox, Edge ou Safari — version récente recommandée</td></tr>
-      <tr><td>Connexion internet</td><td>✅ Oui</td><td>Pour les appels à l'API Claude (génération IA)</td></tr>
-      <tr><td>Clé API Claude</td><td>✅ Oui</td><td>Pour les fonctions IA — voir section 2.2</td></tr>
+      <tr><td>Connexion internet</td><td>✅ Oui</td><td>Pour les appels à l'API Groq (génération IA)</td></tr>
+      <tr><td>Clé API Groq</td><td>✅ Oui</td><td>Pour les fonctions IA — voir section 2.2</td></tr>
       <tr><td>Compte utilisateur</td><td>❌ Non</td><td>Aucun compte — progression sauvegardée sous le nom de l'étudiant</td></tr>
       <tr><td>Installation logicielle</td><td>❌ Non</td><td>100% web, aucun téléchargement requis</td></tr>
     </table>
@@ -244,18 +244,18 @@ tr:nth-child(even) td{background:var(--gray50);}
   </div></div>
 
   <div id="s2b"><div class="card">
-    <h3>2.2 — Obtenir et distribuer les clés API Claude</h3>
-    <p>Les fonctions IA utilisent l'API <strong>Claude Sonnet</strong> d'Anthropic. Une clé est nécessaire pour : générer les problèmes, évaluer les réponses, fournir les feedbacks et générer le quiz final.</p>
+    <h3>2.2 — Obtenir et distribuer les clés API Groq</h3>
+    <p>Les fonctions IA utilisent l'API <strong>Groq</strong> (modèle llama-3.3-70b). Une clé est nécessaire pour : générer les problèmes, évaluer les réponses, fournir les feedbacks et générer le quiz final.</p>
     <h4>Option A — Une clé partagée pour toute la classe (recommandé)</h4>
     <div class="steps">
-      <div class="step-block"><div class="step-num g">1</div><div class="step-content"><h4>Créez un compte Anthropic sur console.anthropic.com</h4><p>Utilisez votre adresse universitaire. Ajoutez un moyen de paiement ou utilisez les crédits d'essai offerts (suffisants pour une classe de 20-30 étudiants).</p></div></div>
-      <div class="step-block"><div class="step-num g">2</div><div class="step-content"><h4>Générez une clé dédiée dans "API Keys"</h4><p>Menu gauche → "API Keys" → "Create Key" → nommez-la (ex: "Cours Lean FST 2026"). La clé commence par <code style="font-size:.78rem;background:#f1f5f9;padding:.1rem .35rem;border-radius:4px;">sk-ant-api03-</code></p></div></div>
-      <div class="step-block"><div class="step-num g">3</div><div class="step-content"><h4>Partagez la clé en début de séance</h4><p>Écrivez-la au tableau ou projetez-la. Les étudiants la saisissent dans le champ "Clé API" en haut à droite du site. Elle disparaît à la fermeture de l'onglet — ils devront la resaisir à chaque session.</p></div></div>
+      <div class="step-block"><div class="step-num g">1</div><div class="step-content"><h4>Créez un compte Groq sur console.groq.com</h4><p>Utilisez votre adresse universitaire. L'inscription est gratuite et aucune carte bancaire n'est requise — Groq offre un quota généreux suffisant pour une classe entière.</p></div></div>
+      <div class="step-block"><div class="step-num g">2</div><div class="step-content"><h4>Générez une clé dédiée dans "API Keys"</h4><p>Menu gauche → "API Keys" → "Create API Key" → nommez-la (ex: "Cours Lean FST 2026"). La clé commence par <code style="font-size:.78rem;background:#f1f5f9;padding:.1rem .35rem;border-radius:4px;">gsk_</code></p></div></div>
+      <div class="step-block"><div class="step-num g">3</div><div class="step-content"><h4>Partagez la clé en début de séance</h4><p>Écrivez-la au tableau ou projetez-la. Les étudiants la saisissent dans le champ "Clé Groq" en haut à droite du site. Elle est mémorisée pendant la session — ils n'ont pas besoin de la resaisir à chaque page.</p></div></div>
     </div>
-    <div class="tip"><strong>💰 Coût estimé</strong> Pour une classe de 30 étudiants qui complètent le parcours complet : <strong>2 à 5 €</strong> au total. Les crédits offerts lors de la création d'un compte couvrent généralement une classe entière.</div>
-    <div class="danger"><strong>🔒 Révoquez la clé après le cours</strong> Sur console.anthropic.com → API Keys → Révoquez la clé dédiée après la séance pour éviter tout usage non autorisé.</div>
+    <div class="tip"><strong>💰 Coût</strong> L'API Groq est <strong>gratuite</strong> dans les limites de quota standards — amplement suffisant pour une classe de 30 étudiants complétant le parcours complet.</div>
+    <div class="danger"><strong>🔒 Révoquez la clé après le cours</strong> Sur console.groq.com → API Keys → Supprimez la clé dédiée après la séance pour éviter tout usage non autorisé.</div>
     <h4>Option B — Chaque étudiant crée sa propre clé (plus autonome)</h4>
-    <p>Demandez à chaque étudiant de créer son propre compte Anthropic (gratuit, crédits d'essai suffisants). Cette option est plus autonome mais demande 5-10 minutes de configuration en début de première séance.</p>
+    <p>Demandez à chaque étudiant de créer son propre compte Groq sur console.groq.com (inscription gratuite, sans carte bancaire). Cette option est plus autonome mais demande 5-10 minutes de configuration en début de première séance.</p>
   </div></div>
 
   <div id="s2c"><div class="card">
@@ -263,7 +263,7 @@ tr:nth-child(even) td{background:var(--gray50);}
     <p><strong>Avant que les étudiants commencent :</strong></p>
     <ul class="checklist">
       <li>Vérifier que la plateforme est accessible (ouvrir l'URL dans votre navigateur)</li>
-      <li>Préparer la clé API Claude à partager et vérifier qu'elle fonctionne</li>
+      <li>Préparer la clé API Groq à partager et vérifier qu'elle fonctionne</li>
       <li>Informer les étudiants qu'ils doivent saisir leur <strong>prénom et nom complets</strong> (pas de pseudo)</li>
       <li>Rappeler que deux étudiants sur le même ordinateur ont des progressions séparées (chacun tape son nom)</li>
       <li>Préciser qu'ils doivent vous envoyer leur <strong>prénom et nom exacts</strong> en fin de séance</li>
@@ -707,7 +707,7 @@ tr:nth-child(even) td{background:var(--gray50);}
 
   <div class="card"><h3>❓ Un étudiant a perdu sa progression en changeant d'ordinateur</h3><p>La progression est dans le localStorage du navigateur — liée à une machine précise. Si l'étudiant a changé de poste, sa progression n'est pas récupérable automatiquement. Accordez-lui du temps supplémentaire ou notez uniquement ce qui a pu être sauvegardé.</p></div>
 
-  <div class="card"><h3>❓ L'IA ne répond plus en cours de séance — que faire ?</h3><p><strong>1.</strong> Vérifiez la clé API (expirée ou incorrecte) sur console.anthropic.com. <strong>2.</strong> Vérifiez la connexion internet de la salle. <strong>3.</strong> En dernier recours, les étudiants peuvent continuer en mode "sans IA" avec les exercices pré-enregistrés et la correction statique — la progression et le score fonctionnent toujours.</p></div>
+  <div class="card"><h3>❓ L'IA ne répond plus en cours de séance — que faire ?</h3><p><strong>1.</strong> Vérifiez la clé API Groq (expirée ou incorrecte) sur console.groq.com. <strong>2.</strong> Vérifiez la connexion internet de la salle. <strong>3.</strong> En dernier recours, les étudiants peuvent continuer en mode "sans IA" avec les exercices pré-enregistrés et la correction statique — la progression et le score fonctionnent toujours.</p></div>
 
   <div class="card"><h3>❓ Puis-je utiliser la plateforme sur Moodle ?</h3><p>Oui — intégrez la plateforme via une iframe dans votre cours Moodle. Pour la collecte des rapports, créez un devoir Moodle de type "Texte en ligne" où les étudiants collent leur nom (leur "code").</p></div>
 

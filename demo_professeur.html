@@ -158,7 +158,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
     <img src="fst_logo.png" alt="FST">
     <span class="topbar-title">OUTIL PÉDAGOGIQUE · AMÉLIORATION CONTINUE · FST TANGER — VUE PROFESSEUR</span>
   </div>
-  <span class="slide-ctr" id="sc">1 / 43</span>
+  <span class="slide-ctr" id="sc">1 / 48</span>
 </div>
 <div class="pbar"><div class="pbar-fill" id="pf" style="width:2.5%"></div></div>
 
@@ -275,6 +275,602 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
   </div>
 </div>
 
+<!-- ═══ S3b PARCOURS CV — VUE PROFESSEUR ═══ -->
+<div class="slide bg-hero" id="s3b">
+  <div class="stag st-blue" style="margin-bottom:.3rem;">Fonctionnalité Clé — Parcours Personnalisé</div>
+  <h2 class="sh2">Parcours <span class="hl">CV Personnalisé</span> — Chaque étudiant reçoit un parcours adapté à son profil</h2>
+  <p style="font-size:.78rem;color:rgba(255,255,255,.5);margin-bottom:.8rem;">À la première connexion, chaque étudiant peut uploader son CV (PDF). L'IA Groq extrait son poste, son secteur et son contexte professionnel, puis recommande automatiquement 7 modules prioritaires et personnalise tous les exercices IA.</p>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📄 Ce que fait l'étudiant — 3 étapes</div>
+        <div style="display:flex;flex-direction:column;gap:.32rem;font-size:.67rem;color:#374151;">
+          <div style="background:#f5f3ff;border-radius:8px;padding:.45rem .65rem;border:1.5px solid #c4b5fd;display:flex;align-items:flex-start;gap:.45rem;">
+            <span style="color:#7c3aed;font-size:.85rem;margin-top:.05rem;flex-shrink:0;">①</span>
+            <div><strong>Upload du CV (PDF)</strong> — Fenêtre d'accueil au 1er lancement<br><span style="font-size:.6rem;color:#64748b;">L'IA extrait : poste, entreprise, secteur, contexte professionnel</span></div>
+          </div>
+          <div style="background:#eff6ff;border-radius:8px;padding:.45rem .65rem;border:1.5px solid #bfdbfe;display:flex;align-items:flex-start;gap:.45rem;">
+            <span style="color:#2563eb;font-size:.85rem;margin-top:.05rem;flex-shrink:0;">②</span>
+            <div><strong>Recommandation des 7 modules prioritaires</strong><br><span style="font-size:.6rem;color:#64748b;">L'IA justifie chaque choix selon le profil de l'étudiant</span></div>
+          </div>
+          <div style="background:#f0fdf4;border-radius:8px;padding:.45rem .65rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.45rem;">
+            <span style="color:#059669;font-size:.85rem;margin-top:.05rem;flex-shrink:0;">③</span>
+            <div><strong>Parcours CV actif</strong> — Seuls les 7 modules s'affichent, séquentiels<br><span style="font-size:.6rem;color:#64748b;">Chaque exercice IA est automatiquement ancré dans le secteur de l'étudiant</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">👨‍🏫 Ce que cela change pour vous</div>
+        <div style="background:#faf5ff;border-radius:8px;border:1.5px solid #c4b5fd;padding:.38rem .65rem;margin-bottom:.45rem;display:flex;align-items:center;gap:.4rem;">
+          <span style="font-size:.63rem;color:#4c1d95;font-weight:700;">🎯 Parcours CV actif — 7 modules sélectionnés pour votre profil</span>
+        </div>
+        <div style="font-size:.65rem;color:#374151;display:flex;flex-direction:column;gap:.3rem;margin-bottom:.4rem;">
+          <div style="background:#f0fdf4;border-radius:7px;padding:.35rem .55rem;border-left:3px solid #10b981;">📊 <strong>Dans votre dashboard :</strong> Les modules recommandés sont visibles dans le profil étudiant — vous savez quel parcours chaque étudiant a choisi</div>
+          <div style="background:#fef9ee;border-radius:7px;padding:.35rem .55rem;border-left:3px solid #f59e0b;">🔓 <strong>Modules désactivés respectés :</strong> Si vous désactivez un module, il ne peut pas être inclus dans les parcours CV des étudiants</div>
+          <div style="background:#eff6ff;border-radius:7px;padding:.35rem .55rem;border-left:3px solid #3b82f6;">🎓 <strong>Exercices contextualisés :</strong> Un étudiant en aéronautique reçoit automatiquement des cas AMDEC avec des défauts de pièces critiques, pas génériques</div>
+        </div>
+        <div style="background:#fef2f2;border-radius:7px;padding:.32rem .5rem;border:1px solid #fecaca;font-size:.61rem;color:#374151;">
+          🔒 <strong>Note sécurité :</strong> Le CV est traité uniquement via l'API Groq de l'étudiant — aucune donnée n'est envoyée à un serveur externe ni stockée.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     ███████╗ SECTION PROFESSEUR EXCLUSIVE ██████╗
+     ══════════════════════════════════════════════════ -->
+
+<!-- ═══ SÉPARATEUR PROFESSEUR ═══ -->
+<div class="slide bg-admin" id="s-prof-sep" style="align-items:center;justify-content:center;">
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">
+    <div style="position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(124,58,237,.25),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+    <div style="position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(168,85,247,.15),transparent 70%);top:-60px;right:-60px;"></div>
+    <div style="position:absolute;width:250px;height:250px;background:radial-gradient(circle,rgba(99,102,241,.12),transparent 70%);bottom:-40px;left:-40px;"></div>
+  </div>
+  <div style="text-align:center;position:relative;z-index:1;">
+    <div style="font-size:3.5rem;margin-bottom:1rem;">👨‍🏫</div>
+    <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.2);border:2px solid rgba(168,85,247,.5);border-radius:14px;padding:.5rem 1.5rem;margin-bottom:1.2rem;">
+      <span style="font-size:.75rem;font-weight:900;color:#c084fc;letter-spacing:1.5px;text-transform:uppercase;">Section Exclusive</span>
+    </div>
+    <h1 style="font-size:2.8rem;font-weight:900;line-height:1.1;margin-bottom:.8rem;">Tableau de Bord<br><span style="color:#a855f7;">Professeur</span></h1>
+    <p style="font-size:.9rem;color:rgba(255,255,255,.5);max-width:500px;margin:0 auto 1.5rem;line-height:1.65;">Les slides suivantes montrent les fonctionnalités <strong style="color:#c084fc;">exclusivement accessibles</strong> au professeur via le dashboard admin.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;max-width:600px;margin:0 auto;">
+      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">🔐 Accès Ctrl+Shift+A</span>
+      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">👥 Suivi de classe</span>
+      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">📊 Statistiques</span>
+      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">📥 Export CSV</span>
+      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">🏷️ Gestion codes</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S35 ACCÈS ADMIN ═══ -->
+<div class="slide bg-admin" id="s35">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Accès Dashboard Admin</div>
+  <h2 class="sh2">Tableau de Bord <span class="hlv">Professeur</span> — Accès exclusif</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🔐 Comment accéder au Dashboard Admin</div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;">
+          <div style="background:#f5f3ff;border-radius:10px;padding:.7rem 1rem;border:1.5px solid #c4b5fd;text-align:center;">
+            <div style="font-size:.65rem;font-weight:800;color:#6d28d9;margin-bottom:.35rem;">RACCOURCI CLAVIER</div>
+            <div style="font-size:1.1rem;margin-bottom:.3rem;"><span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">A</span></div>
+            <div style="font-size:.62rem;color:#374151;">Sur n'importe quelle page du site</div>
+          </div>
+          <div style="background:#f5f3ff;border-radius:10px;padding:.7rem 1rem;border:1.5px solid #c4b5fd;text-align:center;">
+            <div style="font-size:.65rem;font-weight:800;color:#6d28d9;margin-bottom:.35rem;">MOT DE PASSE</div>
+            <div style="display:flex;justify-content:center;gap:.2rem;margin-bottom:.3rem;">
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">G</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">R</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">E</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">E</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">N</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">L</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">A</span>
+              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">B</span>
+            </div>
+            <div style="font-size:.58rem;color:#64748b;">Confidentiel — à ne pas communiquer aux étudiants</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🛡️ 4 onglets — Fonctionnalités exclusives professeur</div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.66rem;color:#374151;">
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">👥 <strong>Roster étudiants</strong> — scores M1→M11, certifiés/en cours, stats de classe, export CSV</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">📥 <strong>Importer codes</strong> — import individuel ou en masse (un code par ligne)</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">⚙️ <strong>Accès & Config</strong> — seuil de validation configurable, activer/désactiver modules, débloquer/réinitialiser</div>
+          <div style="background:#ede9fe;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #6d28d9;">🧩 <strong>Générateur de modules</strong> — créer un module complet (cours + exercices + quiz) depuis un titre et une description</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S36 LISTE ÉTUDIANTS ═══ -->
+<div class="slide bg-admin" id="s36">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Liste &amp; Progression</div>
+  <h2 class="sh2">Tableau de Bord <span class="hlv">Classe</span> — Suivi en temps réel</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📋 Interface Admin — Onglets</div>
+        <div class="atab">
+          <div class="at on">👥 Étudiants</div>
+          <div class="at">📥 Importer codes</div>
+          <div class="at">⚙️ Accès & Config</div>
+          <div class="at">🧩 Générateur</div>
+        </div>
+        <table class="rtable">
+          <tr><th>Code</th><th>Nom</th><th>Modules</th><th>Score moy.</th><th>Statut</th></tr>
+          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-001</td><td>Ahmed Benali</td><td>11/11</td><td style="color:#059669;font-weight:700;">86%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
+          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-002</td><td>Sara El Fassi</td><td>7/11</td><td style="color:#d97706;font-weight:700;">74%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
+          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-003</td><td>Youssef Idrissi</td><td>11/11</td><td style="color:#059669;font-weight:700;">91%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
+          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-004</td><td>Fatima Zahra Amrani</td><td>5/11</td><td style="color:#d97706;font-weight:700;">68%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
+          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-005</td><td>Karim Nassir</td><td>11/11</td><td style="color:#059669;font-weight:700;">79%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
+          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-006</td><td>Nadia Bouhaj</td><td>2/11</td><td style="color:#dc2626;font-weight:700;">55%</td><td><span style="background:#fef2f2;color:#991b1b;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">🔴 Débutant</span></td></tr>
+        </table>
+        <div style="margin-top:.4rem;font-size:.58rem;color:#94a3b8;font-style:italic;">… et 24 autres étudiants dans la liste</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📊 Résumé de classe (30 étudiants)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.5rem;">
+          <div class="stat-big"><div class="n">3</div><div class="l">Certifiés (&gt;70%)</div></div>
+          <div class="stat-big"><div class="n" style="color:#d97706;">2</div><div class="l">En cours</div></div>
+          <div class="stat-big"><div class="n" style="color:#dc2626;">1</div><div class="l">En difficulté</div></div>
+          <div class="stat-big"><div class="n" style="color:#a855f7;">79%</div><div class="l">Moy. classe</div></div>
+        </div>
+        <div style="background:#f5f3ff;border-radius:8px;padding:.45rem .7rem;border:1px solid #c4b5fd;font-size:.63rem;color:#374151;"><strong style="color:#6d28d9;">⚠️ Module difficile :</strong> M2 5S (moy. 68%) et M7 SPC (moy. 72%) — envisager une session de renforcement</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S37 SUIVI INDIVIDUEL ═══ -->
+<div class="slide bg-admin" id="s37">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Suivi Individuel</div>
+  <h2 class="sh2">Fiche Étudiant <span class="hlv">Détaillée</span> — Profil complet</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">👤 Profil — Ahmed Benali (ETU-001)</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.65rem;color:#374151;margin-bottom:.5rem;">
+          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Code étudiant</span><strong style="font-family:monospace;">ETU-2024-001</strong></div>
+          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Modules complétés</span><strong>11 / 11 ✅</strong></div>
+          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Score moyen</span><strong style="color:#059669;">86%</strong></div>
+          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Temps total</span><strong>7h12</strong></div>
+          <div style="display:flex;justify-content:space-between;background:#f0fdf4;border-radius:5px;padding:.28rem .45rem;border:1px solid #bbf7d0;"><span>Certificat</span><strong style="color:#059669;">✅ Délivré</strong></div>
+        </div>
+        <div style="background:#fef9ee;border-radius:8px;padding:.45rem .65rem;border:1px solid #fde68a;font-size:.63rem;color:#374151;">
+          <strong style="color:#d97706;">📌 Point professeur :</strong> Excellent sur PDCA et SMED. Légère faiblesse en M2 5S (78%) → suggérer exercices supplémentaires sur Seiketsu/Shitsuke.
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📊 Scores détaillés par module</div>
+        <div style="display:flex;flex-direction:column;gap:.22rem;font-size:.62rem;color:#374151;">
+          <div class="prog-row"><span class="prog-label">M1 PDCA</span><div class="prog-bar"><div class="prog-fill" style="width:92%;background:#3b82f6;"></div></div><span style="font-weight:700;color:#2563eb;">92%</span></div>
+          <div class="prog-row"><span class="prog-label">M2 5S</span><div class="prog-bar"><div class="prog-fill" style="width:78%;background:#ef4444;"></div></div><span style="font-weight:700;color:#dc2626;">78%</span></div>
+          <div class="prog-row"><span class="prog-label">M3 Ishikawa</span><div class="prog-bar"><div class="prog-fill" style="width:85%;background:#10b981;"></div></div><span style="font-weight:700;color:#059669;">85%</span></div>
+          <div class="prog-row"><span class="prog-label">M4 Pareto</span><div class="prog-bar"><div class="prog-fill" style="width:90%;background:#f59e0b;"></div></div><span style="font-weight:700;color:#d97706;">90%</span></div>
+          <div class="prog-row"><span class="prog-label">M5 Kanban</span><div class="prog-bar"><div class="prog-fill" style="width:85%;background:#06b6d4;"></div></div><span style="font-weight:700;color:#0891b2;">85%</span></div>
+          <div class="prog-row"><span class="prog-label">M6 VSM</span><div class="prog-bar"><div class="prog-fill" style="width:88%;background:#7c3aed;"></div></div><span style="font-weight:700;color:#6d28d9;">88%</span></div>
+          <div class="prog-row"><span class="prog-label">M7 SPC</span><div class="prog-bar"><div class="prog-fill" style="width:87%;background:#ec4899;"></div></div><span style="font-weight:700;color:#db2777;">87%</span></div>
+          <div class="prog-row"><span class="prog-label">M8 SMED</span><div class="prog-bar"><div class="prog-fill" style="width:91%;background:#f97316;"></div></div><span style="font-weight:700;color:#ea580c;">91%</span></div>
+          <div class="prog-row"><span class="prog-label">M9 AMDEC</span><div class="prog-bar"><div class="prog-fill" style="width:84%;background:#6366f1;"></div></div><span style="font-weight:700;color:#4f46e5;">84%</span></div>
+          <div class="prog-row"><span class="prog-label">M10 Projet</span><div class="prog-bar"><div class="prog-fill" style="width:87%;background:#f59e0b;"></div></div><span style="font-weight:700;color:#d97706;">87%</span></div>
+          <div class="prog-row"><span class="prog-label">M11 Quiz</span><div class="prog-bar"><div class="prog-fill" style="width:82%;background:#a855f7;"></div></div><span style="font-weight:700;color:#7c3aed;">82%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S38 STATISTIQUES DE CLASSE ═══ -->
+<div class="slide bg-admin" id="s38">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Statistiques de Classe</div>
+  <h2 class="sh2">Analyse des <span class="hlv">Performances</span> — Vue globale</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📊 Score moyen par module (30 étudiants)</div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.63rem;color:#374151;">
+          <div class="prog-row"><span class="prog-label">M1 PDCA</span><div class="prog-bar"><div class="prog-fill" style="width:84%;background:#3b82f6;"></div></div><span style="font-weight:700;">84%</span></div>
+          <div class="prog-row" style="position:relative;"><span class="prog-label">M2 5S</span><div class="prog-bar"><div class="prog-fill" style="width:68%;background:#ef4444;"></div></div><span style="font-weight:700;color:#dc2626;">68% ⚠️</span></div>
+          <div class="prog-row"><span class="prog-label">M3 Ishikawa</span><div class="prog-bar"><div class="prog-fill" style="width:79%;background:#10b981;"></div></div><span style="font-weight:700;">79%</span></div>
+          <div class="prog-row"><span class="prog-label">M4 Pareto</span><div class="prog-bar"><div class="prog-fill" style="width:83%;background:#f59e0b;"></div></div><span style="font-weight:700;">83%</span></div>
+          <div class="prog-row"><span class="prog-label">M5 Kanban</span><div class="prog-bar"><div class="prog-fill" style="width:77%;background:#06b6d4;"></div></div><span style="font-weight:700;">77%</span></div>
+          <div class="prog-row"><span class="prog-label">M6 VSM</span><div class="prog-bar"><div class="prog-fill" style="width:81%;background:#7c3aed;"></div></div><span style="font-weight:700;">81%</span></div>
+          <div class="prog-row" style="position:relative;"><span class="prog-label">M7 SPC</span><div class="prog-bar"><div class="prog-fill" style="width:72%;background:#ec4899;"></div></div><span style="font-weight:700;color:#dc2626;">72% ⚠️</span></div>
+          <div class="prog-row"><span class="prog-label">M8 SMED</span><div class="prog-bar"><div class="prog-fill" style="width:86%;background:#f97316;"></div></div><span style="font-weight:700;">86%</span></div>
+          <div class="prog-row"><span class="prog-label">M9 AMDEC</span><div class="prog-bar"><div class="prog-fill" style="width:74%;background:#6366f1;"></div></div><span style="font-weight:700;color:#dc2626;">74% ⚠️</span></div>
+          <div class="prog-row"><span class="prog-label">M10 Projet</span><div class="prog-bar"><div class="prog-fill" style="width:81%;background:#f59e0b;"></div></div><span style="font-weight:700;">81%</span></div>
+          <div class="prog-row"><span class="prog-label">M11 Quiz</span><div class="prog-bar"><div class="prog-fill" style="width:78%;background:#a855f7;"></div></div><span style="font-weight:700;">78%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📈 Distribution des scores (30 étudiants)</div>
+        <div style="display:flex;gap:.3rem;align-items:flex-end;height:80px;margin-bottom:.5rem;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#dc2626;border-radius:3px 3px 0 0;width:100%;height:15px;"></div><span style="font-size:.5rem;color:#64748b;">&lt;60%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">2</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#f59e0b;border-radius:3px 3px 0 0;width:100%;height:30px;"></div><span style="font-size:.5rem;color:#64748b;">60-70%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">5</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#10b981;border-radius:3px 3px 0 0;width:100%;height:60px;"></div><span style="font-size:.5rem;color:#64748b;">70-80%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">12</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#3b82f6;border-radius:3px 3px 0 0;width:100%;height:50px;"></div><span style="font-size:.5rem;color:#64748b;">80-90%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">9</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#7c3aed;border-radius:3px 3px 0 0;width:100%;height:20px;"></div><span style="font-size:.5rem;color:#64748b;">&gt;90%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">2</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;font-size:.62rem;">
+          <div style="background:#f0fdf4;border-radius:6px;padding:.3rem;text-align:center;border:1px solid #bbf7d0;"><strong style="color:#059669;">21/30</strong><br>certifiés (≥70%)</div>
+          <div style="background:#fef2f2;border-radius:6px;padding:.3rem;text-align:center;border:1px solid #fecaca;"><strong style="color:#dc2626;">79%</strong><br>moy. de classe</div>
+        </div>
+        <div style="margin-top:.4rem;background:#f5f3ff;border-radius:7px;padding:.35rem .5rem;border:1px solid #c4b5fd;font-size:.62rem;color:#374151;">💡 <strong>Recommandation :</strong> Session de rattrapage M2 5S + M7 SPC pour les 9 étudiants &lt; 70%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S39 EXPORT CSV ═══ -->
+<div class="slide bg-admin" id="s39">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Export &amp; Données</div>
+  <h2 class="sh2">Export <span class="hlv">CSV</span> — Toutes les données en un clic</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📥 Fonctionnalité Export CSV</div>
+        <div style="background:#f5f3ff;border-radius:10px;padding:.8rem 1rem;border:1.5px solid #c4b5fd;text-align:center;margin-bottom:.5rem;">
+          <div style="font-size:.65rem;font-weight:800;color:#6d28d9;margin-bottom:.3rem;">BOUTON DANS LE DASHBOARD ADMIN</div>
+          <span class="bm bm-v" style="font-size:.8rem;">📥 Exporter CSV (30 étudiants)</span>
+          <div style="font-size:.58rem;color:#64748b;margin-top:.3rem;">Génère un fichier téléchargeable instantanément</div>
+        </div>
+        <div style="font-size:.65rem;color:#374151;font-family:monospace;background:#f8fafc;border-radius:7px;padding:.5rem .7rem;border:1px solid #e2e8f0;line-height:1.8;">
+          <span style="color:#94a3b8;">code,nom,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,moy,cert</span><br>
+          ETU-001,Ahmed Benali,92,78,85,90,85,88,87,91,84,87,82,86,OUI<br>
+          ETU-002,Sara El Fassi,88,72,79,85,0,0,0,0,0,0,0,74,NON<br>
+          ETU-003,Youssef Idrissi,95,84,90,92,89,91,88,94,86,89,85,91,OUI
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📊 Données disponibles dans l'export</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.67rem;color:#374151;">
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">🏷️ <strong>Identité :</strong> Code étudiant, Nom complet</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">📊 <strong>Scores :</strong> Note /100 pour chacun des 11 modules (M1→M11)</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">📈 <strong>Moyenne :</strong> Score moyen pondéré sur tous les modules</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">🎓 <strong>Certification :</strong> OUI/NON selon score ≥ 70%</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">⏱️ <strong>Progression :</strong> Nombre de modules complétés</div>
+        </div>
+        <div style="margin-top:.4rem;background:#fef9ee;border-radius:7px;padding:.38rem .6rem;border:1px solid #fde68a;font-size:.63rem;color:#374151;">📎 <strong>Compatible :</strong> Excel, Google Sheets, LibreOffice Calc pour analyse et notation</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S40 GESTION CODES ═══ -->
+<div class="slide bg-admin" id="s40">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Gestion des Codes Étudiants</div>
+  <h2 class="sh2">Codes <span class="hlv">Étudiants</span> — Attribution &amp; Suivi</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🏷️ Comment fonctionnent les codes</div>
+        <div style="display:flex;flex-direction:column;gap:.35rem;font-size:.68rem;color:#374151;">
+          <div style="background:#eff6ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #3b82f6;">
+            <strong>1. Génération</strong> — Le professeur crée les codes avant la séance depuis le dashboard (format libre : ETU-001, N12345, etc.)
+          </div>
+          <div style="background:#f0fdf4;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #10b981;">
+            <strong>2. Distribution</strong> — Chaque étudiant reçoit son code unique (papier, email ou affiché). Il le saisit lors de sa connexion.
+          </div>
+          <div style="background:#fef9ee;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #f59e0b;">
+            <strong>3. Traçabilité</strong> — Dès qu'un étudiant valide un module, le code est associé à son score dans la base locale.
+          </div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">
+            <strong>4. Retrouver</strong> — Le professeur retrouve chaque étudiant par son code dans le dashboard → score, progression, certificat.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📥 Onglet "Importer codes" — Import individuel</div>
+        <div style="background:#f8fafc;border-radius:8px;padding:.5rem .65rem;border:1.5px solid #e2e8f0;margin-bottom:.4rem;">
+          <div style="font-size:.6rem;font-weight:700;color:#374151;margin-bottom:.18rem;">Coller le code de l'étudiant :</div>
+          <div style="background:#fff;border:1px solid #c4b5fd;border-radius:6px;padding:.3rem .5rem;font-size:.62rem;color:#94a3b8;margin-bottom:.25rem;font-family:monospace;">Ahmed Benali</div>
+          <div style="display:flex;gap:.3rem;">
+            <span class="bm bm-v" style="font-size:.6rem;">📥 Importer</span>
+            <span style="font-size:.6rem;color:#059669;align-self:center;">✅ Ahmed Benali ajouté — 8/11 modules complétés.</span>
+          </div>
+        </div>
+        <div style="background:#f5f3ff;border-radius:8px;padding:.5rem .65rem;border:1.5px solid #c4b5fd;">
+          <div style="font-size:.6rem;font-weight:700;color:#6d28d9;margin-bottom:.18rem;">Import en masse — un code par ligne :</div>
+          <div style="background:#fff;border:1px solid #ddd6fe;border-radius:6px;padding:.3rem .5rem;font-size:.6rem;color:#94a3b8;margin-bottom:.25rem;font-family:monospace;line-height:1.6;">Ahmed Benali<br>Sara El Fassi<br>Youssef Idrissi<br>… (30 codes)</div>
+          <span class="bm bm-v" style="font-size:.6rem;">📥 Importer tout (30 étudiants)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S40b GESTION DES MODULES ═══ -->
+<div class="slide bg-admin" id="s40b">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Gestion des Modules</div>
+  <h2 class="sh2">Activer / Désactiver <span class="hlv">les Modules</span> — Contrôle pédagogique total</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">⚙️ Interface de gestion — Onglet "Accès modules"</div>
+        <div class="atab" style="margin-bottom:.5rem;">
+          <div class="at">👥 Étudiants</div>
+          <div class="at">📥 Importer</div>
+          <div class="at on">🔓 Accès modules</div>
+        </div>
+        <table class="rtable">
+          <tr><th>Module</th><th>Nom</th><th>Statut</th><th>Action</th></tr>
+          <tr><td style="font-weight:700;">M1</td><td>PDCA</td><td><span style="color:#059669;font-weight:700;font-size:.62rem;">● Actif</span></td><td><span style="font-size:.62rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;background:#059669;color:#fff;">Actif ✓</span></td></tr>
+          <tr><td style="font-weight:700;">M2</td><td>5S</td><td><span style="color:#059669;font-weight:700;font-size:.62rem;">● Actif</span></td><td><span style="font-size:.62rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;background:#059669;color:#fff;">Actif ✓</span></td></tr>
+          <tr><td style="font-weight:700;">M3</td><td>Ishikawa</td><td><span style="color:#059669;font-weight:700;font-size:.62rem;">● Actif</span></td><td><span style="font-size:.62rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;background:#059669;color:#fff;">Actif ✓</span></td></tr>
+          <tr><td style="font-weight:700;">M7</td><td>SPC</td><td><span style="color:#dc2626;font-weight:700;font-size:.62rem;">● Inactif</span></td><td><span style="font-size:.62rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;background:#dc2626;color:#fff;">Inactif</span></td></tr>
+          <tr><td style="font-weight:700;">M9</td><td>AMDEC</td><td><span style="color:#dc2626;font-weight:700;font-size:.62rem;">● Inactif</span></td><td><span style="font-size:.62rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;background:#dc2626;color:#fff;">Inactif</span></td></tr>
+        </table>
+        <div style="margin-top:.4rem;font-size:.61rem;color:#64748b;text-align:center;">Un clic sur le bouton → bascule immédiatement Actif / Inactif</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">💡 Cas d'usage pédagogiques</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.66rem;color:#374151;">
+          <div style="background:#f5f3ff;border-radius:8px;padding:.4rem .6rem;border-left:3px solid #7c3aed;">
+            <strong style="color:#5b21b6;">Séance ciblée :</strong> Désactivez tous les modules sauf M1-M4 pour une séance d'introduction — les étudiants ne peuvent accéder qu'aux modules du jour.
+          </div>
+          <div style="background:#fef9ee;border-radius:8px;padding:.4rem .6rem;border-left:3px solid #f59e0b;">
+            <strong style="color:#92400e;">Module en préparation :</strong> Désactivez temporairement un module dont le contenu est en cours de révision.
+          </div>
+          <div style="background:#f0fdf4;border-radius:8px;padding:.4rem .6rem;border-left:3px solid #10b981;">
+            <strong style="color:#065f46;">Progression guidée :</strong> Débloquez les modules semaine par semaine selon votre plan de cours.
+          </div>
+        </div>
+      </div>
+      <div class="wc">
+        <div class="wc-title">⚠️ Ce que voit l'étudiant</div>
+        <div style="background:#f8fafc;border-radius:8px;border:1.5px solid #e2e8f0;padding:.5rem .65rem;font-size:.65rem;color:#374151;line-height:1.6;">
+          <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:.25rem;">
+            <div style="border-radius:7px;border:1.5px solid #e2e8f0;padding:.3rem .45rem;background:#f1f5f9;opacity:.6;font-size:.62rem;font-weight:700;color:#94a3b8;min-width:60px;text-align:center;">⚠️ M9<br>AMDEC<br><span style="font-size:.55rem;">🚫 Désactivé</span></div>
+            <div style="font-size:.63rem;color:#374151;">Si un étudiant clique sur un module désactivé, un message s'affiche :<br><strong style="color:#dc2626;">"Ce module est actuellement désactivé par le professeur."</strong></div>
+          </div>
+          <div style="font-size:.6rem;color:#64748b;border-top:1px solid #e2e8f0;padding-top:.25rem;margin-top:.15rem;">Les modules désactivés ne sont pas non plus proposés dans les parcours CV personnalisés.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S40bb SEUIL DE VALIDATION + ACTIONS RAPIDES ═══ -->
+<div class="slide bg-admin" id="s40bb">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Configuration pédagogique</div>
+  <h2 class="sh2">Seuil de Validation &amp; <span class="hlv">Actions Rapides</span> — Onglet "Accès &amp; Config"</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🎯 Seuil de validation configurable</div>
+        <div style="font-size:.66rem;color:#6b7280;margin-bottom:.45rem;line-height:1.5;">Score minimum requis pour valider un module — s'applique à tous les étudiants, toutes les sessions futures.</div>
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:.65rem .8rem;margin-bottom:.4rem;">
+          <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-bottom:.4rem;">
+            <span style="font-size:.72rem;font-weight:700;color:#374151;">Modules M1 → M10 :</span>
+            <span style="width:52px;padding:.28rem .4rem;border:2px solid #7c3aed;border-radius:7px;font-size:.9rem;font-weight:900;color:#4c1d95;text-align:center;background:#faf5ff;">60</span>
+            <span style="font-size:.72rem;color:#6b7280;">%</span>
+            <span style="font-size:.6rem;color:#94a3b8;">← valeur par défaut</span>
+          </div>
+          <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem;">
+            <span style="font-size:.72rem;font-weight:700;color:#374151;">Quiz final M11 :</span>
+            <span style="width:52px;padding:.28rem .4rem;border:2px solid #7c3aed;border-radius:7px;font-size:.9rem;font-weight:900;color:#4c1d95;text-align:center;background:#faf5ff;">70</span>
+            <span style="font-size:.72rem;color:#6b7280;">%</span>
+            <span style="font-size:.6rem;color:#94a3b8;">← valeur par défaut</span>
+          </div>
+          <span class="bm bm-v" style="font-size:.65rem;">💾 Sauvegarder</span>
+        </div>
+        <div style="background:#fef9ee;border-radius:7px;padding:.32rem .5rem;border:1px solid #fde68a;font-size:.62rem;color:#374151;">
+          💡 <strong>Exemple :</strong> Passer le seuil M1-M10 à 75% rend la formation plus sélective — un étudiant à 68% devra refaire les exercices avant de progresser.
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">⚡ Actions rapides</div>
+        <div style="display:flex;flex-direction:column;gap:.4rem;">
+          <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:.65rem .8rem;">
+            <div style="font-size:.72rem;font-weight:800;color:#166534;margin-bottom:.2rem;">🔓 Débloquer tous les modules</div>
+            <div style="font-size:.63rem;color:#15803d;margin-bottom:.4rem;">Score 100% partout — utile pour tester la plateforme ou faire une démonstration complète.</div>
+            <span class="bm bm-g" style="font-size:.63rem;">Débloquer tout</span>
+          </div>
+          <div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:.65rem .8rem;">
+            <div style="font-size:.72rem;font-weight:800;color:#991b1b;margin-bottom:.2rem;">🔄 Réinitialiser la progression</div>
+            <div style="font-size:.63rem;color:#b91c1c;margin-bottom:.4rem;">Efface toute la progression sur cet ordinateur — utile entre deux groupes d'étudiants sur la même machine.</div>
+            <span class="bm bm-r" style="font-size:.63rem;background:#dc2626;color:#fff;padding:.22rem .6rem;border-radius:6px;font-weight:800;cursor:pointer;">Réinitialiser</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S40c GÉNÉRATEUR DE MODULE NO-CODE ═══ -->
+<div class="slide bg-admin" id="s40c">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Créer ses propres modules</div>
+  <h2 class="sh2">Générateur de Module <span class="hlv">No-Code</span> — Titre + Description → Module complet en 30s</h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">✏️ Formulaire de création — 4 champs</div>
+        <div style="display:flex;flex-direction:column;gap:.32rem;margin-bottom:.45rem;">
+          <div>
+            <div style="font-size:.6rem;font-weight:700;color:#374151;margin-bottom:.12rem;">Titre du module <span style="color:#dc2626;">*</span></div>
+            <div style="background:#fff;border:1.5px solid #c4b5fd;border-radius:7px;padding:.35rem .55rem;font-size:.67rem;color:#4c1d95;font-weight:700;">Lean Digital — Outils numériques pour l'industrie 4.0</div>
+          </div>
+          <div>
+            <div style="font-size:.6rem;font-weight:700;color:#374151;margin-bottom:.12rem;">Objectifs / Description <span style="color:#dc2626;">*</span></div>
+            <div style="background:#fff;border:1.5px solid #c4b5fd;border-radius:7px;padding:.35rem .55rem;font-size:.65rem;color:#374151;line-height:1.5;">Comprendre comment les outils numériques (MES, IoT, ERP) s'intègrent dans une démarche Lean pour éliminer les gaspillages digitaux et améliorer la traçabilité en temps réel.</div>
+          </div>
+          <div style="display:flex;gap:.4rem;">
+            <div style="flex:1;">
+              <div style="font-size:.6rem;font-weight:700;color:#374151;margin-bottom:.12rem;">Niveau</div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:.3rem .5rem;font-size:.65rem;color:#374151;">Intermédiaire ▾</div>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:.6rem;font-weight:700;color:#374151;margin-bottom:.12rem;">Durée estimée</div>
+              <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:.3rem .5rem;font-size:.65rem;color:#374151;">~25 min</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:.4rem;">
+          <span class="bm bm-v" style="font-size:.67rem;flex:1;text-align:center;">🤖 Générer le module</span>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🤖 Aperçu généré par l'IA Groq</div>
+        <div style="border:2px solid #7c3aed;border-radius:10px;padding:.6rem .8rem;background:#faf5ff;margin-bottom:.4rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;">
+            <span style="font-size:1.2rem;">💻</span>
+            <div>
+              <div style="font-weight:900;font-size:.8rem;color:#4c1d95;">Lean Digital — Industrie 4.0</div>
+              <div style="font-size:.62rem;color:#7c3aed;">Niveau intermédiaire · ~25 min</div>
+            </div>
+          </div>
+          <div style="font-size:.63rem;color:#6b7280;margin-bottom:.4rem;">Intégration des outils numériques dans la démarche Lean pour une industrie plus réactive et traçable.</div>
+          <div style="display:flex;flex-direction:column;gap:.2rem;font-size:.62rem;color:#374151;">
+            <div><strong style="color:#4c1d95;">📌 MES & traçabilité temps réel</strong> — Collecte automatisée des données de production, dashboards OEE, alertes immédiates sur les dérives…</div>
+            <div><strong style="color:#4c1d95;">📌 IoT & capteurs intelligents</strong> — Surveillance des paramètres critiques, maintenance préd…</div>
+            <div><strong style="color:#4c1d95;">📌 ERP et flux d'information</strong> — Élimination des gaspillages informationnels, synchronisation…</div>
+          </div>
+          <div style="font-size:.63rem;color:#7c3aed;font-weight:700;margin-top:.3rem;">📝 5 questions de quiz incluses</div>
+          <div style="display:flex;gap:.4rem;margin-top:.4rem;">
+            <span class="bm bm-v" style="font-size:.62rem;">✅ Publier ce module</span>
+            <span class="bm bm-gh" style="font-size:.62rem;">🔄 Régénérer</span>
+          </div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:7px;padding:.3rem .5rem;border:1px solid #bbf7d0;font-size:.61rem;color:#374151;">
+          ✅ <strong>Après publication :</strong> Le module apparaît dans la grille étudiante exactement comme un module standard — avec cours, exercices IA 3 niveaux et quiz noté.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S41 GUIDE DÉMARRAGE ═══ -->
+<div class="slide bg-admin" id="s41">
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Guide de Démarrage Rapide</div>
+  <h2 class="sh2">Mettre en place la plateforme en <span class="hlv">3 étapes</span></h2>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">⚡ Checklist avant la séance</div>
+        <div style="display:flex;flex-direction:column;gap:.35rem;font-size:.68rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .75rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
+            <span style="color:#059669;font-size:.9rem;margin-top:.05rem;">①</span>
+            <div><strong>Ouvrir la plateforme</strong><br><span style="font-size:.62rem;color:#64748b;">Accéder à l'URL GitHub Pages · Tester connexion internet</span></div>
+          </div>
+          <div style="background:#eff6ff;border-radius:8px;padding:.55rem .75rem;border:1.5px solid #bfdbfe;display:flex;align-items:flex-start;gap:.5rem;">
+            <span style="color:#2563eb;font-size:.9rem;margin-top:.05rem;">②</span>
+            <div><strong>Préparer les codes étudiants</strong><br><span style="font-size:.62rem;color:#64748b;"><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">A</span> → Ajouter les codes → Imprimer ou projeter la liste</span></div>
+          </div>
+          <div style="background:#fef9ee;border-radius:8px;padding:.55rem .75rem;border:1.5px solid #fde68a;display:flex;align-items:flex-start;gap:.5rem;">
+            <span style="color:#d97706;font-size:.9rem;margin-top:.05rem;">③</span>
+            <div><strong>Distribuer les clés API Groq</strong><br><span style="font-size:.62rem;color:#64748b;">Chaque étudiant crée son compte gratuit sur console.groq.com (2 min) et copie sa clé</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📅 Déroulement d'une séance type (3h)</div>
+        <div style="display:flex;flex-direction:column;gap:.25rem;font-size:.65rem;color:#374151;">
+          <div style="display:flex;gap:.5rem;align-items:center;background:#f8fafc;border-radius:6px;padding:.3rem .5rem;"><span style="color:#94a3b8;font-size:.6rem;width:30px;flex-shrink:0;">0h00</span><span>Connexion + configuration API (5-10 min)</span></div>
+          <div style="display:flex;gap:.5rem;align-items:center;background:#f8fafc;border-radius:6px;padding:.3rem .5rem;"><span style="color:#94a3b8;font-size:.6rem;width:30px;flex-shrink:0;">0h10</span><span>M1 PDCA → M4 Pareto (3 modules)</span></div>
+          <div style="display:flex;gap:.5rem;align-items:center;background:#fef9ee;border-radius:6px;padding:.3rem .5rem;border:1px solid #fde68a;"><span style="color:#d97706;font-size:.6rem;width:30px;flex-shrink:0;">1h30</span><span><strong>Pause 15 min</strong> + suivi prof (dashboard admin)</span></div>
+          <div style="display:flex;gap:.5rem;align-items:center;background:#f8fafc;border-radius:6px;padding:.3rem .5rem;"><span style="color:#94a3b8;font-size:.6rem;width:30px;flex-shrink:0;">1h45</span><span>M5 Kanban → M11 Quiz (modules avancés dont M9 AMDEC &amp; M10 Projet)</span></div>
+          <div style="display:flex;gap:.5rem;align-items:center;background:#f0fdf4;border-radius:6px;padding:.3rem .5rem;border:1px solid #bbf7d0;"><span style="color:#059669;font-size:.6rem;width:30px;flex-shrink:0;">2h50</span><span><strong>Export CSV + correction collective</strong></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S42 CONCLUSION PROF ═══ -->
+<div class="slide bg-prof" id="s42">
+  <div class="stag st-violet" style="margin-bottom:.4rem;">👨‍🏫 Synthèse Professeur</div>
+  <h2 class="sh2">Outil <span class="hlv">Complet</span> — Lean &amp; Six Sigma</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:.9rem;text-align:center;max-width:580px;">Un environnement pédagogique clé en main : les étudiants progressent de manière autonome pendant que vous suivez leur avancement en temps réel.</p>
+  <div class="row" style="justify-content:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">✅ Ce que l'outil offre aux étudiants</div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.67rem;color:#374151;">
+          <div style="display:flex;gap:.4rem;"><span>🔄</span><span>11 modules interactifs Lean &amp; Six Sigma avec cas industriels marocains</span></div>
+          <div style="display:flex;gap:.4rem;"><span>🤖</span><span>Feedback IA Groq personnalisé pour chaque exercice</span></div>
+          <div style="display:flex;gap:.4rem;"><span>📄</span><span>Rapport PDF + certificat automatique à télécharger</span></div>
+          <div style="display:flex;gap:.4rem;"><span>📱</span><span>100% web — aucune installation, accessible partout</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🎓 Ce que l'outil offre aux professeurs</div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.67rem;color:#374151;">
+          <div style="display:flex;gap:.4rem;"><span>📊</span><span>Suivi en temps réel de toute la classe par étudiant</span></div>
+          <div style="display:flex;gap:.4rem;"><span>📥</span><span>Export CSV complet : scores, modules, certifications</span></div>
+          <div style="display:flex;gap:.4rem;"><span>🏷️</span><span>Gestion des codes étudiants depuis le dashboard admin</span></div>
+          <div style="display:flex;gap:.4rem;"><span>📈</span><span>Identification automatique des modules difficiles</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;max-width:900px;">
+    <span class="pill p-blue">🔄 M1 PDCA</span>
+    <span class="pill p-red">🏭 M2 5S</span>
+    <span class="pill p-green">🐟 M3 Ishikawa</span>
+    <span class="pill p-amber">📊 M4 Pareto</span>
+    <span class="pill" style="background:#ecfeff;color:#164e63;">📋 M5 Kanban</span>
+    <span class="pill p-purple">🗺️ M6 VSM</span>
+    <span class="pill" style="background:#fdf2f8;color:#9d174d;">📈 M7 SPC</span>
+    <span class="pill" style="background:#fff7ed;color:#c2410c;">⚡ M8 SMED</span>
+    <span class="pill" style="background:#e0e7ff;color:#3730a3;">⚠️ M9 AMDEC</span>
+    <span class="pill" style="background:#fef3c7;color:#92400e;">🏗️ M10 Projet</span>
+    <span class="pill" style="background:#eef2ff;color:#3730a3;">🎓 M11 Quiz</span>
+  </div>
+</div>
+
+<!-- ═══ S43 URL FINALE ═══ -->
+<div class="slide bg-prof" id="s43">
+  <div style="text-align:center;position:relative;z-index:1;">
+    <img src="fst_logo.png" style="height:75px;display:block;margin:0 auto 1rem;filter:drop-shadow(0 4px 20px rgba(0,0,0,.5));" alt="FST">
+    <h2 class="sh2" style="text-align:center;">Accès à la plateforme</h2>
+    <div style="background:rgba(124,58,237,.15);border:1.5px solid rgba(168,85,247,.35);border-radius:14px;padding:1rem 2rem;margin:.8rem auto;max-width:640px;">
+      <div style="font-size:.65rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem;letter-spacing:.5px;">URL ÉTUDIANTS &amp; PROFESSEURS</div>
+      <div style="font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.3px;">nono612.github.io/Module-Pedagogique-<br>Amelioration-Continue-FST/</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;max-width:580px;margin:.8rem auto;">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.8rem;text-align:center;">
+        <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin-bottom:.3rem;">ACCÈS ÉTUDIANT</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.7);">Ouvrir l'URL → Saisir nom + code étudiant + clé API Groq → Démarrer</div>
+      </div>
+      <div style="background:rgba(124,58,237,.15);border:1px solid rgba(168,85,247,.3);border-radius:12px;padding:.8rem;text-align:center;">
+        <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin-bottom:.3rem;">ACCÈS PROFESSEUR</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.7);"><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">A</span> sur n'importe quelle page → Mot de passe admin</div>
+      </div>
+    </div>
+    <div style="margin-top:.6rem;font-size:.65rem;color:rgba(255,255,255,.25);">← → pour naviguer · Diaporama complet — 40 slides</div>
+  </div>
+</div>
+
 <!-- ═══ S4 M1 THÉORIE ═══ -->
 <div class="slide bg-m1" id="s4">
   <div class="stag st-blue">🔄 Module 1 — PDCA · Théorie <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
@@ -316,7 +912,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
   <div class="row">
     <div class="col">
       <div style="background:linear-gradient(135deg,#1e3a5f,#0f2d56);border-radius:12px;padding:.8rem 1rem;border:1.5px solid rgba(96,165,250,.3);margin-bottom:.6rem;">
-        <div style="font-size:.6rem;font-weight:800;color:#93c5fd;letter-spacing:.8px;margin-bottom:.3rem;">🤖 PROBLÈME GÉNÉRÉ PAR L'IA</div>
+        <div style="font-size:.6rem;font-weight:800;color:#93c5fd;letter-spacing:.8px;margin-bottom:.3rem;">🤖 CAS IA GÉNÉRÉ · ⭐ DÉBUTANT (niveau 1/3 — Intermédiaire et Avancé suivront)</div>
         <div style="font-size:.72rem;line-height:1.6;color:rgba(255,255,255,.85);">Atelier de soudure : <strong style="color:#fbbf24;">taux de rebuts à 4,8%</strong> sur 2 000 pièces/jour. Délais de livraison non tenus. <strong style="color:#fbbf24;">Objectif : &lt;1,6% en 3 semaines</strong>. Placez chaque action dans le bon quadrant PDCA.</div>
       </div>
       <div class="wc">
@@ -352,9 +948,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — Cycle PDCA</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 92 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Classement correct des 4 actions. L'action B (analyse des fiches) comme point de départ PLAN est pertinente car toute amélioration commence par la compréhension des données existantes.</div>
-        <div style="margin-bottom:.35rem;"><strong>Axe d'amélioration :</strong> Dans une vraie démarche PDCA, l'action PLAN devrait aussi inclure la définition d'un indicateur cible précis et un plan d'action chiffré.</div>
-        <div><strong>Conseil :</strong> Couplé à un diagramme d'Ishikawa (M3) pour identifier les causes racines avant d'agir.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — Classement correct des 4 actions. L'action B en PLAN (analyser les fiches qualité) est pertinente : tout cycle commence par le diagnostic des données existantes.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — L'objectif PLAN n'est pas formulé SMART : "réduire les rebuts" sans cible chiffrée ni délai. Aucun responsable n'est désigné pour le DO.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — PLAN : B + objectif SMART (rebuts &lt;1,6% en 3 sem.) | DO : A — régler 420°C | CHECK : C — mesurer J+7 | ACT : D — standardiser si cible atteinte.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Coupler avec Ishikawa (M3) pour identifier les causes racines avant le DO, et s'assurer que le réglage 420°C cible bien la bonne cause.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.6rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 1 — PDCA Validé ! Score 92%</div>
@@ -409,6 +1006,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <div class="slide bg-m2" id="s8">
   <div class="stag st-red">🏭 Module 2 — 5S · Exercice <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
   <h2 class="sh2">Classification <span style="color:#f87171;">18 Problèmes</span> d'atelier</h2>
+  <div style="display:flex;align-items:center;gap:.5rem;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:.3rem .8rem;margin-bottom:.6rem;max-width:1020px;font-size:.6rem;font-weight:700;"><span style="color:#f87171;">⭐ Débutant — Niveau 1/3</span><span style="color:rgba(255,255,255,.25);">|</span><span style="color:rgba(255,255,255,.45);">3 niveaux séquentiels requis pour valider M2 · L'IA génère un atelier différent à chaque niveau</span></div>
   <div class="row">
     <div class="col">
       <div class="wc">
@@ -462,8 +1060,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — Audit 5S</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 78 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Point fort :</strong> Le Seisō (nettoyage) est parfaitement maîtrisé (5/5). L'atelier présente un nettoyage rigoureux et régulier.</div>
-        <div><strong>Priorité d'amélioration :</strong> Le Seiketsu (note 2/5) est le point faible critique — l'absence de procédures standardisées explique la dégradation rapide après chaque nettoyage.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — Seisō (S3) parfaitement maîtrisé (5/5). 14/18 classements corrects ; ordre séquentiel Seiri → Seiton bien respecté.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — Seiketsu (S4 = 2/5) est le point faible critique : absence de procédures affichées. 4 items mal classifiés (confusion S1/S2).</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — S1 Seiri : 6 items · S2 Seiton : 4 items · S3 Seisō : 4 items · S4 Seiketsu : 2 items · S5 Shitsuke : 2 items → 14/18 = 78%.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Implémenter un audit 5S hebdomadaire noté et affiché au poste : le Shitsuke s'ancre dans la durée, pas en un seul chantier.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.4rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 2 — 5S Validé ! Score 78%</div>
@@ -511,7 +1111,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
   <div class="row">
     <div class="col">
       <div style="background:linear-gradient(135deg,#022c22,#052e16);border-radius:12px;padding:.8rem 1rem;border:1.5px solid rgba(52,211,153,.3);margin-bottom:.6rem;">
-        <div style="font-size:.6rem;font-weight:800;color:#6ee7b7;letter-spacing:.8px;margin-bottom:.3rem;">🐟 PROBLÈME</div>
+        <div style="font-size:.6rem;font-weight:800;color:#6ee7b7;letter-spacing:.8px;margin-bottom:.3rem;">🤖 CAS IA GÉNÉRÉ · ⭐ DÉBUTANT (niveau 1/3 — 3 niveaux séquentiels requis)</div>
         <div style="font-size:.72rem;line-height:1.6;color:rgba(255,255,255,.85);">Atelier câblage ELECTRO TANGER : <strong style="color:#fbbf24;">30% des câbles livrés non-conformes</strong> — courts-circuits détectés en contrôle final. Construisez le diagramme Ishikawa.</div>
       </div>
       <div class="wc">
@@ -551,8 +1151,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — Diagramme Ishikawa</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 85 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Les 5 familles sont correctement identifiées. La cause racine (procédure absente) est pertinente : c'est souvent la cause systémique qui explique pourquoi d'autres problèmes (formation, qualité) persistent.</div>
-        <div><strong>Axe d'amélioration :</strong> Le cuivre de mauvaise qualité aurait pu être identifié comme cause prioritaire également — un double vote pondéré (méthode voting) aurait aidé.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — Les 5 familles 5M renseignées. Cause racine "procédure de sertissage absente" pertinente : cause systémique qui explique la persistance des autres défauts.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — Une seule cause racine identifiée est insuffisante pour un taux de 30%. Le cuivre fournisseur B est une 2e cause racine critique non retenue. La catégorie Milieu (humidité 70%) est sous-exploitée.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — Main-d'œuvre : formation HT + rotation | Machine : recalibrer pince | Matières : changer fourn. B | Méthodes : rédiger procédure (cause #1) | Milieu : déshumidificateurs &lt;55%.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Appliquer les 5 Pourquoi sur la cause racine retenue pour vérifier la profondeur de l'analyse avant de définir les actions correctives.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.6rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 3 — Ishikawa Validé ! Score 85%</div>
@@ -605,6 +1207,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <div class="slide bg-m4" id="s14">
   <div class="stag st-amber">📊 Module 4 — Pareto · Exercice <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
   <h2 class="sh2">Analyse des défauts — <span style="color:#fbbf24;">PLASTIQUE MAROC</span></h2>
+  <div style="display:flex;align-items:center;gap:.5rem;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.3rem .8rem;margin-bottom:.6rem;max-width:1020px;font-size:.6rem;font-weight:700;"><span style="color:#fbbf24;">⭐ Débutant — Niveau 1/3</span><span style="color:rgba(255,255,255,.25);">|</span><span style="color:rgba(255,255,255,.45);">3 niveaux séquentiels requis · secteurs plus complexes aux niveaux Intermédiaire et Avancé</span></div>
   <div class="row">
     <div class="col">
       <div class="wc">
@@ -647,8 +1250,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — Pareto</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 90 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Tri correct, diagramme bien construit, zone 80% correctement identifiée sur 3 causes. La priorisation est parfaitement alignée avec la loi de Pareto.</div>
-        <div><strong>Conseil :</strong> Coupler ce Pareto avec un Ishikawa sur les "Bavures de moulage" pour en trouver la cause racine et agir efficacement.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — Tri décroissant correct, diagramme bien construit avec courbe cumulative. Zone 80% identifiée sur 3 causes (76%). Priorisation alignée avec la règle 80/20.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — 3 causes retenues = 76% seulement. Les Retassures (5,8%) portent le cumulé à 81,8% — un 4e plan d'action simple aurait été optimal. Aucun objectif chiffré de réduction des rebuts n'est fixé.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — Vitaux : #1 Bavures 34% | #2 Déformation 24% | #3 Bulles 18% | #4 Retassures 6% → 4 actions correctives ciblées = 81,8% des défauts traités.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Coupler ce Pareto avec un Ishikawa sur "Bavures de moulage" (cause #1 à 34%) pour identifier la cause racine avant de définir les paramètres correctifs.</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;margin-top:.5rem;">
         <div style="background:#fef2f2;border-radius:8px;padding:.5rem;text-align:center;border:1px solid #fecaca;"><div style="font-size:1rem;font-weight:900;color:#dc2626;">3</div><div style="font-size:.6rem;color:#374151;">Causes vitales</div></div>
@@ -706,6 +1311,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <div class="slide bg-m5" id="s17">
   <div class="stag st-cyan">📋 Module 5 — Kanban · Exercice <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
   <h2 class="sh2">Rééquilibrage du <span style="color:#22d3ee;">Board</span> — PRECISION MAROC</h2>
+  <div style="display:flex;align-items:center;gap:.5rem;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.2);border-radius:8px;padding:.3rem .8rem;margin-bottom:.6rem;max-width:1020px;font-size:.6rem;font-weight:700;"><span style="color:#22d3ee;">⭐ Débutant — Niveau 1/3</span><span style="color:rgba(255,255,255,.25);">|</span><span style="color:rgba(255,255,255,.45);">3 niveaux séquentiels requis · complexité WIP et types de flux augmentent à chaque niveau</span></div>
   <div class="row">
     <div class="col">
       <div class="wc">
@@ -740,8 +1346,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — Gestion Kanban</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 85 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Dépassement WIP correctement identifié et traité. Gestion du blocage PM-443 professionnelle. Principe de flux tiré bien compris.</div>
-        <div><strong>Conseil :</strong> Coupler Kanban avec OEE et tableau de management visuel quotidien.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — WIP dépassé (4/3) correctement détecté et traité. Gestion du blocage PM-443 professionnelle. Principe de flux tiré bien compris.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — Aucun signal rouge visuel sur PM-443 pour alerter toute l'équipe. La priorité ⭐ de PM-441 n'est pas justifiée par un critère objectif (délai client, impact financier).</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — EN COURS : PM-441 (⭐ délai J+2) + PM-442 (normal) + PM-443 (🔴 bloqué — attente fourn.) | WIP : 3/3 respecté | BACKLOG : PM-447, PM-448 en attente.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Ajouter un Daily Meeting visuel (SQCDP) chaque matin pour remonter les blocages Kanban dès J+1 et éviter l'effet tunnel.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.6rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 5 — Kanban Validé ! Score 85%</div>
@@ -802,6 +1410,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <div class="slide bg-m6" id="s20">
   <div class="stag st-purple">🗺️ Module 6 — VSM · Exercice <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
   <h2 class="sh2">Cartographie <span style="color:#a78bfa;">État Actuel</span> — METAL PLUS</h2>
+  <div style="display:flex;align-items:center;gap:.5rem;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);border-radius:8px;padding:.3rem .8rem;margin-bottom:.6rem;max-width:1020px;font-size:.6rem;font-weight:700;"><span style="color:#a78bfa;">⭐ Débutant — Niveau 1/3</span><span style="color:rgba(255,255,255,.25);">|</span><span style="color:rgba(255,255,255,.45);">3 niveaux séquentiels requis · flux multi-produits et goulots combinés aux niveaux supérieurs</span></div>
   <div class="row">
     <div class="col">
       <div class="wc">
@@ -839,8 +1448,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — Value Stream Mapping</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 88 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Le goulot Soudure est correctement identifié. La proposition de flux tiré (supprimer les stocks intermédiaires) est pertinente. Le calcul de TVA est exact.</div>
-        <div><strong>Axe d'amélioration :</strong> L'état futur devrait intégrer un système Kanban entre Pliage et Soudure pour réguler le flux sans stock tampon.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — Goulot Soudure (TC=120s &gt; Takt=60s) correctement identifié. Calcul TVA exact (0,05%). Proposition d'état futur avec suppression des stocks intermédiaires pertinente.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — L'état futur n'intègre pas de flux tiré (Kanban) entre Pliage et Soudure. TVA future visée "3%" insuffisante — un niveau World Class vise ≥60%.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — État futur : Découpe(38s)→Kanban→Pliage(52s)→Kanban→Soudure×2(60s)→Ctrl(25s) | Lead Time cible : 0,5j (-91%) | TVA cible : 4-6%.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Planifier les chantiers Kaizen dans l'ordre : 1) résoudre le goulot Soudure, 2) flux continu entre postes, 3) supprimer les stocks tampon restants.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.6rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 6 — VSM Validé ! Score 88%</div>
@@ -902,6 +1513,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <div class="slide bg-m7" id="s23">
   <div class="stag st-pink">📈 Module 7 — SPC · Exercice <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
   <h2 class="sh2">Calcul des <span style="color:#f472b6;">Limites</span> &amp; Lecture de Carte</h2>
+  <div style="display:flex;align-items:center;gap:.5rem;background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);border-radius:8px;padding:.3rem .8rem;margin-bottom:.6rem;max-width:1020px;font-size:.6rem;font-weight:700;"><span style="color:#f472b6;">⭐ Débutant — Niveau 1/3</span><span style="color:rgba(255,255,255,.25);">|</span><span style="color:rgba(255,255,255,.45);">3 niveaux requis · règles Nelson croissantes et Cp/Cpk aux niveaux Intermédiaire et Avancé</span></div>
   <div class="row">
     <div class="col">
       <div class="wc">
@@ -964,8 +1576,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — SPC</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 87 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Le calcul des limites (LSC/LIC) est exact. Le point hors contrôle (mesure 5) est correctement identifié et signalé. La règle R1 est bien appliquée.</div>
-        <div><strong>Axe :</strong> L'étudiant n'a pas vérifié la règle R4 (8 points du même côté) qui aurait aussi révélé une tendance haussière sur les mesures 1-4.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — Calcul des limites (LSC=25,037 / LIC=24,963) exact. Point hors contrôle (mesure 5 à 25,06) correctement identifié. Règle R1 bien appliquée.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — Règle R4 (8 points du même côté de LC) non vérifiée : mesures 1-4 toutes au-dessus de LC → tendance haussière précoce non détectée. Capabilité Cp/Cpk non calculée.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — LSC=25,037 | LC=25,000 | LIC=24,963 | R1 violée (mesure 5) → arrêt machine | Cp=(25,05-24,95)/(6×0,025)=0,67 → procédé incapable (Cp&lt;1,33).</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Vérifier toutes les règles R1 à R8 dans l'ordre. Un procédé "sous contrôle" peut rester incapable : calculer Cp/Cpk pour valider la capabilité réelle après stabilisation.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.6rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 7 — SPC Validé ! Score 87%</div>
@@ -1019,6 +1633,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <div class="slide bg-m8" id="s26">
   <div class="stag st-orange">⚡ Module 8 — SMED · Exercice <span style="margin-left:.4rem;" class="prof-badge">👁️ Vue étudiant</span></div>
   <h2 class="sh2">Classification <span style="color:#fb923c;">Int./Ext.</span> &amp; Réorganisation</h2>
+  <div style="display:flex;align-items:center;gap:.5rem;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:8px;padding:.3rem .8rem;margin-bottom:.6rem;max-width:1020px;font-size:.6rem;font-weight:700;"><span style="color:#fb923c;">⭐ Débutant — Niveau 1/3</span><span style="color:rgba(255,255,255,.25);">|</span><span style="color:rgba(255,255,255,.45);">3 niveaux requis · nombre d'opérations et secteurs (automobile, aéro) augmentent à chaque niveau</span></div>
   <div class="row">
     <div class="col">
       <div class="wc">
@@ -1059,8 +1674,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
       <div class="ai">
         <div class="ai-hd">🤖 Analyse IA — SMED</div>
         <div style="margin-bottom:.4rem;"><span class="score">✅ Score : 91 / 100</span></div>
-        <div style="margin-bottom:.35rem;"><strong>Points forts :</strong> Excellente conversion des opérations internes. Le remplacement des boulons par attaches rapides est la meilleure pratique SMED. Gain de 87 minutes très réaliste industriellement.</div>
-        <div><strong>Conseil :</strong> Standardiser via une fiche SMED affichée au poste, avec photos de chaque étape, pour que n'importe quel opérateur puisse réaliser le changement.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#10b981;">✅ POINTS FORTS</strong> — 2 opérations internes correctement converties en externes (chercher moule + préchauffage). Remplacement boulons → attaches rapides : meilleure pratique SMED. Gain de 87 min (-72%) très réaliste.</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#ef4444;">❌ ERREURS ET MANQUES</strong> — Les réglages pression/vitesse (20 min) non rationalisés : une fiche paramètre pré-remplie les réduirait à 3-5 min. Aucun objectif de temps cible fixé (viser &lt;10 min est l'objectif SMED classique).</div>
+        <div style="margin-bottom:.3rem;"><strong style="color:#6366f1;">📝 RÉPONSE MODÈLE</strong> — Externe (avant arrêt) : chercher moule + préchauffage | Interne : démontage (8min — attaches rapides) + montage (30min) + réglages (5min — fiche std) = 43min → -64%.</div>
+        <div><strong style="color:#f59e0b;">💡 CONSEILS</strong> — Afficher une fiche SMED illustrée (photos + temps cibles + paramètres pré-remplis) au poste pour que tout opérateur puisse réaliser le changement. Viser &lt;10 min avec paramétrage automatique.</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#059669);border-radius:10px;padding:.65rem 1rem;text-align:center;margin-top:.6rem;">
         <div style="font-size:.72rem;font-weight:900;color:#fff;">✅ Module 8 — SMED Validé ! Score 91%</div>
@@ -1412,397 +2029,6 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     ███████╗ SECTION PROFESSEUR EXCLUSIVE ██████╗
-     ══════════════════════════════════════════════════ -->
-
-<!-- ═══ SÉPARATEUR PROFESSEUR ═══ -->
-<div class="slide bg-admin" id="s-prof-sep" style="align-items:center;justify-content:center;">
-  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">
-    <div style="position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(124,58,237,.25),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);"></div>
-    <div style="position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(168,85,247,.15),transparent 70%);top:-60px;right:-60px;"></div>
-    <div style="position:absolute;width:250px;height:250px;background:radial-gradient(circle,rgba(99,102,241,.12),transparent 70%);bottom:-40px;left:-40px;"></div>
-  </div>
-  <div style="text-align:center;position:relative;z-index:1;">
-    <div style="font-size:3.5rem;margin-bottom:1rem;">👨‍🏫</div>
-    <div style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.2);border:2px solid rgba(168,85,247,.5);border-radius:14px;padding:.5rem 1.5rem;margin-bottom:1.2rem;">
-      <span style="font-size:.75rem;font-weight:900;color:#c084fc;letter-spacing:1.5px;text-transform:uppercase;">Section Exclusive</span>
-    </div>
-    <h1 style="font-size:2.8rem;font-weight:900;line-height:1.1;margin-bottom:.8rem;">Tableau de Bord<br><span style="color:#a855f7;">Professeur</span></h1>
-    <p style="font-size:.9rem;color:rgba(255,255,255,.5);max-width:500px;margin:0 auto 1.5rem;line-height:1.65;">Les slides suivantes montrent les fonctionnalités <strong style="color:#c084fc;">exclusivement accessibles</strong> au professeur via le dashboard admin.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;max-width:600px;margin:0 auto;">
-      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">🔐 Accès Ctrl+Shift+A</span>
-      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">👥 Suivi de classe</span>
-      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">📊 Statistiques</span>
-      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">📥 Export CSV</span>
-      <span style="background:rgba(124,58,237,.2);border:1px solid rgba(168,85,247,.3);color:#c084fc;border-radius:20px;padding:.3rem .9rem;font-size:.68rem;font-weight:700;">🏷️ Gestion codes</span>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S35 ACCÈS ADMIN ═══ -->
-<div class="slide bg-admin" id="s35">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Accès Dashboard Admin</div>
-  <h2 class="sh2">Tableau de Bord <span class="hlv">Professeur</span> — Accès exclusif</h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">🔐 Comment accéder au Dashboard Admin</div>
-        <div style="display:flex;flex-direction:column;gap:.5rem;">
-          <div style="background:#f5f3ff;border-radius:10px;padding:.7rem 1rem;border:1.5px solid #c4b5fd;text-align:center;">
-            <div style="font-size:.65rem;font-weight:800;color:#6d28d9;margin-bottom:.35rem;">RACCOURCI CLAVIER</div>
-            <div style="font-size:1.1rem;margin-bottom:.3rem;"><span class="key">Ctrl</span> + <span class="key">Shift</span> + <span class="key">A</span></div>
-            <div style="font-size:.62rem;color:#374151;">Sur n'importe quelle page du site</div>
-          </div>
-          <div style="background:#f5f3ff;border-radius:10px;padding:.7rem 1rem;border:1.5px solid #c4b5fd;text-align:center;">
-            <div style="font-size:.65rem;font-weight:800;color:#6d28d9;margin-bottom:.35rem;">MOT DE PASSE</div>
-            <div style="display:flex;justify-content:center;gap:.2rem;margin-bottom:.3rem;">
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">G</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">R</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">E</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">E</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">N</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">L</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">A</span>
-              <span style="background:#1e1b4b;color:#a78bfa;border:1px solid #4c1d95;border-radius:5px;padding:.25rem .45rem;font-family:monospace;font-weight:700;font-size:.75rem;">B</span>
-            </div>
-            <div style="font-size:.58rem;color:#64748b;">Confidentiel — à ne pas communiquer aux étudiants</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">🛡️ Fonctionnalités exclusives professeur</div>
-        <div style="display:flex;flex-direction:column;gap:.35rem;font-size:.68rem;color:#374151;">
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">👥 <strong>Liste des étudiants</strong> — voir tous les codes + noms enregistrés</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">📊 <strong>Scores en temps réel</strong> — progression de chaque étudiant par module</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">📈 <strong>Statistiques de classe</strong> — moyenne, distribution, modules difficiles</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">📥 <strong>Export CSV</strong> — télécharger toutes les données en une ligne</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">🏷️ <strong>Gestion des codes</strong> — générer et distribuer les codes étudiants</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S36 LISTE ÉTUDIANTS ═══ -->
-<div class="slide bg-admin" id="s36">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Liste &amp; Progression</div>
-  <h2 class="sh2">Tableau de Bord <span class="hlv">Classe</span> — Suivi en temps réel</h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📋 Interface Admin — Onglets</div>
-        <div class="atab">
-          <div class="at on">👥 Étudiants</div>
-          <div class="at">📊 Statistiques</div>
-          <div class="at">📥 Export</div>
-          <div class="at">⚙️ Paramètres</div>
-        </div>
-        <table class="rtable">
-          <tr><th>Code</th><th>Nom</th><th>Modules</th><th>Score moy.</th><th>Statut</th></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-001</td><td>Ahmed Benali</td><td>11/11</td><td style="color:#059669;font-weight:700;">86%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-002</td><td>Sara El Fassi</td><td>7/11</td><td style="color:#d97706;font-weight:700;">74%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-003</td><td>Youssef Idrissi</td><td>11/11</td><td style="color:#059669;font-weight:700;">91%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-004</td><td>Fatima Zahra Amrani</td><td>5/11</td><td style="color:#d97706;font-weight:700;">68%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-005</td><td>Karim Nassir</td><td>11/11</td><td style="color:#059669;font-weight:700;">79%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-006</td><td>Nadia Bouhaj</td><td>2/11</td><td style="color:#dc2626;font-weight:700;">55%</td><td><span style="background:#fef2f2;color:#991b1b;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">🔴 Débutant</span></td></tr>
-        </table>
-        <div style="margin-top:.4rem;font-size:.58rem;color:#94a3b8;font-style:italic;">… et 24 autres étudiants dans la liste</div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📊 Résumé de classe (30 étudiants)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.5rem;">
-          <div class="stat-big"><div class="n">3</div><div class="l">Certifiés (&gt;70%)</div></div>
-          <div class="stat-big"><div class="n" style="color:#d97706;">2</div><div class="l">En cours</div></div>
-          <div class="stat-big"><div class="n" style="color:#dc2626;">1</div><div class="l">En difficulté</div></div>
-          <div class="stat-big"><div class="n" style="color:#a855f7;">79%</div><div class="l">Moy. classe</div></div>
-        </div>
-        <div style="background:#f5f3ff;border-radius:8px;padding:.45rem .7rem;border:1px solid #c4b5fd;font-size:.63rem;color:#374151;"><strong style="color:#6d28d9;">⚠️ Module difficile :</strong> M2 5S (moy. 68%) et M7 SPC (moy. 72%) — envisager une session de renforcement</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S37 SUIVI INDIVIDUEL ═══ -->
-<div class="slide bg-admin" id="s37">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Suivi Individuel</div>
-  <h2 class="sh2">Fiche Étudiant <span class="hlv">Détaillée</span> — Profil complet</h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">👤 Profil — Ahmed Benali (ETU-001)</div>
-        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.65rem;color:#374151;margin-bottom:.5rem;">
-          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Code étudiant</span><strong style="font-family:monospace;">ETU-2024-001</strong></div>
-          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Modules complétés</span><strong>11 / 11 ✅</strong></div>
-          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Score moyen</span><strong style="color:#059669;">86%</strong></div>
-          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Temps total</span><strong>7h12</strong></div>
-          <div style="display:flex;justify-content:space-between;background:#f0fdf4;border-radius:5px;padding:.28rem .45rem;border:1px solid #bbf7d0;"><span>Certificat</span><strong style="color:#059669;">✅ Délivré</strong></div>
-        </div>
-        <div style="background:#fef9ee;border-radius:8px;padding:.45rem .65rem;border:1px solid #fde68a;font-size:.63rem;color:#374151;">
-          <strong style="color:#d97706;">📌 Point professeur :</strong> Excellent sur PDCA et SMED. Légère faiblesse en M2 5S (78%) → suggérer exercices supplémentaires sur Seiketsu/Shitsuke.
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📊 Scores détaillés par module</div>
-        <div style="display:flex;flex-direction:column;gap:.22rem;font-size:.62rem;color:#374151;">
-          <div class="prog-row"><span class="prog-label">M1 PDCA</span><div class="prog-bar"><div class="prog-fill" style="width:92%;background:#3b82f6;"></div></div><span style="font-weight:700;color:#2563eb;">92%</span></div>
-          <div class="prog-row"><span class="prog-label">M2 5S</span><div class="prog-bar"><div class="prog-fill" style="width:78%;background:#ef4444;"></div></div><span style="font-weight:700;color:#dc2626;">78%</span></div>
-          <div class="prog-row"><span class="prog-label">M3 Ishikawa</span><div class="prog-bar"><div class="prog-fill" style="width:85%;background:#10b981;"></div></div><span style="font-weight:700;color:#059669;">85%</span></div>
-          <div class="prog-row"><span class="prog-label">M4 Pareto</span><div class="prog-bar"><div class="prog-fill" style="width:90%;background:#f59e0b;"></div></div><span style="font-weight:700;color:#d97706;">90%</span></div>
-          <div class="prog-row"><span class="prog-label">M5 Kanban</span><div class="prog-bar"><div class="prog-fill" style="width:85%;background:#06b6d4;"></div></div><span style="font-weight:700;color:#0891b2;">85%</span></div>
-          <div class="prog-row"><span class="prog-label">M6 VSM</span><div class="prog-bar"><div class="prog-fill" style="width:88%;background:#7c3aed;"></div></div><span style="font-weight:700;color:#6d28d9;">88%</span></div>
-          <div class="prog-row"><span class="prog-label">M7 SPC</span><div class="prog-bar"><div class="prog-fill" style="width:87%;background:#ec4899;"></div></div><span style="font-weight:700;color:#db2777;">87%</span></div>
-          <div class="prog-row"><span class="prog-label">M8 SMED</span><div class="prog-bar"><div class="prog-fill" style="width:91%;background:#f97316;"></div></div><span style="font-weight:700;color:#ea580c;">91%</span></div>
-          <div class="prog-row"><span class="prog-label">M9 AMDEC</span><div class="prog-bar"><div class="prog-fill" style="width:84%;background:#6366f1;"></div></div><span style="font-weight:700;color:#4f46e5;">84%</span></div>
-          <div class="prog-row"><span class="prog-label">M10 Projet</span><div class="prog-bar"><div class="prog-fill" style="width:87%;background:#f59e0b;"></div></div><span style="font-weight:700;color:#d97706;">87%</span></div>
-          <div class="prog-row"><span class="prog-label">M11 Quiz</span><div class="prog-bar"><div class="prog-fill" style="width:82%;background:#a855f7;"></div></div><span style="font-weight:700;color:#7c3aed;">82%</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S38 STATISTIQUES DE CLASSE ═══ -->
-<div class="slide bg-admin" id="s38">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Statistiques de Classe</div>
-  <h2 class="sh2">Analyse des <span class="hlv">Performances</span> — Vue globale</h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📊 Score moyen par module (30 étudiants)</div>
-        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.63rem;color:#374151;">
-          <div class="prog-row"><span class="prog-label">M1 PDCA</span><div class="prog-bar"><div class="prog-fill" style="width:84%;background:#3b82f6;"></div></div><span style="font-weight:700;">84%</span></div>
-          <div class="prog-row" style="position:relative;"><span class="prog-label">M2 5S</span><div class="prog-bar"><div class="prog-fill" style="width:68%;background:#ef4444;"></div></div><span style="font-weight:700;color:#dc2626;">68% ⚠️</span></div>
-          <div class="prog-row"><span class="prog-label">M3 Ishikawa</span><div class="prog-bar"><div class="prog-fill" style="width:79%;background:#10b981;"></div></div><span style="font-weight:700;">79%</span></div>
-          <div class="prog-row"><span class="prog-label">M4 Pareto</span><div class="prog-bar"><div class="prog-fill" style="width:83%;background:#f59e0b;"></div></div><span style="font-weight:700;">83%</span></div>
-          <div class="prog-row"><span class="prog-label">M5 Kanban</span><div class="prog-bar"><div class="prog-fill" style="width:77%;background:#06b6d4;"></div></div><span style="font-weight:700;">77%</span></div>
-          <div class="prog-row"><span class="prog-label">M6 VSM</span><div class="prog-bar"><div class="prog-fill" style="width:81%;background:#7c3aed;"></div></div><span style="font-weight:700;">81%</span></div>
-          <div class="prog-row" style="position:relative;"><span class="prog-label">M7 SPC</span><div class="prog-bar"><div class="prog-fill" style="width:72%;background:#ec4899;"></div></div><span style="font-weight:700;color:#dc2626;">72% ⚠️</span></div>
-          <div class="prog-row"><span class="prog-label">M8 SMED</span><div class="prog-bar"><div class="prog-fill" style="width:86%;background:#f97316;"></div></div><span style="font-weight:700;">86%</span></div>
-          <div class="prog-row"><span class="prog-label">M9 AMDEC</span><div class="prog-bar"><div class="prog-fill" style="width:74%;background:#6366f1;"></div></div><span style="font-weight:700;color:#dc2626;">74% ⚠️</span></div>
-          <div class="prog-row"><span class="prog-label">M10 Projet</span><div class="prog-bar"><div class="prog-fill" style="width:81%;background:#f59e0b;"></div></div><span style="font-weight:700;">81%</span></div>
-          <div class="prog-row"><span class="prog-label">M11 Quiz</span><div class="prog-bar"><div class="prog-fill" style="width:78%;background:#a855f7;"></div></div><span style="font-weight:700;">78%</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📈 Distribution des scores (30 étudiants)</div>
-        <div style="display:flex;gap:.3rem;align-items:flex-end;height:80px;margin-bottom:.5rem;">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#dc2626;border-radius:3px 3px 0 0;width:100%;height:15px;"></div><span style="font-size:.5rem;color:#64748b;">&lt;60%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">2</span></div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#f59e0b;border-radius:3px 3px 0 0;width:100%;height:30px;"></div><span style="font-size:.5rem;color:#64748b;">60-70%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">5</span></div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#10b981;border-radius:3px 3px 0 0;width:100%;height:60px;"></div><span style="font-size:.5rem;color:#64748b;">70-80%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">12</span></div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#3b82f6;border-radius:3px 3px 0 0;width:100%;height:50px;"></div><span style="font-size:.5rem;color:#64748b;">80-90%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">9</span></div>
-          <div style="display:flex;flex-direction:column;align-items:center;gap:.15rem;flex:1;"><div style="background:#7c3aed;border-radius:3px 3px 0 0;width:100%;height:20px;"></div><span style="font-size:.5rem;color:#64748b;">&gt;90%</span><span style="font-size:.55rem;font-weight:700;color:#374151;">2</span></div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;font-size:.62rem;">
-          <div style="background:#f0fdf4;border-radius:6px;padding:.3rem;text-align:center;border:1px solid #bbf7d0;"><strong style="color:#059669;">21/30</strong><br>certifiés (≥70%)</div>
-          <div style="background:#fef2f2;border-radius:6px;padding:.3rem;text-align:center;border:1px solid #fecaca;"><strong style="color:#dc2626;">79%</strong><br>moy. de classe</div>
-        </div>
-        <div style="margin-top:.4rem;background:#f5f3ff;border-radius:7px;padding:.35rem .5rem;border:1px solid #c4b5fd;font-size:.62rem;color:#374151;">💡 <strong>Recommandation :</strong> Session de rattrapage M2 5S + M7 SPC pour les 9 étudiants &lt; 70%</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S39 EXPORT CSV ═══ -->
-<div class="slide bg-admin" id="s39">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Export &amp; Données</div>
-  <h2 class="sh2">Export <span class="hlv">CSV</span> — Toutes les données en un clic</h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📥 Fonctionnalité Export CSV</div>
-        <div style="background:#f5f3ff;border-radius:10px;padding:.8rem 1rem;border:1.5px solid #c4b5fd;text-align:center;margin-bottom:.5rem;">
-          <div style="font-size:.65rem;font-weight:800;color:#6d28d9;margin-bottom:.3rem;">BOUTON DANS LE DASHBOARD ADMIN</div>
-          <span class="bm bm-v" style="font-size:.8rem;">📥 Exporter CSV (30 étudiants)</span>
-          <div style="font-size:.58rem;color:#64748b;margin-top:.3rem;">Génère un fichier téléchargeable instantanément</div>
-        </div>
-        <div style="font-size:.65rem;color:#374151;font-family:monospace;background:#f8fafc;border-radius:7px;padding:.5rem .7rem;border:1px solid #e2e8f0;line-height:1.8;">
-          <span style="color:#94a3b8;">code,nom,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,moy,cert</span><br>
-          ETU-001,Ahmed Benali,92,78,85,90,85,88,87,91,84,87,82,86,OUI<br>
-          ETU-002,Sara El Fassi,88,72,79,85,0,0,0,0,0,0,0,74,NON<br>
-          ETU-003,Youssef Idrissi,95,84,90,92,89,91,88,94,86,89,85,91,OUI
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📊 Données disponibles dans l'export</div>
-        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.67rem;color:#374151;">
-          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">🏷️ <strong>Identité :</strong> Code étudiant, Nom complet</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">📊 <strong>Scores :</strong> Note /100 pour chacun des 11 modules (M1→M11)</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">📈 <strong>Moyenne :</strong> Score moyen pondéré sur tous les modules</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">🎓 <strong>Certification :</strong> OUI/NON selon score ≥ 70%</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">⏱️ <strong>Progression :</strong> Nombre de modules complétés</div>
-        </div>
-        <div style="margin-top:.4rem;background:#fef9ee;border-radius:7px;padding:.38rem .6rem;border:1px solid #fde68a;font-size:.63rem;color:#374151;">📎 <strong>Compatible :</strong> Excel, Google Sheets, LibreOffice Calc pour analyse et notation</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S40 GESTION CODES ═══ -->
-<div class="slide bg-admin" id="s40">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Gestion des Codes Étudiants</div>
-  <h2 class="sh2">Codes <span class="hlv">Étudiants</span> — Attribution &amp; Suivi</h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">🏷️ Comment fonctionnent les codes</div>
-        <div style="display:flex;flex-direction:column;gap:.35rem;font-size:.68rem;color:#374151;">
-          <div style="background:#eff6ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #3b82f6;">
-            <strong>1. Génération</strong> — Le professeur crée les codes avant la séance depuis le dashboard (format libre : ETU-001, N12345, etc.)
-          </div>
-          <div style="background:#f0fdf4;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #10b981;">
-            <strong>2. Distribution</strong> — Chaque étudiant reçoit son code unique (papier, email ou affiché). Il le saisit lors de sa connexion.
-          </div>
-          <div style="background:#fef9ee;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #f59e0b;">
-            <strong>3. Traçabilité</strong> — Dès qu'un étudiant valide un module, le code est associé à son score dans la base locale.
-          </div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">
-            <strong>4. Retrouver</strong> — Le professeur retrouve chaque étudiant par son code dans le dashboard → score, progression, certificat.
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📋 Interface gestion des codes</div>
-        <div class="atab">
-          <div class="at on">👥 Étudiants</div>
-          <div class="at">➕ Ajouter</div>
-          <div class="at">🗑️ Supprimer</div>
-        </div>
-        <div style="display:flex;gap:.4rem;margin-bottom:.5rem;">
-          <div style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:.35rem .55rem;font-size:.65rem;color:#94a3b8;">Code : ETU-031</div>
-          <div style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:.35rem .55rem;font-size:.65rem;color:#94a3b8;">Nom : Houda Berrada</div>
-          <span class="bm bm-g" style="font-size:.65rem;">+ Ajouter</span>
-        </div>
-        <table class="rtable">
-          <tr><th>Code</th><th>Nom</th><th>Actif</th></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-001</td><td>Ahmed Benali</td><td><span style="color:#059669;">✅</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-002</td><td>Sara El Fassi</td><td><span style="color:#059669;">✅</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-031</td><td>Houda Berrada</td><td><span style="color:#94a3b8;">⏳ Nouveau</span></td></tr>
-        </table>
-        <div style="margin-top:.4rem;font-size:.6rem;color:#94a3b8;text-align:center;">30 étudiants enregistrés · Données stockées localement</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S41 GUIDE DÉMARRAGE ═══ -->
-<div class="slide bg-admin" id="s41">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Guide de Démarrage Rapide</div>
-  <h2 class="sh2">Mettre en place la plateforme en <span class="hlv">3 étapes</span></h2>
-  <div class="row">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">⚡ Checklist avant la séance</div>
-        <div style="display:flex;flex-direction:column;gap:.35rem;font-size:.68rem;color:#374151;">
-          <div style="background:#f0fdf4;border-radius:8px;padding:.55rem .75rem;border:1.5px solid #bbf7d0;display:flex;align-items:flex-start;gap:.5rem;">
-            <span style="color:#059669;font-size:.9rem;margin-top:.05rem;">①</span>
-            <div><strong>Ouvrir la plateforme</strong><br><span style="font-size:.62rem;color:#64748b;">Accéder à l'URL GitHub Pages · Tester connexion internet</span></div>
-          </div>
-          <div style="background:#eff6ff;border-radius:8px;padding:.55rem .75rem;border:1.5px solid #bfdbfe;display:flex;align-items:flex-start;gap:.5rem;">
-            <span style="color:#2563eb;font-size:.9rem;margin-top:.05rem;">②</span>
-            <div><strong>Préparer les codes étudiants</strong><br><span style="font-size:.62rem;color:#64748b;"><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">A</span> → Ajouter les codes → Imprimer ou projeter la liste</span></div>
-          </div>
-          <div style="background:#fef9ee;border-radius:8px;padding:.55rem .75rem;border:1.5px solid #fde68a;display:flex;align-items:flex-start;gap:.5rem;">
-            <span style="color:#d97706;font-size:.9rem;margin-top:.05rem;">③</span>
-            <div><strong>Distribuer les clés API Groq</strong><br><span style="font-size:.62rem;color:#64748b;">Chaque étudiant crée son compte gratuit sur console.groq.com (2 min) et copie sa clé</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">📅 Déroulement d'une séance type (3h)</div>
-        <div style="display:flex;flex-direction:column;gap:.25rem;font-size:.65rem;color:#374151;">
-          <div style="display:flex;gap:.5rem;align-items:center;background:#f8fafc;border-radius:6px;padding:.3rem .5rem;"><span style="color:#94a3b8;font-size:.6rem;width:30px;flex-shrink:0;">0h00</span><span>Connexion + configuration API (5-10 min)</span></div>
-          <div style="display:flex;gap:.5rem;align-items:center;background:#f8fafc;border-radius:6px;padding:.3rem .5rem;"><span style="color:#94a3b8;font-size:.6rem;width:30px;flex-shrink:0;">0h10</span><span>M1 PDCA → M4 Pareto (3 modules)</span></div>
-          <div style="display:flex;gap:.5rem;align-items:center;background:#fef9ee;border-radius:6px;padding:.3rem .5rem;border:1px solid #fde68a;"><span style="color:#d97706;font-size:.6rem;width:30px;flex-shrink:0;">1h30</span><span><strong>Pause 15 min</strong> + suivi prof (dashboard admin)</span></div>
-          <div style="display:flex;gap:.5rem;align-items:center;background:#f8fafc;border-radius:6px;padding:.3rem .5rem;"><span style="color:#94a3b8;font-size:.6rem;width:30px;flex-shrink:0;">1h45</span><span>M5 Kanban → M11 Quiz (modules avancés dont M9 AMDEC &amp; M10 Projet)</span></div>
-          <div style="display:flex;gap:.5rem;align-items:center;background:#f0fdf4;border-radius:6px;padding:.3rem .5rem;border:1px solid #bbf7d0;"><span style="color:#059669;font-size:.6rem;width:30px;flex-shrink:0;">2h50</span><span><strong>Export CSV + correction collective</strong></span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ S42 CONCLUSION PROF ═══ -->
-<div class="slide bg-prof" id="s42">
-  <div class="stag st-violet" style="margin-bottom:.4rem;">👨‍🏫 Synthèse Professeur</div>
-  <h2 class="sh2">Outil <span class="hlv">Complet</span> — Lean &amp; Six Sigma</h2>
-  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:.9rem;text-align:center;max-width:580px;">Un environnement pédagogique clé en main : les étudiants progressent de manière autonome pendant que vous suivez leur avancement en temps réel.</p>
-  <div class="row" style="justify-content:center;">
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">✅ Ce que l'outil offre aux étudiants</div>
-        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.67rem;color:#374151;">
-          <div style="display:flex;gap:.4rem;"><span>🔄</span><span>11 modules interactifs Lean &amp; Six Sigma avec cas industriels marocains</span></div>
-          <div style="display:flex;gap:.4rem;"><span>🤖</span><span>Feedback IA Groq personnalisé pour chaque exercice</span></div>
-          <div style="display:flex;gap:.4rem;"><span>📄</span><span>Rapport PDF + certificat automatique à télécharger</span></div>
-          <div style="display:flex;gap:.4rem;"><span>📱</span><span>100% web — aucune installation, accessible partout</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="col">
-      <div class="wc">
-        <div class="wc-title">🎓 Ce que l'outil offre aux professeurs</div>
-        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.67rem;color:#374151;">
-          <div style="display:flex;gap:.4rem;"><span>📊</span><span>Suivi en temps réel de toute la classe par étudiant</span></div>
-          <div style="display:flex;gap:.4rem;"><span>📥</span><span>Export CSV complet : scores, modules, certifications</span></div>
-          <div style="display:flex;gap:.4rem;"><span>🏷️</span><span>Gestion des codes étudiants depuis le dashboard admin</span></div>
-          <div style="display:flex;gap:.4rem;"><span>📈</span><span>Identification automatique des modules difficiles</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;max-width:900px;">
-    <span class="pill p-blue">🔄 M1 PDCA</span>
-    <span class="pill p-red">🏭 M2 5S</span>
-    <span class="pill p-green">🐟 M3 Ishikawa</span>
-    <span class="pill p-amber">📊 M4 Pareto</span>
-    <span class="pill" style="background:#ecfeff;color:#164e63;">📋 M5 Kanban</span>
-    <span class="pill p-purple">🗺️ M6 VSM</span>
-    <span class="pill" style="background:#fdf2f8;color:#9d174d;">📈 M7 SPC</span>
-    <span class="pill" style="background:#fff7ed;color:#c2410c;">⚡ M8 SMED</span>
-    <span class="pill" style="background:#e0e7ff;color:#3730a3;">⚠️ M9 AMDEC</span>
-    <span class="pill" style="background:#fef3c7;color:#92400e;">🏗️ M10 Projet</span>
-    <span class="pill" style="background:#eef2ff;color:#3730a3;">🎓 M11 Quiz</span>
-  </div>
-</div>
-
-<!-- ═══ S43 URL FINALE ═══ -->
-<div class="slide bg-prof" id="s43">
-  <div style="text-align:center;position:relative;z-index:1;">
-    <img src="fst_logo.png" style="height:75px;display:block;margin:0 auto 1rem;filter:drop-shadow(0 4px 20px rgba(0,0,0,.5));" alt="FST">
-    <h2 class="sh2" style="text-align:center;">Accès à la plateforme</h2>
-    <div style="background:rgba(124,58,237,.15);border:1.5px solid rgba(168,85,247,.35);border-radius:14px;padding:1rem 2rem;margin:.8rem auto;max-width:640px;">
-      <div style="font-size:.65rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem;letter-spacing:.5px;">URL ÉTUDIANTS &amp; PROFESSEURS</div>
-      <div style="font-size:.95rem;font-weight:900;color:#fff;letter-spacing:.3px;">nono612.github.io/Module-Pedagogique-<br>Amelioration-Continue-FST/</div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;max-width:580px;margin:.8rem auto;">
-      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.8rem;text-align:center;">
-        <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin-bottom:.3rem;">ACCÈS ÉTUDIANT</div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.7);">Ouvrir l'URL → Saisir nom + code étudiant + clé API Groq → Démarrer</div>
-      </div>
-      <div style="background:rgba(124,58,237,.15);border:1px solid rgba(168,85,247,.3);border-radius:12px;padding:.8rem;text-align:center;">
-        <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin-bottom:.3rem;">ACCÈS PROFESSEUR</div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.7);"><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">A</span> sur n'importe quelle page → Mot de passe admin</div>
-      </div>
-    </div>
-    <div style="margin-top:.6rem;font-size:.65rem;color:rgba(255,255,255,.25);">← → pour naviguer · Diaporama complet — 40 slides</div>
-  </div>
-</div>
-
 </div><!-- /deck -->
 
 <div class="navctrl">
@@ -1813,7 +2039,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 </div>
 
 <script>
-const TOTAL=44;let cur=0;
+const TOTAL=48;let cur=0;
 function go(n){if(n<0||n>=TOTAL)return;const ss=document.querySelectorAll('.slide');ss[cur].classList.remove('active');ss[cur].classList.add('exit');setTimeout(()=>ss[cur].classList.remove('exit'),380);cur=n;ss[cur].classList.add('active');upd();}
 function next(){go(cur+1);}function prev(){go(cur-1);}
 function upd(){const ss=document.querySelectorAll('.slide');const tag=ss[cur].querySelector('.stag');document.getElementById('sect-label').textContent=tag?tag.textContent.trim():'';document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===TOTAL-1;document.getElementById('sc').textContent=(cur+1)+' / '+TOTAL;document.getElementById('pf').style.width=((cur+1)/TOTAL*100)+'%';}
