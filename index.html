@@ -1799,6 +1799,7 @@ state.pdca=state.pdca||{};
 state.vsmSteps=state.vsmSteps||null;
 state.smedRows=state.smedRows||null;
 state.paretoData=state.paretoData||null;
+state.ishiData=state.ishiData||null;
 state.domain=state.domain||null;
 state.cvSeen=state.cvSeen||false;
 state.cvFilter=state.cvFilter||false;
@@ -2529,10 +2530,6 @@ Génère des réponses modèles pour les 8 champs PDCA. JSON uniquement :
 
 function loadPDCA(){
   if(state.currentPDCAProblem){
-    if(!state.currentPDCAProblem.correction){
-      const prob=PDCA_FALLBACKS[Math.floor(Math.random()*PDCA_FALLBACKS.length)];
-      state.currentPDCAProblem=prob;currentPDCAProblem=prob;save();
-    }
     currentPDCAProblem=state.currentPDCAProblem;
     renderProblemCard(state.currentPDCAProblem);
     document.getElementById('pdcaNewProblemBtn').style.display='block';
@@ -2887,7 +2884,7 @@ async function analyze5S(){
 
 CONTEXTE DE L'EXERCICE :
 Atelier : ${scenCtx}
-Niveau de difficulté : ${_m2LastEx?.difficulte||'Standard'}
+Niveau de difficulté : ${getExLevel(2).label}
 
 RÉSULTATS DÉTAILLÉS :
 Exercice 1 — Classification 5S : ${ex1Score}% (${errors.length} erreur(s) sur ${_items.length} éléments)
@@ -2987,20 +2984,25 @@ function initIshikawa(){
       </div><div id="itags-${cat}"></div>`;
     c.appendChild(d);
   });
+  if(state.ishiData)Object.assign(ishiData,state.ishiData);
   const effEl=document.getElementById('ishiEffect');
-  if(effEl&&!effEl.value)effEl.value='';
+  if(effEl&&state.ishiEffect)effEl.value=state.ishiEffect;
   renderIshiTags();
 }
 function addIshiCause(cat){
   const inp=document.getElementById('ishi-'+cat);
   const v=inp.value.trim();if(!v)return;
   if(!ishiData[cat])ishiData[cat]=[];
-  ishiData[cat].push(v);inp.value='';renderIshiTags();
+  ishiData[cat].push(v);inp.value='';
+  state.ishiData=JSON.parse(JSON.stringify(ishiData));
+  state.ishiEffect=document.getElementById('ishiEffect')?.value||'';
+  save();
+  renderIshiTags();
 }
 function renderIshiTags(){
   ISHI_CATS.forEach(cat=>{
     const el=document.getElementById('itags-'+cat);if(!el)return;
-    el.innerHTML=(ishiData[cat]||[]).map((c,i)=>`<span class="tag" onclick="ishiData['${cat}'].splice(${i},1);renderIshiTags()">${c} ×</span>`).join('');
+    el.innerHTML=(ishiData[cat]||[]).map((c,i)=>`<span class="tag" onclick="ishiData['${cat}'].splice(${i},1);state.ishiData=JSON.parse(JSON.stringify(ishiData));save();renderIshiTags()">${c} ×</span>`).join('');
   });
 }
 async function aiIshikawa(){
@@ -3751,14 +3753,15 @@ function calcSMED(){
     <div class="alert alert-info" style="margin-top:.6rem;"><b>Plan d'action :</b> Externaliser en priorité : <b>${toConvert.map(r=>r.name).join(', ')}</b></div>
     <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1rem;margin-top:1rem;align-items:start;">
       <div><div style="font-size:.75rem;font-weight:700;color:#374151;margin-bottom:.4rem;text-align:center;">Répartition Interne / Externe</div><canvas id="smedDonutC" height="180"></canvas></div>
-      <div><div style="font-size:.75rem;font-weight:700;color:#374151;margin-bottom:.4rem;text-align:center;">Avant vs Après SMED (objectif : 45 min)</div><canvas id="smedBarC" height="180"></canvas></div>
+      <div><div style="font-size:.75rem;font-weight:700;color:#374151;margin-bottom:.4rem;text-align:center;">Avant vs Après SMED</div><canvas id="smedBarC" height="180"></canvas></div>
     </div>`;
   if(smedPieC)smedPieC.destroy();
   const ctx1=document.getElementById('smedDonutC').getContext('2d');
   smedPieC=new Chart(ctx1,{type:'doughnut',data:{labels:['Interne ⛔','Externe ✅'],datasets:[{data:[tInt,tExt],backgroundColor:['rgba(220,38,38,.8)','rgba(5,150,105,.8)'],borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},boxWidth:12}}}}});
   if(smedBarC)smedBarC.destroy();
   const ctx2=document.getElementById('smedBarC').getContext('2d');
-  smedBarC=new Chart(ctx2,{type:'bar',data:{labels:['Avant SMED','Après SMED','Objectif'],datasets:[{label:'Temps interne (min)',data:[tInt,afterTotal,45],backgroundColor:['rgba(220,38,38,.75)',afterTotal<=45?'rgba(5,150,105,.8)':'rgba(245,158,11,.8)','rgba(99,102,241,.5)'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Minutes'},beginAtZero:true}}}});
+  const _smedObj=_modExCtx[8]?.ex?.objectif||45;
+  smedBarC=new Chart(ctx2,{type:'bar',data:{labels:['Avant SMED','Après SMED','Objectif'],datasets:[{label:'Temps interne (min)',data:[tInt,afterTotal,_smedObj],backgroundColor:['rgba(220,38,38,.75)',afterTotal<=_smedObj?'rgba(5,150,105,.8)':'rgba(245,158,11,.8)','rgba(99,102,241,.5)'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Minutes'},beginAtZero:true}}}});
   state.scores[8]=Math.min(100,40+(smedRows.length>=5?20:0)+(gainPct>0?40:0));save();
 }
 function scoreSMED(){return state.scores[8]||0;}
@@ -4171,7 +4174,9 @@ function _applyModuleExercise(modId,ex,lv){
   switch(modId){
     case 3:{
       document.getElementById('ishiEffect').value=ex.effet||'';
-      ISHI_CATS.forEach(c=>{ishiData[c]=[];});renderIshiTags();
+      ISHI_CATS.forEach(c=>{ishiData[c]=[];});
+      state.ishiData={};state.ishiEffect=ex.effet||'';save();
+      renderIshiTags();
       ['ishiAIFeedback','ishiCorrection','ishiScore'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
       const svg=document.getElementById('fishbone-svg');if(svg)svg.innerHTML='';
       const ctx=document.getElementById('ishiExContext');
@@ -4181,6 +4186,7 @@ function _applyModuleExercise(modId,ex,lv){
     case 4:{
       if(ex.defauts&&ex.defauts.length){
         paretoRows=ex.defauts.map(d=>({name:String(d.name||''),count:Math.max(1,+d.count||1)}));
+        state.paretoData=paretoRows;save();
         renderParetoRows();if(paretoC){paretoC.destroy();paretoC=null;}
         ['paretoAI','paretoScore','paretoAIFull','paretoCorrection'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='';});
       }
@@ -4310,11 +4316,11 @@ function submitQuiz(){
     });
     if(ans===q.correct)ok++;
   });
-  const pct=Math.round(ok/quizData.length*100),pass=pct>=70;
+  const pct=Math.round(ok/quizData.length*100),pass=pct>=getThreshold(11);
   document.getElementById('quizScore').innerHTML=`
     <div style="text-align:center;padding:2rem;">
       <div class="quiz-score-big">${pct}%</div>
-      <div style="font-size:1.1rem;font-weight:800;color:${pass?'var(--green)':'var(--red)'};margin:.6rem 0;">${pass?'🎉 Félicitations ! Parcours validé !':'❌ Score insuffisant – 70% requis'}</div>
+      <div style="font-size:1.1rem;font-weight:800;color:${pass?'var(--green)':'var(--red)'};margin:.6rem 0;">${pass?'🎉 Félicitations ! Parcours validé !':`❌ Score insuffisant – ${getThreshold(11)}% requis`}</div>
       <div style="color:var(--gray400);font-size:.88rem;margin-bottom:1.4rem;">${ok} / ${quizData.length} bonnes réponses</div>
       <button class="btn btn-gold" onclick="generateQuiz()" style="font-size:.92rem;padding:.6rem 1.6rem;">🔄 Générer un nouveau quiz (10 nouvelles questions)</button>
     </div>`;
