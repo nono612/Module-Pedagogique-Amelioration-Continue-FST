@@ -2358,7 +2358,51 @@ async function analyzePDCA(){
   const p=state.pdca||{};
   const ai=document.getElementById('pdcaAI');
   if(!prob){ai.innerHTML='<div class="alert alert-warning">⚠️ Générez d\'abord un problème.</div>';return;}
-  const prompt=`Tu es formateur expert Lean Six Sigma. Donne un feedback PÉDAGOGIQUE COMPLET sur ce cycle PDCA d'un étudiant en Génie Industriel. Réponds en FRANÇAIS.\n\nPROBLÈME: ${prob.titre}\nContexte: ${prob.contexte}\nProblème: ${prob.probleme}\nObjectif: ${prob.objectif}\nContraintes: ${prob.contraintes}\n\nRÉPONSES DE L'ÉTUDIANT:\nPLAN – Objectif: "${p.plan1||'[Non rempli]'}"\nPLAN – Actions: "${p.plan2||'[Non rempli]'}"\nDO – Actions: "${p.do1||'[Non rempli]'}"\nDO – Ressources: "${p.do2||'[Non rempli]'}"\nCHECK – Résultats: "${p.check1||'[Non rempli]'}"\nCHECK – KPIs: "${p.check2||'[Non rempli]'}"\nACT – Standardisation: "${p.act1||'[Non rempli]'}"\nACT – Prochain cycle: "${p.act2||'[Non rempli]'}"\n\nStructure ta réponse ainsi:\n\n✅ CE QUE VOUS AVEZ BIEN FAIT\n[Liste des points positifs avec explication]\n\n❌ CE QUI EST INSUFFISANT OU INCORRECT\n[Liste des erreurs et manques avec explication]\n\n📝 LES RÉPONSES CORRECTES COMPLÈTES\nPLAN – Objectif SMART idéal: [réponse modèle]\nPLAN – Actions prévues idéales: [réponse modèle]\nDO – Actions idéales: [réponse modèle]\nDO – Ressources idéales: [réponse modèle]\nCHECK – Résultats idéaux: [réponse modèle]\nCHECK – KPIs idéaux: [réponse modèle]\nACT – Standardisation idéale: [réponse modèle]\nACT – Prochain cycle idéal: [réponse modèle]\n\n💡 CONSEILS POUR PROGRESSER\n[2-3 conseils actionnables pour mieux utiliser le PDCA]${getDomainContext()}`;
+  const prompt=`Tu es formateur expert Lean Six Sigma, exigeant et précis. Donne un feedback PÉDAGOGIQUE COMPLET sur ce cycle PDCA d'un étudiant en Génie Industriel. Réponds en FRANÇAIS.
+
+PROBLÈME POSÉ :
+Titre : ${prob.titre}
+Secteur : ${prob.secteur||'—'}
+Contexte : ${prob.contexte}
+Problème : ${prob.probleme}
+Objectif attendu : ${prob.objectif}
+Contraintes : ${prob.contraintes}
+
+RÉPONSES DE L'ÉTUDIANT :
+PLAN – Objectif SMART : "${p.plan1||'[Non rempli]'}"
+PLAN – Actions prévues : "${p.plan2||'[Non rempli]'}"
+DO – Actions réalisées : "${p.do1||'[Non rempli]'}"
+DO – Ressources : "${p.do2||'[Non rempli]'}"
+CHECK – Résultats mesurés : "${p.check1||'[Non rempli]'}"
+CHECK – KPIs : "${p.check2||'[Non rempli]'}"
+ACT – Standardisation : "${p.act1||'[Non rempli]'}"
+ACT – Prochain cycle : "${p.act2||'[Non rempli]'}"
+
+RÈGLE ABSOLUE PRIORITAIRE : Si un champ contient du charabia, des caractères aléatoires ou est hors-sujet → indique ❌ INVALIDE pour ce champ sans chercher d'excuse. Ne donne pas de crédit à une réponse sans rapport avec le problème.
+
+Structure ta réponse EXACTEMENT ainsi :
+
+✅ CE QUE VOUS AVEZ BIEN FAIT
+— Champs correctement remplis avec ce qui est pertinent (sois précis, cite les chiffres ou concepts exacts)
+— Si rien n'est correct, écris : "Aucun champ ne répond correctement aux exigences du PDCA."
+
+❌ CE QUI EST INSUFFISANT OU INCORRECT
+— Champs vides, hors-sujet ou incomplets avec explication conceptuelle précise
+— Erreurs spécifiques au contexte du problème (ex: objectif non SMART car sans chiffre, sans délai)
+
+📝 LES RÉPONSES CORRECTES COMPLÈTES
+PLAN – Objectif SMART idéal : [exemple adapté au problème exact, avec chiffre et délai]
+PLAN – Actions prévues idéales : [liste d'actions concrètes pour CE contexte]
+DO – Actions idéales : [ce qui devrait être fait en phase exécution]
+DO – Ressources idéales : [humaines, financières, techniques pour CE cas]
+CHECK – Résultats attendus : [métriques chiffrées à mesurer]
+CHECK – KPIs idéaux : [indicateurs précis avec valeurs cibles]
+ACT – Standardisation idéale : [procédures à créer/mettre à jour]
+ACT – Prochain cycle : [ce qui reste à améliorer et comment]
+
+💡 CONSEILS POUR PROGRESSER
+— 2-3 conseils actionnables spécifiques à cet exercice
+— Score estimé /100 et axe prioritaire à travailler${getDomainContext()}`;
   await callClaude(prompt,'pdcaAI');
 }
 
@@ -2428,12 +2472,34 @@ où X est le score numérique entre 0 et le max de chaque champ.`;
   }catch(e){return scorePDCA();}
 }
 
-function showPDCACorrection(){
+async function showPDCACorrection(){
   const prob=state.currentPDCAProblem||currentPDCAProblem;
   const el=document.getElementById('pdcaCorrection');
-  if(!prob||!prob.correction){
-    el.innerHTML='<div class="alert alert-warning">⚠️ Pas de correction disponible pour ce problème (généré par IA). Utilisez le Feedback IA complet.</div>';
-    return;
+  if(!prob){el.innerHTML='<div class="alert alert-warning">⚠️ Aucun problème chargé.</div>';return;}
+  if(!prob.correction){
+    const key=getKey();
+    if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer la correction.</div>';return;}
+    el.innerHTML='<div style="display:flex;align-items:center;gap:.7rem;padding:.5rem 0;"><div class="ai-spinner"></div><span style="font-size:.82rem;color:#6b7280;">Génération de la correction modèle…</span></div>';
+    const prompt=`Tu es expert Lean PDCA. Génère une correction modèle réaliste et détaillée pour ce problème industriel.
+
+Problème : ${prob.titre}
+Secteur : ${prob.secteur}
+Contexte : ${prob.contexte}
+Problème : ${prob.probleme}
+Objectif : ${prob.objectif}
+Contraintes : ${prob.contraintes}
+
+Génère des réponses modèles pour les 8 champs PDCA. JSON uniquement :
+{"plan1":"Objectif SMART complet avec métriques et délai","plan2":"Plan d'action détaillé semaine par semaine","do1":"Actions concrètes réalisées avec précisions","do2":"Ressources mobilisées (budget, équipes, outils)","check1":"Résultats mesurés avec chiffres avant/après","check2":"KPIs suivis et valeurs mesurées","act1":"Standardisation des améliorations (procédures, formation)","act2":"Prochain cycle PDCA et nouvel objectif"}`;
+    try{
+      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:900,temperature:0.3})});
+      const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+      const mm=text.match(/\{[\s\S]*\}/);
+      if(!mm)throw new Error();
+      prob.correction=JSON.parse(mm[0]);
+      if(state.currentPDCAProblem)state.currentPDCAProblem.correction=prob.correction;
+      save();
+    }catch(e){el.innerHTML='<div class="alert alert-warning">⚠️ Erreur lors de la génération de la correction.</div>';return;}
   }
   const c=prob.correction;
   const fields=[
@@ -2817,22 +2883,42 @@ async function analyze5S(){
   const auditErrors=[];
   FS_AUDIT.forEach(sec=>sec.questions.forEach((q,qi)=>{const g=fs5AuditAnswers[`${sec.s}-${qi}`];if(g&&g!==q.answer)auditErrors.push(`${sec.label} Q${qi+1}: "${g}" (correct:"${q.answer}") — ${q.q}`);}));
   const global5S=Math.round(ex1Score*.6+ex2Score*.4);
-  const prompt=`Tu es un formateur expert Lean Manufacturing. Un étudiant vient de réaliser le module 5S sur ${scenCtx}.
+  const prompt=`Tu es un formateur expert Lean Manufacturing 5S, exigeant et précis. Évalue strictement les résultats 5S de cet étudiant.
 
-RÉSULTATS :
-- Exercice 1 — Classification 5S : ${ex1Score}% (${errors.length} erreur(s) sur ${_items.length} éléments)
-${errors.length?'Erreurs :\n'+errors.slice(0,5).join('\n'):'Toutes les classifications sont correctes.'}
+CONTEXTE DE L'EXERCICE :
+Atelier : ${scenCtx}
+Niveau de difficulté : ${_m2LastEx?.difficulte||'Standard'}
 
-- Exercice 2 — Audit 5S : ${ex2Score}% (${auditErrors.length} erreur(s) sur 25 critères)
-${auditErrors.length?'Erreurs :\n'+auditErrors.slice(0,5).join('\n'):'Tous les critères sont correctement évalués.'}
+RÉSULTATS DÉTAILLÉS :
+Exercice 1 — Classification 5S : ${ex1Score}% (${errors.length} erreur(s) sur ${_items.length} éléments)
+${errors.length?'Erreurs de classification :\n'+errors.slice(0,8).map(e=>`  • ${e}`).join('\n'):'  ✅ Toutes les classifications sont correctes.'}
 
-Score global : ${global5S}%
+Exercice 2 — Audit 5S : ${ex2Score}% (${auditErrors.length} erreur(s) sur 25 critères)
+${auditErrors.length?'Erreurs d\'audit :\n'+auditErrors.slice(0,8).map(e=>`  • ${e}`).join('\n'):'  ✅ Tous les critères correctement évalués.'}
 
-Donne un feedback pédagogique structuré en français (3-4 courts paragraphes) :
-1. Ce que l'étudiant a bien compris
-2. Les notions à revoir avec une explication simple
-3. Astuce pour mémoriser les 5S facilement
-4. Encouragement final${getDomainContext()}`;
+Score global pondéré : ${global5S}% (Exercice 1 × 60% + Audit × 40%)
+
+RÈGLE ABSOLUE : Si le score est <40% → feedback sévère sans complaisance. Une réponse au hasard ne mérite pas d'encouragement.
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Ce que l'étudiant maîtrise réellement (avec exemples précis des bonnes réponses)
+
+❌ ERREURS ET MANQUES CRITIQUES
+— Erreurs de classification 5S les plus importantes avec explication conceptuelle
+  (ex: "Pourquoi un marteau inutilisé = Seiri et non Seiton")
+— Critères d'audit mal évalués et leur signification pratique
+
+📝 RÉPONSE MODÈLE
+— Les 3 erreurs les plus fréquentes corrigées avec la règle de décision 5S
+— Comment distinguer Seiri/Seiton/Seiso/Seiketsu/Shitsuke en pratique industrielle
+— Exemple concret tiré de ${scenCtx}
+
+💡 CONSEILS
+— Méthode Red Tag pour le Seiri : critère temporel (inutilisé depuis >3 mois = à éliminer)
+— Erreurs classiques : "nettoyer" ≠ Seiso seul — le Seiso révèle les pannes cachées
+— Score /100 et prochain axe prioritaire à travailler`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'fs5AI');
 }
@@ -3027,19 +3113,40 @@ async function analyzeIshikawa(){
   const el=document.getElementById('ishiAIFeedback');
   if(!getKey()){el.innerHTML='<div class="alert alert-warning">⚠️ Saisissez votre clé API dans le header.</div>';return;}
   const effect=document.getElementById('ishiEffect').value||'Non défini';
+  const ctx=_modExCtx[3];
+  const exInfo=ctx?`Entreprise : ${ctx.ex.entreprise||'—'} | Secteur : ${ctx.ex.secteur||'—'} | Problème : ${ctx.ex.probleme||effect} | Niveau : ${ctx.lv.label}`:`Problème : ${effect}`;
   let totalCauses=0;
-  const summary=ISHI_CATS.map(cat=>{const n=(ishiData[cat]||[]).length;totalCauses+=n;return `${cat}: ${n} cause(s)${n?` — "${(ishiData[cat]||[]).slice(0,2).join('", "')}"`:''}`}).join('\n');
-  const prompt=`Tu es un formateur expert Lean Manufacturing. Un étudiant a construit un diagramme Ishikawa 5M pour le problème : "${effect}" (atelier PRECISION MAROC, 8% rebuts, aéronautique).
+  const summary=ISHI_CATS.map(cat=>{const causes=(ishiData[cat]||[]);totalCauses+=causes.length;return `${cat} (${causes.length} cause${causes.length!==1?'s':''}) : ${causes.length?'"'+causes.join('", "')+'""':'[VIDE]'}`}).join('\n');
+  const prompt=`Tu es un formateur expert Lean Six Sigma, exigeant et précis. Évalue strictement ce diagramme Ishikawa d'un étudiant en génie industriel.
 
-CAUSES IDENTIFIÉES PAR L'ÉTUDIANT :
+CONTEXTE DE L'EXERCICE :
+${exInfo}
+
+CAUSES IDENTIFIÉES PAR L'ÉTUDIANT (${totalCauses} au total) :
 ${summary}
-Total : ${totalCauses} cause(s) répertoriée(s)
 
-Donne un feedback pédagogique structuré en français (3-4 paragraphes) :
-1. Qualité de l'analyse (exhaustivité, pertinence des causes identifiées)
-2. Catégories sous-exploitées et causes importantes manquées pour ce cas industriel
-3. Conseil méthodologique sur l'utilisation de l'Ishikawa en entreprise
-4. Encouragement et note sur la progression${getDomainContext()}`;
+RÈGLE ABSOLUE : Si l'étudiant a mis du charabia, des mots sans rapport avec le problème, ou des cases vides → signale-le explicitement avec ❌ et sois sévère.
+
+Donne un feedback expert structuré en FRANÇAIS avec ces 4 sections obligatoires :
+
+✅ POINTS FORTS
+— Liste précise des causes bien identifiées (avec explication du pourquoi elles sont pertinentes pour CE problème)
+
+❌ ERREURS ET MANQUES CRITIQUES
+— Causes incorrectes ou hors-sujet détectées
+— Catégories sous-exploitées (minimum attendu : 2-3 causes par M)
+— Causes importantes manquées pour CE secteur industriel spécifique
+
+📝 RÉPONSE MODÈLE — Causes attendues par catégorie
+Matière : [2-3 causes racines réalistes pour ce cas]
+Méthode : [2-3 causes]
+Main-d'œuvre : [2-3 causes]
+Machines : [2-3 causes]
+Milieu : [2-3 causes]
+
+💡 CONSEILS MÉTHODOLOGIQUES
+— Comment améliorer l'analyse Ishikawa (5 Pourquoi, brainstorming, vote pondéré)
+— Score estimé sur 100 et axe de progression prioritaire${getDomainContext()}`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'ishiAIFeedback');
 }
@@ -3131,18 +3238,43 @@ async function analyzeParetoFull(){
   let cumul=0;
   const data=sorted.map(r=>{cumul+=r.count;return `${r.name}: ${r.count} (${Math.round(r.count/total*100)}% — cumulé: ${Math.round(cumul/total*100)}%)`});
   const vital=sorted.filter((_,i)=>{let c=0;for(let j=0;j<=i;j++)c+=sorted[j].count;return c/total<=0.8;}).length||1;
-  const prompt=`Tu es un expert Lean Six Sigma. Un étudiant vient d'analyser un diagramme de Pareto pour les défauts de l'atelier PRECISION MAROC (aéronautique).
+  const ctx4=_modExCtx[4];
+  const exInfo4=ctx4?`Entreprise : ${ctx4.ex.entreprise||'—'} | Secteur : ${ctx4.ex.secteur||'—'} | Contexte : ${ctx4.ex.contexte||'—'} | Niveau : ${ctx4.lv.label}`:'Exercice Pareto';
+  const decision=(document.getElementById('paretoDecision')?.value||'').trim();
+  const vitaux2=window._paretoVitaux||[];
+  const plansAction=vitaux2.map((_,i)=>(document.getElementById('planAction'+i)?.value||'').trim()).filter(Boolean);
+  const prompt=`Tu es un expert Lean Six Sigma, exigeant et précis. Évalue strictement cette analyse de Pareto d'un étudiant en génie industriel.
 
-DONNÉES ANALYSÉES :
+CONTEXTE DE L'EXERCICE :
+${exInfo4}
+
+DONNÉES ANALYSÉES PAR L'ÉTUDIANT :
 ${data.join('\n')}
-Total défauts : ${total}
-Vitaux peu nombreux (80%) : ${sorted.slice(0,vital).map(r=>r.name).join(', ')} (${vital} défaut${vital>1?'s':''})
+Total : ${total} défauts/occurrences
+Vitaux identifiés (règle 80/20) : ${sorted.slice(0,vital).map(r=>r.name).join(', ')} → ${vital} item${vital>1?'s':''}
+Décision de l'étudiant : "${decision||'[Non renseignée]'}"
+Plans d'action : ${plansAction.length?plansAction.map((p,i)=>`Action ${i+1}: "${p}"`).join(' | '):'[Aucun plan d\'action saisi]'}
 
-Donne un feedback pédagogique structuré en français (3-4 paragraphes) :
-1. Pertinence des données saisies (suffisance, pertinence pour un atelier aéronautique)
-2. Interprétation de la loi 80/20 et actions prioritaires recommandées
-3. Outils Lean à utiliser en complément (5 Pourquoi, Ishikawa, AMDEC...)
-4. Encouragement et prochaine étape${getDomainContext()}`;
+RÈGLE ABSOLUE : Si données vides, charabia ou plans d'action sans rapport → signale explicitement avec ❌.
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Ce qui est correctement analysé dans ce Pareto
+
+❌ ERREURS ET MANQUES
+— Erreurs dans l'identification des vitaux (si faux)
+— Plans d'action vagues, manquants ou non cohérents avec les défauts prioritaires
+— Décision mal justifiée ou absente
+
+📝 RÉPONSE MODÈLE
+— Les vrais vitaux dans ce dataset (avec % cumulés)
+— Plan d'action idéal pour chaque vital (outil Lean recommandé + action concrète)
+— Décision optimale à prendre
+
+💡 CONSEILS
+— Comment utiliser le Pareto en lien avec l'Ishikawa et le PDCA
+— Score estimé /100 et axe prioritaire${getDomainContext()}`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'paretoAIFull');
 }
@@ -3241,22 +3373,44 @@ async function analyzeKanban(){
   const done=(state.kanban.done||[]).length;
   const total=backlog+doing+done;
   const wipOk=doing<=wip;
-  const prompt=`Tu es un expert Lean/Agile. Un étudiant a configuré un tableau Kanban pour l'atelier PRECISION MAROC.
+  const ctx5=_modExCtx[5];
+  const exInfo5=ctx5?`Entreprise : ${ctx5.ex.entreprise||'—'} | Secteur : ${ctx5.ex.secteur||'—'} | Contexte : ${ctx5.ex.contexte||'—'} | Niveau : ${ctx5.lv.label}`:'Exercice Kanban';
+  const doingTasks=(state.kanban.doing||[]).join(', ')||'[aucune]';
+  const doneTasks=(state.kanban.done||[]).join(', ')||'[aucune]';
+  const backlogTasks=(state.kanban.backlog||[]).join(', ')||'[aucune]';
+  const prompt=`Tu es un expert Lean/Agile, exigeant et précis. Évalue strictement ce tableau Kanban d'un étudiant.
 
-ÉTAT DU TABLEAU :
-- Limite WIP choisie : ${wip} tâches
-- Backlog : ${backlog} tâches
-- En cours : ${doing} tâches ${!wipOk?'(⚠️ LIMITE DÉPASSÉE)':'(✅ dans la limite)'}
-- Terminé : ${done} tâches
-- Total tâches : ${total}
-- Tâches en cours : ${(state.kanban.doing||[]).join(', ')||'aucune'}
-- Tâches terminées : ${(state.kanban.done||[]).join(', ')||'aucune'}
+CONTEXTE DE L'EXERCICE :
+${exInfo5}
 
-Donne un feedback pédagogique structuré en français (3-4 paragraphes) :
-1. Pertinence du WIP choisi et gestion du flux
-2. Ce qui a bien été fait / ce qui peut être amélioré
-3. Explication du principe "Stop Starting, Start Finishing"
-4. Encouragement et conseil pour la suite${getDomainContext()}`;
+ÉTAT DU TABLEAU KANBAN :
+- Limite WIP choisie par l'étudiant : ${wip} tâches
+- Backlog : ${backlog} tâches → "${backlogTasks}"
+- En cours (Doing) : ${doing} tâches ${!wipOk?'⚠️ LIMITE WIP DÉPASSÉE':'✅ dans la limite'} → "${doingTasks}"
+- Terminé : ${done} tâches → "${doneTasks}"
+- Total tâches créées : ${total}
+
+RÈGLE ABSOLUE : Si le tableau est vide ou les tâches sont hors-sujet → signale avec ❌.
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Ce qui est correctement configuré (WIP, flux, tâches)
+
+❌ ERREURS ET MANQUES
+— Erreurs dans le choix du WIP (trop haut, trop bas) et pourquoi
+— Tâches mal classifiées ou non pertinentes pour ce contexte
+— Violations identifiées du principe "Stop Starting, Start Finishing"
+
+📝 RÉPONSE MODÈLE
+— WIP optimal recommandé pour ce contexte avec justification
+— Liste de 5-6 tâches pertinentes et leur placement initial idéal (Backlog/Doing/Done)
+— Signal Kanban expliqué : "quand Terminé+1 → Backlog-1 entre en Doing"
+
+💡 CONSEILS
+— Comment le Kanban rend les goulots VISIBLES (ne jamais augmenter le WIP pour cacher un problème)
+— Lien avec VSM et le takt time
+— Score estimé /100${getDomainContext()}`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'kanbanAIFull');
 }
@@ -3355,23 +3509,45 @@ async function analyzeVSM(){
   const vaR=lt>0?Math.round(vaCycle/lt*100):0;
   const nvaCycle=vsmSteps.filter(r=>!r.va).reduce((s,r)=>s+r.cycle,0);
   const stepsInfo=vsmSteps.map(s=>`${s.name}: cycle=${s.cycle}min, attente=${s.wait}min, VA=${s.va?'Oui':'Non'}`).join('\n');
-  const prompt=`Tu es un expert VSM/Lean. Un étudiant a cartographié le flux de PRECISION MAROC (atelier aéronautique).
+  const ctx6=_modExCtx[6];
+  const exInfo6=ctx6?`Entreprise : ${ctx6.ex.entreprise||'—'} | Secteur : ${ctx6.ex.secteur||'—'} | Contexte : ${ctx6.ex.contexte||'—'} | Niveau : ${ctx6.lv.label}`:'Exercice VSM';
+  const prompt=`Tu es un expert VSM/Lean Manufacturing, exigeant et précis. Évalue strictement cette cartographie de flux d'un étudiant.
 
-VSM RÉALISÉ :
+CONTEXTE DE L'EXERCICE :
+${exInfo6}
+
+VSM RÉALISÉ PAR L'ÉTUDIANT :
 ${stepsInfo}
 
-MÉTRIQUES :
+MÉTRIQUES CALCULÉES :
 - Lead Time total : ${lt} min
-- Temps de cycle : ${tCycle} min
-- Taux VA : ${vaR}% (cible : ≥30%)
-- Temps NVA : ${nvaCycle} min (gaspillages cycles)
-- Temps d'attente total : ${tWait} min
+- Temps de cycle total : ${tCycle} min
+- Taux VA : ${vaR}% (cible industrielle : ≥30%, lean world class : ≥60%)
+- Temps NVA (cycles gaspillage) : ${nvaCycle} min
+- Temps d'attente total (muda principal) : ${tWait} min (${lt>0?Math.round(tWait/lt*100):0}% du Lead Time)
 
-Donne un feedback pédagogique structuré en français (3-4 paragraphes) :
-1. Analyse du taux VA et comparaison avec les standards industriels
-2. Identification des principaux gaspillages (muda) et leur impact
-3. Recommandations pour améliorer le flux (actions concrètes)
-4. Encouragement et lien avec les autres outils Lean${getDomainContext()}`;
+RÈGLE ABSOLUE : Si le VSM est vide ou incohérent (cycles négatifs, toutes étapes en VA sans logique) → signale avec ❌.
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Étapes correctement identifiées et classifiées VA/NVA
+— Métriques bien saisies
+
+❌ ERREURS ET MANQUES
+— Erreurs de classification VA/NVA avec explication (ex: contrôle qualité = NVA nécessaire)
+— Gaspillages (muda) mal identifiés ou sous-estimés
+— Taux VA insuffisant : que faut-il réduire en priorité ?
+
+📝 RÉPONSE MODÈLE
+— VSM idéal pour ce contexte : étapes avec cycle/attente/VA recommandés
+— Lead Time cible après amélioration (avec chiffres précis)
+— Taux VA amélioré attendu
+
+💡 CONSEILS
+— Les 3 types de muda les plus coûteux dans ce flux (attentes, sur-production, transport)
+— Outils Lean à déployer : Kanban pour réduire attentes, 5S pour réduire NVA cycles
+— Score estimé /100${getDomainContext()}`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'vsmAIFull');
 }
@@ -3469,21 +3645,49 @@ async function analyzeSPCFull(){
   const outPts=spcVals.filter(v=>v>ucl||v<lcl).length;
   const consecutive9=()=>{let max=0,cur=0,side=null;spcVals.forEach(v=>{const s=v>=mean?'up':'down';if(s===side){cur++;max=Math.max(max,cur);}else{side=s;cur=1;}});return max>=9;};
   const trend6=()=>{let inc=0,dec=0,maxI=0,maxD=0;for(let i=1;i<spcVals.length;i++){if(spcVals[i]>spcVals[i-1]){inc++;dec=0;}else{dec++;inc=0;}maxI=Math.max(maxI,inc);maxD=Math.max(maxD,dec);}return maxI>=5||maxD>=5;};
-  const prompt=`Tu es un expert SPC (Statistical Process Control). Un étudiant a tracé une carte de contrôle pour les diamètres de pièces CNC de PRECISION MAROC (cible 50.000 mm, tolérance ±0.200 mm).
+  const ctx7=_modExCtx[7];
+  const exInfo7=ctx7?`Entreprise : ${ctx7.ex.entreprise||'—'} | Secteur : ${ctx7.ex.secteur||'—'} | Pièce/Paramètre : ${ctx7.ex.parametreControle||ctx7.ex.contexte||'—'} | Niveau : ${ctx7.lv.label}`:'Exercice SPC';
+  const spcCible=ctx7?.ex?.cible||ctx7?.ex?.valeurCible||'cible définie dans l\'exercice';
+  const spcTol=ctx7?.ex?.tolerance||ctx7?.ex?.tolerances||'tolérance définie dans l\'exercice';
+  const prompt=`Tu es un expert SPC (Statistical Process Control), statisticien industriel exigeant. Évalue strictement cette carte de contrôle d'un étudiant.
 
-DONNÉES : ${spcVals.join(', ')}
-STATISTIQUES :
-- N=${n} mesures, Moyenne=${mean.toFixed(4)} mm, σ=${std.toFixed(4)}
-- UCL=${ucl.toFixed(4)}, LCL=${lcl.toFixed(4)}
-- Points hors limites (Nelson 1) : ${outPts}
-- 9 points consécutifs même côté moyenne (Nelson 2) : ${consecutive9()?'OUI':'Non'}
-- Tendance monotone 6+ points (Nelson 3) : ${trend6()?'OUI':'Non'}
+CONTEXTE DE L'EXERCICE :
+${exInfo7}
+Valeur cible : ${spcCible} | Tolérances : ${spcTol}
 
-Donne un feedback pédagogique structuré en français (3-4 paragraphes) :
-1. État du processus (sous contrôle ou non ?) et violations des règles de Nelson
-2. Interprétation industrielle et impact sur la qualité des pièces aéronautiques
-3. Actions correctives recommandées selon les violations détectées
-4. Conseil sur la mise en place d'une carte de contrôle en production${getDomainContext()}`;
+DONNÉES SAISIES PAR L'ÉTUDIANT : ${spcVals.join(', ')}
+
+STATISTIQUES CALCULÉES :
+- N = ${n} mesures
+- Moyenne X̄ = ${mean.toFixed(4)}
+- Écart-type σ = ${std.toFixed(4)}
+- UCL = ${ucl.toFixed(4)} | LCL = ${lcl.toFixed(4)}
+- Points hors limites (Règle Nelson 1) : ${outPts} point(s)
+- 9+ points consécutifs même côté moyenne (Nelson 2) : ${consecutive9()?'OUI ⚠️':'Non ✅'}
+- Tendance monotone 6+ points (Nelson 3) : ${trend6()?'OUI ⚠️':'Non ✅'}
+
+RÈGLE ABSOLUE : Si données trop peu nombreuses (<5), incohérentes ou identiques → signale avec ❌.
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Ce qui est correctement interprété dans cette carte de contrôle
+
+❌ ERREURS ET MANQUES CRITIQUES
+— Violations des règles de Nelson non détectées ou mal interprétées
+— Interprétation erronée (processus sous contrôle alors qu'il ne l'est pas, ou inversement)
+— Calculs incorrects si détectés
+
+📝 RÉPONSE MODÈLE
+— Interprétation correcte de cette carte : le processus est-il sous contrôle ? Pourquoi ?
+— Violations réelles des règles Nelson dans ces données (avec numéros de points)
+— Actions correctives concrètes recommandées selon les violations (cause probable + action)
+— Indices de capabilité Cp et Cpk attendus avec interprétation (si les tolérances sont connues)
+
+💡 CONSEILS
+— Comment réagir à chaque type de violation Nelson en production
+— Différence entre limites de contrôle (UCL/LCL) et tolérances client (LSS/LIS)
+— Score estimé /100${getDomainContext()}`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'spcAIFull');
 }
@@ -3569,23 +3773,50 @@ async function analyzeSMED(){
   const tInt=intTasks.reduce((s,r)=>s+r.dur,0);
   const tExt=extTasks.reduce((s,r)=>s+r.dur,0);
   const extPct=Math.round(tExt/total*100);
-  const prompt=`Tu es un expert SMED (Single Minute Exchange of Die). Un étudiant a analysé le changement de série de l'atelier PRECISION MAROC.
+  const ctx8=_modExCtx[8];
+  const exInfo8=ctx8?`Entreprise : ${ctx8.ex.entreprise||'—'} | Secteur : ${ctx8.ex.secteur||'—'} | Machine/Opération : ${ctx8.ex.machine||ctx8.ex.contexte||'—'} | Niveau : ${ctx8.lv.label}`:'Exercice SMED';
+  const objectifSMED=ctx8?.ex?.objectif||'< 45 min (objectif SMED standard)';
+  const prompt=`Tu es un expert SMED (Single Minute Exchange of Die), exigeant et précis. Évalue strictement cette analyse de changement de série d'un étudiant.
 
-TÂCHES CLASSIFIÉES :
-Internes (machine arrêtée) : ${intTasks.map(r=>`${r.name} (${r.dur}min)`).join(', ')}
-Externes (machine en marche) : ${extTasks.map(r=>`${r.name} (${r.dur}min)`).join(', ')}
+CONTEXTE DE L'EXERCICE :
+${exInfo8}
+Objectif temps de changement : ${objectifSMED}
+
+CLASSIFICATION RÉALISÉE PAR L'ÉTUDIANT :
+Tâches INTERNES (machine arrêtée — ${tInt} min) :
+${intTasks.length?intTasks.map(r=>`  • ${r.name} : ${r.dur} min`).join('\n'):'  [Aucune]'}
+
+Tâches EXTERNES (machine en marche — ${tExt} min) :
+${extTasks.length?extTasks.map(r=>`  • ${r.name} : ${r.dur} min`).join('\n'):'  [Aucune]'}
 
 MÉTRIQUES :
-- Temps total changement de série : ${total} min
-- Temps interne actuel : ${tInt} min
-- Temps externalisable : ${tExt} min (${extPct}% du total)
-- Objectif : < 45 min
+- Temps total changement : ${total} min
+- Temps interne (machine arrêtée) : ${tInt} min → c'est le temps qui compte vraiment
+- Temps externe (déjà fait pendant production) : ${tExt} min (${extPct}% externalisé)
+- Gain potentiel si externalisation correcte : ${tExt} min économisés
 
-Donne un feedback pédagogique structuré en français (3-4 paragraphes) :
-1. Qualité de la classification interne/externe (erreurs éventuelles)
-2. Gain potentiel calculé et comparaison avec l'objectif <45 min
-3. Étapes SMED avancées (standardisation, gabarits, préparation parallèle)
-4. Encouragement et impact sur la productivité${getDomainContext()}`;
+RÈGLE ABSOLUE : Si aucune tâche saisie ou classification incohérente → signale avec ❌.
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Tâches correctement classifiées interne/externe
+— Externalisation bien identifiée
+
+❌ ERREURS ET MANQUES CRITIQUES
+— Tâches mal classifiées (ex: "Préparation outil" devrait être externe)
+— Tâches qui auraient pu être externalisées mais sont restées en interne
+— Calcul du gain potentiel insuffisant ou objectif non atteint
+
+📝 RÉPONSE MODÈLE
+— Classification correcte de chaque tâche avec justification (Interne obligatoire / Externe possible / À éliminer)
+— Temps interne minimum atteignable après externalisation optimale (avec chiffres)
+— Actions SMED phases 2&3 : gabarits de réglage, standardisation, préparation parallèle pour réduire encore le temps interne
+
+💡 CONSEILS
+— Les 3 règles d'or du SMED : Séparer, Convertir, Réduire
+— Impact sur le takt time et la flexibilité de production
+— Score estimé /100${getDomainContext()}`;
   el.innerHTML='<div class="alert alert-info">⏳ Analyse IA en cours…</div>';
   await callClaude(prompt,'smedAIFull');
 }
@@ -3684,6 +3915,7 @@ function _refreshExBadge(modId){
 /* ══════════════════════════════════════════
    EXERCISE TIMER — chronomètre par exercice
 ══════════════════════════════════════════ */
+let _modExCtx={}; // stores current AI exercise per module: {3:{ex,lv}, 4:{ex,lv}, ...}
 let _exTimerId=null,_exTimerMod=null,_exTimerLeft=0,_exTimerTotal=300;
 
 function _exDefaultMins(modId,lvIdx){
@@ -3867,6 +4099,7 @@ async function generateModuleExercise(modId){
     const mm=text.match(/\{[\s\S]*\}/);
     if(!mm)throw new Error('Réponse IA invalide — pas de JSON');
     const ex=JSON.parse(mm[0]);
+    _modExCtx[modId]={ex,lv};
     _applyModuleExercise(modId,ex,lv);
     // Show timer placeholder while AI estimates time
     statusEl.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.3rem;">
@@ -4188,7 +4421,44 @@ async function analyzeAmdec(){
   const filled=amdecRows.filter(r=>r.g&&r.o&&r.d);
   if(filled.length<2){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Complétez au moins 2 lignes AMDEC avec G, O et D.</div>';return;}
   const tableText=filled.map(r=>`- ${r.comp}: mode="${r.mode}", effet="${r.effect}", cause="${r.cause}", G=${r.g}, O=${r.o}, D=${r.d}, IPR=${parseInt(r.g)*parseInt(r.o)*parseInt(r.d)}, action="${r.action||'non définie'}"`).join('\n');
-  const prompt=`Tu es expert AMDEC en génie industriel. Voici le tableau AMDEC d'un étudiant :\n${tableText}\n\nDonne un feedback structuré en 4 points : 1) Qualité du remplissage des cotations G/O/D, 2) Pertinence des IPR calculés (critique si ≥100), 3) Qualité des actions correctives proposées, 4) Recommandations d'amélioration. Utilise des termes techniques Lean/qualité.`;
+  const ctxEl=document.getElementById('amdecExContext');
+  const ctxTxt=ctxEl?.textContent?.trim().slice(0,300)||'Contexte AMDEC non spécifié';
+  const lv9=getExLevel(9);
+  const prompt=`Tu es un expert AMDEC (Analyse des Modes de Défaillance, de leurs Effets et de leur Criticité), exigeant et précis. Évalue strictement ce tableau AMDEC d'un étudiant en génie industriel.
+
+CONTEXTE DE L'EXERCICE :
+${ctxTxt}
+Niveau de difficulté : ${lv9.label}
+
+TABLEAU AMDEC REMPLI PAR L'ÉTUDIANT :
+${tableText}
+
+RÈGLES ABSOLUES :
+- Si un IPR est manifestement sous-estimé (ex: "Accident opérateur" avec G=2) → signale l'incohérence
+- Si une action corrective est vague ("à vérifier", "voir plus tard") → ❌ insuffisant
+- Si moins de 2 lignes remplies → ❌ travail insuffisant pour évaluer
+
+Feedback expert structuré en FRANÇAIS :
+
+✅ POINTS FORTS
+— Cotations G/O/D cohérentes avec la gravité réelle des défaillances
+— Actions correctives bien définies (précises et actionnables)
+
+❌ ERREURS ET MANQUES CRITIQUES
+— Cotations incohérentes ou sous-estimées (avec justification technique)
+— IPR critiques (≥100) sans action corrective définie
+— Actions vagues ou génériques non acceptables
+— Composants ou modes de défaillance manqués pour ce contexte
+
+📝 RÉPONSE MODÈLE
+— Pour chaque ligne : cotation G/O/D correcte recommandée avec justification
+— IPR attendus et leur classification (critique ≥200, important ≥100, acceptable <100)
+— Actions correctives idéales : précises, mesurables, avec responsable et délai
+
+💡 CONSEILS
+— Comment utiliser l'AMDEC de façon préventive (AMDEC Produit vs Processus)
+— Lien avec le PDCA : IPR critique → Plan d'action PDCA
+— Score estimé /100`;
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:.5})});
     const data=await res.json();
@@ -4259,7 +4529,42 @@ async function analyzeCapstone(){
   const plan=document.getElementById('capstonePlan')?.value||'';
   const prob=document.getElementById('capstoneProblemText')?.textContent||'cas industriel fourni';
   if(!tools||!justif){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Sélectionnez des outils et rédigez une justification.</div>';return;}
-  const prompt=`Tu es expert Lean Six Sigma. Un étudiant en génie industriel a analysé ce cas : "${prob.slice(0,300)}..."\n\nOutils choisis : ${tools}\nJustification : ${justif}\nPlan d'action : ${plan}\n\nÉvalue : 1) Pertinence des outils choisis par rapport au cas, 2) Qualité du raisonnement dans la justification, 3) Faisabilité et cohérence du plan d'action, 4) Points forts et axes d'amélioration. Sois précis et pédagogique, niveau ingénieur.`;
+  const ctx10=_modExCtx[10];
+  const exInfo10=ctx10?`Entreprise : ${ctx10.ex.entreprise||'—'} | Secteur : ${ctx10.ex.secteur||'—'} | Problèmes : ${ctx10.ex.problemes||ctx10.ex.contexte||'—'} | Niveau : ${ctx10.lv.label}`:`Cas industriel : "${prob.slice(0,200)}"`;
+  const prompt=`Tu es un expert Lean Six Sigma et formateur en génie industriel, exigeant et précis. Évalue ce projet de synthèse (Capstone) d'un étudiant.
+
+CONTEXTE DU CAS INDUSTRIEL :
+${exInfo10}
+
+RÉPONSE DE L'ÉTUDIANT :
+Outils Lean choisis : ${tools||'[Aucun outil sélectionné]'}
+Justification du choix : "${justif||'[Non renseignée]'}"
+Plan d'action : "${plan||'[Non renseigné]'}"
+
+RÈGLE ABSOLUE : Si la justification est du charabia ou hors-sujet → signale avec ❌. Si aucun outil sélectionné → ❌ travail insuffisant.
+
+Évaluation expert structurée en FRANÇAIS :
+
+✅ POINTS FORTS
+— Outils bien choisis et pertinents pour les problèmes identifiés
+— Raisonnement logique et argumenté dans la justification
+— Plan d'action structuré et réaliste
+
+❌ ERREURS ET MANQUES CRITIQUES
+— Outils inadaptés ou manquants pour certains problèmes du cas (explique pourquoi)
+— Justification vague, incomplète ou sans lien avec le cas réel
+— Plan d'action non SMART (sans chiffres, sans délais, sans responsable)
+— Outils importants oubliés pour ce contexte spécifique
+
+📝 RÉPONSE MODÈLE
+— Sélection d'outils idéale pour ce cas (avec justification pour chaque outil)
+— Séquence optimale de déploiement : quel outil d'abord, pourquoi
+— Plan d'action modèle : 3-5 actions concrètes, mesurables, séquencées
+
+💡 CONSEILS
+— Comment présenter une analyse multi-outils à un directeur industriel
+— KPIs à suivre pour mesurer l'efficacité de ce plan Lean
+— Score estimé /100`;
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:.5})});
     const data=await res.json();
@@ -5415,7 +5720,7 @@ function tryAdaptiveRemediation(n,score,minScore){
     box.className='remediation-box';
     box.style.cssText='margin-top:.9rem;';
     const last=el.querySelector('.ccard:last-child');
-    if(last)last.after(box);else el.appendChild(box);
+    if(last)last.appendChild(box);else el.appendChild(box);
   }
   const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
   const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
@@ -5924,11 +6229,29 @@ async function evalCustomAnswer(i){
   if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   feedEl.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#6b7280;"><div class="ai-spinner"></div>Évaluation en cours…</div>';
   const exData=(m.exercices&&m.exercices[done])||{};
-  const prompt=`Tu es formateur expert en "${m.titre}". Évalue cette réponse d'étudiant de niveau ${lv.label}.\n\nQuestion : "${exData.question||''}"\nRéponse attendue : "${exData.expectedAnswer||''}"\nRéponse étudiant : "${answer}"\n\nDonne un feedback court (3-4 lignes max) : points corrects ✅, points manquants ❌, 1 conseil d'amélioration 💡. Si du charabia ou hors-sujet : dis-le clairement. Sois encourageant mais honnête.`;
+  const prompt=`Tu es formateur expert en "${m.titre}". Évalue strictement cette réponse d'étudiant.
+
+RÈGLE ABSOLUE PRIORITAIRE : Si la réponse est du charabia, des caractères aléatoires, une phrase hors-sujet, ou ne répond PAS à la question posée → réponds UNIQUEMENT cette phrase exacte : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
+Ne cherche PAS à trouver du positif dans une réponse invalide.
+
+Question posée : "${exData.question||''}"
+Éléments de réponse attendus : "${exData.expectedAnswer||''}"
+Réponse de l'étudiant : "${answer}"
+
+Si la réponse est valide et en lien avec la question, évalue en 3 points concis :
+✅ Ce qui est correct (sois précis)
+❌ Ce qui manque ou est incorrect
+💡 1 conseil d'amélioration
+
+Sois honnête et exigeant. Une réponse vague ou incomplète mérite des ❌.`;
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:220,temperature:0.4})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
-    feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>`;
+    const lvAfter=_EX_LEVELS[Math.min(_getCustomLevDone(i),2)];
+    feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
+      <div style="margin-top:.8rem;padding-top:.7rem;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">
+        <button class="btn btn-green btn-sm" onclick="completeCustomExLevel(${i})" style="font-size:.8rem;">✅ Valider ce niveau ${lvAfter.stars} et continuer →</button>
+      </div>`;
   }catch(e){feedEl.innerHTML='<div class="alert alert-warning">Erreur lors de l\'évaluation.</div>';}
 }
 
@@ -5984,7 +6307,9 @@ async function validateCustomModule(i){
 function _tryRemCustom(i,score,minScore,m){
   const sec=document.getElementById('m-custom');if(!sec)return;
   let box=sec.querySelector('.remediation-box');
-  if(!box){box=document.createElement('div');box.className='remediation-box';box.style.cssText='margin-top:.9rem;';sec.appendChild(box);}
+  if(!box){box=document.createElement('div');box.className='remediation-box';box.style.cssText='margin-top:.9rem;';
+  const lastCard=sec.querySelector('.ccard:last-child');
+  if(lastCard)lastCard.appendChild(box);else sec.appendChild(box);}
   const niveau=score<40?'débutant':score<minScore?'intermédiaire':'avancé avec lacunes';
   const niveauLabel={'débutant':'📖 Débutant','intermédiaire':'💪 Intermédiaire','avancé avec lacunes':'🎯 Avancé'}[niveau];
   const color={'débutant':'#dc2626','intermédiaire':'#d97706','avancé avec lacunes':'#2563eb'}[niveau];
