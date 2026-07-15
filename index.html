@@ -2294,22 +2294,46 @@ async function generateAIParcours(){
   const domain=state.domain||'Génie Industriel';
   const completed=state.completed||[];
   const scores=state.scores||{};
-  const doneStr=completed.map(id=>{const m=MODULES.find(x=>x.id===id);return m?`${m.titre} (score: ${scores[m.id]||'?'}%)`:''}).filter(Boolean).join(', ')||'Aucun module validé';
-  const todoStr=MODULES.filter(m=>!completed.includes(m.id)).map(m=>`M${m.id}: ${m.titre}`).join('\n');
-  const prompt=`Tu es un expert pédagogique en amélioration continue et génie industriel.\n\nProfil étudiant :\n- Domaine : ${domain}\n- Modules déjà validés : ${doneStr}\n- Modules restants :\n${todoStr}\n\nPropose un parcours d'apprentissage personnalisé et optimal pour cet étudiant. Réponds UNIQUEMENT en JSON strict, sans texte avant ou après :\n{\n  "intro": "phrase d'accroche personnalisée selon le domaine et la progression",\n  "parcours": [\n    {"module": "M1", "titre": "...", "raison": "pourquoi ce module maintenant en 1 phrase courte"}\n  ],\n  "conseil": "un conseil concret et motivant pour cet étudiant"\n}`;
+  const allModsList=MODULES.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}"}`).join('\n');
+  const doneStr=completed.map(id=>{const m=MODULES.find(x=>x.id===id);return m?`M${m.id} ${m.name} (score:${scores[m.id]||'?'}%)`:''}).filter(Boolean).join(', ')||'Aucun';
+  const todoMods=MODULES.filter(m=>!completed.includes(m.id));
+  const modeRevision=todoMods.length===0;
+  const targetMods=modeRevision?MODULES:todoMods;
+  const targetStr=targetMods.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}"${modeRevision?`,"score":${scores[m.id]||0}`:''}}`).join('\n');
+  const prompt=`Tu es un expert pédagogique en amélioration continue et génie industriel.
+
+LISTE COMPLÈTE DES MODULES DE LA PLATEFORME (utilise UNIQUEMENT ces modules avec leurs IDs exacts) :
+${allModsList}
+
+Profil étudiant :
+- Domaine/secteur : ${domain}
+- Modules validés : ${doneStr}
+- ${modeRevision?'Tous les modules sont validés. Propose un ordre de RÉVISION basé sur les scores les plus faibles.':'Modules restants à travailler :\n'+targetStr}
+
+Réponds UNIQUEMENT en JSON strict sans aucun texte avant ou après :
+{
+  "intro": "phrase personnalisée et motivante selon le domaine et la situation de l'étudiant",
+  "parcours": [
+    {"id": 3, "module": "M3", "titre": "titre exact du module", "raison": "explication courte et pertinente"}
+  ],
+  "conseil": "conseil concret et motivant"
+}
+
+RÈGLE ABSOLUE : utilise uniquement les IDs et titres de la liste ci-dessus. Ne pas inventer de modules.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1000,temperature:0.8})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1200,temperature:0.7})});
     const data=await resp.json();
     const raw=data.choices?.[0]?.message?.content||'';
     const jsonMatch=raw.match(/\{[\s\S]*\}/);
     if(!jsonMatch)throw new Error('Réponse IA invalide');
     const result=JSON.parse(jsonMatch[0]);
+    const proposedIds=(result.parcours||[]).map(p=>Number(p.id)).filter(id=>id&&MODULES.find(m=>m.id===id));
     if(panel){
       panel.innerHTML=`
         <div style="background:#f5f3ff;border-radius:10px;padding:.9rem 1rem;margin-bottom:.9rem;border-left:4px solid #7c3aed;">
           <div style="font-size:.82rem;color:#5b21b6;font-style:italic;">"${result.intro}"</div>
         </div>
-        <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#6b7280;margin-bottom:.6rem;">📍 Ordre recommandé par l'IA</div>
+        <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#6b7280;margin-bottom:.6rem;">${modeRevision?'🔁 Ordre de révision recommandé':'📍 Ordre recommandé par l\'IA'}</div>
         ${(result.parcours||[]).map((p,i)=>`
           <div style="display:flex;gap:.8rem;align-items:flex-start;padding:.65rem .8rem;border-radius:8px;background:${i===0?'#eff6ff':'#f9fafb'};margin-bottom:.4rem;border:1px solid ${i===0?'#93c5fd':'#e5e7eb'};">
             <div style="width:26px;height:26px;border-radius:50%;background:${i===0?'#2563eb':'#e2e8f0'};color:${i===0?'#fff':'#374151'};display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;">${i+1}</div>
@@ -2319,6 +2343,10 @@ async function generateAIParcours(){
             </div>
           </div>`).join('')}
         ${result.conseil?`<div style="background:#f0fdf4;border-radius:8px;padding:.75rem 1rem;margin-top:.6rem;border-left:3px solid #059669;font-size:.78rem;color:#065f46;">💡 ${result.conseil}</div>`:''}
+        <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap;">
+          <button class="btn btn-sm" style="background:linear-gradient(135deg,#059669,#047857);color:#fff;" onclick="applyAIParcours([${proposedIds.join(',')}])">✅ Appliquer ce parcours</button>
+          <button class="btn btn-sm" style="background:#f1f5f9;color:#6b7280;" onclick="clearAIParcours()">✕ Réinitialiser l'ordre</button>
+        </div>
       `;
       if(btnRegen)btnRegen.style.display='inline-flex';
     }
@@ -2327,18 +2355,40 @@ async function generateAIParcours(){
   }
 }
 
+function applyAIParcours(ids){
+  state.aiParcoursIds=ids;
+  save();
+  renderGrid();
+  document.getElementById('moduleGrid')?.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clearAIParcours(){
+  state.aiParcoursIds=null;
+  save();
+  renderGrid();
+}
+
 function renderGrid(){
   const g=document.getElementById('moduleGrid');g.innerHTML='';
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
   const _cvActive=state.cvFilter&&state.cvRecoIds&&state.cvRecoIds.length>0;
+  const _aiActive=!_cvActive&&state.aiParcoursIds&&state.aiParcoursIds.length>0;
   if(_cvActive){
     const banner=document.createElement('div');
     banner.style.cssText='grid-column:1/-1;background:linear-gradient(135deg,#faf5ff,#f3e8ff);border:1.5px solid #7c3aed;border-radius:12px;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.2rem;';
     banner.innerHTML=`<div style="font-size:.8rem;color:#4c1d95;font-weight:700;">🎯 Parcours CV actif — ${state.cvRecoIds.length} modules sélectionnés pour votre profil</div><button class="btn btn-ghost btn-sm" onclick="cvClearFilter()" style="font-size:.72rem;flex-shrink:0;color:#6b7280;">✕ Voir tous les modules</button>`;
     g.appendChild(banner);
   }
+  if(_aiActive){
+    const banner=document.createElement('div');
+    banner.style.cssText='grid-column:1/-1;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #059669;border-radius:12px;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.2rem;';
+    banner.innerHTML=`<div style="font-size:.8rem;color:#065f46;font-weight:700;">✨ Parcours IA actif — modules réorganisés selon la recommandation</div><button class="btn btn-ghost btn-sm" onclick="clearAIParcours()" style="font-size:.72rem;flex-shrink:0;color:#6b7280;">✕ Ordre par défaut</button>`;
+    g.appendChild(banner);
+  }
   const modsToShow=_cvActive
     ?state.cvRecoIds.map(id=>MODULES.find(m=>m.id===id)).filter(Boolean).filter(m=>isModuleActive(m.id))
+    :_aiActive
+    ?[...state.aiParcoursIds.map(id=>MODULES.find(m=>m.id===id)).filter(Boolean).filter(m=>isModuleActive(m.id)),...MODULES.filter(m=>isModuleActive(m.id)&&!state.aiParcoursIds.includes(m.id))]
     :MODULES.filter(m=>isModuleActive(m.id));
   modsToShow.forEach((m,visIdx)=>{
     const done=state.completed.includes(m.id);
