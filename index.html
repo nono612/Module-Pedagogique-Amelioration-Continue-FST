@@ -1847,10 +1847,11 @@ let _syncTimer=null;
 
 /* Sync progression étudiant → cloud (debounced) */
 async function _sbPushState(){
-  if(!state.studentName)return;
+  const syncName=_canonicalName||state.studentName;
+  if(!syncName)return;
   try{
     await _sb.from('student_progress').upsert(
-      {student_name:state.studentName,state_json:state,updated_at:new Date().toISOString()},
+      {student_name:syncName,state_json:state,updated_at:new Date().toISOString()},
       {onConflict:'student_name'}
     );
   }catch(e){}
@@ -1858,8 +1859,9 @@ async function _sbPushState(){
 
 /* Charge depuis le cloud et fusionne avec local */
 async function _sbPullState(name){
+  const syncName=_canonicalName||name;
   try{
-    const{data,error}=await _sb.from('student_progress').select('state_json').eq('student_name',name).maybeSingle();
+    const{data,error}=await _sb.from('student_progress').select('state_json').eq('student_name',syncName).maybeSingle();
     if(error||!data?.state_json)return false;
     const r=data.state_json;
     // Fusion intelligente : on prend le meilleur des deux
@@ -1899,6 +1901,7 @@ async function _sbPullCustomModules(){
 
 /* ── Auth fonctions ── */
 let _currentUser=null;
+let _canonicalName=null; // nom fixé à la connexion, jamais modifié par le champ nom
 
 function authSwitchTab(tab){
   document.getElementById('authFormLogin').style.display=tab==='login'?'block':'none';
@@ -1961,6 +1964,7 @@ async function authForgotPassword(){
 async function authLogout(){
   await _sb.auth.signOut();
   _currentUser=null;
+  _canonicalName=null;
   state={scores:{},completed:[],studentName:'',kanban:{backlog:['Définir le problème','Analyser les données','Former l\'équipe'],doing:['Cartographier le flux'],done:['Identifier les gaspillages']},pdca:{},vsmSteps:null,smedRows:null,paretoData:null,ishiData:null,domain:null,cvSeen:false,cvFilter:false,cvRecoIds:[],exLevels:{},timers:{},badges:{},feedbacks:{}};
   sessionStorage.clear();
   const ub=document.getElementById('userBadge');if(ub)ub.style.display='none';
@@ -1974,6 +1978,7 @@ async function _onAuthSuccess(user,forcedName,isNewReg=false){
   // Charge le profil
   const{data:profile}=await _sb.from('profiles').select('*').eq('user_id',user.id).maybeSingle();
   const displayName=forcedName||(profile?.display_name)||user.user_metadata?.display_name||(user.email?.split('@')[0])||'Étudiant';
+  _canonicalName=displayName; // nom fixe pour le sync cloud
   // Applique le profil
   state.studentName=displayName;
   if(profile?.cv_domain)state.domain=profile.cv_domain;
@@ -5248,9 +5253,14 @@ function removeStudent(idx){
   if(!confirm('Supprimer cet étudiant du tableau ?'))return;
   const r=getRoster();r.splice(idx,1);saveRoster(r);renderRoster();
 }
-function clearRoster(){
-  if(!confirm('Vider toute la liste des étudiants ? Action irréversible.'))return;
+async function clearRoster(){
+  if(!confirm('Vider toute la liste des étudiants dans Supabase ? Action irréversible.'))return;
   saveRoster([]);renderRoster();
+  try{
+    await _sb.from('student_progress').delete().not('student_name','is',null);
+    const btn=document.getElementById('cloudRefreshBtn');
+    if(btn){const t=btn.textContent;btn.textContent='✅ Vidé !';setTimeout(()=>btn.textContent=t,2000);}
+  }catch(e){alert('⚠️ Erreur suppression Supabase : '+e.message);}
 }
 function exportRosterCSV(){
   const roster=getRoster();
