@@ -813,14 +813,14 @@ textarea{resize:vertical;min-height:80px;}
     <div class="hero-content">
       <div class="hero-tag">🎓 Génie Industriel · Lean · Six Sigma</div>
       <h1>Outil Pédagogique <span class="hl">Amélioration</span><br>Continue</h1>
-      <p class="hero-sub">Parcours pédagogique interactif — maîtrisez les outils Lean et Six Sigma à travers 9 modules pratiques avec intelligence artificielle intégrée.</p>
+      <p class="hero-sub">Parcours pédagogique interactif — maîtrisez les outils Lean et Six Sigma à travers <span id="heroModuleCount">11</span> modules pratiques avec intelligence artificielle intégrée.</p>
       <div class="hero-stats">
         <div class="stat-box">
           <div class="stat-num" id="statDone">0</div>
           <div class="stat-lbl">Modules validés</div>
         </div>
         <div class="stat-box">
-          <div class="stat-num">9</div>
+          <div class="stat-num" id="statTotal">11</div>
           <div class="stat-lbl">Total modules</div>
         </div>
         <div class="stat-box">
@@ -2273,10 +2273,16 @@ function updateNav(){
     else{const _p=_prevActiveModule(n);if(_p&&!state.completed.includes(_p))b.classList.add('nav-locked');}
   });
   const done=state.completed.length;
-  document.getElementById('globalBadge').textContent=done+' / 11 modules';
-  document.getElementById('globalBar').style.width=(done/11*100)+'%';
-  document.getElementById('progressText').textContent=Math.round(done/11*100)+'%';
-  const sd=document.getElementById('statDone');if(sd)sd.textContent=done;
+  const activeCustom=getCustomModules().filter(cm=>cm.active!==false);
+  const custDone=activeCustom.filter((_,i)=>(state.scores||{})['c'+i]>=60).length;
+  const totalActive=MODULES.filter(m=>isModuleActive(m.id)).length+activeCustom.length;
+  const totalDone=done+custDone;
+  document.getElementById('globalBadge').textContent=totalDone+' / '+totalActive+' modules';
+  document.getElementById('globalBar').style.width=(totalActive>0?totalDone/totalActive*100:0)+'%';
+  document.getElementById('progressText').textContent=Math.round(totalActive>0?totalDone/totalActive*100:0)+'%';
+  const sd=document.getElementById('statDone');if(sd)sd.textContent=totalDone;
+  const st=document.getElementById('statTotal');if(st)st.textContent=totalActive;
+  const hc=document.getElementById('heroModuleCount');if(hc)hc.textContent=totalActive;
   const sa=document.getElementById('statAvg');
   if(sa){const sc=Object.values(state.scores);sa.textContent=sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length)+'%':'–';}
   const cb=document.getElementById('completionBanner');if(cb)cb.style.display=done>=11?'block':'none';
