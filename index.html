@@ -2294,12 +2294,17 @@ async function generateAIParcours(){
   const domain=state.domain||'Génie Industriel';
   const completed=state.completed||[];
   const scores=state.scores||{};
-  const allModsList=MODULES.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}"}`).join('\n');
+  const customMods=getCustomModules().filter(cm=>cm.active!==false);
+  const stdList=MODULES.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}"}`).join('\n');
+  const custList=customMods.map((cm,i)=>`{"id":"c${i}","module":"C${i+1}","titre":"${cm.titre}"}`).join('\n');
+  const allModsList=stdList+(custList?'\n'+custList:'');
   const doneStr=completed.map(id=>{const m=MODULES.find(x=>x.id===id);return m?`M${m.id} ${m.name} (score:${scores[m.id]||'?'}%)`:''}).filter(Boolean).join(', ')||'Aucun';
   const todoMods=MODULES.filter(m=>!completed.includes(m.id));
-  const modeRevision=todoMods.length===0;
-  const targetMods=modeRevision?MODULES:todoMods;
-  const targetStr=targetMods.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}"${modeRevision?`,"score":${scores[m.id]||0}`:''}}`).join('\n');
+  const modeRevision=todoMods.length===0&&customMods.length===0;
+  const targetStr=modeRevision
+    ?MODULES.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}","score":${scores[m.id]||0}}`).join('\n')
+    :[...todoMods.map(m=>`{"id":${m.id},"module":"M${m.id}","titre":"${m.name}"}`),
+       ...customMods.map((cm,i)=>`{"id":"c${i}","module":"C${i+1}","titre":"${cm.titre}"}`)].join('\n');
   const prompt=`Tu es un expert pédagogique en amélioration continue et génie industriel.
 
 LISTE COMPLÈTE DES MODULES DE LA PLATEFORME (utilise UNIQUEMENT ces modules avec leurs IDs exacts) :
@@ -2314,12 +2319,13 @@ Réponds UNIQUEMENT en JSON strict sans aucun texte avant ou après :
 {
   "intro": "phrase personnalisée et motivante selon le domaine et la situation de l'étudiant",
   "parcours": [
-    {"id": 3, "module": "M3", "titre": "titre exact du module", "raison": "explication courte et pertinente"}
+    {"id": 3, "module": "M3", "titre": "titre exact du module", "raison": "explication courte et pertinente"},
+    {"id": "c0", "module": "C1", "titre": "titre exact du module custom", "raison": "explication courte"}
   ],
   "conseil": "conseil concret et motivant"
 }
 
-RÈGLE ABSOLUE : utilise uniquement les IDs et titres de la liste ci-dessus. Ne pas inventer de modules.`;
+RÈGLE ABSOLUE : utilise uniquement les IDs et titres de la liste ci-dessus. Les IDs standards sont des nombres (1,2,3...), les IDs des modules personnalisés sont des chaînes ("c0","c1"...). Ne jamais inventer de modules.`;
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1200,temperature:0.7})});
     const data=await resp.json();
@@ -2327,7 +2333,7 @@ RÈGLE ABSOLUE : utilise uniquement les IDs et titres de la liste ci-dessus. Ne 
     const jsonMatch=raw.match(/\{[\s\S]*\}/);
     if(!jsonMatch)throw new Error('Réponse IA invalide');
     const result=JSON.parse(jsonMatch[0]);
-    const proposedIds=(result.parcours||[]).map(p=>Number(p.id)).filter(id=>id&&MODULES.find(m=>m.id===id));
+    const proposedIds=(result.parcours||[]).map(p=>String(p.id).startsWith('c')?String(p.id):Number(p.id)).filter(id=>id!==0&&id!==''&&(typeof id==='string'||MODULES.find(m=>m.id===id)));
     if(panel){
       panel.innerHTML=`
         <div style="background:#f5f3ff;border-radius:10px;padding:.9rem 1rem;margin-bottom:.9rem;border-left:4px solid #7c3aed;">
@@ -2390,6 +2396,40 @@ function renderGrid(){
     :_aiActive
     ?[...state.aiParcoursIds.map(id=>MODULES.find(m=>m.id===id)).filter(Boolean).filter(m=>isModuleActive(m.id)),...MODULES.filter(m=>isModuleActive(m.id)&&!state.aiParcoursIds.includes(m.id))]
     :MODULES.filter(m=>isModuleActive(m.id));
+  // Mode parcours IA : rendu unifié std + custom dans l'ordre proposé
+  if(_aiActive){
+    const custMods=getCustomModules().filter(cm=>cm.active!==false);
+    const allItems=[
+      ...MODULES.filter(m=>isModuleActive(m.id)).map(m=>({type:'std',key:m.id,data:m})),
+      ...custMods.map((cm,i)=>({type:'custom',key:`c${i}`,data:cm,idx:i}))
+    ];
+    const orderedItems=[
+      ...state.aiParcoursIds.map(k=>allItems.find(x=>String(x.key)===String(k))).filter(Boolean),
+      ...allItems.filter(x=>!state.aiParcoursIds.some(k=>String(k)===String(x.key)))
+    ];
+    orderedItems.forEach((item,visIdx)=>{
+      const d=document.createElement('div');
+      if(item.type==='std'){
+        const m=item.data;
+        const done=state.completed.includes(m.id);
+        const prev=_prevActiveModule(m.id);const locked=prev!=null&&!state.completed.includes(prev);
+        const score=state.scores[m.id]!==undefined?state.scores[m.id]:null;
+        d.className='mod-card c'+m.id+(locked?' mod-locked':'')+(done?' mod-done':'');
+        d.innerHTML=`<div class="mod-card-top"><div><div class="mod-num">Module ${visIdx+1}</div><span class="mod-status-chip ${done?'chip-done':locked?'chip-locked':'chip-open'}">${done?'✓ Validé':locked?'🔒 Verrouillé':'→ Disponible'}</span></div><div class="mod-icon-wrap">${m.icon}</div></div><div class="mod-card-body"><h3>${m.name}</h3><p>${m.desc}</p><div style="font-size:.68rem;color:#94a3b8;margin-top:.3rem;">⏱️ ${m.time}</div>${score!==null?`<div class="mod-score-row"><div class="mod-score-track"><div class="mod-score-fill" style="width:${score}%"></div></div><span class="mod-score-val">${score}%</span></div>`:''}</div>`;
+        if(!locked)d.onclick=()=>goModule(m.id);
+      }else{
+        const cm=item.data,i=item.idx;
+        const score=(state.scores||{})['c'+i]!==undefined?(state.scores||{})['c'+i]:null;
+        const done=score!==null&&score>=60;
+        d.className='mod-card c-custom'+(done?' mod-done':'');
+        d.style.setProperty('--mc','#7c3aed');
+        d.innerHTML=`<div class="mod-card-top"><div><div class="mod-num">Module ${visIdx+1}</div><span class="mod-status-chip ${done?'chip-done':'chip-open'}">${done?'✓ Validé':'→ Disponible'}</span></div><div class="mod-icon-wrap">${cm.icone||'🧩'}</div></div><div class="mod-card-body"><h3>${cm.titre}</h3><p>${cm.desc||''}</p><div style="font-size:.68rem;color:#94a3b8;margin-top:.3rem;">⏱️ ${cm.duree||'~30 min'}</div>${score!==null?`<div class="mod-score-row"><div class="mod-score-track"><div class="mod-score-fill" style="width:${score}%"></div></div><span class="mod-score-val">${score}%</span></div>`:''}</div>`;
+        d.onclick=()=>goCustomModule(i);
+      }
+      g.appendChild(d);
+    });
+    return;
+  }
   modsToShow.forEach((m,visIdx)=>{
     const done=state.completed.includes(m.id);
     let locked;
