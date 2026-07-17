@@ -2082,11 +2082,27 @@ _sb.auth.getSession().then(({data:{session}})=>{
 /* Écoute les changements d'auth (reset password, etc.) */
 _sb.auth.onAuthStateChange((event,session)=>{
   if(event==='PASSWORD_RECOVERY'){
-    // L'utilisateur clique le lien reset → on lui montre le formulaire de nouveau mot de passe
-    const newPwd=prompt('Entrez votre nouveau mot de passe (min. 6 caractères) :');
-    if(newPwd&&newPwd.length>=6)_sb.auth.updateUser({password:newPwd}).then(()=>alert('✅ Mot de passe mis à jour !'));
+    // Ferme tout autre overlay et affiche le formulaire de reset
+    const ao=document.getElementById('authOverlay');if(ao)ao.style.display='none';
+    const cv=document.getElementById('cvModal');if(cv)cv.classList.add('hidden');
+    const rm=document.getElementById('resetPwdOverlay');if(rm)rm.style.display='flex';
   }
 });
+async function submitNewPassword(){
+  const p1=document.getElementById('resetPwd1')?.value||'';
+  const p2=document.getElementById('resetPwd2')?.value||'';
+  const msg=document.getElementById('resetPwdMsg');
+  if(p1.length<6){msg.innerHTML='<span style="color:#dc2626;">Minimum 6 caractères.</span>';return;}
+  if(p1!==p2){msg.innerHTML='<span style="color:#dc2626;">Les mots de passe ne correspondent pas.</span>';return;}
+  msg.innerHTML='<span style="color:#6b7280;">⏳ Mise à jour…</span>';
+  const{error}=await _sb.auth.updateUser({password:p1});
+  if(error){msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message}</span>`;return;}
+  msg.innerHTML='<span style="color:#059669;">✅ Mot de passe mis à jour !</span>';
+  setTimeout(()=>{
+    const rm=document.getElementById('resetPwdOverlay');if(rm)rm.style.display='none';
+    const ao=document.getElementById('authOverlay');if(ao)ao.style.display='flex';
+  },1800);
+}
 
 /* Chargement initial au démarrage */
 (async()=>{
@@ -7386,6 +7402,27 @@ document.addEventListener('DOMContentLoaded',()=>{
     <div class="rem-body" id="remOverlayBody">
       <div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem;color:#6b7280;"><div class="ai-spinner"></div><span>Chargement…</span></div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ RESET PASSWORD OVERLAY ═══ -->
+<div id="resetPwdOverlay" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 50%,#0f172a 100%);align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:20px;padding:2rem 1.8rem;width:100%;max-width:400px;box-shadow:0 25px 60px rgba(0,0,0,.5);">
+    <div style="text-align:center;margin-bottom:1.5rem;">
+      <div style="font-size:2.5rem;margin-bottom:.5rem;">🔐</div>
+      <div style="font-size:1.1rem;font-weight:900;color:#1e293b;">Nouveau mot de passe</div>
+      <div style="font-size:.78rem;color:#64748b;margin-top:.3rem;">Choisissez un nouveau mot de passe pour votre compte</div>
+    </div>
+    <div style="margin-bottom:.9rem;">
+      <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Nouveau mot de passe</label>
+      <input type="password" id="resetPwd1" placeholder="Minimum 6 caractères" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+    </div>
+    <div style="margin-bottom:1.2rem;">
+      <label style="font-size:.75rem;font-weight:700;color:#374151;display:block;margin-bottom:.35rem;">Confirmer le mot de passe</label>
+      <input type="password" id="resetPwd2" placeholder="Répétez le mot de passe" style="width:100%;padding:.65rem .9rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:.85rem;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'" onkeydown="if(event.key==='Enter')submitNewPassword()">
+    </div>
+    <button onclick="submitNewPassword()" style="width:100%;padding:.8rem;background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border:none;border-radius:12px;font-size:.9rem;font-weight:800;cursor:pointer;">✅ Enregistrer le nouveau mot de passe</button>
+    <div id="resetPwdMsg" style="margin-top:.8rem;font-size:.78rem;text-align:center;min-height:1.1rem;"></div>
   </div>
 </div>
 
