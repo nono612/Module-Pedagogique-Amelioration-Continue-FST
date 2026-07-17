@@ -697,6 +697,62 @@ textarea{resize:vertical;min-height:80px;}
 .teacher-table th:first-child{text-align:left;}
 .teacher-table td{padding:.5rem .6rem;border-bottom:1px solid var(--gray200);}
 .teacher-table tr:nth-child(even) td{background:var(--gray50);}
+
+/* ═══════════════════════════════════════════════════════
+   ✨ ANIMATIONS AVANCÉES
+═══════════════════════════════════════════════════════ */
+@keyframes cardEntrance{0%{opacity:0;transform:translateY(36px) scale(.93)}60%{transform:translateY(-4px) scale(1.01)}100%{opacity:1;transform:none}}
+@keyframes glowPulse{0%,100%{box-shadow:0 2px 12px rgba(5,150,105,.15),0 0 0 0 rgba(5,150,105,0)}50%{box-shadow:0 4px 24px rgba(5,150,105,.28),0 0 0 6px rgba(5,150,105,.07)}}
+@keyframes shimmerMove{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes rippleAnim{0%{transform:scale(0);opacity:.7}100%{transform:scale(4);opacity:0}}
+@keyframes heroTextIn{0%{opacity:0;transform:translateY(22px)}100%{opacity:1;transform:none}}
+@keyframes statPop{0%{opacity:0;transform:scale(.6) translateY(10px)}70%{transform:scale(1.08) translateY(-2px)}100%{opacity:1;transform:none}}
+@keyframes badgeBounce{0%,100%{transform:scale(1)}40%{transform:scale(1.18)}70%{transform:scale(.94)}}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(120px) rotate(720deg);opacity:0}}
+
+/* Barre de progression avec reflet animé */
+.prog-fill{position:relative;overflow:hidden;}
+.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.45) 50%,transparent 100%);background-size:200% 100%;animation:shimmerMove 2.2s linear infinite;}
+
+/* Cartes modules — entrée animée */
+.mod-card.card-entrance{animation:cardEntrance .55s cubic-bezier(.34,1.2,.64,1) both;}
+.mod-card.mod-done{animation:glowPulse 2.8s ease-in-out infinite;}
+.mod-card.mod-done.card-entrance{animation:cardEntrance .55s cubic-bezier(.34,1.2,.64,1) both,glowPulse 2.8s ease-in-out 1s infinite;}
+
+/* 3D tilt */
+.mod-card:not(.mod-locked){transform-style:preserve-3d;will-change:transform;}
+
+/* Ripple sur boutons */
+.btn{position:relative;overflow:hidden;}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.32);pointer-events:none;animation:rippleAnim .6s linear forwards;transform:scale(0);}
+
+/* Hero canvas */
+#heroCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:22px;z-index:0;}
+.hero-content{position:relative;z-index:1;}
+
+/* Hero texte entrant en cascade */
+.hero-tag{animation:heroTextIn .5s .1s both;}
+.hero h1{animation:heroTextIn .5s .25s both;}
+.hero-sub{animation:heroTextIn .5s .4s both;}
+.hero-stats{animation:heroTextIn .5s .55s both;}
+
+/* Stats pop au chargement */
+.stat-box{animation:statPop .5s cubic-bezier(.34,1.2,.64,1) both;}
+.stat-box:nth-child(1){animation-delay:.6s}
+.stat-box:nth-child(2){animation-delay:.72s}
+.stat-box:nth-child(3){animation-delay:.84s}
+.stat-box:nth-child(4){animation-delay:.96s}
+.stat-box:nth-child(5){animation-delay:1.08s}
+
+/* Sections — transition plus fluide */
+.section.active{animation:heroTextIn .4s cubic-bezier(.4,0,.2,1) both;}
+
+/* Badge bounce quand obtenu */
+.badge-earned{animation:badgeBounce .5s ease both;}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.34,1.2,.64,1);}
+.reveal.visible{opacity:1;transform:none;}
 </style>
 </head>
 <body>
@@ -808,6 +864,7 @@ textarea{resize:vertical;min-height:80px;}
 <div id="home" class="section active">
   <!-- Hero -->
   <div class="hero">
+    <canvas id="heroCanvas"></canvas>
     <div class="hero-orb1"></div>
     <div class="hero-orb2"></div>
     <div class="hero-content">
@@ -2541,6 +2598,7 @@ async function validateModule(n,scoreFn){
       ${!pass?`<div style="font-size:.8rem;color:var(--red);margin-top:.3rem;">Score insuffisant (${score}% / ${minScore}% requis). Complétez mieux vos réponses et réessayez.</div>`:''}
       ${pass&&n<11?`<div style="font-size:.8rem;color:var(--green);margin-top:.3rem;font-weight:700;">🔓 Module ${n+1} débloqué !</div>`:''}
     </div>`;
+  if(pass){triggerConfetti(box);}
   if(pass&&n===11)showCertificate();
   if(!pass)tryAdaptiveRemediation(n,score,minScore);
 }
@@ -6951,6 +7009,175 @@ function submitCustomQuiz(){
   // Show validate button if levels done
   showCustomValidateBtn(i);
 }
+
+/* ═══════════════════════════════════════════════════════
+   ✨ ANIMATIONS AVANCÉES
+═══════════════════════════════════════════════════════ */
+
+// ── 1. Particules flottantes dans le hero ──
+(function initHeroParticles(){
+  const canvas=document.getElementById('heroCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){
+    const hero=canvas.parentElement;
+    W=canvas.width=hero.offsetWidth;
+    H=canvas.height=hero.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  class P{
+    constructor(){this.reset(true);}
+    reset(init){
+      this.x=Math.random()*W;
+      this.y=init?Math.random()*H:H+5;
+      this.r=Math.random()*1.8+.4;
+      this.vx=(Math.random()-.5)*.35;
+      this.vy=-(Math.random()*.55+.15);
+      this.o=Math.random()*.55+.1;
+      this.color=Math.random()>.6?'#fbbf24':Math.random()>.5?'#60a5fa':'#a78bfa';
+    }
+    update(){this.x+=this.vx;this.y+=this.vy;if(this.y<-5||this.x<-5||this.x>W+5)this.reset();}
+    draw(){ctx.save();ctx.globalAlpha=this.o;ctx.fillStyle=this.color;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();ctx.restore();}
+  }
+  for(let i=0;i<70;i++)particles.push(new P());
+  function loop(){
+    ctx.clearRect(0,0,W,H);
+    // Lignes de connexion subtiles
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<80){ctx.save();ctx.globalAlpha=(.08*(1-dist/80));ctx.strokeStyle='#60a5fa';ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke();ctx.restore();}
+      }
+    }
+    particles.forEach(p=>{p.update();p.draw();});
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ── 2. Compteur animé pour les statistiques ──
+function animateCount(el,target,suffix='',duration=900){
+  if(!el)return;
+  const start=performance.now();
+  const from=parseInt(el.textContent)||0;
+  function tick(now){
+    const p=Math.min((now-start)/duration,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(target-from)*ease)+suffix;
+    if(p<1)requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Surcharge updateNav pour animer les compteurs
+const _origUpdateNav=typeof updateNav==='function'?updateNav:null;
+function _animateStatsOnUpdate(){
+  const sd=document.getElementById('statDone');
+  const sa=document.getElementById('statAvg');
+  if(sd){const v=parseInt(sd.textContent)||0;animateCount(sd,v,'',600);}
+  if(sa&&sa.textContent!=='–'){const v=parseInt(sa.textContent)||0;animateCount(sa,v,'%',700);}
+}
+
+// ── 3. Effet tilt 3D sur les cartes modules ──
+(function initTilt(){
+  let lastCard=null;
+  document.addEventListener('mousemove',e=>{
+    const card=e.target.closest('.mod-card:not(.mod-locked)');
+    if(lastCard&&lastCard!==card){
+      lastCard.style.transform='';
+      lastCard.style.boxShadow='';
+    }
+    lastCard=card;
+    if(!card)return;
+    const r=card.getBoundingClientRect();
+    const x=((e.clientX-r.left)/r.width-.5)*14;
+    const y=((e.clientY-r.top)/r.height-.5)*14;
+    card.style.transform=`perspective(900px) rotateX(${-y}deg) rotateY(${x}deg) translateY(-8px) scale(1.02)`;
+    card.style.boxShadow=`${-x*.5}px ${y*.5+12}px 40px rgba(13,27,42,.18), 0 0 0 1.5px var(--mc,#2563eb)`;
+    card.style.transition='box-shadow .15s,border-color .15s';
+  },true);
+  document.addEventListener('mouseleave',e=>{
+    if(e.target.classList&&e.target.classList.contains('mod-card')){
+      e.target.style.transform='';
+      e.target.style.boxShadow='';
+      e.target.style.transition='transform .5s cubic-bezier(.34,1.2,.64,1),box-shadow .4s';
+    }
+  },true);
+})();
+
+// ── 4. Ripple sur les boutons ──
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('.btn');
+  if(!btn||btn.disabled)return;
+  const r=btn.getBoundingClientRect();
+  const size=Math.max(r.width,r.height)*2;
+  const rip=document.createElement('span');
+  rip.className='ripple';
+  rip.style.cssText=`width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px;`;
+  btn.appendChild(rip);
+  setTimeout(()=>rip.remove(),700);
+},true);
+
+// ── 5. Confetti lors de la validation d'un module ──
+function triggerConfetti(originEl){
+  const colors=['#fbbf24','#059669','#2563eb','#7c3aed','#f97316','#ec4899'];
+  const rect=originEl?(originEl.getBoundingClientRect?originEl.getBoundingClientRect():{top:window.innerHeight/2,left:window.innerWidth/2}):{top:window.innerHeight/2,left:window.innerWidth/2};
+  const cx=rect.left+(rect.width||0)/2,cy=rect.top+(rect.height||0)/2;
+  for(let i=0;i<55;i++){
+    const el=document.createElement('div');
+    const size=5+Math.random()*7;
+    const isSquare=Math.random()>.5;
+    el.style.cssText=`position:fixed;width:${size}px;height:${size}px;background:${colors[~~(Math.random()*colors.length)]};left:${cx}px;top:${cy}px;border-radius:${isSquare?'2px':'50%'};pointer-events:none;z-index:99999;will-change:transform;`;
+    document.body.appendChild(el);
+    const angle=Math.random()*Math.PI*2;
+    const speed=5+Math.random()*12;
+    let vx=Math.cos(angle)*speed,vy=Math.sin(angle)*speed-6;
+    let op=1,rot=Math.random()*360;
+    const spin=(Math.random()-.5)*20;
+    function fall(){vy+=.35;vx*=.97;op-=.018;rot+=spin;
+      el.style.cssText+=`;transform:translate(${(vx*=.99)*3}px,${(vy)*=1}px) rotate(${rot}deg);opacity:${op};`;
+      if(op>0)requestAnimationFrame(fall);else el.remove();
+    }
+    setTimeout(()=>requestAnimationFrame(fall),Math.random()*180);
+  }
+}
+
+// ── 6. Entrée animée des cartes modules (staggered) ──
+const _origRenderGrid=typeof renderGrid==='function'?renderGrid:null;
+if(typeof renderGrid==='function'){
+  const __rg=renderGrid;
+  renderGrid=function(){
+    __rg.apply(this,arguments);
+    document.querySelectorAll('#moduleGrid .mod-card').forEach((card,i)=>{
+      card.style.animationDelay=`${i*60}ms`;
+      card.classList.remove('card-entrance');
+      void card.offsetWidth;
+      card.classList.add('card-entrance');
+    });
+  };
+}
+
+// ── 7. Scroll reveal sur les sections de contenu ──
+(function initScrollReveal(){
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+  },{threshold:.12});
+  function observe(){
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el=>obs.observe(el));
+  }
+  observe();
+  new MutationObserver(observe).observe(document.body,{childList:true,subtree:true});
+})();
+
+// ── 8. Ajouter classe reveal aux blocs principaux ──
+document.addEventListener('DOMContentLoaded',()=>{
+  ['.progress-strip','.mod-grid','.rst-table'].forEach(sel=>{
+    document.querySelectorAll(sel).forEach(el=>{if(!el.classList.contains('reveal'))el.classList.add('reveal');});
+  });
+});
 
 </script>
 
