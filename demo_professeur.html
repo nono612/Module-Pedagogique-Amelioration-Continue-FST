@@ -158,7 +158,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
     <img src="fst_logo.png" alt="FST">
     <span class="topbar-title">OUTIL PÉDAGOGIQUE · AMÉLIORATION CONTINUE · FST TANGER — VUE PROFESSEUR</span>
   </div>
-  <span class="slide-ctr" id="sc">1 / 48</span>
+  <span class="slide-ctr" id="sc">1 / 49</span>
 </div>
 <div class="pbar"><div class="pbar-fill" id="pf" style="width:2.5%"></div></div>
 
@@ -188,37 +188,102 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <!-- ═══ S2 CONNEXION ═══ -->
 <div class="slide bg-hero" id="s2">
   <div class="stag st-blue" style="margin-bottom:.3rem;">Étape 1 — Accès à la plateforme</div>
-  <h2 class="sh2">Connexion &amp; <span class="hl">Configuration</span></h2>
-  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:560px;">L'étudiant accède au site via son navigateur, saisit son profil et configure sa clé IA Groq gratuite.</p>
+  <h2 class="sh2">Authentification <span class="hl">Email / Mot de passe</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:580px;">Chaque étudiant crée son compte personnel. Sa progression est automatiquement sauvegardée dans le cloud Supabase — retrouvable sur n'importe quel appareil sans rien ressaisir.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">👨‍🎓 Ce que fait l'étudiant</div>
+        <div style="display:flex;flex-direction:column;gap:.32rem;font-size:.67rem;color:#374151;">
+          <div style="background:#f5f3ff;border-radius:8px;padding:.42rem .65rem;border-left:3px solid #7c3aed;display:flex;gap:.4rem;align-items:flex-start;"><span style="font-weight:800;color:#7c3aed;flex-shrink:0;">①</span><div><strong>Crée un compte</strong> avec son email &amp; mot de passe (1 seule fois)</div></div>
+          <div style="background:#eff6ff;border-radius:8px;padding:.42rem .65rem;border-left:3px solid #3b82f6;display:flex;gap:.4rem;align-items:flex-start;"><span style="font-weight:800;color:#3b82f6;flex-shrink:0;">②</span><div><strong>Saisit sa clé API Groq &amp; son CV</strong> une seule fois — mémorisés définitivement</div></div>
+          <div style="background:#f0fdf4;border-radius:8px;padding:.42rem .65rem;border-left:3px solid #10b981;display:flex;gap:.4rem;align-items:flex-start;"><span style="font-weight:800;color:#10b981;flex-shrink:0;">③</span><div><strong>Retrouve sa progression</strong> instantanément depuis n'importe quel appareil</div></div>
+        </div>
+      </div>
+      <div class="wc">
+        <div class="wc-title">👨‍🏫 Avantages pour le professeur</div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.66rem;color:#374151;">
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .55rem;border-left:3px solid #7c3aed;">☁️ Progression de chaque étudiant <strong>visible en temps réel</strong> dans votre tableau de bord</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .55rem;border-left:3px solid #7c3aed;">🔄 <strong>Rafraîchissement cloud</strong> en un clic — données toujours à jour depuis Supabase</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .55rem;border-left:3px solid #7c3aed;">📥 <strong>Export CSV</strong> de toute la classe en un clic</div>
+        </div>
+      </div>
+    </div>
+    <!-- Mockup écran auth étudiant -->
+    <div style="background:#fff;border-radius:16px;padding:1.3rem 1.5rem;color:#1e293b;box-shadow:0 8px 40px rgba(0,0,0,.3);max-width:320px;width:100%;">
+      <div style="text-align:center;margin-bottom:.9rem;"><div style="font-size:1.8rem;">🎓</div><div style="font-weight:900;font-size:.85rem;color:#0d1b2a;">Outil Pédagogique</div><div style="font-size:.62rem;color:#64748b;">FST Tanger · Amélioration Continue</div></div>
+      <div style="display:flex;gap:.25rem;background:#f1f5f9;border-radius:7px;padding:.15rem;margin-bottom:.75rem;">
+        <div style="flex:1;background:#fff;border-radius:5px;padding:.28rem;text-align:center;font-size:.62rem;font-weight:800;color:#7c3aed;box-shadow:0 1px 3px rgba(0,0,0,.08);">Se connecter</div>
+        <div style="flex:1;padding:.28rem;text-align:center;font-size:.62rem;font-weight:700;color:#94a3b8;">Créer un compte</div>
+      </div>
+      <div style="margin-bottom:.4rem;"><label style="font-size:.58rem;font-weight:700;color:#374151;display:block;margin-bottom:.15rem;">Email</label><div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:6px;padding:.35rem .55rem;font-size:.68rem;color:#374151;">ahmed.benali@edu.ma</div></div>
+      <div style="margin-bottom:.65rem;"><label style="font-size:.58rem;font-weight:700;color:#374151;display:block;margin-bottom:.15rem;">Mot de passe</label>
+        <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:6px;padding:.35rem .55rem;font-size:.68rem;color:#94a3b8;display:flex;justify-content:space-between;">••••••••<span>👁</span></div>
+        <div style="text-align:right;margin-top:.15rem;font-size:.55rem;color:#7c3aed;font-weight:700;">Mot de passe oublié ?</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);border-radius:7px;padding:.45rem;text-align:center;font-size:.7rem;font-weight:800;color:#fff;margin-bottom:.4rem;">🚀 Se connecter</div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:.3rem .55rem;text-align:center;font-size:.6rem;color:#059669;font-weight:700;">☁️ Supabase — données sécurisées &amp; synchronisées</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S2b SUPABASE CLOUD ═══ -->
+<div class="slide bg-hero" id="s2b">
+  <div class="stag st-green" style="margin-bottom:.3rem;">Infrastructure — Base de données Cloud</div>
+  <h2 class="sh2">☁️ <span class="hl">Supabase</span> — Toutes les données synchronisées en temps réel</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:600px;">La progression de chaque étudiant est automatiquement poussée dans le cloud PostgreSQL. Vous voyez tout depuis votre tableau de bord en cliquant "Rafraîchir".</p>
   <div class="row">
     <div class="col">
       <div class="wc">
-        <div class="wc-title">🔑 Formulaire de connexion</div>
-        <div style="display:flex;flex-direction:column;gap:.5rem;">
-          <div><div style="font-size:.6rem;font-weight:700;color:#64748b;margin-bottom:.2rem;">PRÉNOM &amp; NOM</div><div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:.38rem .65rem;font-size:.7rem;color:#374151;">Ahmed Benali</div></div>
-          <div><div style="font-size:.6rem;font-weight:700;color:#64748b;margin-bottom:.2rem;">CODE ÉTUDIANT</div><div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:.38rem .65rem;font-size:.7rem;color:#374151;">ETU-2024-047</div></div>
-          <div><div style="font-size:.6rem;font-weight:700;color:#64748b;margin-bottom:.2rem;">CLÉ API GROQ <span style="color:#10b981;">(gratuite)</span></div><div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:.38rem .65rem;font-size:.65rem;color:#94a3b8;font-family:monospace;">gsk_••••••••••••••••••••••••</div></div>
-          <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:8px;padding:.5rem;text-align:center;font-size:.75rem;font-weight:800;color:#fff;">🚀 Commencer les modules</div>
+        <div class="wc-title">☁️ Tableau de suivi — mise à jour cloud</div>
+        <!-- Mockup bouton + statut -->
+        <div style="display:flex;gap:.4rem;align-items:center;margin-bottom:.6rem;">
+          <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:7px;padding:.38rem .7rem;font-size:.65rem;font-weight:800;">☁️ Rafraîchir (cloud)</div>
+          <div style="background:#f1f5f9;border-radius:6px;padding:.38rem .7rem;font-size:.65rem;font-weight:700;color:#374151;">📥 Exporter CSV</div>
+          <div style="background:#fef2f2;border-radius:6px;padding:.38rem .6rem;font-size:.65rem;font-weight:700;color:#dc2626;">🗑️ Vider</div>
         </div>
+        <div style="background:#f0fdf4;border-radius:7px;padding:.4rem .7rem;border:1px solid #bbf7d0;font-size:.63rem;color:#065f46;margin-bottom:.5rem;">
+          ☁️ <strong>3 étudiants</strong> chargés depuis Supabase — dernière synchro : 22:01:16
+        </div>
+        <!-- Mini tableau -->
+        <div style="overflow-x:auto;">
+          <table style="width:100%;font-size:.58rem;border-collapse:collapse;">
+            <thead><tr style="background:#f8fafc;">
+              <th style="text-align:left;padding:.3rem .4rem;font-weight:800;color:#64748b;border-bottom:1.5px solid #e2e8f0;">ÉTUDIANT</th>
+              <th style="padding:.3rem .4rem;font-weight:800;color:#64748b;border-bottom:1.5px solid #e2e8f0;">PROGRESS.</th>
+              <th style="padding:.3rem .4rem;font-weight:800;color:#64748b;border-bottom:1.5px solid #e2e8f0;">PDCA</th>
+              <th style="padding:.3rem .4rem;font-weight:800;color:#64748b;border-bottom:1.5px solid #e2e8f0;">5S</th>
+              <th style="padding:.3rem .4rem;font-weight:800;color:#64748b;border-bottom:1.5px solid #e2e8f0;">VSM</th>
+              <th style="padding:.3rem .4rem;font-weight:800;color:#7c3aed;border-bottom:1.5px solid #e2e8f0;border-top:2px solid #7c3aed;">LEAN+</th>
+              <th style="padding:.3rem .4rem;font-weight:800;color:#64748b;border-bottom:1.5px solid #e2e8f0;">MOY.</th>
+            </tr></thead>
+            <tbody>
+              <tr><td style="padding:.3rem .4rem;font-weight:700;">Ahmed B.</td><td style="padding:.3rem .4rem;text-align:center;"><span style="background:#dcfce7;color:#166534;border-radius:10px;padding:.1rem .4rem;font-weight:800;">11/13</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 92%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 88%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 95%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#f3e8ff;color:#6b21a8;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 78%</span></td><td style="text-align:center;padding:.3rem;font-weight:800;color:#059669;">88%</td></tr>
+              <tr style="background:#f8fafc;"><td style="padding:.3rem .4rem;font-weight:700;">Sara M.</td><td style="padding:.3rem .4rem;text-align:center;"><span style="background:#fef3c7;color:#92400e;border-radius:10px;padding:.1rem .4rem;font-weight:800;">5/13</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 75%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 80%</span></td><td style="text-align:center;padding:.3rem;color:#94a3b8;">—</td><td style="text-align:center;padding:.3rem;color:#94a3b8;">—</td><td style="text-align:center;padding:.3rem;font-weight:800;color:#d97706;">65%</td></tr>
+              <tr><td style="padding:.3rem .4rem;font-weight:700;">Karim L.</td><td style="padding:.3rem .4rem;text-align:center;"><span style="background:#dcfce7;color:#166534;border-radius:10px;padding:.1rem .4rem;font-weight:800;">13/13</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 100%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 96%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#dcfce7;color:#166534;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 90%</span></td><td style="text-align:center;padding:.3rem;"><span style="background:#f3e8ff;color:#6b21a8;border-radius:8px;padding:.1rem .35rem;font-weight:700;">✓ 85%</span></td><td style="text-align:center;padding:.3rem;font-weight:800;color:#059669;">94%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:.4rem;font-size:.58rem;color:#7c3aed;font-weight:700;">⬆️ La colonne "LEAN+" en violet = module personnalisé créé par le professeur</div>
       </div>
     </div>
     <div class="col">
       <div class="wc">
-        <div class="wc-title">📋 Informations importantes</div>
-        <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.68rem;color:#374151;">
-          <div style="background:#f0fdf4;border-radius:7px;padding:.4rem .6rem;border-left:3px solid #10b981;">✅ <strong>Clé API Groq</strong> : obtenir gratuitement sur console.groq.com — jamais stockée</div>
-          <div style="background:#eff6ff;border-radius:7px;padding:.4rem .6rem;border-left:3px solid #3b82f6;">🔒 <strong>Code étudiant</strong> : fourni par le professeur pour le suivi de classe</div>
-          <div style="background:#fef9ee;border-radius:7px;padding:.4rem .6rem;border-left:3px solid #f59e0b;">📱 <strong>100% web</strong> : aucune installation, fonctionne sur PC, tablette, mobile</div>
-          <div style="background:#fef2f2;border-radius:7px;padding:.4rem .6rem;border-left:3px solid #ef4444;">⚠️ <strong>Clé API</strong> : jamais sauvegardée — à ressaisir à chaque session</div>
+        <div class="wc-title">🗄️ Tables Supabase synchronisées</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.65rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #10b981;"><strong>student_progress</strong> — scores, modules validés, badges de chaque étudiant</div>
+          <div style="background:#eff6ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #3b82f6;"><strong>profiles</strong> — nom affiché, clé API, domaine CV</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;"><strong>custom_modules</strong> — modules personnalisés partagés avec toute la classe</div>
+          <div style="background:#fef9ee;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #f59e0b;"><strong>admin_config</strong> — seuils de validation, modules actifs/inactifs</div>
         </div>
       </div>
       <div class="wc">
-        <div class="wc-title">👨‍🏫 Note professeur</div>
-        <div style="font-size:.68rem;color:#374151;line-height:1.6;">Distribuez les <strong>codes étudiants</strong> en début de séance (accessibles depuis votre tableau de bord admin). Ces codes permettront de retrouver et identifier chaque étudiant dans vos rapports.</div>
-        <div style="margin-top:.6rem;background:linear-gradient(135deg,#0d1b2a,#1a3a6e);border-radius:8px;padding:.55rem .8rem;display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:.65rem;color:rgba(255,255,255,.7);font-weight:700;">🔐 Mot de passe Espace Professeur</span>
-          <span style="font-family:monospace;font-size:.8rem;font-weight:800;color:#fbbf24;letter-spacing:2px;">prof2024</span>
-        </div>
+        <div class="wc-title">✨ Tableau dynamique automatique</div>
+        <div style="font-size:.65rem;color:#374151;line-height:1.6;">Le tableau professeur <strong>s'adapte automatiquement</strong> :<br>
+        • Colonnes M1–M11 toujours présentes<br>
+        • <span style="color:#7c3aed;font-weight:700;">Colonnes violettes</span> = modules custom que vous avez créés<br>
+        • Progression affichée en <strong>X/Y modules</strong> (Y inclut vos modules custom)<br>
+        • Si un étudiant n'a pas fait un module → <span style="color:#94a3b8;font-weight:700;">—</span></div>
       </div>
     </div>
   </div>
@@ -2033,13 +2098,13 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 
 <div class="navctrl">
   <button class="nbtn" id="pb" onclick="prev()" disabled>← Préc.</button>
-  <span class="slide-num" id="sc">1 / 44</span>
+  <span class="slide-num" id="sc">1 / 49</span>
   <div class="sect-label" id="sect-label"></div>
   <button class="nbtn" id="nb" onclick="next()">Suiv. →</button>
 </div>
 
 <script>
-const TOTAL=48;let cur=0;
+const TOTAL=49;let cur=0;
 function go(n){if(n<0||n>=TOTAL)return;const ss=document.querySelectorAll('.slide');ss[cur].classList.remove('active');ss[cur].classList.add('exit');setTimeout(()=>ss[cur].classList.remove('exit'),380);cur=n;ss[cur].classList.add('active');upd();}
 function next(){go(cur+1);}function prev(){go(cur-1);}
 function upd(){const ss=document.querySelectorAll('.slide');const tag=ss[cur].querySelector('.stag');document.getElementById('sect-label').textContent=tag?tag.textContent.trim():'';document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===TOTAL-1;document.getElementById('sc').textContent=(cur+1)+' / '+TOTAL;document.getElementById('pf').style.width=((cur+1)/TOTAL*100)+'%';}

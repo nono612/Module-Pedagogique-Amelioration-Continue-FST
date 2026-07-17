@@ -180,7 +180,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
     <img src="fst_logo.png" alt="FST">
     <span class="topbar-title">OUTIL PÉDAGOGIQUE · AMÉLIORATION CONTINUE · FST TANGER</span>
   </div>
-  <span class="slide-ctr" id="sc">1 / 37</span>
+  <span class="slide-ctr" id="sc">1 / 44</span>
 </div>
 <div class="pbar"><div class="pbar-fill" id="pf" style="width:3%"></div></div>
 
@@ -197,9 +197,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
     <div class="stag st-amber" style="margin:0 auto .6rem;">Présentation & Démonstration</div>
     <h1 class="sh1">Outil Pédagogique<br><span class="hl">Amélioration Continue</span></h1>
     <p class="sub" style="margin:0 auto 1.3rem;">Plateforme interactive Lean &amp; Six Sigma — 11 modules avec Intelligence Artificielle intégrée · ~5h30 de formation · FST Tanger</p>
-    <div class="stats" style="margin:0 auto;">
-      <div class="sbox"><div class="snum">11</div><div class="slbl">Modules interactifs</div></div>
+    <div class="stats" style="margin:0 auto;grid-template-columns:repeat(5,1fr);">
+      <div class="sbox"><div class="snum">11+</div><div class="slbl">Modules interactifs</div></div>
       <div class="sbox"><div class="snum">IA</div><div class="slbl">Groq intégrée</div></div>
+      <div class="sbox"><div class="snum">☁️</div><div class="slbl">Cloud Supabase</div></div>
       <div class="sbox"><div class="snum">PDF</div><div class="slbl">Rapport &amp; Cert.</div></div>
       <div class="sbox"><div class="snum">100%</div><div class="slbl">Web · Sans install.</div></div>
     </div>
@@ -210,30 +211,83 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 <!-- ═══ S2 CONNEXION ═══ -->
 <div class="slide bg-hero" id="s2">
   <div class="stag st-blue" style="margin-bottom:.3rem;">Étape 1 — Accès à la plateforme</div>
-  <h2 class="sh2">Connexion &amp; <span class="hl">Configuration</span></h2>
-  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:560px;">L'étudiant accède au site via son navigateur, saisit son profil et configure sa clé IA Groq gratuite.</p>
+  <h2 class="sh2">Authentification <span class="hl">Sécurisée</span> — Compte personnel</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:580px;">Chaque étudiant crée un compte email/mot de passe. Sa progression est sauvegardée dans le cloud et retrouvable sur n'importe quel appareil à tout moment.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🌐 Accès direct — aucune installation</div>
+        <div style="background:#f8fafc;border-radius:7px;padding:.45rem .7rem;font-family:monospace;font-size:.68rem;color:#2563eb;border:1px solid #e2e8f0;word-break:break-all;margin-bottom:.6rem;">https://nono612.github.io/Module-Pedagogique-Amelioration-Continue-FST/</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.67rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #10b981;">☁️ <strong>Progression cloud</strong> — retrouvable sur PC, tablette, mobile</div>
+          <div style="background:#eff6ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #3b82f6;">🔑 <strong>Clé API &amp; CV mémorisés</strong> — à saisir une seule fois</div>
+          <div style="background:#fef9ee;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #f59e0b;">🔐 <strong>Mot de passe oublié</strong> — réinitialisation par email</div>
+        </div>
+      </div>
+    </div>
+    <!-- Mockup écran auth -->
+    <div style="background:#fff;border-radius:16px;padding:1.4rem 1.6rem;color:#1e293b;box-shadow:0 8px 40px rgba(0,0,0,.3);max-width:340px;width:100%;">
+      <div style="text-align:center;margin-bottom:1rem;"><div style="font-size:2rem;">🎓</div><div style="font-weight:900;font-size:.88rem;color:#0d1b2a;">Outil Pédagogique</div><div style="font-size:.65rem;color:#64748b;margin-top:.1rem;">FST Tanger · Amélioration Continue</div></div>
+      <!-- Onglets -->
+      <div style="display:flex;gap:.3rem;background:#f1f5f9;border-radius:8px;padding:.2rem;margin-bottom:.9rem;">
+        <div style="flex:1;background:#fff;border-radius:6px;padding:.3rem;text-align:center;font-size:.65rem;font-weight:800;color:#2563eb;box-shadow:0 1px 4px rgba(0,0,0,.08);">Se connecter</div>
+        <div style="flex:1;padding:.3rem;text-align:center;font-size:.65rem;font-weight:700;color:#94a3b8;">Créer un compte</div>
+      </div>
+      <div style="margin-bottom:.45rem;"><label style="font-size:.6rem;font-weight:700;color:#374151;display:block;margin-bottom:.18rem;">Adresse email</label><input style="width:100%;border:1.5px solid #e2e8f0;border-radius:7px;padding:.38rem .6rem;font-size:.72rem;font-family:'Inter',sans-serif;color:#374151;" value="youssef.tahir@edu.ma" readonly></div>
+      <div style="margin-bottom:.7rem;"><label style="font-size:.6rem;font-weight:700;color:#374151;display:block;margin-bottom:.18rem;">Mot de passe</label>
+        <div style="position:relative;"><input style="width:100%;border:1.5px solid #e2e8f0;border-radius:7px;padding:.38rem .6rem;font-size:.72rem;font-family:'Inter',sans-serif;color:#374151;" value="••••••••" readonly><span style="position:absolute;right:.5rem;top:50%;transform:translateY(-50%);font-size:.7rem;color:#94a3b8;">👁</span></div>
+        <div style="text-align:right;margin-top:.2rem;font-size:.58rem;color:#3b82f6;font-weight:700;">Mot de passe oublié ?</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border-radius:8px;padding:.5rem;text-align:center;font-size:.75rem;font-weight:800;color:#fff;margin-bottom:.55rem;">🚀 Se connecter</div>
+      <div style="background:#f0fdf4;border-radius:6px;padding:.35rem .6rem;text-align:center;font-size:.62rem;color:#059669;font-weight:700;">☁️ Connecté à Supabase — données sécurisées</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S2b BASE DE DONNÉES CLOUD ═══ -->
+<div class="slide bg-hero" id="s2b">
+  <div class="stag st-green" style="margin-bottom:.3rem;">Étape 1b — Infrastructure Cloud</div>
+  <h2 class="sh2">Base de données <span class="hl">Supabase</span> — Progression sauvegardée pour toujours</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:600px;">Toutes les données sont synchronisées automatiquement dans le cloud PostgreSQL. L'étudiant retrouve sa progression intacte sur n'importe quel appareil, à n'importe quel moment.</p>
   <div class="row">
     <div class="col">
       <div class="wc">
-        <div class="wc-title">🌐 Accès direct</div>
-        <div style="font-size:.74rem;color:#374151;margin-bottom:.5rem;">Aucune installation — 100% navigateur web.</div>
-        <div style="background:#f8fafc;border-radius:7px;padding:.45rem .7rem;font-family:monospace;font-size:.68rem;color:#2563eb;border:1px solid #e2e8f0;word-break:break-all;">https://nono612.github.io/Module-Pedagogique-Amelioration-Continue-FST/</div>
-      </div>
-      <div class="wc">
-        <div class="wc-title">🔑 Clé API Groq</div>
-        <div style="font-size:.72rem;color:#374151;line-height:1.5;margin-bottom:.5rem;">L'IA est alimentée par Groq (clé gratuite). Elle est saisie dans le header et <strong>jamais sauvegardée</strong>.</div>
-        <div style="display:flex;gap:.4rem;flex-wrap:wrap;"><span class="pill p-green">✓ Gratuit</span><span class="pill p-blue">console.groq.com</span><span class="pill p-amber">⚡ Rapide</span></div>
+        <div class="wc-title">☁️ Ce qui est sauvegardé automatiquement</div>
+        <div style="display:flex;flex-direction:column;gap:.32rem;font-size:.68rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:8px;padding:.45rem .65rem;border-left:3px solid #10b981;display:flex;align-items:center;gap:.5rem;"><span style="font-size:1rem;">📊</span><div><strong>Progression complète</strong> — scores de chaque module, niveaux validés, badges obtenus</div></div>
+          <div style="background:#eff6ff;border-radius:8px;padding:.45rem .65rem;border-left:3px solid #3b82f6;display:flex;align-items:center;gap:.5rem;"><span style="font-size:1rem;">🔑</span><div><strong>Clé API Groq</strong> — saisie une seule fois, retrouvée à chaque connexion</div></div>
+          <div style="background:#fef9ee;border-radius:8px;padding:.45rem .65rem;border-left:3px solid #f59e0b;display:flex;align-items:center;gap:.5rem;"><span style="font-size:1rem;">📄</span><div><strong>Profil CV &amp; domaine</strong> — personnalisation mémorisée à vie</div></div>
+          <div style="background:#f5f3ff;border-radius:8px;padding:.45rem .65rem;border-left:3px solid #7c3aed;display:flex;align-items:center;gap:.5rem;"><span style="font-size:1rem;">🧩</span><div><strong>Modules personnalisés</strong> — créés par le professeur, synchronisés pour toute la classe</div></div>
+        </div>
       </div>
     </div>
-    <div style="background:#fff;border-radius:16px;padding:1.4rem 1.6rem;color:#1e293b;box-shadow:0 8px 40px rgba(0,0,0,.3);max-width:360px;width:100%;">
-      <div style="text-align:center;margin-bottom:1rem;"><div style="font-size:2.2rem;">🎓</div><div style="font-weight:900;font-size:.9rem;color:#0d1b2a;">Outil Pédagogique Amélioration Continue</div><div style="font-size:.68rem;color:#64748b;margin-top:.15rem;">FST Tanger · Génie Industriel</div></div>
-      <div style="margin-bottom:.55rem;"><label style="font-size:.65rem;font-weight:700;color:#374151;display:block;margin-bottom:.25rem;">Votre prénom &amp; nom</label><input style="width:100%;border:1.5px solid #3b82f6;border-radius:7px;padding:.4rem .6rem;font-size:.78rem;background:#eff6ff;font-family:'Inter',sans-serif;" value="Youssef Tahir" readonly></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.55rem;">
-        <div><label style="font-size:.62rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Secteur</label><input style="width:100%;border:1.5px solid #3b82f6;border-radius:6px;padding:.35rem .5rem;font-size:.68rem;background:#eff6ff;font-family:'Inter',sans-serif;" value="Aéronautique" readonly></div>
-        <div><label style="font-size:.62rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Poste</label><input style="width:100%;border:1.5px solid #3b82f6;border-radius:6px;padding:.35rem .5rem;font-size:.68rem;background:#eff6ff;font-family:'Inter',sans-serif;" value="Technicien" readonly></div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🗄️ Architecture — Supabase PostgreSQL</div>
+        <div style="font-size:.63rem;color:#374151;margin-bottom:.5rem;">Base de données gratuite, hébergée dans le cloud. Zéro configuration côté étudiant.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;font-size:.6rem;">
+          <div style="background:#f8fafc;border-radius:7px;padding:.45rem .6rem;border:1px solid #e2e8f0;">
+            <div style="font-weight:800;color:#1e293b;margin-bottom:.2rem;">📋 student_progress</div>
+            <div style="color:#64748b;">Scores · Modules validés · Badges</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:7px;padding:.45rem .6rem;border:1px solid #e2e8f0;">
+            <div style="font-weight:800;color:#1e293b;margin-bottom:.2rem;">👤 profiles</div>
+            <div style="color:#64748b;">Nom · Clé API · CV Domain</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:7px;padding:.45rem .6rem;border:1px solid #e2e8f0;">
+            <div style="font-weight:800;color:#1e293b;margin-bottom:.2rem;">🧩 custom_modules</div>
+            <div style="color:#64748b;">Modules créés par le prof</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:7px;padding:.45rem .6rem;border:1px solid #e2e8f0;">
+            <div style="font-weight:800;color:#1e293b;margin-bottom:.2rem;">⚙️ admin_config</div>
+            <div style="color:#64748b;">Seuils · Modules actifs/inactifs</div>
+          </div>
+        </div>
+        <div style="margin-top:.6rem;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:8px;padding:.5rem .7rem;border:1px solid #bbf7d0;display:flex;align-items:center;gap:.5rem;">
+          <span style="font-size:1.1rem;">✅</span>
+          <span style="font-size:.65rem;color:#065f46;font-weight:700;">Synchronisation automatique toutes les 2 secondes · 100% gratuit</span>
+        </div>
       </div>
-      <div style="margin-bottom:.7rem;"><label style="font-size:.62rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Entreprise</label><input style="width:100%;border:1.5px solid #3b82f6;border-radius:6px;padding:.38rem .55rem;font-size:.68rem;background:#eff6ff;font-family:'Inter',sans-serif;" value="PRECISION MAROC" readonly></div>
-      <div class="bm bm-p" style="width:100%;justify-content:center;">🚀 Commencer le parcours</div>
     </div>
   </div>
 </div>
@@ -317,6 +371,56 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
         </div>
         <div style="background:#f0fdf4;border-radius:7px;padding:.3rem .5rem;border:1px solid #bbf7d0;font-size:.61rem;color:#374151;">
           ✅ <strong>Vous pouvez annuler à tout moment</strong> en cliquant "Voir tous les modules" pour retrouver le parcours complet des 11 modules.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S3c PARCOURS IA ═══ -->
+<div class="slide bg-hero" id="s3c">
+  <div class="stag st-purple" style="margin-bottom:.3rem;">Nouveauté — Intelligence Artificielle</div>
+  <h2 class="sh2">✨ Parcours IA <span class="hl">Personnalisé</span> — L'IA réorganise vos modules</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:1rem;max-width:600px;">En un clic, l'IA analyse votre profil, vos scores et vos modules restants — et propose l'ordre optimal pour progresser. Inclut vos modules personnalisés créés par le professeur.</p>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">✨ Bouton "Générer mon parcours" — Accueil</div>
+        <!-- Mockup du bouton -->
+        <div style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:10px;padding:.7rem 1rem;margin-bottom:.5rem;">
+          <div style="font-weight:700;font-size:.78rem;color:#374151;margin-bottom:.15rem;">✨ Parcours personnalisé IA</div>
+          <div style="font-size:.62rem;color:#6b7280;margin-bottom:.5rem;">L'IA analyse votre profil et vous propose un ordre optimal d'apprentissage.</div>
+          <div style="display:flex;gap:.4rem;">
+            <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-radius:7px;padding:.32rem .7rem;font-size:.65rem;font-weight:800;">✨ Générer mon parcours</div>
+            <div style="background:#f1f5f9;color:#374151;border-radius:7px;padding:.32rem .7rem;font-size:.65rem;font-weight:700;">🔄 Autre proposition</div>
+          </div>
+        </div>
+        <!-- Mockup résultat IA -->
+        <div style="background:#f5f3ff;border-left:4px solid #7c3aed;border-radius:8px;padding:.5rem .7rem;font-size:.65rem;color:#5b21b6;font-style:italic;margin-bottom:.4rem;">"Basé sur votre profil en aéronautique et vos 3 modules validés, je vous recommande de commencer par le VSM pour cartographier votre flux de valeur…"</div>
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;margin-bottom:.35rem;">📍 Ordre recommandé</div>
+        ${['M6 — VSM','M4 — Pareto','M5 — Kanban','M8 — SMED'].map((m,i)=>`<div style="display:flex;gap:.5rem;align-items:center;padding:.35rem .5rem;border-radius:6px;background:${i===0?'#eff6ff':'#f9fafb'};margin-bottom:.22rem;border:1px solid ${i===0?'#93c5fd':'#e5e7eb'};font-size:.62rem;"><span style="width:18px;height:18px;border-radius:50%;background:${i===0?'#2563eb':'#e2e8f0'};color:${i===0?'#fff':'#374151'};display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:800;flex-shrink:0;">${i+1}</span>${m}</div>`).join('')}
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">✅ Appliquer &amp; réinitialiser</div>
+        <div style="display:flex;gap:.4rem;margin-bottom:.6rem;">
+          <div style="flex:1;background:linear-gradient(135deg,#059669,#047857);color:#fff;border-radius:7px;padding:.4rem;text-align:center;font-size:.65rem;font-weight:800;">✅ Appliquer ce parcours</div>
+          <div style="background:#f1f5f9;color:#6b7280;border-radius:7px;padding:.4rem .6rem;font-size:.65rem;font-weight:700;">✕ Ordre par défaut</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:8px;padding:.5rem .7rem;border:1px solid #bbf7d0;font-size:.63rem;color:#065f46;margin-bottom:.4rem;">
+          <strong>Bannière verte</strong> apparaît dans la grille : "✨ Parcours IA actif — modules réorganisés selon la recommandation"
+        </div>
+        <div style="background:#fef9ee;border-radius:8px;padding:.5rem .7rem;border-left:3px solid #f59e0b;font-size:.63rem;color:#92400e;">
+          💡 <strong>Inclut les modules personnalisés</strong> créés par le professeur — l'IA peut les placer à n'importe quelle position dans le parcours
+        </div>
+      </div>
+      <div class="wc">
+        <div class="wc-title">🎲 Comment ça marche</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.65rem;color:#374151;">
+          <div style="display:flex;gap:.4rem;align-items:flex-start;"><span style="color:#7c3aed;font-weight:800;flex-shrink:0;">①</span><span>L'IA reçoit votre <strong>domaine CV</strong>, vos <strong>modules validés + scores</strong>, et la liste complète des modules disponibles</span></div>
+          <div style="display:flex;gap:.4rem;align-items:flex-start;"><span style="color:#7c3aed;font-weight:800;flex-shrink:0;">②</span><span>Elle propose un <strong>ordre personnalisé</strong> avec une justification pour chaque module</span></div>
+          <div style="display:flex;gap:.4rem;align-items:flex-start;"><span style="color:#7c3aed;font-weight:800;flex-shrink:0;">③</span><span>Si vous avez tout validé → elle propose un <strong>ordre de révision</strong> basé sur vos scores les plus faibles</span></div>
         </div>
       </div>
     </div>
@@ -2124,7 +2228,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
 </div>
 
 <script>
-const TOTAL=42;let cur=0;
+const TOTAL=44;let cur=0;
 function go(n){if(n<0||n>=TOTAL)return;const ss=document.querySelectorAll('.slide');ss[cur].classList.remove('active');ss[cur].classList.add('exit');setTimeout(()=>ss[cur].classList.remove('exit'),380);cur=n;ss[cur].classList.add('active');upd();}
 function next(){go(cur+1);}function prev(){go(cur-1);}
 function upd(){const ss=document.querySelectorAll('.slide');const tag=ss[cur].querySelector('.stag');document.getElementById('sect-label').textContent=tag?tag.textContent.trim():'';document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===TOTAL-1;document.getElementById('sc').textContent=(cur+1)+' / '+TOTAL;document.getElementById('pf').style.width=((cur+1)/TOTAL*100)+'%';}
