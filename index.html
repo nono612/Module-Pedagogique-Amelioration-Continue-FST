@@ -1981,9 +1981,10 @@ async function authLogin(){
   if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Connexion…</span>';
   const{data,error}=await _sb.auth.signInWithPassword({email,password:pwd});
   if(error){
-    let errMsg='Email ou mot de passe incorrect.';
-    if(error.message?.includes('Email not confirmed'))errMsg='Confirmez votre email avant de vous connecter (vérifiez votre boîte mail).';
-    if(error.message?.includes('Invalid login credentials'))errMsg='Email ou mot de passe incorrect.';
+    let errMsg='Email ou mot de passe incorrect. Vérifiez aussi vos spams pour un email de confirmation.';
+    if(error.message?.includes('Email not confirmed'))errMsg='Votre email n\'est pas encore confirmé — cherchez l\'email de Supabase dans vos spams et cliquez le lien, ou contactez votre professeur.';
+    if(error.message?.includes('Invalid login credentials'))errMsg='Email ou mot de passe incorrect. Si vous venez de créer votre compte, vérifiez vos spams pour confirmer votre email.';
+    if(error.message?.includes('too many requests')||error.message?.includes('rate limit'))errMsg='Trop de tentatives. Attendez quelques minutes avant de réessayer.';
     if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${errMsg}</span>`;
     return;
   }
@@ -2015,7 +2016,7 @@ async function authForgotPassword(){
   if(msg)msg.innerHTML='<span style="color:#6b7280;">⏳ Envoi…</span>';
   const{error}=await _sb.auth.resetPasswordForEmail(email,{redirectTo:'https://nono612.github.io/Module-Pedagogique-Amelioration-Continue-FST/'});
   if(error){if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message}</span>`;return;}
-  if(msg)msg.innerHTML='<span style="color:#059669;">✅ Email envoyé ! Vérifiez votre boîte mail.</span>';
+  if(msg)msg.innerHTML='<span style="color:#059669;">✅ Email envoyé ! Vérifiez votre boîte mail <strong>et vos spams</strong>.</span>';
 }
 
 async function authLogout(){
