@@ -448,7 +448,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
         <div class="wc-title">🛡️ 4 onglets — Fonctionnalités exclusives professeur</div>
         <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.66rem;color:#374151;">
           <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">👥 <strong>Roster étudiants</strong> — scores M1→M11, certifiés/en cours, stats de classe, export CSV</div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">📥 <strong>Importer codes</strong> — import individuel ou en masse (un code par ligne)</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">☁️ <strong>Rafraîchir cloud</strong> — charge automatiquement les données Supabase de tous les étudiants</div>
           <div style="background:#f5f3ff;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #7c3aed;">⚙️ <strong>Accès & Config</strong> — seuil de validation configurable, activer/désactiver modules, débloquer/réinitialiser</div>
           <div style="background:#ede9fe;border-radius:7px;padding:.35rem .6rem;border-left:3px solid #6d28d9;">🧩 <strong>Générateur de modules</strong> — créer un module complet (cours + exercices + quiz) depuis un titre et une description</div>
         </div>
@@ -467,18 +467,18 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
         <div class="wc-title">📋 Interface Admin — Onglets</div>
         <div class="atab">
           <div class="at on">👥 Étudiants</div>
-          <div class="at">📥 Importer codes</div>
+          <div class="at">☁️ Rafraîchir cloud</div>
           <div class="at">⚙️ Accès & Config</div>
           <div class="at">🧩 Générateur</div>
         </div>
         <table class="rtable">
-          <tr><th>Code</th><th>Nom</th><th>Modules</th><th>Score moy.</th><th>Statut</th></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-001</td><td>Ahmed Benali</td><td>11/11</td><td style="color:#059669;font-weight:700;">86%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-002</td><td>Sara El Fassi</td><td>7/11</td><td style="color:#d97706;font-weight:700;">74%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-003</td><td>Youssef Idrissi</td><td>11/11</td><td style="color:#059669;font-weight:700;">91%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-004</td><td>Fatima Zahra Amrani</td><td>5/11</td><td style="color:#d97706;font-weight:700;">68%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-005</td><td>Karim Nassir</td><td>11/11</td><td style="color:#059669;font-weight:700;">79%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
-          <tr><td style="font-family:monospace;font-size:.58rem;">ETU-006</td><td>Nadia Bouhaj</td><td>2/11</td><td style="color:#dc2626;font-weight:700;">55%</td><td><span style="background:#fef2f2;color:#991b1b;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">🔴 Débutant</span></td></tr>
+          <tr><th>Étudiant</th><th>Modules</th><th>Score moy.</th><th>Statut</th></tr>
+          <tr><td>Ahmed Benali</td><td>11/13</td><td style="color:#059669;font-weight:700;">86%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
+          <tr><td>Sara El Fassi</td><td>7/13</td><td style="color:#d97706;font-weight:700;">74%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
+          <tr><td>Youssef Idrissi</td><td>13/13</td><td style="color:#059669;font-weight:700;">91%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
+          <tr><td>Fatima Zahra Amrani</td><td>5/13</td><td style="color:#d97706;font-weight:700;">68%</td><td><span style="background:#fef9ee;color:#92400e;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">⏳ En cours</span></td></tr>
+          <tr><td>Karim Nassir</td><td>13/13</td><td style="color:#059669;font-weight:700;">79%</td><td><span style="background:#f0fdf4;color:#065f46;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">✅ Certifié</span></td></tr>
+          <tr><td>Nadia Bouhaj</td><td>2/13</td><td style="color:#dc2626;font-weight:700;">55%</td><td><span style="background:#fef2f2;color:#991b1b;border-radius:4px;padding:.05rem .3rem;font-size:.55rem;font-weight:700;">🔴 Débutant</span></td></tr>
         </table>
         <div style="margin-top:.4rem;font-size:.58rem;color:#94a3b8;font-style:italic;">… et 24 autres étudiants dans la liste</div>
       </div>
@@ -505,9 +505,9 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
   <div class="row">
     <div class="col">
       <div class="wc">
-        <div class="wc-title">👤 Profil — Ahmed Benali (ETU-001)</div>
+        <div class="wc-title">👤 Profil — Ahmed Benali</div>
         <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.65rem;color:#374151;margin-bottom:.5rem;">
-          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Code étudiant</span><strong style="font-family:monospace;">ETU-2024-001</strong></div>
+          <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Email</span><strong style="font-family:monospace;">ahmed.benali@edu.ma</strong></div>
           <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Modules complétés</span><strong>11 / 11 ✅</strong></div>
           <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Score moyen</span><strong style="color:#059669;">86%</strong></div>
           <div style="display:flex;justify-content:space-between;background:#f8fafc;border-radius:5px;padding:.28rem .45rem;"><span>Temps total</span><strong>7h12</strong></div>
@@ -596,10 +596,10 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
           <div style="font-size:.58rem;color:#64748b;margin-top:.3rem;">Génère un fichier téléchargeable instantanément</div>
         </div>
         <div style="font-size:.65rem;color:#374151;font-family:monospace;background:#f8fafc;border-radius:7px;padding:.5rem .7rem;border:1px solid #e2e8f0;line-height:1.8;">
-          <span style="color:#94a3b8;">code,nom,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,moy,cert</span><br>
-          ETU-001,Ahmed Benali,92,78,85,90,85,88,87,91,84,87,82,86,OUI<br>
-          ETU-002,Sara El Fassi,88,72,79,85,0,0,0,0,0,0,0,74,NON<br>
-          ETU-003,Youssef Idrissi,95,84,90,92,89,91,88,94,86,89,85,91,OUI
+          <span style="color:#94a3b8;">nom,email,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10,m11,moy,cert</span><br>
+          Ahmed Benali,ahmed.benali@edu.ma,92,78,85,90,85,88,87,91,84,87,82,86,OUI<br>
+          Sara El Fassi,sara.elfassi@edu.ma,88,72,79,85,0,0,0,0,0,0,0,74,NON<br>
+          Youssef Idrissi,youssef.idrissi@edu.ma,95,84,90,92,89,91,88,94,86,89,85,91,OUI
         </div>
       </div>
     </div>
@@ -619,46 +619,36 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
   </div>
 </div>
 
-<!-- ═══ S40 GESTION CODES ═══ -->
+<!-- ═══ S40 GESTION CLOUD ═══ -->
 <div class="slide bg-admin" id="s40">
-  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Gestion des Codes Étudiants</div>
-  <h2 class="sh2">Codes <span class="hlv">Étudiants</span> — Attribution &amp; Suivi</h2>
+  <div class="stag st-violet">👨‍🏫 PROFESSEUR — Gestion Cloud</div>
+  <h2 class="sh2">☁️ Supabase — Les données arrivent <span class="hlv">automatiquement</span></h2>
   <div class="row">
     <div class="col">
       <div class="wc">
-        <div class="wc-title">🏷️ Comment fonctionnent les codes</div>
+        <div class="wc-title">🔄 Comment la progression arrive dans votre dashboard</div>
         <div style="display:flex;flex-direction:column;gap:.35rem;font-size:.68rem;color:#374151;">
-          <div style="background:#eff6ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #3b82f6;">
-            <strong>1. Génération</strong> — Le professeur crée les codes avant la séance depuis le dashboard (format libre : ETU-001, N12345, etc.)
-          </div>
-          <div style="background:#f0fdf4;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #10b981;">
-            <strong>2. Distribution</strong> — Chaque étudiant reçoit son code unique (papier, email ou affiché). Il le saisit lors de sa connexion.
-          </div>
-          <div style="background:#fef9ee;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #f59e0b;">
-            <strong>3. Traçabilité</strong> — Dès qu'un étudiant valide un module, le code est associé à son score dans la base locale.
-          </div>
-          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;">
-            <strong>4. Retrouver</strong> — Le professeur retrouve chaque étudiant par son code dans le dashboard → score, progression, certificat.
-          </div>
+          <div style="background:#eff6ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #3b82f6;display:flex;gap:.5rem;align-items:flex-start;"><span style="font-weight:800;color:#3b82f6;flex-shrink:0;">①</span><div><strong>L'étudiant crée son compte</strong> (email + mot de passe) — son nom est enregistré dans Supabase</div></div>
+          <div style="background:#f0fdf4;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #10b981;display:flex;gap:.5rem;align-items:flex-start;"><span style="font-weight:800;color:#10b981;flex-shrink:0;">②</span><div><strong>Il valide des modules</strong> — chaque score est automatiquement poussé dans la table <code>student_progress</code></div></div>
+          <div style="background:#fef9ee;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #f59e0b;display:flex;gap:.5rem;align-items:flex-start;"><span style="font-weight:800;color:#f59e0b;flex-shrink:0;">③</span><div><strong>Vous cliquez "☁️ Rafraîchir"</strong> — le tableau se remplit avec tous les étudiants inscrits</div></div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.4rem .65rem;border-left:3px solid #7c3aed;display:flex;gap:.5rem;align-items:flex-start;"><span style="font-weight:800;color:#7c3aed;flex-shrink:0;">④</span><div><strong>Résultat</strong> — nom, modules validés, scores et colonnes custom visibles en temps réel</div></div>
         </div>
       </div>
     </div>
     <div class="col">
       <div class="wc">
-        <div class="wc-title">📥 Onglet "Importer codes" — Import individuel</div>
-        <div style="background:#f8fafc;border-radius:8px;padding:.5rem .65rem;border:1.5px solid #e2e8f0;margin-bottom:.4rem;">
-          <div style="font-size:.6rem;font-weight:700;color:#374151;margin-bottom:.18rem;">Coller le code de l'étudiant :</div>
-          <div style="background:#fff;border:1px solid #c4b5fd;border-radius:6px;padding:.3rem .5rem;font-size:.62rem;color:#94a3b8;margin-bottom:.25rem;font-family:monospace;">Ahmed Benali</div>
-          <div style="display:flex;gap:.3rem;">
-            <span class="bm bm-v" style="font-size:.6rem;">📥 Importer</span>
-            <span style="font-size:.6rem;color:#059669;align-self:center;">✅ Ahmed Benali ajouté — 8/11 modules complétés.</span>
+        <div class="wc-title">⚡ Avantages vs ancien système</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.67rem;color:#374151;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;">
+            <div style="background:#fef2f2;border-radius:7px;padding:.38rem .55rem;border-left:3px solid #ef4444;font-size:.61rem;"><strong style="color:#dc2626;">❌ Avant</strong><br>Codes ETU-XXX à distribuer<br>Saisie manuelle par l'étudiant<br>Données locales perdues</div>
+            <div style="background:#f0fdf4;border-radius:7px;padding:.38rem .55rem;border-left:3px solid #10b981;font-size:.61rem;"><strong style="color:#059669;">✅ Maintenant</strong><br>Compte email permanent<br>Auto-sync après chaque module<br>Données cloud persistantes</div>
           </div>
         </div>
-        <div style="background:#f5f3ff;border-radius:8px;padding:.5rem .65rem;border:1.5px solid #c4b5fd;">
-          <div style="font-size:.6rem;font-weight:700;color:#6d28d9;margin-bottom:.18rem;">Import en masse — un code par ligne :</div>
-          <div style="background:#fff;border:1px solid #ddd6fe;border-radius:6px;padding:.3rem .5rem;font-size:.6rem;color:#94a3b8;margin-bottom:.25rem;font-family:monospace;line-height:1.6;">Ahmed Benali<br>Sara El Fassi<br>Youssef Idrissi<br>… (30 codes)</div>
-          <span class="bm bm-v" style="font-size:.6rem;">📥 Importer tout (30 étudiants)</span>
-        </div>
+      </div>
+      <div class="wc">
+        <div class="wc-title">🗑️ Vider les données</div>
+        <div style="font-size:.66rem;color:#374151;line-height:1.6;">Le bouton <strong>"🗑️ Vider"</strong> supprime toutes les entrées de la table <code>student_progress</code> dans Supabase — utile en fin de semestre pour repartir à zéro avec une nouvelle classe.</div>
+        <div style="margin-top:.4rem;background:#fef2f2;border-radius:7px;padding:.35rem .6rem;border:1px solid #fca5a5;font-size:.62rem;color:#991b1b;">⚠️ Action irréversible — à utiliser uniquement entre deux promotions</div>
       </div>
     </div>
   </div>
@@ -674,7 +664,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
         <div class="wc-title">⚙️ Interface de gestion — Onglet "Accès modules"</div>
         <div class="atab" style="margin-bottom:.5rem;">
           <div class="at">👥 Étudiants</div>
-          <div class="at">📥 Importer</div>
+          <div class="at">☁️ Rafraîchir</div>
           <div class="at on">🔓 Accès modules</div>
         </div>
         <table class="rtable">
@@ -925,11 +915,11 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;max-width:580px;margin:.8rem auto;">
       <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.8rem;text-align:center;">
         <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin-bottom:.3rem;">ACCÈS ÉTUDIANT</div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.7);">Ouvrir l'URL → Saisir nom + code étudiant + clé API Groq → Démarrer</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.7);">Ouvrir l'URL → Créer un compte email → Saisir clé Groq → Démarrer</div>
       </div>
       <div style="background:rgba(124,58,237,.15);border:1px solid rgba(168,85,247,.3);border-radius:12px;padding:.8rem;text-align:center;">
         <div style="font-size:.65rem;font-weight:800;color:#a78bfa;margin-bottom:.3rem;">ACCÈS PROFESSEUR</div>
-        <div style="font-size:.7rem;color:rgba(255,255,255,.7);"><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">A</span> sur n'importe quelle page → Mot de passe admin</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.7);"><span class="key">Ctrl</span>+<span class="key">Shift</span>+<span class="key">A</span> sur n'importe quelle page → Dashboard professeur</div>
       </div>
     </div>
     <div style="margin-top:.6rem;font-size:.65rem;color:rgba(255,255,255,.25);">← → pour naviguer · Diaporama complet — 40 slides</div>
@@ -2010,7 +2000,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
         <img src="fst_logo.png" style="height:45px;margin:0 auto .6rem;display:block;" alt="FST">
         <div style="font-size:.75rem;font-weight:800;color:#f59e0b;margin-bottom:.3rem;">Outil Pédagogique Amélioration Continue</div>
         <div style="font-size:.62rem;color:rgba(255,255,255,.6);margin-bottom:.6rem;">Certifie que</div>
-        <div style="font-size:1rem;font-weight:900;color:#fff;margin-bottom:.4rem;">Ahmed Benali — ETU-2024-047</div>
+        <div style="font-size:1rem;font-weight:900;color:#fff;margin-bottom:.4rem;">Ahmed Benali</div>
         <div style="font-size:.62rem;color:rgba(255,255,255,.55);margin-bottom:.6rem;">a complété avec succès les 11 modules Lean &amp; Six Sigma</div>
         <div style="display:flex;justify-content:center;gap:.5rem;margin-bottom:.5rem;">
           <div class="cert-seal">📊 Score : 86/100</div>
@@ -2052,7 +2042,7 @@ body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidde
         <div class="wc-title">📄 Page 1 — Profil &amp; Résultats</div>
         <div style="border:1.5px solid #e2e8f0;border-radius:8px;padding:.7rem;font-size:.6rem;color:#374151;">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;border-bottom:1px solid #f1f5f9;padding-bottom:.4rem;"><img src="fst_logo.png" style="height:22px;" alt="FST"><span style="font-weight:800;font-size:.65rem;">Outil Pédagogique Amélioration Continue · FST Tanger</span></div>
-          <div style="margin-bottom:.3rem;"><strong>Étudiant :</strong> Ahmed Benali · ETU-2024-047</div>
+          <div style="margin-bottom:.3rem;"><strong>Étudiant :</strong> Ahmed Benali · ahmed.benali@edu.ma</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem;margin-top:.3rem;">
             <div style="background:#f0fdf4;border-radius:5px;padding:.25rem;text-align:center;"><strong style="color:#059669;">86%</strong><br>Moy. générale</div>
             <div style="background:#eff6ff;border-radius:5px;padding:.25rem;text-align:center;"><strong style="color:#2563eb;">11/11</strong><br>Modules</div>
