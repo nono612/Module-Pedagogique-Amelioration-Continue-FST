@@ -5492,6 +5492,7 @@ function getDomainContext(){
 }
 
 function showCVModal(){
+  if(!_currentUser)return;
   const m=document.getElementById('cvModal');if(!m)return;
   m.classList.remove('hidden');
   if(state.domain)_renderCVExtract(state.domain);
@@ -6290,8 +6291,8 @@ window.addEventListener('DOMContentLoaded',()=>{
     drop.addEventListener('dragleave',function(){this.classList.remove('drag');});
     drop.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleCVFile(f);});
   }
-  // Modal CV à chaque nouvel onglet/session, sauf si déjà vu dans cette session
-  if(!state.cvSeen)showCVModal();
+  // Modal CV uniquement si connecté et pas encore vu
+  if(!state.cvSeen && _currentUser)showCVModal();
   updateTimeDisplay();
   // Watchers pour mode révision
   _watchFeedbackDiv('pdcaAI',1);
