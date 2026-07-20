@@ -1964,6 +1964,7 @@ async function _sbPullCustomModules(){
 /* ── Auth fonctions ── */
 let _currentUser=null;
 let _canonicalName=null; // nom fixé à la connexion, jamais modifié par le champ nom
+let _passwordRecoveryMode=false;
 
 function authSwitchTab(tab){
   document.getElementById('authFormLogin').style.display=tab==='login'?'block':'none';
@@ -2076,14 +2077,13 @@ async function _onAuthSuccess(user,forcedName,isNewReg=false){
 
 /* Vérifie session existante au chargement */
 _sb.auth.getSession().then(({data:{session}})=>{
-  if(session?.user){_onAuthSuccess(session.user);}
-  else{/* Overlay déjà visible par défaut */}
+  if(session?.user&&!_passwordRecoveryMode){_onAuthSuccess(session.user);}
 });
 
 /* Écoute les changements d'auth (reset password, etc.) */
 _sb.auth.onAuthStateChange((event,session)=>{
   if(event==='PASSWORD_RECOVERY'){
-    // Ferme tout autre overlay et affiche le formulaire de reset
+    _passwordRecoveryMode=true;
     const ao=document.getElementById('authOverlay');if(ao)ao.style.display='none';
     const cv=document.getElementById('cvModal');if(cv)cv.classList.add('hidden');
     const rm=document.getElementById('resetPwdOverlay');if(rm)rm.style.display='flex';
@@ -6294,8 +6294,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     drop.addEventListener('dragleave',function(){this.classList.remove('drag');});
     drop.addEventListener('drop',function(e){e.preventDefault();this.classList.remove('drag');const f=e.dataTransfer.files[0];if(f)handleCVFile(f);});
   }
-  // Modal CV uniquement si connecté et pas encore vu
-  if(!state.cvSeen && _currentUser)showCVModal();
+  // Modal CV gérée uniquement par _onAuthSuccess (isNewReg) ou bouton 📄 CV
   updateTimeDisplay();
   // Watchers pour mode révision
   _watchFeedbackDiv('pdcaAI',1);
