@@ -2288,7 +2288,10 @@ function getCustomModules(){return JSON.parse(localStorage.getItem('greenlab_cus
 function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));_sbPushCustomModules(mods);}
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
-  if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
+  if(v.trim()){
+    sessionStorage.setItem('ac_groq_key',v.trim());
+    if(_currentUser)_sb.from('profiles').upsert({user_id:_currentUser.id,api_key:v.trim()},{onConflict:'user_id'});
+  }
   const keyStep=document.getElementById('cvKeyStep');
   if(keyStep&&v.trim()){keyStep.style.border='2px solid #a78bfa';keyStep.style.background='#f5f3ff';}
 }
