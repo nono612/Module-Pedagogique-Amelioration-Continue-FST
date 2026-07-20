@@ -6627,48 +6627,79 @@ async function generateCustomModule(){
   const key=getKey();
   const title=(document.getElementById('genTitle')?.value||'').trim();
   const desc=(document.getElementById('genDesc')?.value||'').trim();
-  const level=document.getElementById('genLevel')?.value||'intermédiaire';
-  const dur=(document.getElementById('genDuration')?.value||'~20 min').trim();
+  const level=document.getElementById('genLevel')?.value||'Master (Bac+5)';
+  const dur=(document.getElementById('genDuration')?.value||'~45 min').trim();
+  const sector=document.getElementById('genSector')?.value||'Générique (multi-secteur)';
+  const modType=document.getElementById('genType')?.value||'Méthodologique';
+  const prereq=(document.getElementById('genPrereq')?.value||'').trim();
   const prev=document.getElementById('genPreview');
   const msg=document.getElementById('admGenMsg');
-  if(!title||!desc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et la description.</span>';return;}
+  if(!title||!desc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et les objectifs pédagogiques.</span>';return;}
   if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
-  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
-  const sysPrompt=`Tu es un expert en Génie Industriel et Lean Manufacturing. Réponds UNIQUEMENT en JSON valide sur une seule ligne, sans markdown, sans texte autour.`;
-  const userPrompt=`Crée un module pédagogique niveau INGÉNIEUR sur le thème : "${title}".
-Objectifs : ${desc}
-Niveau : ${level}
+  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module complet en cours — théorie, quiz, cas industriel…</div></div>';
+  const sysPrompt=`Tu es un expert formateur en Génie Industriel, Lean Manufacturing et Excellence Opérationnelle. Tu crées des modules pédagogiques professionnels de niveau universitaire. Réponds UNIQUEMENT en JSON valide, sans markdown ni texte autour.`;
+  const userPrompt=`Crée un MODULE PÉDAGOGIQUE COMPLET et PROFESSIONNEL sur : "${title}"
+Secteur : ${sector} | Type : ${modType} | Niveau : ${level} | Durée : ${dur||'~45 min'}
+Objectifs : ${desc}${prereq?'\nPrérequis : '+prereq:''}
 
-Le JSON doit avoir exactement cette structure (remplace les descriptions par le vrai contenu) :
+STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai contenu — NE PAS laisser de descriptions) :
 {
   "titre": "${title}",
-  "icone": "🔧",
-  "desc": "Une phrase percutante décrivant le module",
-  "duree": "${dur||'~30 min'}",
+  "icone": "emoji_pertinent_pour_le_sujet",
+  "desc": "Une phrase percutante qui donne envie d'étudier ce module",
+  "duree": "${dur||'~45 min'}",
+  "secteur": "${sector}",
+  "type": "${modType}",
+  "niveau": "${level}",
+  "objectifs": [
+    "Objectif pédagogique 1 — verbe d'action + compétence mesurable",
+    "Objectif pédagogique 2 — verbe d'action + compétence mesurable",
+    "Objectif pédagogique 3 — verbe d'action + compétence mesurable",
+    "Objectif pédagogique 4 — verbe d'action + compétence mesurable"
+  ],
+  "formules": [
+    {"nom": "Nom de la formule ou de l'outil clé 1", "valeur": "Formule, ratio ou outil avec explication courte"},
+    {"nom": "Nom de la formule ou de l'outil clé 2", "valeur": "Formule, ratio ou outil avec explication courte"},
+    {"nom": "Nom de la formule ou de l'outil clé 3", "valeur": "Formule, ratio ou outil avec explication courte"}
+  ],
   "sections": [
     {
-      "titre": "Fondamentaux — ${title}",
-      "contenu": "Écris ici 500 mots minimum de contenu pédagogique : définitions précises, principes fondamentaux, formules, données chiffrées industrielles, exemples concrets, standards internationaux. Utilise des émojis pour structurer."
+      "titre": "📘 Fondamentaux — ${title}",
+      "contenu": "RÉDIGE ICI 500 MOTS MINIMUM de contenu pédagogique riche : définitions précises, historique, principes fondamentaux, normes et standards industriels (ISO, IATF, etc.), données chiffrées issues de l'industrie réelle, exemples concrets du secteur ${sector}. Structure avec des sous-titres émojis. Style : cours universitaire de niveau ${level}."
     },
     {
-      "titre": "Méthodologie et outils",
-      "contenu": "Écris ici 500 mots minimum : démarche étape par étape, outils pratiques, KPIs avec valeurs cibles, méthodes de calcul, cas d'application."
+      "titre": "⚙️ Méthodologie et outils pratiques",
+      "contenu": "RÉDIGE ICI 500 MOTS MINIMUM : démarche étape par étape numérotée (1 à 8 étapes minimum), description détaillée de chaque étape, outils associés (avec leur usage exact), indicateurs KPI avec valeurs cibles industrielles typiques, méthodes de calcul avec formules, matrice de décision si pertinent. Style : guide pratique d'ingénieur."
     },
     {
-      "titre": "Mise en œuvre industrielle",
-      "contenu": "Écris ici 500 mots minimum : guide d'application terrain, bonnes pratiques, erreurs à éviter, retours d'expérience, conseils d'expert."
+      "titre": "🏭 Application et mise en œuvre industrielle",
+      "contenu": "RÉDIGE ICI 500 MOTS MINIMUM : guide d'implémentation terrain complet, facteurs clés de succès (FCS), erreurs les plus fréquentes et comment les éviter, retours d'expérience d'entreprises réelles (anonymisés), ROI typique observé, comparaison avant/après avec données chiffrées, conseils d'expert terrain."
+    },
+    {
+      "titre": "💡 Synthèse — Points clés à retenir",
+      "contenu": "RÉDIGE ICI un résumé structuré : les 5-7 points essentiels à mémoriser absolument, les pièges à éviter, la check-list de mise en œuvre, les indicateurs de succès, et un conseil de praticien expérimenté. Format : liste numérotée avec émojis, facile à mémoriser."
     }
   ],
+  "qcm": [
+    {"q": "Question de compréhension 1 sur ${title} (précise et ancrée dans la pratique)", "opts": ["Option A", "Option B", "Option C", "Option D"], "rep": 0, "expl": "Explication courte de la bonne réponse"},
+    {"q": "Question de compréhension 2 sur un calcul ou indicateur clé", "opts": ["Option A", "Option B", "Option C", "Option D"], "rep": 1, "expl": "Explication courte de la bonne réponse"},
+    {"q": "Question d'application 3 — mise en situation industrielle", "opts": ["Option A", "Option B", "Option C", "Option D"], "rep": 2, "expl": "Explication courte de la bonne réponse"},
+    {"q": "Question de diagnostic 4 — erreur fréquente ou cas limite", "opts": ["Option A", "Option B", "Option C", "Option D"], "rep": 0, "expl": "Explication courte de la bonne réponse"},
+    {"q": "Question d'expert 5 — arbitrage ou décision d'ingénieur", "opts": ["Option A", "Option B", "Option C", "Option D"], "rep": 3, "expl": "Explication courte de la bonne réponse"}
+  ],
   "cas": {
-    "entreprise": "Nom fictif réaliste + secteur industriel",
-    "contexte": "Description détaillée de la situation industrielle avec données chiffrées",
-    "donnees": "KPIs avant/après avec valeurs numériques",
-    "probleme": "Problème précis avec impacts chiffrés",
-    "objectif": "Objectif SMART mesurable",
-    "contraintes": "Budget, délai, effectif, réglementation"
+    "entreprise": "Nom d'entreprise fictif réaliste + secteur précis (ex: Solaris Composites SAS — Équipementier automobile Tier 1)",
+    "contexte": "Description complète et réaliste de la situation industrielle en 4-5 phrases, avec données chiffrées précises : taille de l'entreprise, volumes de production, effectif, chiffre d'affaires approximatif, historique du problème rencontré.",
+    "donnees": "Liste de 6-8 KPIs mesurés avec leurs valeurs numériques actuelles (avant intervention) : taux de rebuts X%, rendement Y%, coût de non-qualité Z€/mois, délai moyen, TRS, etc.",
+    "enjeux": "Impacts financiers, qualité et sécurité du problème : perte chiffrée en €/mois, risque client (pénalités, perte de marché), impact RH et réglementaire.",
+    "probleme": "Description précise du problème technique et organisationnel à résoudre, avec ses causes racines identifiées et ses impacts mesurés sur la production.",
+    "objectif": "Objectif SMART complet : réduire X de Y% à Z% en W semaines, avec gains financiers attendus en €.",
+    "contraintes": "Budget alloué en €, délai en semaines, effectif disponible, contraintes réglementaires (normes), contraintes techniques spécifiques."
   }
-}`;
+}
+
+IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de descriptions génériques.`;
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:16000,temperature:0.7,response_format:{type:'json_object'}})});
     const data=await resp.json();
@@ -6676,11 +6707,9 @@ Le JSON doit avoir exactement cette structure (remplace les descriptions par le 
     const text=data.choices[0].message.content;
     try{_genPreviewData=JSON.parse(text);}
     catch(pe){
-      // Fallback : extraction + réparation si le modèle ajoute du texte autour
       const m=text.match(/\{[\s\S]*\}/);
       if(!m)throw new Error('JSON introuvable dans la réponse IA');
       let raw=m[0];
-      // Corrige les retours à la ligne littéraux dans les strings
       raw=raw.replace(/("(?:[^"\\]|\\.)*")|[\n\r]/g,(m,str)=>str?str:' ');
       try{_genPreviewData=JSON.parse(raw);}catch(_){throw new Error('Réponse IA invalide — réessayez');}
     }
@@ -6691,17 +6720,29 @@ Le JSON doit avoir exactement cette structure (remplace les descriptions par le 
 function _renderGenPreview(d,dur,level){
   const prev=document.getElementById('genPreview');
   if(!prev)return;
-  prev.innerHTML=`<div style="border:2px solid #7c3aed;border-radius:12px;padding:1rem;background:#faf5ff;margin-top:.6rem;">
-    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem;">
-      <span style="font-size:1.6rem;">${d.icone||'🧩'}</span>
-      <div><div style="font-weight:900;font-size:.92rem;color:#4c1d95;">${_escH(d.titre)}</div><div style="font-size:.72rem;color:#7c3aed;">Niveau ${level} · ${d.duree||dur}</div></div>
+  const objHtml=(d.objectifs||[]).map(o=>`<div style="display:flex;align-items:flex-start;gap:.4rem;font-size:.76rem;color:#374151;margin-bottom:.2rem;"><span style="color:#7c3aed;font-weight:900;flex-shrink:0;">✓</span>${_escH(o)}</div>`).join('');
+  const formHtml=(d.formules||[]).map(f=>`<div style="background:#f3f0ff;border-radius:7px;padding:.35rem .6rem;margin-bottom:.3rem;"><span style="font-size:.7rem;font-weight:800;color:#4c1d95;">${_escH(f.nom)}</span><br><span style="font-size:.72rem;color:#374151;font-family:monospace;">${_escH(f.valeur)}</span></div>`).join('');
+  const secHtml=(d.sections||[]).map(s=>`<div style="margin-bottom:.5rem;border-left:3px solid #7c3aed;padding-left:.6rem;"><div style="font-weight:800;font-size:.76rem;color:#4c1d95;">${_escH(s.titre)}</div><div style="font-size:.72rem;color:#6b7280;margin-top:.1rem;line-height:1.4;">${_escH((s.contenu||'').slice(0,200))}${(s.contenu||'').length>200?'…':''}</div></div>`).join('');
+  prev.innerHTML=`<div style="border:2px solid #7c3aed;border-radius:14px;overflow:hidden;margin-top:.6rem;">
+    <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:.85rem 1rem;display:flex;align-items:center;gap:.7rem;">
+      <span style="font-size:2rem;">${d.icone||'🧩'}</span>
+      <div><div style="font-weight:900;font-size:.95rem;color:#fff;">${_escH(d.titre)}</div>
+      <div style="font-size:.71rem;color:rgba(255,255,255,.8);margin-top:.1rem;">${_escH(d.secteur||'')} · ${_escH(d.niveau||level)} · ${d.duree||dur}</div></div>
     </div>
-    <div style="font-size:.77rem;color:#6b7280;margin-bottom:.7rem;">${_escH(d.desc||'')}</div>
-    ${(d.sections||[]).slice(0,3).map(s=>`<div style="margin-bottom:.5rem;"><div style="font-weight:800;font-size:.77rem;color:#4c1d95;">📌 ${_escH(s.titre)}</div><div style="font-size:.73rem;color:#374151;line-height:1.5;margin-top:.15rem;">${_escH((s.contenu||'').slice(0,180))}${(s.contenu||'').length>180?'…':''}</div></div>`).join('')}
-    <div style="font-size:.73rem;color:#7c3aed;font-weight:700;margin-top:.5rem;">${d.cas?'🏭 Cas industriel inclus — 3 exercices niveau ingénieur':'📚 3 sections pédagogiques'}</div>
-    <div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap;">
-      <button class="btn btn-purple btn-sm" onclick="publishCustomModule()">✅ Publier ce module</button>
-      <button class="btn btn-ghost btn-sm" onclick="generateCustomModule()">🔄 Régénérer</button>
+    <div style="padding:.85rem 1rem;background:#faf5ff;">
+      <div style="font-size:.78rem;color:#4c1d95;font-weight:700;font-style:italic;margin-bottom:.7rem;">"${_escH(d.desc||'')}"</div>
+      ${objHtml?`<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">🎯 Objectifs pédagogiques</div>${objHtml}</div>`:''}
+      ${formHtml?`<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">🔑 Formules & outils clés</div>${formHtml}</div>`:''}
+      <div style="margin-bottom:.75rem;"><div style="font-size:.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;">📚 ${(d.sections||[]).length} sections théoriques</div>${secHtml}</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;font-size:.72rem;">
+        ${d.qcm?.length?`<span style="background:#dbeafe;color:#1d4ed8;padding:.25rem .6rem;border-radius:20px;font-weight:700;">❓ ${d.qcm.length} questions QCM</span>`:''}
+        ${d.cas?`<span style="background:#dcfce7;color:#15803d;padding:.25rem .6rem;border-radius:20px;font-weight:700;">🏭 Cas industriel complet</span>`:''}
+        <span style="background:#f3f0ff;color:#7c3aed;padding:.25rem .6rem;border-radius:20px;font-weight:700;">🎯 3 exercices progressifs</span>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap;">
+        <button class="btn btn-purple" onclick="publishCustomModule()" style="flex:1;">✅ Publier ce module</button>
+        <button class="btn btn-ghost btn-sm" onclick="generateCustomModule()">🔄 Régénérer</button>
+      </div>
     </div>
   </div>`;
 }
@@ -6758,71 +6799,106 @@ function goCustomModule(i){
   const sec=document.getElementById('m-custom');if(!sec)return;
   const done=_getCustomLevDone(i);
 
-  // Section cards with gradient headers
-  const sectionColors=['linear-gradient(135deg,#4c1d95,#7c3aed)','linear-gradient(135deg,#1d4ed8,#3b82f6)','linear-gradient(135deg,#065f46,#10b981)'];
-  const sectionBorders=['#ddd6fe','#bfdbfe','#a7f3d0'];
-  const sectionIcons=['📘','⚙️','🏭'];
-  const sectionsHtml=(m.sections||[]).slice(0,3).map((s,idx)=>`
-    <div style="border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:1.1rem;">
-      <div style="background:${sectionColors[idx]};padding:.65rem 1rem;display:flex;align-items:center;gap:.5rem;">
-        <span style="font-size:1rem;">${sectionIcons[idx]}</span>
-        <span style="font-weight:800;font-size:.87rem;color:#fff;letter-spacing:.01em;">${_escH(s.titre)}</span>
+  // Objectives
+  const objHtml=(m.objectifs||[]).length?`
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.5rem;margin-top:.6rem;">
+      ${(m.objectifs||[]).map(o=>`<div style="background:#f0fdf4;border-radius:9px;padding:.55rem .75rem;border:1px solid #86efac;display:flex;align-items:flex-start;gap:.4rem;"><span style="color:#15803d;font-weight:900;font-size:.9rem;flex-shrink:0;">✓</span><span style="font-size:.78rem;color:#15803d;font-weight:600;line-height:1.4;">${_escH(o)}</span></div>`).join('')}
+    </div>`:'';
+
+  // Key formulas
+  const formHtml=(m.formules||[]).length?`
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.6rem;">
+      ${(m.formules||[]).map(f=>`<div style="background:linear-gradient(135deg,#f3f0ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:.55rem .8rem;min-width:160px;flex:1;"><div style="font-size:.67rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">${_escH(f.nom)}</div><div style="font-size:.78rem;color:#1e1b4b;font-family:monospace;font-weight:700;">${_escH(f.valeur)}</div></div>`).join('')}
+    </div>`:'';
+
+  // Sections — all 4
+  const sectionColors=['linear-gradient(135deg,#4c1d95,#7c3aed)','linear-gradient(135deg,#1d4ed8,#3b82f6)','linear-gradient(135deg,#065f46,#10b981)','linear-gradient(135deg,#92400e,#f59e0b)'];
+  const sectionBorders=['#ddd6fe','#bfdbfe','#a7f3d0','#fde68a'];
+  const sectionsHtml=(m.sections||[]).map((s,idx)=>`
+    <div style="border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:1rem;">
+      <div style="background:${sectionColors[idx%4]};padding:.65rem 1rem;">
+        <span style="font-weight:800;font-size:.87rem;color:#fff;">${_escH(s.titre)}</span>
       </div>
-      <div style="padding:.9rem 1rem;background:#fff;border:1.5px solid ${sectionBorders[idx]};border-top:none;border-radius:0 0 14px 14px;line-height:1.75;color:#374151;font-size:.84rem;">${(s.contenu||'').replace(/\n/g,'<br>')}</div>
+      <div style="padding:1rem 1.1rem;background:#fff;border:1.5px solid ${sectionBorders[idx%4]};border-top:none;border-radius:0 0 14px 14px;line-height:1.8;color:#1e293b;font-size:.84rem;">${(s.contenu||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
     </div>`).join('');
 
-  // Industrial case study card
+  // QCM
+  const qcmHtml=(m.qcm||[]).length?`
+    <div class="ccard" style="border-left:4px solid #1d4ed8;">
+      <div class="ccard-title" style="color:#1d4ed8;">❓ Quiz de compréhension — ${(m.qcm||[]).length} questions</div>
+      <div style="font-size:.76rem;color:#6b7280;margin-bottom:.8rem;">Testez votre compréhension avant de passer aux exercices pratiques.</div>
+      <div id="customQCM${i}"></div>
+      <div style="margin-top:.7rem;">
+        <button class="btn btn-sm" style="background:#1d4ed8;color:#fff;font-weight:700;" onclick="checkCustomQCM(${i})">✅ Vérifier mes réponses</button>
+      </div>
+      <div id="customQCMResult${i}" style="margin-top:.6rem;"></div>
+    </div>`:'';
+
+  // Industrial case — ultra-rich
   const cas=m.cas;
   const casHtml=cas?`
     <div class="ccard" style="border-left:4px solid #7c3aed;">
-      <div class="ccard-title" style="color:#4c1d95;">🏭 Cas Industriel — ${_escH(cas.entreprise||'Contexte')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.7rem;margin-top:.6rem;">
-        <div style="background:#faf5ff;border-radius:10px;padding:.7rem .8rem;border:1px solid #ddd6fe;">
-          <div style="font-size:.67rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📌 Contexte</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.5;">${_escH(cas.contexte||'')}</div>
+      <div class="ccard-title" style="color:#4c1d95;">🏭 Cas Industriel — ${_escH(cas.entreprise||'Contexte industriel')}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.7rem;margin-top:.7rem;">
+        <div style="background:#faf5ff;border-radius:10px;padding:.75rem .9rem;border:1px solid #ddd6fe;">
+          <div style="font-size:.67rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">📌 Contexte</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.contexte||'')}</div>
         </div>
-        <div style="background:#fff7ed;border-radius:10px;padding:.7rem .8rem;border:1px solid #fed7aa;">
-          <div style="font-size:.67rem;font-weight:800;color:#c2410c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📊 Données clés</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.5;">${_escH(cas.donnees||'')}</div>
+        <div style="background:#fff7ed;border-radius:10px;padding:.75rem .9rem;border:1px solid #fed7aa;">
+          <div style="font-size:.67rem;font-weight:800;color:#c2410c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">📊 Données & KPIs mesurés</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.donnees||'')}</div>
         </div>
-        <div style="background:#fef2f2;border-radius:10px;padding:.7rem .8rem;border:1px solid #fca5a5;">
-          <div style="font-size:.67rem;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">⚠️ Problème</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.5;">${_escH(cas.probleme||'')}</div>
+        ${cas.enjeux?`<div style="background:#fef3c7;border-radius:10px;padding:.75rem .9rem;border:1px solid #fcd34d;">
+          <div style="font-size:.67rem;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">💰 Enjeux & Impacts</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.enjeux)}</div>
+        </div>`:''}
+        <div style="background:#fef2f2;border-radius:10px;padding:.75rem .9rem;border:1px solid #fca5a5;">
+          <div style="font-size:.67rem;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">⚠️ Problème à résoudre</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.probleme||'')}</div>
         </div>
-        <div style="background:#f0fdf4;border-radius:10px;padding:.7rem .8rem;border:1px solid #86efac;">
-          <div style="font-size:.67rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">🎯 Objectif & Contraintes</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.5;"><strong>Objectif :</strong> ${_escH(cas.objectif||'')} <br><strong>Contraintes :</strong> ${_escH(cas.contraintes||'')}</div>
+        <div style="background:#f0fdf4;border-radius:10px;padding:.75rem .9rem;border:1px solid #86efac;">
+          <div style="font-size:.67rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">🎯 Objectif SMART</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.objectif||'')}</div>
+        </div>
+        <div style="background:#f0f9ff;border-radius:10px;padding:.75rem .9rem;border:1px solid #bae6fd;">
+          <div style="font-size:.67rem;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">🔒 Contraintes</div>
+          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.contraintes||'')}</div>
         </div>
       </div>
-      <div style="font-size:.74rem;color:#7c3aed;margin-top:.8rem;padding:.45rem .8rem;background:#f3f0ff;border-radius:8px;font-weight:600;">💡 Ce cas industriel est le fil conducteur de vos 3 exercices progressifs.</div>
+      <div style="font-size:.74rem;color:#7c3aed;margin-top:.9rem;padding:.5rem .9rem;background:#f3f0ff;border-radius:8px;font-weight:600;">💡 Ce cas industriel est le fil conducteur de vos 3 exercices progressifs ci-dessous.</div>
     </div>`:'';
-
-  // Stepper HTML
-  const stepperHtml=`<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;" id="customExBadge${i}"></div>`;
 
   sec.innerHTML=`
     <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);">
-      <div style="font-size:2.6rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
-      <h1 style="font-size:1.6rem;margin-bottom:.4rem;">${_escH(m.titre)}</h1>
-      <p style="opacity:.85;max-width:480px;margin:0 auto;">${_escH(m.desc||'')}</p>
-      <div style="display:flex;justify-content:center;gap:1rem;margin-top:.7rem;flex-wrap:wrap;">
-        <span style="font-size:.75rem;opacity:.85;background:rgba(255,255,255,.18);padding:.25rem .75rem;border-radius:20px;">⏱️ ${m.duree||'~30 min'}</span>
-        <span style="font-size:.75rem;opacity:.85;background:rgba(255,255,255,.18);padding:.25rem .75rem;border-radius:20px;">🎯 3 exercices ingénieur</span>
-        <span style="font-size:.75rem;opacity:.85;background:rgba(255,255,255,.18);padding:.25rem .75rem;border-radius:20px;">📚 ${(m.sections||[]).length} sections</span>
+      <div style="font-size:2.8rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
+      <h1 style="font-size:1.65rem;margin-bottom:.35rem;">${_escH(m.titre)}</h1>
+      <p style="opacity:.85;max-width:540px;margin:0 auto;font-size:.88rem;">${_escH(m.desc||'')}</p>
+      <div style="display:flex;justify-content:center;gap:.8rem;margin-top:.8rem;flex-wrap:wrap;">
+        <span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">⏱️ ${m.duree||'~45 min'}</span>
+        ${m.secteur?`<span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">🏭 ${_escH(m.secteur)}</span>`:''}
+        <span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">📚 ${(m.sections||[]).length} sections</span>
+        ${(m.qcm||[]).length?`<span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">❓ ${m.qcm.length} questions quiz</span>`:''}
+        <span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">🎯 3 exercices ingénieur</span>
       </div>
     </div>
+
+    ${objHtml?`<div class="ccard"><div class="ccard-title">🎯 Objectifs pédagogiques</div>${objHtml}</div>`:''}
+
+    ${formHtml?`<div class="ccard"><div class="ccard-title">🔑 Formules & outils clés</div>${formHtml}</div>`:''}
 
     <div class="ccard">
       <div class="ccard-title">📖 Contenu théorique</div>
       ${sectionsHtml}
     </div>
 
+    ${qcmHtml}
+
     ${casHtml}
 
     <div class="ccard">
       <div class="ccard-title">🎯 Exercices progressifs — 3 niveaux</div>
-      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Appliquez les concepts sur le cas industriel. L'IA génère des exercices concrets de niveau ingénieur.</div>
-      ${stepperHtml}
+      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Appliquez les concepts sur le cas industriel. L'IA génère des exercices concrets et corrigés de niveau ingénieur.</div>
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;" id="customExBadge${i}"></div>
       <div id="customExContent${i}"></div>
       <div id="customExStatus${i}" style="margin-top:.5rem;"></div>
     </div>
@@ -6834,7 +6910,10 @@ function goCustomModule(i){
       </div>
       <div id="customScoreResult${i}"></div>
     </div>`;
+
   showSection('m-custom');
+  // Render QCM
+  if((m.qcm||[]).length)_renderCustomQCM(i,m.qcm);
   _renderCustomExBadge(i);
   if(done<3)showCustomExercise(i);
   else{
@@ -6842,6 +6921,59 @@ function goCustomModule(i){
     if(cec)cec.innerHTML='<div style="color:#059669;font-weight:700;font-size:.82rem;padding:.5rem 0;">✅ Les 3 niveaux sont complétés !</div>';
     showCustomValidateBtn(i);
   }
+}
+
+function _renderCustomQCM(i,qcm){
+  const el=document.getElementById('customQCM'+i);if(!el)return;
+  el.innerHTML=qcm.map((q,qi)=>`
+    <div style="margin-bottom:1rem;padding:.75rem .9rem;background:#f8fafc;border-radius:10px;border:1.5px solid #e2e8f0;">
+      <div style="font-size:.82rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">${qi+1}. ${_escH(q.q)}</div>
+      <div style="display:flex;flex-direction:column;gap:.3rem;">
+        ${(q.opts||[]).map((opt,oi)=>`
+          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.79rem;color:#374151;padding:.3rem .5rem;border-radius:7px;border:1.5px solid transparent;transition:all .15s;" id="qcmLbl${i}_${qi}_${oi}" onclick="selectCustomQCM(${i},${qi},${oi})">
+            <input type="radio" name="cqcm${i}_${qi}" value="${oi}" style="accent-color:#1d4ed8;">
+            ${_escH(opt)}
+          </label>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function selectCustomQCM(i,qi,oi){
+  const mods=getCustomModules();const m=mods[i];if(!m?.qcm)return;
+  const qcm=m.qcm;
+  // Highlight selected
+  (qcm[qi].opts||[]).forEach((_,j)=>{
+    const lbl=document.getElementById(`qcmLbl${i}_${qi}_${j}`);
+    if(lbl)lbl.style.background=j===oi?'#dbeafe':'';
+    if(lbl)lbl.style.borderColor=j===oi?'#3b82f6':'transparent';
+  });
+}
+
+function checkCustomQCM(i){
+  const mods=getCustomModules();const m=mods[i];if(!m?.qcm)return;
+  let score=0;const total=m.qcm.length;
+  let detailHtml='';
+  m.qcm.forEach((q,qi)=>{
+    const sel=document.querySelector(`input[name="cqcm${i}_${qi}"]:checked`);
+    const chosen=sel?parseInt(sel.value):-1;
+    const correct=q.rep??0;
+    const ok=chosen===correct;
+    if(ok)score++;
+    // Color labels
+    (q.opts||[]).forEach((_,oi)=>{
+      const lbl=document.getElementById(`qcmLbl${i}_${qi}_${oi}`);
+      if(!lbl)return;
+      if(oi===correct){lbl.style.background='#dcfce7';lbl.style.borderColor='#16a34a';}
+      else if(oi===chosen&&!ok){lbl.style.background='#fee2e2';lbl.style.borderColor='#dc2626';}
+    });
+    detailHtml+=`<div style="font-size:.75rem;margin:.2rem 0;padding:.3rem .6rem;border-radius:6px;background:${ok?'#f0fdf4':'#fef2f2'};color:${ok?'#15803d':'#dc2626'};">${ok?'✅':'❌'} Q${qi+1} — ${_escH(q.expl||'')}</div>`;
+  });
+  const pct=Math.round(score/total*100);
+  const el=document.getElementById('customQCMResult'+i);
+  if(el)el.innerHTML=`<div style="padding:.75rem 1rem;border-radius:10px;background:${pct>=60?'#f0fdf4':'#fef2f2'};border:1.5px solid ${pct>=60?'#86efac':'#fca5a5'};margin-top:.4rem;">
+    <div style="font-weight:800;font-size:.88rem;color:${pct>=60?'#15803d':'#dc2626'};">${pct>=60?'✅':'❌'} Score : ${score}/${total} (${pct}%)</div>
+    <div style="margin-top:.5rem;">${detailHtml}</div>
+  </div>`;
 }
 
 async function showCustomExercise(i){
@@ -6944,23 +7076,24 @@ async function evalCustomAnswer(i){
   if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   feedEl.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#6b7280;"><div class="ai-spinner"></div>Évaluation en cours…</div>';
   const exData=(m.exercices&&m.exercices[done])||{};
-  const prompt=`Tu es formateur expert en "${m.titre}". Évalue strictement cette réponse d'étudiant.
+  const casCtx=m.cas?`\nCas industriel : ${m.cas.entreprise||''} | Problème : ${m.cas.probleme||''} | Objectif : ${m.cas.objectif||''}`:'';
+  const prompt=`Tu es formateur expert en "${m.titre}" (${m.secteur||'industrie'}). Évalue strictement cette réponse d'étudiant niveau ${lv.label}.
 
-RÈGLE ABSOLUE PRIORITAIRE : Si la réponse est du charabia, des caractères aléatoires, une phrase hors-sujet, ou ne répond PAS à la question posée → réponds UNIQUEMENT cette phrase exacte : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
-Ne cherche PAS à trouver du positif dans une réponse invalide.
+RÈGLE ABSOLUE : Si la réponse est du charabia, des caractères aléatoires ou hors-sujet → réponds UNIQUEMENT : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
 
-Question posée : "${exData.question||''}"
-Éléments de réponse attendus : "${exData.expectedAnswer||''}"
+Question : "${exData.question||''}"${casCtx}
+Corrigé attendu : "${exData.expectedAnswer||''}"
 Réponse de l'étudiant : "${answer}"
 
-Si la réponse est valide et en lien avec la question, évalue en 3 points concis :
-✅ Ce qui est correct (sois précis)
-❌ Ce qui manque ou est incorrect
-💡 1 conseil d'amélioration
+Évalue en 4 points (si réponse valide) :
+✅ Points forts — ce qui est juste et bien expliqué (sois précis sur les éléments corrects)
+❌ Points manquants ou incorrects — ce qui est absent ou faux (cite des éléments concrets)
+📊 Calculs / Chiffres — si des valeurs numériques étaient attendues, indique-les
+💡 Conseil expert — 1 recommandation professionnelle pour progresser
 
-Sois honnête et exigeant. Une réponse vague ou incomplète mérite des ❌.`;
+Sois exigeant et précis. Niveau ingénieur attendu.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:220,temperature:0.4})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:450,temperature:0.4})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
     const lvAfter=_EX_LEVELS[Math.min(_getCustomLevDone(i),2)];
     feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
@@ -7411,39 +7544,91 @@ document.addEventListener('DOMContentLoaded',()=>{
 
     <!-- PANEL: GENERATOR -->
     <div id="adm-panel-gen" class="adm-panel" style="display:none;">
-      <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.25rem;">🧩 Générateur de module no-code</div>
-      <div style="font-size:.78rem;color:#6b7280;margin-bottom:1rem;line-height:1.5;">Créez un module personnalisé sans programmer. L'IA génère le cours, les exercices et le quiz.</div>
-      <div style="display:flex;flex-direction:column;gap:.65rem;">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:12px;padding:.9rem 1rem;margin-bottom:1rem;color:#fff;">
+        <div style="font-weight:900;font-size:.95rem;margin-bottom:.2rem;">✨ Générateur de module IA</div>
+        <div style="font-size:.73rem;opacity:.85;line-height:1.4;">Créez un module professionnel complet en quelques secondes — théorie détaillée, quiz, cas industriel et exercices progressifs générés par IA.</div>
+      </div>
+
+      <!-- Form -->
+      <div style="display:flex;flex-direction:column;gap:.6rem;">
+
+        <!-- Titre -->
         <div>
-          <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Titre du module *</label>
-          <input type="text" id="genTitle" placeholder="ex: Lean Healthcare, TPM, 8D, DMAIC..." style="width:100%;padding:.45rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.84rem;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+          <label style="font-size:.76rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">📌 Titre du module <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="genTitle" placeholder="ex: Méthode 8D, TPM, Six Sigma, DMAIC, Lean Healthcare…" style="width:100%;padding:.5rem .75rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.85rem;box-sizing:border-box;font-weight:600;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
         </div>
-        <div>
-          <label style="font-size:.78rem;font-weight:700;color:#374151;display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;">Description / Objectifs pédagogiques *<span style="font-size:.7rem;font-weight:500;color:#6b7280;background:#f3f4f6;border-radius:5px;padding:.1rem .4rem;">500 mots maximum</span></label>
-          <textarea id="genDesc" placeholder="Décrivez ce que l'étudiant apprendra et pratiquera dans ce module..." style="width:100%;min-height:72px;padding:.45rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;resize:vertical;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
-        </div>
-        <div style="display:flex;gap:.7rem;flex-wrap:wrap;">
-          <div style="flex:1;min-width:110px;">
-            <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Niveau</label>
-            <select id="genLevel" style="width:100%;padding:.4rem .55rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;">
-              <option value="débutant">Débutant</option>
-              <option value="intermédiaire" selected>Intermédiaire</option>
-              <option value="avancé">Avancé</option>
+
+        <!-- Secteur + Type -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;">
+          <div>
+            <label style="font-size:.76rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">🏭 Secteur industriel</label>
+            <select id="genSector" style="width:100%;padding:.42rem .55rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.79rem;background:#fff;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+              <option value="Automobile">🚗 Automobile</option>
+              <option value="Aéronautique">✈️ Aéronautique</option>
+              <option value="Agroalimentaire">🌾 Agroalimentaire</option>
+              <option value="Chimie & Pharmacie">💊 Chimie / Pharma</option>
+              <option value="Construction & BTP">🏗️ Construction / BTP</option>
+              <option value="Énergie & Environnement">⚡ Énergie</option>
+              <option value="Électronique & High-Tech">💻 Électronique</option>
+              <option value="Logistique & Supply Chain">📦 Logistique</option>
+              <option value="Métallurgie & Sidérurgie">⚙️ Métallurgie</option>
+              <option value="Santé & Médical">🏥 Santé / Médical</option>
+              <option value="Textile & Habillement">👕 Textile</option>
+              <option value="Générique (multi-secteur)" selected>🌐 Générique</option>
             </select>
           </div>
-          <div style="flex:1;min-width:110px;">
-            <label style="font-size:.78rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">Durée estimée</label>
-            <input type="text" id="genDuration" placeholder="~30 min" style="width:100%;padding:.4rem .55rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.8rem;box-sizing:border-box;">
+          <div>
+            <label style="font-size:.76rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">📂 Type de module</label>
+            <select id="genType" style="width:100%;padding:.42rem .55rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.79rem;background:#fff;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+              <option value="Méthodologique">🛠️ Méthodologique</option>
+              <option value="Technique">⚙️ Technique</option>
+              <option value="Management & Leadership">👥 Management</option>
+              <option value="Analyse & Diagnostic">🔍 Analyse</option>
+              <option value="Projet & Planification">📅 Projet</option>
+            </select>
           </div>
         </div>
-        <button class="btn btn-purple" onclick="generateCustomModule()" style="margin-top:.2rem;">✨ Générer avec l'IA</button>
+
+        <!-- Niveau + Durée -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.55rem;">
+          <div>
+            <label style="font-size:.76rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">🎯 Niveau cible</label>
+            <select id="genLevel" style="width:100%;padding:.42rem .55rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.79rem;background:#fff;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+              <option value="Licence (Bac+3)">🎓 Licence (Bac+3)</option>
+              <option value="Master (Bac+5)" selected>🎓 Master (Bac+5)</option>
+              <option value="Ingénieur">👷 Ingénieur</option>
+              <option value="Professionnel / Formation continue">💼 Pro / Formation</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.76rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">⏱️ Durée estimée</label>
+            <input type="text" id="genDuration" placeholder="~45 min" style="width:100%;padding:.42rem .55rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.79rem;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label style="font-size:.76rem;font-weight:700;color:#374151;display:flex;align-items:center;gap:.5rem;margin-bottom:.2rem;">📝 Objectifs pédagogiques <span style="color:#dc2626;">*</span><span style="font-size:.68rem;font-weight:500;color:#6b7280;background:#f3f4f6;border-radius:5px;padding:.1rem .4rem;margin-left:auto;">500 mots maximum</span></label>
+          <textarea id="genDesc" placeholder="Décrivez précisément ce que l'étudiant apprendra : compétences visées, outils maîtrisés, situations professionnelles traitées…" style="width:100%;min-height:80px;padding:.5rem .75rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.8rem;resize:vertical;box-sizing:border-box;line-height:1.5;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+
+        <!-- Prérequis -->
+        <div>
+          <label style="font-size:.76rem;font-weight:700;color:#374151;display:block;margin-bottom:.2rem;">📚 Prérequis <span style="font-size:.7rem;font-weight:400;color:#9ca3af;">(optionnel)</span></label>
+          <input type="text" id="genPrereq" placeholder="ex: Bases du Lean, notions de statistiques, lecture de plans techniques…" style="width:100%;padding:.42rem .75rem;border:1.5px solid #e2e8f0;border-radius:9px;font-size:.79rem;box-sizing:border-box;" onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#e2e8f0'">
+        </div>
+
+        <!-- Generate button -->
+        <button class="btn btn-purple" onclick="generateCustomModule()" style="margin-top:.3rem;font-size:.87rem;font-weight:800;padding:.65rem;border-radius:10px;">✨ Générer le module complet</button>
       </div>
+
       <div id="admGenMsg" style="margin-top:.5rem;font-size:.78rem;"></div>
       <div id="genPreview" style="margin-top:.8rem;"></div>
 
       <!-- Custom module list -->
-      <div style="margin-top:1.3rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
-        <div style="font-weight:700;font-size:.8rem;color:#374151;margin-bottom:.5rem;">Modules publiés</div>
+      <div style="margin-top:1.4rem;padding-top:1rem;border-top:2px solid #f1f5f9;">
+        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.6rem;">📦 Modules publiés</div>
         <div id="customModuleList"></div>
         <div id="customModuleEmpty" style="font-size:.75rem;color:#94a3b8;display:none;">Aucun module créé pour l'instant.</div>
       </div>
