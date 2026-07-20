@@ -6859,17 +6859,33 @@ async function showCustomExercise(i){
     const cas=m.cas;
     const casBlock=cas?`\nCAS INDUSTRIEL (fil conducteur de tous les exercices) :\n- Entreprise : ${cas.entreprise||''}\n- Contexte : ${cas.contexte||''}\n- Données : ${cas.donnees||''}\n- Problème : ${cas.probleme||''}\n- Objectif : ${cas.objectif||''}\n- Contraintes : ${cas.contraintes||''}`:'';
     const levelPrompts=[
-      `NIVEAU DÉBUTANT — l'étudiant analyse le cas industriel, identifie le problème principal et propose un premier diagnostic. Question ancrée dans les données du cas : demander d'identifier les causes potentielles, calculer un indicateur simple ou proposer une première action concrète. Niveau : futur ingénieur qui débute.`,
-      `NIVEAU INTERMÉDIAIRE — l'étudiant applique la méthodologie "${m.titre}" aux données chiffrées du cas industriel. Exercice d'application pratique : calculer des KPIs, prioriser des actions selon une méthode, rédiger un plan en 3-4 étapes structurées avec jalons. Les données chiffrées du cas DOIVENT être utilisées. Niveau : ingénieur en stage.`,
-      `NIVEAU AVANCÉ — exercice de niveau consultant/ingénieur senior. L'étudiant rédige un plan d'action complet : phases détaillées, responsables, KPIs de suivi, budget estimé, délai, ROI attendu et gestion des risques. S'appuyer sur TOUTES les contraintes du cas. Anticiper les obstacles et proposer des plans B. Niveau : ingénieur confirmé.`
+      `NIVEAU DÉBUTANT — Crée un exercice d'analyse et de diagnostic. L'étudiant doit : identifier les causes du problème à partir des données chiffrées du cas, calculer au moins un indicateur clé (taux, ratio, écart), et proposer un premier plan d'action en 3 étapes concrètes. Utilise OBLIGATOIREMENT les valeurs numériques du cas industriel dans l'énoncé. Style : futur ingénieur qui commence sa carrière.`,
+      `NIVEAU INTERMÉDIAIRE — Crée un exercice d'application méthodologique approfondie. L'étudiant doit : appliquer la démarche "${m.titre}" complète aux données du cas, effectuer des calculs de KPIs avec les vrais chiffres du cas, rédiger un plan d'action détaillé en 4-5 étapes avec jalons et responsables. Les données chiffrées du cas DOIVENT apparaître dans les calculs demandés. Style : ingénieur en poste avec 2 ans d'expérience.`,
+      `NIVEAU AVANCÉ — Crée un exercice de consultant/ingénieur senior. L'étudiant doit : élaborer un plan d'amélioration complet avec analyse ROI chiffrée, définir les phases de déploiement avec jalons précis, proposer un système de pilotage KPIs, gérer les risques et rédiger des plans de contingence. S'appuyer sur TOUTES les contraintes (budget, délai, effectif) du cas. Style : ingénieur confirmé / chef de projet amélioration continue.`
     ][done];
-    const sectionsText=(m.sections||[]).map(s=>s.titre+': '+(s.contenu||'').slice(0,180)).join('\n');
-    const prompt=`Tu es formateur expert en Génie Industriel. Génère un exercice de niveau ingénieur sur le module "${m.titre}".\n${levelPrompts}${casBlock}\nContenu pédagogique du module :\n${sectionsText}\n\nJSON strict uniquement (pas de texte autour) :\n{"question":"Énoncé précis avec contexte du cas industriel (utiliser les vraies données chiffrées)","context":"Données et contraintes à rappeler pour l'exercice (reprendre les chiffres du cas)","expectedAnswer":"Éléments de réponse attendus niveau ingénieur : méthode, calculs, justifications","tempsMinutes":X}\ntempsMinutes = entier (Débutant : 5-8 min, Intermédiaire : 8-15 min, Avancé : 15-25 min)\nJSON uniquement.`;
+    const sectionsText=(m.sections||[]).map(s=>`=== ${s.titre} ===\n${(s.contenu||'').slice(0,600)}`).join('\n\n');
+    const sysP=`Tu es formateur expert en Génie Industriel et Lean Manufacturing. Tu génères des exercices pédagogiques riches, précis et ancrés dans la réalité industrielle. Réponds UNIQUEMENT en JSON valide.`;
+    const userP=`Génère un exercice de cas industriel développé pour le module "${m.titre}", niveau ${lv.label}.
+
+${levelPrompts}
+
+${casBlock}
+
+CONTENU THÉORIQUE DU MODULE (pour ancrer l'exercice dans la théorie) :
+${sectionsText}
+
+Génère un exercice RICHE et DÉVELOPPÉ. Le JSON doit avoir exactement cette structure :
+{
+  "question": "Énoncé détaillé et précis (5-8 phrases minimum). Présente le contexte du cas, les données chiffrées à utiliser, et pose UNE question principale claire avec 2-3 sous-questions guidées. Utilise les vrais chiffres du cas industriel.",
+  "context": "Bloc de données de référence pour l'étudiant (tableau ou liste) : reprend les KPIs, contraintes, données mesurées du cas avec leurs valeurs numériques exactes. Minimum 5-6 données chiffrées.",
+  "expectedAnswer": "Corrigé complet niveau ingénieur (8-12 points) : méthodologie étape par étape, calculs détaillés avec formules, valeurs numériques attendues, justifications techniques, livrables attendus. Ce que doit savoir faire un ingénieur de ce niveau.",
+  "tempsMinutes": ${[6,12,20][done]}
+}`;
     try{
-      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:0.5})});
+      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:userP}],max_tokens:3000,temperature:0.6,response_format:{type:'json_object'}})});
       const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
-      const jm=text.match(/\{[\s\S]*\}/);
-      exData=jm?JSON.parse(jm[0]):{question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};
+      try{exData=JSON.parse(text);}
+      catch(_){const jm=text.match(/\{[\s\S]*\}/);exData=jm?JSON.parse(jm[0]):{question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
       // Cache
       const allMods=getCustomModules();if(!allMods[i].exercices)allMods[i].exercices={};allMods[i].exercices[done]=exData;saveCustomModules(allMods);
     }catch(e){exData={question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
