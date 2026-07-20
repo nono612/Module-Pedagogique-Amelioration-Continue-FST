@@ -6637,18 +6637,25 @@ async function generateCustomModule(){
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
   const prompt=`Tu es un expert en Génie Industriel et Lean Manufacturing. Crée un module pédagogique niveau INGÉNIEUR sur "${title}".\nObjectifs : ${desc}\nNiveau : ${level}\n\nRéponds UNIQUEMENT en JSON valide (sans texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte percutante (1 phrase)","duree":"${dur||'~30 min'}","sections":[{"titre":"Fondamentaux — ${title}","contenu":"Contenu très détaillé : définitions précises, principes fondamentaux, formules et équations, données chiffrées industrielles, exemples concrets illustrés, standards internationaux. MINIMUM 500 mots, structuré avec émojis et sous-titres."},{"titre":"Méthodologie et outils","contenu":"Démarche complète étape par étape, outils pratiques détaillés, indicateurs KPI avec valeurs cibles, méthodes de calcul, cas d'application approfondis. MINIMUM 500 mots."},{"titre":"Mise en œuvre industrielle","contenu":"Guide d'application terrain exhaustif, bonnes pratiques détaillées, erreurs fréquentes et comment les éviter, retours d'expérience réels, conseils d'expert. MINIMUM 500 mots."}],"cas":{"entreprise":"Nom fictif réaliste + secteur industriel précis","contexte":"Situation industrielle concrète et détaillée en 4-5 phrases avec données chiffrées précises","donnees":"KPIs mesurables avec valeurs numériques avant/après intervention","probleme":"Problème industriel précis avec impacts chiffrés sur qualité, coût, délai et sécurité","objectif":"Objectif SMART précis et mesurable à atteindre par l'ingénieur","contraintes":"Budget € précis, délai en semaines, effectif concerné, contraintes réglementaires"}}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:8000,temperature:0.7})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:16000,temperature:0.7})});
     const data=await resp.json();
     if(!resp.ok)throw new Error(data.error?.message||`Erreur API ${resp.status}`);
     const text=data.choices[0].message.content;
     const m=text.match(/\{[\s\S]*\}/);
     if(!m)throw new Error('JSON introuvable dans la réponse IA');
     let raw=m[0];
-    // Répare JSON tronqué : ferme les accolades/crochets manquants
     try{_genPreviewData=JSON.parse(raw);}
     catch(pe){
-      let depth=0;for(const c of raw){if(c==='{')depth++;if(c==='}')depth--;}
-      while(depth-->0)raw+='"}]}}';
+      // Réparation JSON tronqué : ferme chaînes, tableaux et objets ouverts
+      let inStr=false,esc=false,opens=[];
+      for(const c of raw){
+        if(esc){esc=false;continue;}
+        if(c==='\\'&&inStr){esc=true;continue;}
+        if(c==='"'){inStr=!inStr;continue;}
+        if(!inStr){if(c==='{'||c==='[')opens.push(c);else if(c==='}'||c===']')opens.pop();}
+      }
+      if(inStr)raw+='"';
+      for(let i=opens.length-1;i>=0;i--)raw+=opens[i]==='{'?'}':']';
       try{_genPreviewData=JSON.parse(raw);}catch(_){throw new Error('Réponse IA incomplète — réessayez');}
     }
     _renderGenPreview(_genPreviewData,dur,level);
