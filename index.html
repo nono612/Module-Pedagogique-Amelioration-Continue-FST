@@ -6635,14 +6635,22 @@ async function generateCustomModule(){
   if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
-  const prompt=`Tu es un expert en Génie Industriel et Lean Manufacturing. Crée un module pédagogique de niveau INGÉNIEUR sur "${title}".\nObjectifs pédagogiques : ${desc}\nNiveau : ${level}\n\nRéponds UNIQUEMENT en JSON valide (pas de texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte percutante (1 phrase)","duree":"${dur||'~30 min'}","sections":[{"titre":"Fondamentaux — ${title}","contenu":"Contenu riche et structuré : définitions, principes, formules, données chiffrées industrielles, exemples concrets (minimum 250 mots, structuré avec émojis)"},{"titre":"Méthodologie et outils","contenu":"Démarche pas-à-pas, outils pratiques, indicateurs KPI, cas d'application (minimum 200 mots)"},{"titre":"Mise en œuvre industrielle","contenu":"Application terrain, bonnes pratiques, erreurs à éviter, retours d'expérience (minimum 200 mots)"}],"cas":{"entreprise":"Nom fictif d'entreprise + secteur industriel précis (ex: Fonderie Moreau SA — Métallurgie)","contexte":"Situation industrielle réelle : 2-3 phrases avec données chiffrées concrètes","donnees":"KPIs mesurables avec valeurs chiffrées avant/après, métriques clés","probleme":"Problème industriel précis avec impacts chiffrés sur qualité, coût, délai ou sécurité","objectif":"Objectif SMART précis à atteindre par l'ingénieur","contraintes":"Contraintes réelles : budget €, délai en semaines, effectif, réglementaire"}}\n\n3 sections pédagogiques complètes + 1 cas industriel détaillé avec données chiffrées. JSON uniquement, pas de texte autour.`;
+  const prompt=`Expert Lean Manufacturing. Module pédagogique niveau ingénieur sur "${title}".\nObjectif : ${desc}\nNiveau : ${level}\n\nJSON UNIQUEMENT (compact, sans texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"1 phrase percutante","duree":"${dur||'~30 min'}","sections":[{"titre":"Fondamentaux","contenu":"Définitions, principes clés, exemples chiffrés (100 mots max)"},{"titre":"Méthodologie","contenu":"Démarche pas-à-pas, outils, KPIs (100 mots max)"},{"titre":"Application","contenu":"Mise en œuvre terrain, erreurs à éviter (100 mots max)"}],"cas":{"entreprise":"Entreprise fictive + secteur","contexte":"Situation industrielle concrète","donnees":"KPIs avant/après","probleme":"Problème à résoudre","objectif":"Objectif SMART","contraintes":"Budget, délai, effectif"}}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:3500})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1800,temperature:0.7})});
     const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error?.message||`Erreur API ${resp.status}`);
     const text=data.choices[0].message.content;
     const m=text.match(/\{[\s\S]*\}/);
     if(!m)throw new Error('JSON introuvable dans la réponse IA');
-    _genPreviewData=JSON.parse(m[0]);
+    let raw=m[0];
+    // Répare JSON tronqué : ferme les accolades/crochets manquants
+    try{_genPreviewData=JSON.parse(raw);}
+    catch(pe){
+      let depth=0;for(const c of raw){if(c==='{')depth++;if(c==='}')depth--;}
+      while(depth-->0)raw+='"}]}}';
+      try{_genPreviewData=JSON.parse(raw);}catch(_){throw new Error('Réponse IA incomplète — réessayez');}
+    }
     _renderGenPreview(_genPreviewData,dur,level);
   }catch(e){if(prev)prev.innerHTML=`<span style="color:#dc2626;font-size:.78rem;">❌ Erreur : ${_escH(e.message)}</span>`;}
 }
