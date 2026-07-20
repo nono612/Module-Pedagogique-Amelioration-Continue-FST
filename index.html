@@ -4564,9 +4564,9 @@ async function _onExTimeoutCustom(i){
   const feedEl=document.getElementById('customExFeedback'+i);
   if(feedEl)feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:10px;padding:.5rem .8rem;"><span>⏰</span><div><div style="font-weight:800;font-size:.8rem;color:#dc2626;">Temps écoulé !</div><div style="font-size:.75rem;color:#6b7280;">Génération d'un nouvel exercice…</div></div></div>`;
   await new Promise(r=>setTimeout(r,2000));
-  // Reset cached exercise for this level and regenerate
-  const mods=getCustomModules();const m=mods[i];
-  if(m&&m.exercices){const done=_getCustomLevDone(i);delete m.exercices[done];mods[i]=m;saveCustomModules(mods);}
+  // Reset cached exercise for this level and regenerate (per-student cache)
+  const done=_getCustomLevDone(i);
+  if(state.customExercises?.[i])delete state.customExercises[i][done];save();
   showCustomExercise(i);
 }
 
@@ -6984,50 +6984,68 @@ async function showCustomExercise(i){
   el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.5rem;">${lv.stars} Exercice niveau ${lv.label}</div><div class="ai-spinner" style="margin:.8rem auto;display:block;"></div></div>`;
   const key=getKey();
   if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer l\'exercice.</div>';return;}
-  // Use cached exercise or generate
-  const cached=m.exercices&&m.exercices[done];
+
+  // Cache per-student in state (not in global module — each student gets their own adapted exercise)
+  if(!state.customExercises)state.customExercises={};
+  if(!state.customExercises[i])state.customExercises[i]={};
+  const cached=state.customExercises[i][done];
   let exData=cached;
+
   if(!exData){
     const cas=m.cas;
-    const casBlock=cas?`\nCAS INDUSTRIEL (fil conducteur de tous les exercices) :\n- Entreprise : ${cas.entreprise||''}\n- Contexte : ${cas.contexte||''}\n- Données : ${cas.donnees||''}\n- Problème : ${cas.probleme||''}\n- Objectif : ${cas.objectif||''}\n- Contraintes : ${cas.contraintes||''}`:'';
+    const casBlock=cas?`\nCAS INDUSTRIEL :\n- Entreprise : ${cas.entreprise||''}\n- Contexte : ${cas.contexte||''}\n- Données & KPIs : ${cas.donnees||''}\n- Enjeux : ${cas.enjeux||''}\n- Problème : ${cas.probleme||''}\n- Objectif : ${cas.objectif||''}\n- Contraintes : ${cas.contraintes||''}`:'';
+
+    // CV domain adaptation — the key personalization
+    const dom=state.domain;
+    const domCtx=dom?`\n\n🎯 PROFIL DE L'ÉTUDIANT (ADAPTATION OBLIGATOIRE) :
+- Poste : ${dom.poste||'ingénieur'}
+- Entreprise : ${dom.entreprise||''}
+- Secteur : ${dom.secteur||'industrie'}
+- Contexte professionnel : ${dom.contexte||''}
+→ L'exercice DOIT être ancré dans CE secteur et CE contexte métier. Les exemples, les données et la mise en situation doivent correspondre à la réalité professionnelle de cet étudiant. Si son secteur diffère du cas industriel, transpose intelligemment la problématique.`:'';
+
     const levelPrompts=[
-      `NIVEAU DÉBUTANT — Crée un exercice d'analyse et de diagnostic. L'étudiant doit : identifier les causes du problème à partir des données chiffrées du cas, calculer au moins un indicateur clé (taux, ratio, écart), et proposer un premier plan d'action en 3 étapes concrètes. Utilise OBLIGATOIREMENT les valeurs numériques du cas industriel dans l'énoncé. Style : futur ingénieur qui commence sa carrière.`,
-      `NIVEAU INTERMÉDIAIRE — Crée un exercice d'application méthodologique approfondie. L'étudiant doit : appliquer la démarche "${m.titre}" complète aux données du cas, effectuer des calculs de KPIs avec les vrais chiffres du cas, rédiger un plan d'action détaillé en 4-5 étapes avec jalons et responsables. Les données chiffrées du cas DOIVENT apparaître dans les calculs demandés. Style : ingénieur en poste avec 2 ans d'expérience.`,
-      `NIVEAU AVANCÉ — Crée un exercice de consultant/ingénieur senior. L'étudiant doit : élaborer un plan d'amélioration complet avec analyse ROI chiffrée, définir les phases de déploiement avec jalons précis, proposer un système de pilotage KPIs, gérer les risques et rédiger des plans de contingence. S'appuyer sur TOUTES les contraintes (budget, délai, effectif) du cas. Style : ingénieur confirmé / chef de projet amélioration continue.`
+      `NIVEAU DÉBUTANT — Exercice d'analyse et de diagnostic. L'étudiant doit : identifier les causes du problème à partir des données chiffrées, calculer au moins un indicateur clé (taux, ratio, écart), proposer un plan d'action en 3 étapes concrètes. Utilise les valeurs numériques du cas dans l'énoncé. Style : futur ingénieur.`,
+      `NIVEAU INTERMÉDIAIRE — Application méthodologique complète. L'étudiant doit : appliquer la démarche "${m.titre}" aux données du cas, effectuer des calculs KPIs avec les vrais chiffres, rédiger un plan d'action 4-5 étapes avec jalons et responsables. Les données chiffrées du cas DOIVENT apparaître dans les calculs. Style : ingénieur en poste.`,
+      `NIVEAU AVANCÉ — Exercice consultant/ingénieur senior. L'étudiant doit : plan d'amélioration complet avec ROI chiffré, phases de déploiement avec jalons, système de pilotage KPIs, gestion des risques + plans de contingence. S'appuyer sur TOUTES les contraintes du cas. Style : ingénieur confirmé / chef de projet.`
     ][done];
-    const sectionsText=(m.sections||[]).map(s=>`=== ${s.titre} ===\n${(s.contenu||'').slice(0,600)}`).join('\n\n');
-    const sysP=`Tu es formateur expert en Génie Industriel et Lean Manufacturing. Tu génères des exercices pédagogiques riches, précis et ancrés dans la réalité industrielle. Réponds UNIQUEMENT en JSON valide.`;
-    const userP=`Génère un exercice de cas industriel développé pour le module "${m.titre}", niveau ${lv.label}.
+    const sectionsText=(m.sections||[]).map(s=>`=== ${s.titre} ===\n${(s.contenu||'').slice(0,500)}`).join('\n\n');
+    const sysP=`Tu es formateur expert en Génie Industriel et Lean Manufacturing. Tu génères des exercices pédagogiques riches et personnalisés selon le profil étudiant. Réponds UNIQUEMENT en JSON valide.`;
+    const userP=`Génère un exercice personnalisé pour le module "${m.titre}", niveau ${lv.label}.
 
 ${levelPrompts}
-
+${domCtx}
 ${casBlock}
 
-CONTENU THÉORIQUE DU MODULE (pour ancrer l'exercice dans la théorie) :
+CONTENU THÉORIQUE :
 ${sectionsText}
 
-Génère un exercice RICHE et DÉVELOPPÉ. Le JSON doit avoir exactement cette structure :
+JSON avec cette structure exacte :
 {
-  "question": "Énoncé détaillé et précis (5-8 phrases minimum). Présente le contexte du cas, les données chiffrées à utiliser, et pose UNE question principale claire avec 2-3 sous-questions guidées. Utilise les vrais chiffres du cas industriel.",
-  "context": "Bloc de données de référence pour l'étudiant (tableau ou liste) : reprend les KPIs, contraintes, données mesurées du cas avec leurs valeurs numériques exactes. Minimum 5-6 données chiffrées.",
-  "expectedAnswer": "Corrigé complet niveau ingénieur (8-12 points) : méthodologie étape par étape, calculs détaillés avec formules, valeurs numériques attendues, justifications techniques, livrables attendus. Ce que doit savoir faire un ingénieur de ce niveau.",
+  "question": "Énoncé détaillé (5-8 phrases). Contexte du cas${dom?` adapté au secteur ${dom.secteur}`:''}. Données chiffrées à utiliser. 1 question principale + 2-3 sous-questions guidées.",
+  "context": "Données de référence pour l'étudiant : KPIs, contraintes, mesures avec valeurs numériques exactes. Minimum 5-6 données chiffrées.",
+  "expectedAnswer": "Corrigé complet niveau ingénieur (8-12 points) : méthode étape par étape, calculs avec formules, valeurs attendues, justifications, livrables.",
   "tempsMinutes": ${[6,12,20][done]}
 }`;
     try{
       const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:userP}],max_tokens:3000,temperature:0.6,response_format:{type:'json_object'}})});
       const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
       try{exData=JSON.parse(text);}
-      catch(_){const jm=text.match(/\{[\s\S]*\}/);exData=jm?JSON.parse(jm[0]):{question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
-      // Cache
-      const allMods=getCustomModules();if(!allMods[i].exercices)allMods[i].exercices={};allMods[i].exercices[done]=exData;saveCustomModules(allMods);
-    }catch(e){exData={question:`En vous appuyant sur les données du cas industriel, appliquez la méthodologie "${m.titre}" pour résoudre le problème identifié. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
+      catch(_){const jm=text.match(/\{[\s\S]*\}/);exData=jm?JSON.parse(jm[0]):{question:`Appliquez la méthodologie "${m.titre}" sur le cas industriel. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
+      // Cache in student state (NOT in global module)
+      state.customExercises[i][done]=exData;save();
+    }catch(e){exData={question:`Appliquez la méthodologie "${m.titre}" sur le cas industriel. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
   }
+  const cvBadge=state.domain?`<span style="font-size:.67rem;font-weight:700;background:linear-gradient(135deg,#7c3aed22,#7c3aed11);color:#7c3aed;border:1px solid #c4b5fd;border-radius:20px;padding:.15rem .55rem;">🎯 Adapté à votre profil ${_escH(state.domain.secteur||'')}</span>`:'';
   el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};">
-    <div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.5rem;">${lv.stars} Exercice niveau ${lv.label}</div>
-    <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">${_escH(exData.question||'')}</div>
-    ${exData.context?`<div style="font-size:.78rem;color:#6b7280;margin-bottom:.7rem;padding:.5rem .7rem;background:#fff;border-radius:8px;border:1px solid #e2e8f0;">${_escH(exData.context)}</div>`:''}
-    <textarea id="customExAnswer${i}" placeholder="Rédigez votre réponse ici…" style="width:100%;min-height:88px;border:1.5px solid ${lv.border};border-radius:8px;padding:.5rem .7rem;font-size:.82rem;box-sizing:border-box;resize:vertical;outline:none;font-family:inherit;" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
-    <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;">
+      <span style="font-size:.7rem;font-weight:800;color:${lv.color};">${lv.stars} Exercice niveau ${lv.label}</span>
+      ${cvBadge}
+    </div>
+    <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.6rem;line-height:1.55;">${_escH(exData.question||'')}</div>
+    ${exData.context?`<div style="font-size:.78rem;color:#374151;margin-bottom:.7rem;padding:.6rem .8rem;background:#fff;border-radius:8px;border:1px solid #e2e8f0;line-height:1.6;"><strong style="font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;">📊 Données de référence</strong><br>${_escH(exData.context).replace(/\n/g,'<br>')}</div>`:''}
+    <textarea id="customExAnswer${i}" placeholder="Rédigez votre réponse ici — méthode, calculs, justifications…" style="width:100%;min-height:110px;border:1.5px solid ${lv.border};border-radius:8px;padding:.55rem .75rem;font-size:.83rem;box-sizing:border-box;resize:vertical;outline:none;font-family:inherit;line-height:1.55;" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-top:.55rem;flex-wrap:wrap;">
       <button class="btn btn-gold btn-sm" onclick="evalCustomAnswer(${i})">🤖 Feedback IA</button>
       <button class="btn btn-green btn-sm" onclick="completeCustomExLevel(${i})">✅ Valider ce niveau ${lv.stars}</button>
       <div id="exTimerCustom${i}" style="margin-left:auto;" title="Temps estimé par l'IA"></div>
@@ -7076,22 +7094,24 @@ async function evalCustomAnswer(i){
   if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   feedEl.innerHTML='<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:#6b7280;"><div class="ai-spinner"></div>Évaluation en cours…</div>';
   const exData=(m.exercices&&m.exercices[done])||{};
-  const casCtx=m.cas?`\nCas industriel : ${m.cas.entreprise||''} | Problème : ${m.cas.probleme||''} | Objectif : ${m.cas.objectif||''}`:'';
-  const prompt=`Tu es formateur expert en "${m.titre}" (${m.secteur||'industrie'}). Évalue strictement cette réponse d'étudiant niveau ${lv.label}.
+  const dom=state.domain;
+  const domCtx=dom?`\nProfil étudiant : ${dom.poste||'ingénieur'} — ${dom.secteur||''} (${dom.entreprise||''}).`:'';
+  const casCtx=m.cas?`\nCas industriel : ${m.cas.entreprise||''} | Problème : ${m.cas.probleme||''}`:'';
+  const prompt=`Tu es formateur expert en "${m.titre}" (${m.secteur||m.cas?.secteur||'industrie'}). Évalue cette réponse d'étudiant niveau ${lv.label}.${domCtx}
 
-RÈGLE ABSOLUE : Si la réponse est du charabia, des caractères aléatoires ou hors-sujet → réponds UNIQUEMENT : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
+RÈGLE ABSOLUE : Si la réponse est du charabia, hors-sujet ou ne répond pas → réponds UNIQUEMENT : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
 
 Question : "${exData.question||''}"${casCtx}
 Corrigé attendu : "${exData.expectedAnswer||''}"
 Réponse de l'étudiant : "${answer}"
 
-Évalue en 4 points (si réponse valide) :
-✅ Points forts — ce qui est juste et bien expliqué (sois précis sur les éléments corrects)
-❌ Points manquants ou incorrects — ce qui est absent ou faux (cite des éléments concrets)
-📊 Calculs / Chiffres — si des valeurs numériques étaient attendues, indique-les
-💡 Conseil expert — 1 recommandation professionnelle pour progresser
+Évalue en 4 points :
+✅ Points forts — ce qui est correct et bien justifié
+❌ Points manquants/incorrects — ce qui est absent ou faux (cite des éléments précis)
+📊 Calculs/Chiffres — valeurs numériques attendues si manquantes
+💡 Conseil métier — recommandation concrète adaptée au secteur ${dom?.secteur||'industriel'}
 
-Sois exigeant et précis. Niveau ingénieur attendu.`;
+Sois exigeant. Niveau ingénieur requis.`;
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:450,temperature:0.4})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
