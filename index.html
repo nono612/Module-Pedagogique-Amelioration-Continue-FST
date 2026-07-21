@@ -6706,10 +6706,12 @@ IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de 
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:8000,temperature:0.7,response_format:{type:'json_object'}})});
     const data=await resp.json();
     if(!resp.ok){
-      const errMsg=data.error?.message||`Erreur API ${resp.status}`;
-      if(errMsg.includes('Request too large')||errMsg.includes('TPM'))throw new Error('Texte trop long — raccourcissez la description et réessayez.');
-      if(errMsg.includes('rate limit')||errMsg.includes('too many'))throw new Error('Trop de requêtes — attendez 30 secondes et réessayez.');
-      throw new Error(errMsg);
+      const errMsg=data.error?.message||'';
+      if(errMsg.includes('Request too large')||errMsg.includes('TPM')||errMsg.includes('too large'))throw new Error('Description trop longue — le texte a été raccourci automatiquement, mais réessayez en réduisant un peu votre description.');
+      if(errMsg.includes('rate limit')||errMsg.includes('too many')||errMsg.includes('Rate limit'))throw new Error('Trop de requêtes — attendez 30 secondes et réessayez.');
+      if(errMsg.includes('invalid_api_key')||errMsg.includes('Incorrect API key'))throw new Error('Clé API invalide — vérifiez votre clé Groq dans les paramètres.');
+      if(errMsg.includes('model_not_found')||errMsg.includes('does not exist'))throw new Error('Modèle IA indisponible — réessayez dans quelques instants.');
+      throw new Error(`Erreur serveur (${resp.status}) — réessayez dans quelques instants.`);
     }
     const text=data.choices[0].message.content;
     try{_genPreviewData=JSON.parse(text);}
