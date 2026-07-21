@@ -6626,15 +6626,17 @@ let _genPreviewData=null;
 async function generateCustomModule(){
   const key=getKey();
   const title=(document.getElementById('genTitle')?.value||'').trim();
-  const desc=(document.getElementById('genDesc')?.value||'').trim();
+  const rawDesc=(document.getElementById('genDesc')?.value||'').trim();
+  // Tronquer à 400 mots pour rester sous la limite TPM de Groq
+  const desc=rawDesc.split(/\s+/).slice(0,400).join(' ')+(rawDesc.split(/\s+/).length>400?'…':'');
   const level=document.getElementById('genLevel')?.value||'Master (Bac+5)';
   const dur=(document.getElementById('genDuration')?.value||'~45 min').trim();
   const sector=document.getElementById('genSector')?.value||'Générique (multi-secteur)';
   const modType=document.getElementById('genType')?.value||'Méthodologique';
-  const prereq=(document.getElementById('genPrereq')?.value||'').trim();
+  const prereq=(document.getElementById('genPrereq')?.value||'').trim().split(/\s+/).slice(0,60).join(' ');
   const prev=document.getElementById('genPreview');
   const msg=document.getElementById('admGenMsg');
-  if(!title||!desc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et les objectifs pédagogiques.</span>';return;}
+  if(!title||!rawDesc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et les objectifs pédagogiques.</span>';return;}
   if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module complet en cours — théorie, quiz, cas industriel…</div></div>';
@@ -6701,9 +6703,14 @@ STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai conte
 
 IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de descriptions génériques.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:16000,temperature:0.7,response_format:{type:'json_object'}})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:8000,temperature:0.7,response_format:{type:'json_object'}})});
     const data=await resp.json();
-    if(!resp.ok)throw new Error(data.error?.message||`Erreur API ${resp.status}`);
+    if(!resp.ok){
+      const errMsg=data.error?.message||`Erreur API ${resp.status}`;
+      if(errMsg.includes('Request too large')||errMsg.includes('TPM'))throw new Error('Texte trop long — raccourcissez la description et réessayez.');
+      if(errMsg.includes('rate limit')||errMsg.includes('too many'))throw new Error('Trop de requêtes — attendez 30 secondes et réessayez.');
+      throw new Error(errMsg);
+    }
     const text=data.choices[0].message.content;
     try{_genPreviewData=JSON.parse(text);}
     catch(pe){
