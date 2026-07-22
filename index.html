@@ -6839,7 +6839,7 @@ function _renderGenPreview(d,dur,level){
   const secHtml=(d.sections||[]).map((s,idx)=>`
     <div class="gl-section" style="margin-bottom:.5rem;">
       <div class="gl-section-head"><span class="gl-section-num" style="font-size:.7rem;min-width:20px;height:20px;">${idx+1}</span><span class="gl-section-title" style="font-size:.76rem;">${_escH(s.titre.replace(/^[📘⚙️🏭💡]\s*/,''))}</span></div>
-      <div class="gl-section-body" style="font-size:.73rem;color:var(--gl-text-3);margin-top:.3rem;padding-left:1.4rem;">${_escH((s.contenu||'').slice(0,180))}${(s.contenu||'').length>180?'…':''}</div>
+      <div class="gl-section-body" style="font-size:.73rem;color:var(--gl-text-3);margin-top:.3rem;padding-left:1.4rem;">${_escH(_normContent(s.contenu).slice(0,180))}${_normContent(s.contenu).length>180?'…':''}</div>
     </div>`).join('');
   prev.innerHTML=`<div style="border:1px solid var(--gl-border);border-radius:var(--gl-r);overflow:hidden;margin-top:.75rem;box-shadow:var(--gl-shadow);">
     <div class="gl-hero" style="padding:1rem 1.25rem;">
@@ -6978,6 +6978,23 @@ function _customModClr(m){
   if(s.includes('btp')||s.includes('logistique')||s.includes('textile'))return['#f59e0b','#b45309'];
   return['#16a34a','#15803d'];
 }
+// Normalize any module text field to string (LLM may return array or object)
+function _normContent(val){
+  if(!val)return'';
+  if(typeof val==='string')return val;
+  if(Array.isArray(val)){
+    return val.map(item=>{
+      if(typeof item==='string')return item;
+      if(typeof item==='object'&&item!==null){
+        const parts=Object.entries(item).map(([k,v])=>`${k}: ${v}`);
+        return parts.join(' | ');
+      }
+      return String(item);
+    }).join('\n');
+  }
+  return String(val);
+}
+
 // Normalize donnees to string (LLM may return array or object)
 function _normDonnees(donnees){
   if(!donnees)return'';
@@ -7144,14 +7161,14 @@ function goCustomModule(i){
         const sc=sColors[idx%4];
         const sid=`cm${i}_s${idx}`;
         // Detect step-based content
-        const steps=_parseSteps(s.contenu||'');
+        const steps=_parseSteps(_normContent(s.contenu));
         // Preview: step grid or italic excerpt
         const previewHtml=steps
           ? _renderStepGrid(steps.slice(0,4),mc,mcd)
-          : `<p style="font-size:.78rem;color:#6b7280;margin:0;line-height:1.6;font-style:italic;">${_escH((s.contenu||'').slice(0,200))}${(s.contenu||'').length>200?'…':''}</p>`;
+          : `<p style="font-size:.78rem;color:#6b7280;margin:0;line-height:1.6;font-style:italic;">${_escH(_normContent(s.contenu).slice(0,200))}${_normContent(s.contenu).length>200?'…':''}</p>`;
         // Full body: step grid (all) + remaining prose
         const fullStepsHtml=steps?_renderStepGrid(steps,mc,mcd):'';
-        const prose=(s.contenu||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+        const prose=_normContent(s.contenu).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
         const fullHtml=steps?`${fullStepsHtml}<details style="margin-top:.6rem;"><summary style="font-size:.72rem;color:#6b7280;cursor:pointer;">▶ Lire le contenu détaillé</summary><div style="font-size:.8rem;color:#374151;line-height:1.78;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #f1f5f9;">${prose}</div></details>`:prose;
         return`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
           <div style="background:${sc};padding:.5rem .9rem;display:flex;align-items:center;gap:.55rem;cursor:pointer;" onclick="toggleCustomSection('${sid}')">

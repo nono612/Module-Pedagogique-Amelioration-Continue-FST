@@ -6112,16 +6112,16 @@ function goCustomModule(i){
   // Quiz HTML
   const qHtml=m.quiz&&m.quiz.length?(`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding:.5rem .8rem;background:#f8fafc;border-radius:12px;border:1.5px solid #e2e8f0;"><div style="font-size:.8rem;font-weight:700;color:#374151;">📝 Quiz — ${m.quiz.length} questions</div><div id="customQuizTimer${i}"><span style="font-size:.72rem;color:#9ca3af;">⏱️ Démarrage…</span></div></div><div class="q-wrap">${m.quiz.map((q,qi)=>`<div class="q-block"><div class="q-num">Question ${qi+1} / ${m.quiz.length}</div><div class="q-text">${_escH(q.q)}</div>${q.opts.map((o,oi)=>`<div class="q-opt" id="cmq-${qi}-${oi}" onclick="pickCustomQ(${qi},${oi})">${_escH(o)}</div>`).join('')}</div>`).join('')}</div><div class="btn-row" style="margin-top:.8rem;"><button class="btn btn-purple" onclick="submitCustomQuiz()">📊 Valider le quiz</button></div><div id="customQuizScore"></div>`):'<div style="font-size:.8rem;color:#6b7280;">Aucune question de quiz pour ce module.</div>';
   sec.innerHTML=`
-    <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);">
+    <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;">
       <div style="font-size:2.5rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
-      <h1 style="font-size:1.6rem;margin-bottom:.4rem;">${_escH(m.titre)}</h1>
-      <p style="opacity:.85;">${_escH(m.desc||'')}</p>
-      <div style="font-size:.78rem;opacity:.7;margin-top:.3rem;">⏱️ ${m.duree||'~20 min'}</div>
+      <h1 style="font-size:1.6rem;margin-bottom:.4rem;color:#fff;">${_escH(m.titre)}</h1>
+      <p style="opacity:.85;color:#fff;">${_escH(m.desc||'')}</p>
+      <div style="font-size:.78rem;opacity:.7;margin-top:.3rem;color:#fff;">⏱️ ${m.duree||'~20 min'}</div>
     </div>
 
     <div class="ccard">
       <div class="ccard-title">📖 Contenu du module</div>
-      ${(m.sections||[]).map(s=>`<div style="margin-bottom:1.2rem;"><h3 style="color:#4c1d95;margin-bottom:.5rem;font-size:.92rem;">📌 ${_escH(s.titre)}</h3><div style="line-height:1.75;color:#374151;font-size:.85rem;">${(s.contenu||'').replace(/\n/g,'<br>')}</div></div>`).join('<hr style="border:none;border-top:1px solid #ede9fe;margin:1.1rem 0;">')}
+      ${(m.sections||[]).map(s=>{const ct=Array.isArray(s.contenu)?s.contenu.map(x=>typeof x==='object'?Object.values(x).join(' : '):String(x)).join('\n'):String(s.contenu||'');return`<div style="margin-bottom:1.2rem;"><h3 style="color:#4c1d95;margin-bottom:.5rem;font-size:.92rem;">📌 ${_escH(s.titre)}</h3><div style="line-height:1.75;color:#374151;font-size:.85rem;">${ct.replace(/\n/g,'<br>')}</div></div>`;}).join('<hr style="border:none;border-top:1px solid #ede9fe;margin:1.1rem 0;">')}
     </div>
 
     <div class="ccard">
