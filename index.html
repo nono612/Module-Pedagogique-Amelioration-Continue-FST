@@ -2843,7 +2843,7 @@ function generatePDCAProblem(){
     return;
   }
   const _pdcaSeed=Math.floor(Math.random()*99999);
-  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\n[Variation #${_pdcaSeed} — entreprise fictive ORIGINALE, problème DIFFÉRENT des précédents.]\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
+  const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\n[Variation #${_pdcaSeed} — entreprise fictive ORIGINALE, problème DIFFÉRENT des précédents.]\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`+_buildDocsPromptSection(1);
   fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:1.0})})
   .then(r=>r.json()).then(data=>{
     const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
@@ -4712,6 +4712,7 @@ async function generateModuleExercise(modId){
   }
   const _seed=Math.floor(Math.random()*99999);
   prompt+=`\n[Variation #${_seed} — génère un scénario ORIGINAL, entreprise et secteur différents des exercices précédents.]`;
+  prompt+=_buildDocsPromptSection(modId);
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
@@ -5027,7 +5028,7 @@ async function generateAmdecExercise(){
     'AVANCÉ — Secteur exigeant (aéronautique, pharmaceutique). Défaillances ambiguës, effets en cascade, enjeux sécurité critiques.'
   ][lv.idx];
   const _amdecSeed=Math.floor(Math.random()*99999);
-  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction. [Variation #${_amdecSeed} — scénario ORIGINAL, entreprise et secteur différents des précédents.]`;
+  const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction. [Variation #${_amdecSeed} — scénario ORIGINAL, entreprise et secteur différents des précédents.]`+_buildDocsPromptSection(9);
   try{
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:1.0})});
     const data=await res.json();
@@ -5330,7 +5331,7 @@ document.addEventListener('keydown',function(e){
 });
 
 function admTab(name){
-  ['roster','import','access','gen'].forEach(t=>{
+  ['roster','import','access','gen','docs'].forEach(t=>{
     const tab=document.getElementById('adm-tab-'+t);
     const panel=document.getElementById('adm-panel-'+t);
     if(tab)tab.classList.toggle('active',t===name);
@@ -5339,6 +5340,7 @@ function admTab(name){
   if(name==='roster'){renderRoster();sbRefreshRoster();}
   if(name==='access')renderAdminAccess();
   if(name==='gen')renderCustomModuleList();
+  if(name==='docs')renderDocsList();
 }
 
 function getRoster(){return JSON.parse(localStorage.getItem('greenlab_admin_roster')||'[]');}
@@ -5913,7 +5915,7 @@ ${lvDesc}${domCtx}
 Réponds UNIQUEMENT avec un JSON valide (aucun texte avant ou après) :
 {"entreprise":"Nom","secteur":"secteur","contexte":"description courte 2 phrases","items":[{"id":"a","emoji":"🔨","name":"Nom court","context":"Situation (1-2 phrases)","correct":"seiri","zone":"usinage"},{"id":"b",...},...]}
 
-Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri, seiton, seiso, seiketsu, shitsuke. Minimum 3 items par catégorie. Les zones doivent être parmi : usinage, stockage, controle, allee, bureau, vestiaire.`;
+Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri, seiton, seiso, seiketsu, shitsuke. Minimum 3 items par catégorie. Les zones doivent être parmi : usinage, stockage, controle, allee, bureau, vestiaire.`+_buildDocsPromptSection(2);
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:1.0})});
     if(!resp.ok)throw new Error((await resp.json()).error?.message||resp.statusText);
@@ -7840,6 +7842,79 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+/* ══════════════════════════════════════════
+   DOCUMENTS DE COURS — Import professeur
+══════════════════════════════════════════ */
+function getCourseDocs(){return JSON.parse(localStorage.getItem('greenlab_course_docs')||'[]');}
+function saveCourseDocs(d){localStorage.setItem('greenlab_course_docs',JSON.stringify(d));}
+
+function _buildDocsPromptSection(modId){
+  const docs=getCourseDocs().filter(d=>d.module==='all'||d.module===modId);
+  if(!docs.length)return '';
+  const content=docs.map(d=>`[Document: ${d.name}]\n${d.content.slice(0,2500)}`).join('\n\n---\n\n');
+  return `\n\nDOCUMENTS DE COURS FOURNIS PAR LE PROFESSEUR — utilise ces contenus pour que l'exercice généré soit cohérent avec ce qui a été enseigné en cours (terminologie, exemples, niveau de difficulté) :\n${content}\n`;
+}
+
+function handleDocFile(input){
+  const file=input.files[0];if(!file)return;
+  if(file.size>150000){document.getElementById('admDocMsg').innerHTML='<span style="color:#dc2626;">⚠️ Fichier trop volumineux (max 150 Ko). Résumez le document.</span>';input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    document.getElementById('docContent').value=e.target.result;
+    document.getElementById('docCharCount').textContent=e.target.result.length+' / 15 000 car.';
+    if(!document.getElementById('docName').value)document.getElementById('docName').value=file.name.replace(/\.[^.]+$/,'');
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function addCourseDoc(){
+  const name=(document.getElementById('docName').value||'').trim();
+  const module=document.getElementById('docModule').value;
+  const content=(document.getElementById('docContent').value||'').trim();
+  const msg=document.getElementById('admDocMsg');
+  if(!name){msg.innerHTML='<span style="color:#dc2626;">⚠️ Donnez un nom au document.</span>';return;}
+  if(!content){msg.innerHTML='<span style="color:#dc2626;">⚠️ Le contenu est vide.</span>';return;}
+  if(content.length>15000){msg.innerHTML='<span style="color:#dc2626;">⚠️ Trop long (max 15 000 caractères). Raccourcissez le document.</span>';return;}
+  const docs=getCourseDocs();
+  docs.push({id:Date.now(),name,module:module==='all'?'all':parseInt(module),content,date:new Date().toLocaleDateString('fr-FR'),size:content.length});
+  saveCourseDocs(docs);
+  document.getElementById('docName').value='';
+  document.getElementById('docContent').value='';
+  document.getElementById('docCharCount').textContent='0 / 15 000 car.';
+  document.getElementById('docFileInput').value='';
+  msg.innerHTML='<span style="color:#059669;">✅ Document enregistré — il sera utilisé lors des prochaines générations d\'exercices.</span>';
+  setTimeout(()=>{msg.innerHTML='';},3000);
+  renderDocsList();
+}
+
+function deleteCourseDoc(id){
+  if(!confirm('Supprimer ce document ?'))return;
+  saveCourseDocs(getCourseDocs().filter(d=>d.id!==id));
+  renderDocsList();
+}
+
+function renderDocsList(){
+  const docs=getCourseDocs();
+  const el=document.getElementById('admDocsList');
+  const tot=document.getElementById('admDocsTotal');
+  if(!el)return;
+  const modNames={all:'Tous les modules',1:'M1 PDCA',2:'M2 5S',3:'M3 Ishikawa',4:'M4 Pareto',5:'M5 Kanban',6:'M6 VSM',7:'M7 SPC',8:'M8 SMED',9:'M9 AMDEC',10:'M10 Projet',11:'M11 Quiz'};
+  if(tot)tot.textContent=docs.length?docs.length+' document(s) · '+Math.round(docs.reduce((s,d)=>s+d.size,0)/100)/10+' k car. total':'';
+  if(!docs.length){el.innerHTML='<div style="font-size:.75rem;color:#94a3b8;text-align:center;padding:1.5rem;border:2px dashed #e2e8f0;border-radius:10px;">Aucun document importé. Ajoutez vos cours ci-dessus.</div>';return;}
+  el.innerHTML=docs.map(d=>`<div style="display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border:1px solid #e2e8f0;border-radius:9px;margin-bottom:.4rem;background:#fff;">
+    <div style="background:#d1fae5;border-radius:7px;padding:.4rem .55rem;font-size:1rem;flex-shrink:0;">📄</div>
+    <div style="flex:1;min-width:0;">
+      <div style="font-size:.8rem;font-weight:700;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_escH(d.name)}</div>
+      <div style="font-size:.68rem;color:#94a3b8;margin-top:.1rem;display:flex;gap:.7rem;flex-wrap:wrap;">
+        <span style="background:#f0fdf4;color:#059669;border-radius:4px;padding:.05rem .35rem;font-weight:700;">${modNames[d.module]||'Module '+d.module}</span>
+        <span>${Math.round(d.size/100)/10} k car.</span>
+        <span>${d.date}</span>
+      </div>
+    </div>
+    <button onclick="deleteCourseDoc(${d.id})" title="Supprimer" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:6px;padding:.28rem .6rem;font-size:.75rem;cursor:pointer;flex-shrink:0;">🗑️</button>
+  </div>`).join('');
+}
+
 </script>
 
 <!-- ═══════════ CV WELCOME MODAL ═══════════ -->
@@ -7903,6 +7978,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       <button class="adm-tab" id="adm-tab-import" onclick="admTab('import')">📥 Importer</button>
       <button class="adm-tab" id="adm-tab-access" onclick="admTab('access')">⚙️ Config</button>
       <button class="adm-tab" id="adm-tab-gen" onclick="admTab('gen')">🧩 Générateur</button>
+      <button class="adm-tab" id="adm-tab-docs" onclick="admTab('docs')">📚 Documents</button>
     </div>
     <!-- PANEL: ROSTER -->
     <div id="adm-panel-roster" class="adm-panel">
@@ -8064,6 +8140,61 @@ document.addEventListener('DOMContentLoaded',()=>{
         <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.6rem;">📦 Modules publiés</div>
         <div id="customModuleList"></div>
         <div id="customModuleEmpty" style="font-size:.75rem;color:#94a3b8;display:none;">Aucun module créé pour l'instant.</div>
+      </div>
+    </div>
+
+    <!-- PANEL: DOCUMENTS -->
+    <div id="adm-panel-docs" class="adm-panel" style="display:none;">
+      <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:12px;padding:.9rem 1rem;margin-bottom:1.2rem;border:1.5px solid #6ee7b7;">
+        <div style="font-weight:900;font-size:.9rem;color:#065f46;margin-bottom:.3rem;">📚 Documents de cours professeur</div>
+        <div style="font-size:.78rem;color:#047857;line-height:1.6;">Importez vos cours, exercices ou fiches de révision. L'IA les utilisera automatiquement pour générer des exercices cohérents avec votre enseignement. Formats supportés : <b>.txt</b> ou copier-coller direct.</div>
+      </div>
+
+      <!-- Formulaire ajout -->
+      <div style="display:grid;gap:.75rem;background:#f8fafc;border-radius:12px;padding:1rem;border:1.5px solid #e2e8f0;margin-bottom:1.2rem;">
+        <div style="font-weight:800;font-size:.8rem;color:#374151;">➕ Ajouter un document</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+          <div>
+            <label style="font-size:.72rem;font-weight:700;color:#6b7280;display:block;margin-bottom:.2rem;">Nom du document</label>
+            <input type="text" id="docName" placeholder="ex: Cours AMDEC S3, TP Ishikawa…" style="width:100%;padding:.42rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.79rem;box-sizing:border-box;" onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#e2e8f0'">
+          </div>
+          <div>
+            <label style="font-size:.72rem;font-weight:700;color:#6b7280;display:block;margin-bottom:.2rem;">Module concerné</label>
+            <select id="docModule" style="width:100%;padding:.42rem .7rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.79rem;box-sizing:border-box;background:#fff;">
+              <option value="all">🌐 Tous les modules</option>
+              <option value="1">M1 — PDCA</option>
+              <option value="2">M2 — 5S</option>
+              <option value="3">M3 — Ishikawa</option>
+              <option value="4">M4 — Pareto</option>
+              <option value="5">M5 — Kanban</option>
+              <option value="6">M6 — VSM</option>
+              <option value="7">M7 — SPC</option>
+              <option value="8">M8 — SMED</option>
+              <option value="9">M9 — AMDEC</option>
+              <option value="10">M10 — Projet Intégré</option>
+              <option value="11">M11 — Quiz Final</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:.72rem;font-weight:700;color:#6b7280;display:block;margin-bottom:.2rem;">📁 Importer un fichier .txt <span style="font-weight:400;color:#9ca3af;">(ou coller le contenu ci-dessous)</span></label>
+          <input type="file" id="docFileInput" accept=".txt,.md" onchange="handleDocFile(this)" style="font-size:.75rem;color:#374151;width:100%;">
+        </div>
+        <div>
+          <label style="font-size:.72rem;font-weight:700;color:#6b7280;display:block;margin-bottom:.2rem;">✏️ Contenu du document <span style="color:#dc2626;">*</span> <span id="docCharCount" style="font-weight:400;color:#9ca3af;float:right;">0 / 15 000 car.</span></label>
+          <textarea id="docContent" rows="6" placeholder="Collez ici le contenu de votre cours, exercices types, formules, exemples industriels…" oninput="document.getElementById('docCharCount').textContent=this.value.length+' / 15 000 car.'" style="width:100%;padding:.5rem .75rem;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.78rem;resize:vertical;box-sizing:border-box;line-height:1.5;" onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+        </div>
+        <button class="btn btn-sm" onclick="addCourseDoc()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-weight:800;font-size:.8rem;cursor:pointer;align-self:flex-start;">📥 Enregistrer ce document</button>
+        <div id="admDocMsg" style="font-size:.75rem;"></div>
+      </div>
+
+      <!-- Liste des documents -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;">
+          <div style="font-weight:800;font-size:.82rem;color:#374151;">📄 Documents enregistrés</div>
+          <div id="admDocsTotal" style="font-size:.7rem;color:#94a3b8;"></div>
+        </div>
+        <div id="admDocsList"></div>
       </div>
     </div>
   </div>
