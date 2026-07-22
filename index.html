@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Outils Pédagogiques d'Amélioration Continue – FST Tanger</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -302,8 +302,8 @@ main{max-width:1100px;margin:0 auto;padding:2rem 1.2rem;}
   box-shadow:0 4px 18px rgba(0,0,0,.22);
   backdrop-filter:blur(6px);
 }
-.mod-header-text h2{font-size:1.3rem;font-weight:800;margin-bottom:.3rem;}
-.mod-header-text p{font-size:.83rem;color:rgba(255,255,255,.65);}
+.mod-header-text h2{font-size:1.3rem;font-weight:800;margin-bottom:.3rem;color:#fff;}
+.mod-header-text p{font-size:.83rem;color:rgba(255,255,255,.75);}
 .mod-header-steps{
   background:#fff;padding:.8rem 2rem;
   display:flex;align-items:center;gap:1rem;
@@ -753,6 +753,105 @@ textarea{resize:vertical;min-height:80px;}
 /* Scroll reveal */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s cubic-bezier(.34,1.2,.64,1);}
 .reveal.visible{opacity:1;transform:none;}
+
+/* ══════════════════════════════════════════
+   GREEN LAB — DESIGN SYSTEM MODULES CUSTOM
+══════════════════════════════════════════ */
+:root{
+  --gl-bg:#F6F6F4;--gl-surface:#FFFFFF;
+  --gl-border:#E5E5E3;--gl-border-md:#C9C9C6;
+  --gl-text-1:#1A1A18;--gl-text-2:#525250;--gl-text-3:#A3A39F;
+  --gl-accent:#16A34A;--gl-accent-dim:#F0FDF4;--gl-accent-border:#BBF7D0;
+  --gl-amber:#92400E;--gl-amber-dim:#FFFBEB;--gl-amber-border:#FCD34D;
+  --gl-red:#991B1B;--gl-red-dim:#FFF1F2;--gl-red-border:#FECACA;
+  --gl-blue:#1E40AF;--gl-blue-dim:#EFF6FF;--gl-blue-border:#BFDBFE;
+  --gl-r:10px;--gl-r-sm:7px;
+  --gl-shadow:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.03);
+}
+#m-custom{background:var(--gl-bg);font-family:'Inter',sans-serif;}
+.gl-hero{background:#1A1A18;padding:2.5rem 1.75rem 2rem;position:relative;overflow:hidden;}
+.gl-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 60%,rgba(22,163,74,.18) 0%,transparent 55%),radial-gradient(ellipse at 85% 15%,rgba(22,163,74,.09) 0%,transparent 50%);pointer-events:none;}
+.gl-hero-inner{position:relative;z-index:1;max-width:780px;}
+.gl-hero-eyebrow{display:inline-flex;align-items:center;gap:5px;font-size:.67rem;font-weight:600;letter-spacing:.07em;color:#16A34A;text-transform:uppercase;background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.22);border-radius:20px;padding:.18rem .6rem;margin-bottom:.85rem;}
+.gl-hero-title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:1.75rem;font-weight:700;color:#FFFFFF;letter-spacing:-.025em;line-height:1.2;margin-bottom:.5rem;}
+.gl-hero-desc{font-size:.86rem;color:#8A8A87;line-height:1.65;max-width:560px;margin-bottom:1.1rem;font-style:italic;}
+.gl-hero-meta{display:flex;gap:.45rem;flex-wrap:wrap;}
+.gl-hero-tag{font-size:.69rem;font-weight:500;color:#737370;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:.2rem .65rem;}
+.gl-wrap{padding:.1rem 0;}
+.gl-card{background:var(--gl-surface);border:1px solid var(--gl-border);border-radius:var(--gl-r);padding:1.4rem 1.5rem;box-shadow:var(--gl-shadow);margin-bottom:.85rem;}
+.gl-card-title{font-family:'Plus Jakarta Sans','Inter',sans-serif;font-size:.78rem;font-weight:700;color:var(--gl-text-1);letter-spacing:-.01em;margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;text-transform:uppercase;letter-spacing:.05em;}
+.gl-card-title svg{flex-shrink:0;color:var(--gl-text-3);}
+.gl-divider{width:100%;height:1px;background:var(--gl-border);margin:1rem 0;}
+.gl-objectives{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.45rem;}
+.gl-obj{display:flex;align-items:flex-start;gap:.55rem;padding:.65rem .8rem;border:1px solid var(--gl-accent-border);background:var(--gl-accent-dim);border-radius:var(--gl-r-sm);}
+.gl-obj svg{color:var(--gl-accent);flex-shrink:0;margin-top:1px;}
+.gl-obj-text{font-size:.78rem;color:var(--gl-text-1);line-height:1.45;font-weight:500;}
+.gl-formulas{display:flex;gap:.6rem;flex-wrap:wrap;}
+.gl-formula{flex:1;min-width:150px;background:var(--gl-surface);border:1px solid var(--gl-border-md);border-radius:var(--gl-r-sm);padding:.65rem .85rem;border-left:3px solid var(--gl-text-1);}
+.gl-formula-name{font-size:.63rem;font-weight:600;color:var(--gl-text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;}
+.gl-formula-val{font-family:'JetBrains Mono','Courier New',monospace;font-size:.8rem;color:var(--gl-text-1);font-weight:500;}
+.gl-section{border:1px solid var(--gl-border);border-radius:var(--gl-r);overflow:hidden;margin-bottom:.6rem;background:var(--gl-surface);box-shadow:var(--gl-shadow);}
+.gl-section-head{padding:.7rem 1.1rem;border-bottom:1px solid var(--gl-border);display:flex;align-items:center;gap:.55rem;background:#FAFAF9;}
+.gl-section-num{width:22px;height:22px;border-radius:50%;background:var(--gl-text-1);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Plus Jakarta Sans','Inter',sans-serif;}
+.gl-section-title{font-size:.81rem;font-weight:650;color:var(--gl-text-1);font-family:'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:-.01em;}
+.gl-section-body{padding:1.1rem 1.2rem;font-size:.84rem;color:var(--gl-text-2);line-height:1.78;}
+.gl-qcm-item{border:1px solid var(--gl-border);border-radius:var(--gl-r-sm);padding:.85rem 1rem;margin-bottom:.55rem;background:var(--gl-surface);}
+.gl-qcm-q{font-size:.82rem;font-weight:600;color:var(--gl-text-1);margin-bottom:.6rem;line-height:1.45;}
+.gl-qcm-q-num{font-size:.68rem;font-weight:700;color:var(--gl-text-3);display:block;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.05em;}
+.gl-qcm-opt{display:flex;align-items:flex-start;gap:.5rem;padding:.4rem .55rem;border-radius:6px;border:1.5px solid transparent;cursor:pointer;margin-bottom:.2rem;transition:border-color .15s,background .15s;font-size:.79rem;color:var(--gl-text-2);line-height:1.4;}
+.gl-qcm-opt:hover{background:#F6F6F4;border-color:var(--gl-border-md);}
+.gl-qcm-opt input{accent-color:var(--gl-text-1);flex-shrink:0;margin-top:2px;}
+.gl-case{border:1px solid var(--gl-border);border-radius:var(--gl-r);background:var(--gl-surface);box-shadow:var(--gl-shadow);margin-bottom:.85rem;overflow:hidden;}
+.gl-case-head{padding:.9rem 1.2rem;border-bottom:1px solid var(--gl-border);background:#FAFAF9;display:flex;align-items:center;gap:.65rem;}
+.gl-case-co{font-size:.88rem;font-weight:700;color:var(--gl-text-1);font-family:'Plus Jakarta Sans','Inter',sans-serif;letter-spacing:-.01em;}
+.gl-case-sector{font-size:.7rem;color:var(--gl-text-3);font-weight:500;margin-left:auto;}
+.gl-case-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));}
+.gl-case-block{padding:.95rem 1.1rem;border-right:1px solid var(--gl-border);border-bottom:1px solid var(--gl-border);}
+.gl-case-block:last-child{border-right:none;}
+.gl-case-lbl{display:flex;align-items:center;gap:.35rem;font-size:.63rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gl-text-3);margin-bottom:.4rem;}
+.gl-case-lbl svg{flex-shrink:0;}
+.gl-case-txt{font-size:.79rem;color:var(--gl-text-2);line-height:1.58;}
+.gl-tip{background:var(--gl-accent-dim);border:1px solid var(--gl-accent-border);border-radius:var(--gl-r-sm);padding:.6rem .9rem;font-size:.76rem;color:var(--gl-accent);font-weight:500;margin-top:.1rem;display:flex;align-items:flex-start;gap:.45rem;}
+.gl-ex{border:1px solid var(--gl-border);border-radius:var(--gl-r);background:var(--gl-surface);overflow:hidden;box-shadow:var(--gl-shadow);}
+.gl-ex-head{padding:.6rem 1rem;border-bottom:1px solid var(--gl-border);background:#FAFAF9;display:flex;align-items:center;gap:.5rem;}
+.gl-ex-lvl{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.gl-ex-cv{margin-left:auto;font-size:.66rem;font-weight:600;color:var(--gl-accent);background:var(--gl-accent-dim);border:1px solid var(--gl-accent-border);border-radius:20px;padding:.15rem .5rem;}
+.gl-ex-body{padding:1.1rem 1.2rem;}
+.gl-ex-q{font-size:.85rem;font-weight:600;color:var(--gl-text-1);line-height:1.62;margin-bottom:.9rem;}
+.gl-ex-ctx{background:#FAFAF9;border:1px solid var(--gl-border);border-radius:var(--gl-r-sm);padding:.7rem .9rem;margin-bottom:.9rem;}
+.gl-ex-ctx-lbl{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--gl-text-3);margin-bottom:.35rem;display:flex;align-items:center;gap:.35rem;}
+.gl-ex-ctx-txt{font-size:.79rem;color:var(--gl-text-2);line-height:1.65;}
+.gl-ex-ta{width:100%;min-height:110px;border:1.5px solid var(--gl-border-md);border-radius:var(--gl-r-sm);padding:.7rem .9rem;font-size:.83rem;font-family:'Inter',sans-serif;color:var(--gl-text-1);line-height:1.6;box-sizing:border-box;resize:vertical;outline:none;background:var(--gl-surface);transition:border-color .2s;}
+.gl-ex-ta:focus{border-color:var(--gl-text-1);}
+.gl-ex-actions{display:flex;align-items:center;gap:.45rem;margin-top:.7rem;flex-wrap:wrap;}
+.gl-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .85rem;border-radius:var(--gl-r-sm);font-size:.77rem;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .18s;font-family:'Inter',sans-serif;line-height:1;}
+.gl-btn-dark{background:var(--gl-text-1);color:#fff;border-color:var(--gl-text-1);}
+.gl-btn-dark:hover{background:#2D2D2B;}
+.gl-btn-outline{background:transparent;color:var(--gl-text-2);border-color:var(--gl-border-md);}
+.gl-btn-outline:hover{border-color:var(--gl-text-2);color:var(--gl-text-1);background:#F6F6F4;}
+.gl-btn-green{background:var(--gl-accent-dim);color:var(--gl-accent);border-color:var(--gl-accent-border);}
+.gl-btn-green:hover{background:var(--gl-accent);color:#fff;}
+.gl-stepper{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem;}
+.gl-step{display:inline-flex;align-items:center;gap:.35rem;padding:.28rem .65rem;border-radius:20px;font-size:.7rem;font-weight:600;border:1.5px solid var(--gl-border-md);color:var(--gl-text-3);background:var(--gl-surface);transition:all .2s;}
+.gl-step-done{border-color:var(--gl-accent-border);color:var(--gl-accent);background:var(--gl-accent-dim);}
+.gl-step-cur{border-color:var(--gl-text-1);color:var(--gl-text-1);background:#F6F6F4;}
+.gl-feedback{margin-top:.85rem;padding:.9rem 1rem;background:#FAFAF9;border:1px solid var(--gl-border);border-radius:var(--gl-r-sm);font-size:.8rem;color:var(--gl-text-2);line-height:1.7;}
+.gl-qcm-result{padding:.8rem 1rem;border-radius:var(--gl-r-sm);margin-top:.6rem;font-size:.78rem;border:1px solid var(--gl-border);}
+.gl-qcm-result-ok{background:#F0FDF4;border-color:#BBF7D0;}
+.gl-qcm-result-ko{background:#FFF1F2;border-color:#FECDD3;}
+.gl-qcm-score{font-size:.86rem;font-weight:700;display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem;}
+.gl-qcm-result-ok .gl-qcm-score{color:#15803D;}
+.gl-qcm-result-ko .gl-qcm-score{color:#BE123C;}
+.gl-qcm-expl{display:flex;align-items:flex-start;gap:.35rem;font-size:.74rem;padding:.28rem .45rem;border-radius:5px;line-height:1.45;}
+.gl-qcm-expl-ok{color:#15803D;background:#F0FDF4;}
+.gl-qcm-expl-ko{color:#BE123C;background:#FFF1F2;}
+.gl-qcm-sel{background:#F6F6F4;border-color:var(--gl-text-1)!important;}
+.gl-qcm-correct{background:#F0FDF4!important;border-color:#16A34A!important;}
+.gl-qcm-wrong{background:#FFF1F2!important;border-color:#E11D48!important;}
+.gl-ex-lvl{font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.2rem .6rem;border-radius:20px;border:1.5px solid;}
+.gl-ex-body{padding:1.1rem 1.2rem;}
+.gl-ex-ctx{display:flex;align-items:flex-start;gap:.55rem;background:#FAFAF9;border:1px solid var(--gl-border);border-radius:var(--gl-r-sm);padding:.7rem .9rem;margin-bottom:.85rem;font-size:.79rem;color:var(--gl-text-2);line-height:1.6;}
+.gl-ex-ctx svg{flex-shrink:0;margin-top:2px;color:var(--gl-text-3);}
 </style>
 </head>
 <body>
@@ -6665,6 +6764,12 @@ STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai conte
     {"nom": "Nom de la formule ou de l'outil clé 2", "valeur": "Formule, ratio ou outil avec explication courte"},
     {"nom": "Nom de la formule ou de l'outil clé 3", "valeur": "Formule, ratio ou outil avec explication courte"}
   ],
+  "etapes": [
+    {"id":"1","titre":"Étape courte (max 4 mots)","outil":"Outil principal utilisé","emoji":"🔍"},
+    {"id":"2","titre":"Étape courte (max 4 mots)","outil":"Outil principal utilisé","emoji":"📊"},
+    {"id":"3","titre":"Étape courte (max 4 mots)","outil":"Outil principal utilisé","emoji":"⚙️"},
+    {"id":"4","titre":"Étape courte (max 4 mots)","outil":"Outil principal utilisé","emoji":"✅"}
+  ],
   "sections": [
     {
       "titre": "📘 Fondamentaux — ${title}",
@@ -6729,28 +6834,40 @@ IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de 
 function _renderGenPreview(d,dur,level){
   const prev=document.getElementById('genPreview');
   if(!prev)return;
-  const objHtml=(d.objectifs||[]).map(o=>`<div style="display:flex;align-items:flex-start;gap:.4rem;font-size:.76rem;color:#374151;margin-bottom:.2rem;"><span style="color:#7c3aed;font-weight:900;flex-shrink:0;">✓</span>${_escH(o)}</div>`).join('');
-  const formHtml=(d.formules||[]).map(f=>`<div style="background:#f3f0ff;border-radius:7px;padding:.35rem .6rem;margin-bottom:.3rem;"><span style="font-size:.7rem;font-weight:800;color:#4c1d95;">${_escH(f.nom)}</span><br><span style="font-size:.72rem;color:#374151;font-family:monospace;">${_escH(f.valeur)}</span></div>`).join('');
-  const secHtml=(d.sections||[]).map(s=>`<div style="margin-bottom:.5rem;border-left:3px solid #7c3aed;padding-left:.6rem;"><div style="font-weight:800;font-size:.76rem;color:#4c1d95;">${_escH(s.titre)}</div><div style="font-size:.72rem;color:#6b7280;margin-top:.1rem;line-height:1.4;">${_escH((s.contenu||'').slice(0,200))}${(s.contenu||'').length>200?'…':''}</div></div>`).join('');
-  prev.innerHTML=`<div style="border:2px solid #7c3aed;border-radius:14px;overflow:hidden;margin-top:.6rem;">
-    <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);padding:.85rem 1rem;display:flex;align-items:center;gap:.7rem;">
-      <span style="font-size:2rem;">${d.icone||'🧩'}</span>
-      <div><div style="font-weight:900;font-size:.95rem;color:#fff;">${_escH(d.titre)}</div>
-      <div style="font-size:.71rem;color:rgba(255,255,255,.8);margin-top:.1rem;">${_escH(d.secteur||'')} · ${_escH(d.niveau||level)} · ${d.duree||dur}</div></div>
-    </div>
-    <div style="padding:.85rem 1rem;background:#faf5ff;">
-      <div style="font-size:.78rem;color:#4c1d95;font-weight:700;font-style:italic;margin-bottom:.7rem;">"${_escH(d.desc||'')}"</div>
-      ${objHtml?`<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">🎯 Objectifs pédagogiques</div>${objHtml}</div>`:''}
-      ${formHtml?`<div style="margin-bottom:.75rem;"><div style="font-size:.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">🔑 Formules & outils clés</div>${formHtml}</div>`:''}
-      <div style="margin-bottom:.75rem;"><div style="font-size:.72rem;font-weight:800;color:#374151;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;">📚 ${(d.sections||[]).length} sections théoriques</div>${secHtml}</div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;font-size:.72rem;">
-        ${d.qcm?.length?`<span style="background:#dbeafe;color:#1d4ed8;padding:.25rem .6rem;border-radius:20px;font-weight:700;">❓ ${d.qcm.length} questions QCM</span>`:''}
-        ${d.cas?`<span style="background:#dcfce7;color:#15803d;padding:.25rem .6rem;border-radius:20px;font-weight:700;">🏭 Cas industriel complet</span>`:''}
-        <span style="background:#f3f0ff;color:#7c3aed;padding:.25rem .6rem;border-radius:20px;font-weight:700;">🎯 3 exercices progressifs</span>
+  const objHtml=(d.objectifs||[]).slice(0,4).map(o=>`<div class="gl-obj">${_IC.check.replace('14','12')}<span class="gl-obj-text" style="font-size:.74rem;">${_escH(o)}</span></div>`).join('');
+  const formHtml=(d.formules||[]).slice(0,3).map(f=>`<div class="gl-formula"><div class="gl-formula-name">${_escH(f.nom)}</div><div class="gl-formula-val" style="font-size:.75rem;">${_escH(f.valeur)}</div></div>`).join('');
+  const secHtml=(d.sections||[]).map((s,idx)=>`
+    <div class="gl-section" style="margin-bottom:.5rem;">
+      <div class="gl-section-head"><span class="gl-section-num" style="font-size:.7rem;min-width:20px;height:20px;">${idx+1}</span><span class="gl-section-title" style="font-size:.76rem;">${_escH(s.titre.replace(/^[📘⚙️🏭💡]\s*/,''))}</span></div>
+      <div class="gl-section-body" style="font-size:.73rem;color:var(--gl-text-3);margin-top:.3rem;padding-left:1.4rem;">${_escH((s.contenu||'').slice(0,180))}${(s.contenu||'').length>180?'…':''}</div>
+    </div>`).join('');
+  prev.innerHTML=`<div style="border:1px solid var(--gl-border);border-radius:var(--gl-r);overflow:hidden;margin-top:.75rem;box-shadow:var(--gl-shadow);">
+    <div class="gl-hero" style="padding:1rem 1.25rem;">
+      <div class="gl-hero-inner">
+        <div class="gl-hero-eyebrow">${_IC.zap} Aperçu module</div>
+        <h2 class="gl-hero-title" style="font-size:1.25rem;">${_escH(d.titre)}</h2>
+        <p class="gl-hero-desc" style="font-size:.78rem;margin-bottom:.6rem;">${_escH(d.desc||'')}</p>
+        <div class="gl-hero-meta">
+          ${d.secteur?`<span class="gl-hero-tag">${_escH(d.secteur)}</span>`:''}
+          <span class="gl-hero-tag">${_escH(d.niveau||level)}</span>
+          <span class="gl-hero-tag">${_IC.timer} ${d.duree||dur}</span>
+          <span class="gl-hero-tag">${(d.sections||[]).length} sections</span>
+        </div>
       </div>
-      <div style="display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap;">
-        <button class="btn btn-purple" onclick="publishCustomModule()" style="flex:1;">✅ Publier ce module</button>
-        <button class="btn btn-ghost btn-sm" onclick="generateCustomModule()">🔄 Régénérer</button>
+    </div>
+    <div style="padding:.9rem 1.1rem;background:var(--gl-surface);">
+      ${objHtml?`<div style="margin-bottom:.75rem;"><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl-text-3);margin-bottom:.35rem;">Objectifs</div><div class="gl-objectives">${objHtml}</div></div>`:''}
+      ${formHtml?`<div style="margin-bottom:.75rem;"><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl-text-3);margin-bottom:.35rem;">Formules clés</div><div class="gl-formulas">${formHtml}</div></div>`:''}
+      <div style="margin-bottom:.75rem;"><div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--gl-text-3);margin-bottom:.35rem;">Sections</div>${secHtml}</div>
+      <div class="gl-divider"></div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin:.65rem 0;">
+        ${d.qcm?.length?`<span style="display:inline-flex;align-items:center;gap:.3rem;background:var(--gl-accent-dim);color:var(--gl-accent);border:1px solid var(--gl-accent-border);padding:.2rem .55rem;border-radius:20px;font-size:.69rem;font-weight:600;">${_IC.help.replace('14','11')} ${d.qcm.length} questions QCM</span>`:''}
+        ${d.cas?`<span style="display:inline-flex;align-items:center;gap:.3rem;background:#FAFAF9;color:var(--gl-text-2);border:1px solid var(--gl-border);padding:.2rem .55rem;border-radius:20px;font-size:.69rem;font-weight:600;">${_IC.factory.replace('14','11')} Cas industriel</span>`:''}
+        <span style="display:inline-flex;align-items:center;gap:.3rem;background:#FAFAF9;color:var(--gl-text-2);border:1px solid var(--gl-border);padding:.2rem .55rem;border-radius:20px;font-size:.69rem;font-weight:600;">${_IC.target.replace('14','11')} 3 exercices progressifs</span>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="gl-btn gl-btn-dark" onclick="publishCustomModule()" style="flex:1;">${_IC.check} Publier ce module</button>
+        <button class="gl-btn gl-btn-outline" onclick="generateCustomModule()">${_IC.zap} Régénérer</button>
       </div>
     </div>
   </div>`;
@@ -6771,6 +6888,7 @@ function publishCustomModule(){
   renderCustomModuleList();
   renderModuleToggles();
   updateNav();
+  renderRoster();
 }
 function renderCustomModuleList(){
   const wrap=document.getElementById('customModuleList');
@@ -6787,8 +6905,8 @@ function renderCustomModuleList(){
     </div>
   </div>`).join('');
 }
-function toggleCustomModuleActive(i){const mods=getCustomModules();if(!mods[i])return;mods[i].active=mods[i].active===false;saveCustomModules(mods);renderCustomModuleList();renderModuleToggles();updateNav();}
-function deleteCustomModule(i){if(!confirm('Supprimer ce module ?'))return;const mods=getCustomModules();mods.splice(i,1);saveCustomModules(mods);renderCustomModuleList();renderModuleToggles();updateNav();}
+function toggleCustomModuleActive(i){const mods=getCustomModules();if(!mods[i])return;mods[i].active=mods[i].active===false;saveCustomModules(mods);renderCustomModuleList();renderModuleToggles();updateNav();renderRoster();}
+function deleteCustomModule(i){if(!confirm('Supprimer ce module ?'))return;const mods=getCustomModules();mods.splice(i,1);saveCustomModules(mods);renderCustomModuleList();renderModuleToggles();updateNav();renderRoster();}
 
 let _customModIdx=null,_customModQuizAnswers={};
 
@@ -6797,7 +6915,155 @@ function _getCustomLevDone(i){return(state.exLevels||{})['c'+i]||0;}
 function _renderCustomExBadge(i){
   const el=document.getElementById('customExBadge'+i);if(!el)return;
   const done=_getCustomLevDone(i);
-  el.innerHTML=_EX_LEVELS.map((lv,j)=>{const isDone=j<done,isCur=j===done&&done<3;return`<span style="font-size:.72rem;font-weight:800;padding:.2rem .6rem;border-radius:12px;background:${isDone?lv.color+'25':isCur?lv.color+'15':'#f1f5f9'};color:${isDone||isCur?lv.color:'#94a3b8'};border:1.5px solid ${isDone?lv.color:isCur?lv.color+'88':'#e2e8f0'};">${isDone?'✓ ':isCur?'→ ':''}${lv.label}${isDone?' ✓':isCur?' (en cours)':' 🔒'}</span>`;}).join(' ');
+  el.innerHTML=`<div style="min-width:210px;">
+    <div style="display:flex;gap:3px;margin-bottom:.38rem;">
+      ${_EX_LEVELS.map((lv,j)=>{
+        const isDone=j<done,isCur=j===done&&done<3;
+        return`<div style="flex:1;height:5px;border-radius:3px;background:${isDone?lv.color:isCur?lv.color+'66':'#e2e8f0'};transition:background .4s;"></div>`;
+      }).join('')}
+    </div>
+    <div style="display:flex;justify-content:space-between;">
+      ${_EX_LEVELS.map((lv,j)=>{
+        const isDone=j<done,isCur=j===done&&done<3;
+        const col=isDone?lv.color:isCur?lv.color:'#94a3b8';
+        return`<span style="font-size:.6rem;font-weight:800;color:${col};">${isDone?'✓':isCur?'▶':'○'} ${lv.label}</span>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+/* ── Lucide SVG icons (inline, reusable) ── */
+const _IC={
+  check:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  target:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  key:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>`,
+  book:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+  help:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>`,
+  factory:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/></svg>`,
+  chart:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  alert:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  goal:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="m17 7-5-5-5 5"/><path d="M22 12h-4"/><path d="M6 12H2"/><path d="m6.34 17.66-2.83 2.83"/><path d="m20.49 3.51-2.83 2.83"/><path d="m17.66 17.66 2.83 2.83"/><path d="m3.51 3.51 2.83 2.83"/></svg>`,
+  lock:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  bulb:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`,
+  zap:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  money:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+  pin:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></svg>`,
+  timer:`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+};
+
+// SVG donut gauge for a % value — returns SVG string or null if non-%
+function _kpiDonut(val){
+  const m=(val||'').match(/([\d,\.]+)\s*%/);
+  if(!m)return null;
+  const pct=Math.min(100,parseFloat(m[1].replace(',','.')));
+  const c=pct>=70?'#16a34a':pct>=40?'#d97706':'#dc2626';
+  const r=13,circ=2*Math.PI*r;
+  const dash=(pct/100)*circ;
+  return`<svg width="48" height="48" viewBox="0 0 36 36" style="flex-shrink:0;">
+    <circle cx="18" cy="18" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="3.5"/>
+    <circle cx="18" cy="18" r="${r}" fill="none" stroke="${c}" stroke-width="3.5"
+      stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"
+      transform="rotate(-90 18 18)"/>
+    <text x="18" y="21.5" text-anchor="middle" font-size="7" font-weight="900" fill="${c}">${Math.round(pct)}%</text>
+  </svg>`;
+}
+// Accent color from module sector
+function _customModClr(m){
+  const s=(m.secteur||m.cas?.secteur||'').toLowerCase();
+  if(s.includes('auto'))return['#2563eb','#1e40af'];
+  if(s.includes('aéro')||s.includes('aero'))return['#6366f1','#4338ca'];
+  if(s.includes('pharma')||s.includes('santé')||s.includes('sante'))return['#10b981','#047857'];
+  if(s.includes('chimie')||s.includes('métal')||s.includes('metal'))return['#8b5cf6','#6d28d9'];
+  if(s.includes('énergie')||s.includes('energie'))return['#f97316','#c2410c'];
+  if(s.includes('btp')||s.includes('logistique')||s.includes('textile'))return['#f59e0b','#b45309'];
+  return['#16a34a','#15803d'];
+}
+// Normalize donnees to string (LLM may return array or object)
+function _normDonnees(donnees){
+  if(!donnees)return'';
+  if(typeof donnees==='string')return donnees;
+  if(Array.isArray(donnees)){
+    return donnees.map(item=>{
+      if(typeof item==='string')return item;
+      if(typeof item==='object'&&item!==null){
+        const lbl=item.lbl||item.label||item.nom||item.name||'';
+        const val=item.val||item.value||item.valeur||item.v||'';
+        return lbl&&val?`${lbl}: ${val}`:lbl||val||JSON.stringify(item);
+      }
+      return String(item);
+    }).join('\n');
+  }
+  return String(donnees);
+}
+
+// Parse KPI lines from donnees → [{lbl,val,sub}]
+function _extractKPIs(donnees,max){
+  if(!donnees)return[];max=max||5;
+  const str=_normDonnees(donnees);
+  if(!str)return[];
+  return str.split(/[\n·•]+/).map(s=>s.trim()).filter(s=>s.length>4&&s.includes(':')).slice(0,max).map(item=>{
+    const c=item.indexOf(':');
+    const lbl=item.slice(0,c).trim();
+    const rest=item.slice(c+1).trim();
+    const m=rest.match(/([\d][\d\s,\.]*[%h°kKMGma-zA-Z]*)/);
+    const val=m?m[1].trim().replace(/\s{2,}/g,' '):rest.slice(0,14);
+    const sub=rest.replace(val,'').replace(/^\s*[\(\-]/,'').replace(/\)$/,'').trim().slice(0,45);
+    return{lbl,val,sub};
+  });
+}
+// Toggle accordion section
+function toggleCustomSection(id){
+  const b=document.getElementById('csBody_'+id),btn=document.getElementById('csBtn_'+id);
+  if(!b||!btn)return;
+  const open=b.style.display!=='none';
+  b.style.display=open?'none':'block';
+  btn.textContent=open?'▶ Lire la section':'▼ Réduire';
+}
+// Detect numbered steps in text (D1-D8, 1., Étape 1:, bullet+capital, etc.)
+function _parseSteps(text){
+  if(!text)return null;
+  const lines=text.split(/\n+/).map(s=>s.replace(/^[📝✅⚠️💡🔍⚙️🏭🎯•\-–]\s*/,'').trim()).filter(s=>s.length>5);
+  const pat=/^(D\d{1,2}|Étape\s*\d+|ÉTAPE\s*\d+|\d{1,2}[\.\)\-–]|[A-Z]\d[\.\)])\s*[\-–:\.]\s*(.*)/i;
+  const steps=lines.map(l=>{const m=l.match(pat);return m?{id:m[1].trim(),titre:m[2].slice(0,90)}:null;}).filter(Boolean);
+  return steps.length>=3?steps:null;
+}
+// Render visual step grid from parsed steps
+function _renderStepGrid(steps,mc,mcd){
+  const palettes=[mc,mcd,'#059669','#d97706','#dc2626','#6366f1','#ec4899','#0891b2'];
+  return`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;margin:.5rem 0 .2rem;">
+    ${steps.map((s,i)=>`<div style="background:#fff;border:1.5px solid ${mc}33;border-radius:10px;padding:.65rem .8rem;border-top:3px solid ${palettes[i%palettes.length]||mc};transition:box-shadow .15s;" onmouseenter="this.style.boxShadow='0 4px 14px rgba(0,0,0,.1)'" onmouseleave="this.style.boxShadow=''">
+      <div style="font-size:.69rem;font-weight:800;color:${palettes[i%palettes.length]||mc};letter-spacing:.03em;margin-bottom:.25rem;">${_escH(s.id)}</div>
+      <div style="font-size:.77rem;font-weight:600;color:#1e293b;line-height:1.4;">${_escH(s.titre)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+// Render visual roadmap from etapes array
+function _renderRoadmap(etapes,mc,mcd){
+  if(!etapes||!etapes.length)return'';
+  const gradColors=['#2563eb','#6366f1','#059669','#d97706','#dc2626','#8b5cf6','#0891b2','#ec4899'];
+  const n=etapes.length;
+  return`<div class="ccard" style="padding:1.2rem 1.4rem;">
+    <div class="ccard-title">🗺️ Processus — ${n} étapes</div>
+    <div style="overflow-x:auto;padding:.3rem 0 .8rem;">
+      <div style="display:flex;align-items:flex-start;min-width:max-content;gap:0;padding:.2rem .4rem;">
+        ${etapes.map((e,i)=>{
+          const c=gradColors[i%gradColors.length];
+          const isLast=i===n-1;
+          return`<div style="display:flex;align-items:flex-start;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:.35rem;width:88px;">
+              <div style="width:50px;height:50px;border-radius:50%;background:${c};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;box-shadow:0 4px 14px ${c}55;flex-shrink:0;line-height:1;">${_escH(e.id||String(i+1))}</div>
+              <div style="font-size:.62rem;font-weight:700;text-align:center;color:#1e293b;line-height:1.3;max-width:80px;">${_escH(e.titre||'')}</div>
+              ${e.outil?`<div style="font-size:.55rem;color:#9ca3af;text-align:center;max-width:80px;">${_escH(e.outil)}</div>`:''}
+            </div>
+            ${!isLast?`<div style="display:flex;align-items:center;margin-top:25px;flex-shrink:0;">
+              <div style="width:22px;height:2px;background:${c};opacity:.4;"></div>
+              <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid ${gradColors[(i+1)%gradColors.length]};opacity:.7;"></div>
+            </div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
 }
 
 function goCustomModule(i){
@@ -6807,107 +7073,153 @@ function goCustomModule(i){
   _moduleLeave();_moduleActiveId='c'+(i+1);_moduleStartTs=Date.now();
   const sec=document.getElementById('m-custom');if(!sec)return;
   const done=_getCustomLevDone(i);
-
-  // Objectives
-  const objHtml=(m.objectifs||[]).length?`
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.5rem;margin-top:.6rem;">
-      ${(m.objectifs||[]).map(o=>`<div style="background:#f0fdf4;border-radius:9px;padding:.55rem .75rem;border:1px solid #86efac;display:flex;align-items:flex-start;gap:.4rem;"><span style="color:#15803d;font-weight:900;font-size:.9rem;flex-shrink:0;">✓</span><span style="font-size:.78rem;color:#15803d;font-weight:600;line-height:1.4;">${_escH(o)}</span></div>`).join('')}
-    </div>`:'';
-
-  // Key formulas
-  const formHtml=(m.formules||[]).length?`
-    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.6rem;">
-      ${(m.formules||[]).map(f=>`<div style="background:linear-gradient(135deg,#f3f0ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:10px;padding:.55rem .8rem;min-width:160px;flex:1;"><div style="font-size:.67rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">${_escH(f.nom)}</div><div style="font-size:.78rem;color:#1e1b4b;font-family:monospace;font-weight:700;">${_escH(f.valeur)}</div></div>`).join('')}
-    </div>`:'';
-
-  // Sections — all 4
-  const sectionColors=['linear-gradient(135deg,#4c1d95,#7c3aed)','linear-gradient(135deg,#1d4ed8,#3b82f6)','linear-gradient(135deg,#065f46,#10b981)','linear-gradient(135deg,#92400e,#f59e0b)'];
-  const sectionBorders=['#ddd6fe','#bfdbfe','#a7f3d0','#fde68a'];
-  const sectionsHtml=(m.sections||[]).map((s,idx)=>`
-    <div style="border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);margin-bottom:1rem;">
-      <div style="background:${sectionColors[idx%4]};padding:.65rem 1rem;">
-        <span style="font-weight:800;font-size:.87rem;color:#fff;">${_escH(s.titre)}</span>
-      </div>
-      <div style="padding:1rem 1.1rem;background:#fff;border:1.5px solid ${sectionBorders[idx%4]};border-top:none;border-radius:0 0 14px 14px;line-height:1.8;color:#1e293b;font-size:.84rem;">${(s.contenu||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
-    </div>`).join('');
-
-  // QCM
-  const qcmHtml=(m.qcm||[]).length?`
-    <div class="ccard" style="border-left:4px solid #1d4ed8;">
-      <div class="ccard-title" style="color:#1d4ed8;">❓ Quiz de compréhension — ${(m.qcm||[]).length} questions</div>
-      <div style="font-size:.76rem;color:#6b7280;margin-bottom:.8rem;">Testez votre compréhension avant de passer aux exercices pratiques.</div>
-      <div id="customQCM${i}"></div>
-      <div style="margin-top:.7rem;">
-        <button class="btn btn-sm" style="background:#1d4ed8;color:#fff;font-weight:700;" onclick="checkCustomQCM(${i})">✅ Vérifier mes réponses</button>
-      </div>
-      <div id="customQCMResult${i}" style="margin-top:.6rem;"></div>
-    </div>`:'';
-
-  // Industrial case — ultra-rich
+  const [mc,mcd]=_customModClr(m);
   const cas=m.cas;
-  const casHtml=cas?`
-    <div class="ccard" style="border-left:4px solid #7c3aed;">
-      <div class="ccard-title" style="color:#4c1d95;">🏭 Cas Industriel — ${_escH(cas.entreprise||'Contexte industriel')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.7rem;margin-top:.7rem;">
-        <div style="background:#faf5ff;border-radius:10px;padding:.75rem .9rem;border:1px solid #ddd6fe;">
-          <div style="font-size:.67rem;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">📌 Contexte</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.contexte||'')}</div>
-        </div>
-        <div style="background:#fff7ed;border-radius:10px;padding:.75rem .9rem;border:1px solid #fed7aa;">
-          <div style="font-size:.67rem;font-weight:800;color:#c2410c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">📊 Données & KPIs mesurés</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.donnees||'')}</div>
-        </div>
-        ${cas.enjeux?`<div style="background:#fef3c7;border-radius:10px;padding:.75rem .9rem;border:1px solid #fcd34d;">
-          <div style="font-size:.67rem;font-weight:800;color:#b45309;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">💰 Enjeux & Impacts</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.enjeux)}</div>
-        </div>`:''}
-        <div style="background:#fef2f2;border-radius:10px;padding:.75rem .9rem;border:1px solid #fca5a5;">
-          <div style="font-size:.67rem;font-weight:800;color:#dc2626;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">⚠️ Problème à résoudre</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.probleme||'')}</div>
-        </div>
-        <div style="background:#f0fdf4;border-radius:10px;padding:.75rem .9rem;border:1px solid #86efac;">
-          <div style="font-size:.67rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">🎯 Objectif SMART</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.objectif||'')}</div>
-        </div>
-        <div style="background:#f0f9ff;border-radius:10px;padding:.75rem .9rem;border:1px solid #bae6fd;">
-          <div style="font-size:.67rem;font-weight:800;color:#0369a1;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;">🔒 Contraintes</div>
-          <div style="font-size:.8rem;color:#374151;line-height:1.55;">${_escH(cas.contraintes||'')}</div>
+  const bg=mc+'18',bd=mc+'44';
+
+  // ── KPI visuels ──────────────────────────────────────
+  const kpis=_extractKPIs(cas?.donnees,5);
+  const kpiHtml=kpis.length?`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:.5rem;margin:1rem 0 .4rem;">
+    ${kpis.map(k=>{const donut=_kpiDonut(k.val);return`<div style="background:#fff;border-radius:10px;padding:.6rem .55rem;border-top:3px solid ${mc};text-align:center;box-shadow:0 1px 5px rgba(0,0,0,.07);">${donut?`<div style="display:flex;justify-content:center;margin-bottom:.15rem;">${donut}</div>`:`<div style="font-size:1.35rem;font-weight:900;color:${mc};line-height:1.1;letter-spacing:-.5px;">${_escH(k.val||'—')}</div>`}<div style="font-size:.59rem;font-weight:700;color:${mcd};text-transform:uppercase;letter-spacing:.4px;margin:.1rem 0;line-height:1.2;">${_escH(k.lbl)}</div>${k.sub?`<div style="font-size:.56rem;color:#9ca3af;">${_escH(k.sub)}</div>`:''}</div>`;}).join('')}
+  </div>`:'';
+
+  // ── Cas industriel ────────────────────────────────────
+  const casHtml=cas?`<div class="ccard">
+    <div class="ccard-title"><span style="background:${mc};color:#fff;border-radius:6px;padding:.12rem .55rem;font-size:.7rem;font-weight:800;margin-right:.35rem;">CONTEXTE</span>Cas industriel — ${_escH(cas.entreprise||'Mise en situation')}</div>
+    <div style="background:linear-gradient(135deg,${bg},${mc}0d);border-radius:12px;padding:.95rem 1.1rem;border:1.5px solid ${bd};margin-bottom:.85rem;">
+      <div style="display:flex;gap:.8rem;align-items:flex-start;flex-wrap:wrap;">
+        <div style="font-size:2.5rem;line-height:1;">🏭</div>
+        <div style="flex:1;min-width:160px;">
+          <div style="font-weight:900;font-size:.9rem;color:${mcd};margin-bottom:.3rem;">${_escH(cas.entreprise||'')}</div>
+          <p style="font-size:.81rem;line-height:1.7;color:#374151;margin:0;">${_escH(cas.contexte||'')}</p>
         </div>
       </div>
-      <div style="font-size:.74rem;color:#7c3aed;margin-top:.9rem;padding:.5rem .9rem;background:#f3f0ff;border-radius:8px;font-weight:600;">💡 Ce cas industriel est le fil conducteur de vos 3 exercices progressifs ci-dessous.</div>
-    </div>`:'';
+      ${kpiHtml}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.7rem;">
+      <div style="background:#fef2f2;border-radius:10px;padding:.75rem .85rem;border:1.5px solid #fecaca;">
+        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;color:#dc2626;letter-spacing:.4px;margin-bottom:.28rem;">⚠️ Problème</div>
+        <p style="font-size:.79rem;color:#374151;line-height:1.55;margin:0;">${_escH(cas.probleme||'')}</p>
+      </div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:.75rem .85rem;border:1.5px solid #86efac;">
+        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;color:#15803d;letter-spacing:.4px;margin-bottom:.28rem;">🎯 Objectif SMART</div>
+        <p style="font-size:.79rem;color:#374151;line-height:1.55;margin:0;">${_escH(cas.objectif||'')}</p>
+      </div>
+    </div>
+    ${cas.enjeux?`<div style="background:#fffbeb;border-radius:9px;padding:.55rem .85rem;border:1px solid #fcd34d;font-size:.79rem;color:#374151;margin-bottom:.55rem;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:#b45309;">💰 Enjeux financiers — </strong>${_escH(cas.enjeux)}</div>`:''}
+    ${cas.contraintes?`<div style="font-size:.75rem;color:#6b7280;padding:.4rem .65rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;"><strong>🔒 Contraintes :</strong> ${_escH(cas.contraintes)}</div>`:''}
+  </div>`:'';
 
+  // ── Objectifs ─────────────────────────────────────────
+  const objHtml=(m.objectifs||[]).length?`<div class="ccard">
+    <div class="ccard-title">🎯 Objectifs pédagogiques</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:.42rem;">
+      ${(m.objectifs||[]).map((o,oi)=>`<div style="display:flex;align-items:flex-start;gap:.45rem;background:${bg};border:1px solid ${bd};border-radius:9px;padding:.5rem .65rem;">
+        <span style="background:${mc};color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.61rem;font-weight:800;margin-top:1px;">${oi+1}</span>
+        <span style="font-size:.78rem;color:#374151;line-height:1.45;font-weight:500;">${_escH(o)}</span>
+      </div>`).join('')}
+    </div>
+  </div>`:'';
+
+  // ── Formules ──────────────────────────────────────────
+  const formHtml=(m.formules||[]).length?`<div class="ccard">
+    <div class="ccard-title">🔑 Formules &amp; outils clés</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.55rem;">
+      ${(m.formules||[]).map(f=>`<div style="background:#1e293b;border-radius:10px;padding:.7rem .85rem;text-align:center;">
+        <div style="font-size:.58rem;font-weight:700;color:${mc};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.32rem;">${_escH(f.nom)}</div>
+        <div style="font-size:.9rem;font-family:'JetBrains Mono','Courier New',monospace;color:#e2e8f0;font-weight:700;line-height:1.35;">${_escH(f.valeur)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`:'';
+
+  // ── Roadmap visuel (etapes structurées ou sections) ─────
+  const roadmapHtml=_renderRoadmap(m.etapes,mc,mcd);
+
+  // ── Sections accordéon avec détection visuelle ────────
+  const sColors=['#3b82f6','#8b5cf6','#059669','#f59e0b'];
+  const sectionsHtml=`<div class="ccard">
+    <div class="ccard-title">📚 Cours théorique — ${(m.sections||[]).length} sections</div>
+    <div style="display:flex;flex-direction:column;gap:.5rem;">
+      ${(m.sections||[]).map((s,idx)=>{
+        const sc=sColors[idx%4];
+        const sid=`cm${i}_s${idx}`;
+        // Detect step-based content
+        const steps=_parseSteps(s.contenu||'');
+        // Preview: step grid or italic excerpt
+        const previewHtml=steps
+          ? _renderStepGrid(steps.slice(0,4),mc,mcd)
+          : `<p style="font-size:.78rem;color:#6b7280;margin:0;line-height:1.6;font-style:italic;">${_escH((s.contenu||'').slice(0,200))}${(s.contenu||'').length>200?'…':''}</p>`;
+        // Full body: step grid (all) + remaining prose
+        const fullStepsHtml=steps?_renderStepGrid(steps,mc,mcd):'';
+        const prose=(s.contenu||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+        const fullHtml=steps?`${fullStepsHtml}<details style="margin-top:.6rem;"><summary style="font-size:.72rem;color:#6b7280;cursor:pointer;">▶ Lire le contenu détaillé</summary><div style="font-size:.8rem;color:#374151;line-height:1.78;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #f1f5f9;">${prose}</div></details>`:prose;
+        return`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+          <div style="background:${sc};padding:.5rem .9rem;display:flex;align-items:center;gap:.55rem;cursor:pointer;" onclick="toggleCustomSection('${sid}')">
+            <span style="background:rgba(255,255,255,.2);border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:.71rem;font-weight:800;color:#fff;">${idx+1}</span>
+            <span style="font-weight:800;font-size:.83rem;color:#fff;flex:1;">${_escH(s.titre.replace(/^[📘⚙️🏭💡]\s*/,''))}</span>
+            <span id="csBtn_${sid}" style="font-size:.66rem;color:rgba(255,255,255,.85);white-space:nowrap;flex-shrink:0;">▶ Lire la section</span>
+          </div>
+          <div style="padding:.7rem 1rem;background:#fff;">
+            ${previewHtml}
+            <div id="csBody_${sid}" style="display:none;border-top:1px solid #f1f5f9;padding-top:.55rem;margin-top:.4rem;">${fullHtml}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  // ── QCM ───────────────────────────────────────────────
+  const qcmHtml=`<div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.65rem;">
+      <div class="ccard-title" style="color:#1e40af;margin:0;">❓ Quiz de compréhension${(m.qcm||[]).length?` — ${m.qcm.length} questions`:''}</div>
+      <button class="btn btn-ghost btn-sm" onclick="regenCustomQCM(${i})" id="regenQCMBtn${i}" style="font-size:.71rem;border-color:#93c5fd;color:#1e40af;">🔄 Nouveau QCM</button>
+    </div>
+    <div style="font-size:.76rem;color:#1e40af;opacity:.8;margin-bottom:.8rem;">${(m.qcm||[]).length?'Testez votre compréhension avant de passer aux exercices.':'Aucun QCM — cliquez sur "Nouveau QCM" pour en générer un.'}</div>
+    <div id="customQCM${i}"></div>
+    ${(m.qcm||[]).length?`<div style="margin-top:.7rem;"><button class="btn btn-primary" onclick="checkCustomQCM(${i})">✅ Vérifier mes réponses</button></div>`:''}
+    <div id="customQCMResult${i}" style="margin-top:.6rem;"></div>
+  </div>`;
+
+  // ── Rendu final ───────────────────────────────────────
   sec.innerHTML=`
-    <div class="section-hero" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);">
-      <div style="font-size:2.8rem;margin-bottom:.5rem;">${m.icone||'🧩'}</div>
-      <h1 style="font-size:1.65rem;margin-bottom:.35rem;">${_escH(m.titre)}</h1>
-      <p style="opacity:.85;max-width:540px;margin:0 auto;font-size:.88rem;">${_escH(m.desc||'')}</p>
-      <div style="display:flex;justify-content:center;gap:.8rem;margin-top:.8rem;flex-wrap:wrap;">
-        <span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">⏱️ ${m.duree||'~45 min'}</span>
-        ${m.secteur?`<span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">🏭 ${_escH(m.secteur)}</span>`:''}
-        <span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">📚 ${(m.sections||[]).length} sections</span>
-        ${(m.qcm||[]).length?`<span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">❓ ${m.qcm.length} questions quiz</span>`:''}
-        <span style="font-size:.73rem;opacity:.9;background:rgba(255,255,255,.18);padding:.28rem .8rem;border-radius:20px;">🎯 3 exercices ingénieur</span>
+    <div class="mod-header">
+      <div class="mod-header-top" style="--mc:${mc};--mc-dark:${mcd};">
+        <div class="mod-header-icon">${m.icone||'🧩'}</div>
+        <div class="mod-header-text">
+          <h2>${_escH(m.titre)}</h2>
+          <p>${_escH(m.desc||'')}</p>
+        </div>
+      </div>
+      <div class="mod-header-steps">
+        ${m.secteur?`<span class="step-item"><span class="step-dot"></span>🏭 ${_escH(m.secteur)}</span><span class="step-sep">›</span>`:''}
+        ${m.niveau?`<span class="step-item"><span class="step-dot"></span>🎓 ${_escH(m.niveau)}</span><span class="step-sep">›</span>`:''}
+        <span class="step-item"><span class="step-dot"></span>⏱️ ${m.duree||'~45 min'}</span>
+        <span class="step-sep">›</span>
+        <span class="step-item"><span class="step-dot"></span>📚 ${(m.sections||[]).length} sections</span>
+        ${(m.qcm||[]).length?`<span class="step-sep">›</span><span class="step-item"><span class="step-dot"></span>❓ ${m.qcm.length} questions</span>`:''}
+        <span style="margin-left:auto;font-size:.68rem;font-weight:700;color:#94a3b8;">Module IA ✦</span>
       </div>
     </div>
 
-    ${objHtml?`<div class="ccard"><div class="ccard-title">🎯 Objectifs pédagogiques</div>${objHtml}</div>`:''}
-
-    ${formHtml?`<div class="ccard"><div class="ccard-title">🔑 Formules & outils clés</div>${formHtml}</div>`:''}
-
-    <div class="ccard">
-      <div class="ccard-title">📖 Contenu théorique</div>
-      ${sectionsHtml}
+    <div class="ccard" style="background:linear-gradient(135deg,${bg},${mc}0d);border:2px solid ${bd};">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin-bottom:.4rem;">
+        <div>
+          <div style="font-weight:800;font-size:.88rem;color:${mcd};">🎯 Exercices IA — 3 niveaux obligatoires</div>
+          <div style="font-size:.73rem;color:#6b7280;margin-top:.15rem;">Complétez Débutant → Intermédiaire → Avancé dans l'ordre pour valider le module.</div>
+        </div>
+        <div id="customExBadge${i}" style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;"></div>
+      </div>
     </div>
-
-    ${qcmHtml}
 
     ${casHtml}
+    ${objHtml}
+    ${roadmapHtml}
+    ${formHtml}
+    ${sectionsHtml}
+    ${qcmHtml}
 
     <div class="ccard">
-      <div class="ccard-title">🎯 Exercices progressifs — 3 niveaux</div>
-      <div style="font-size:.78rem;color:#6b7280;margin-bottom:.8rem;">Appliquez les concepts sur le cas industriel. L'IA génère des exercices concrets et corrigés de niveau ingénieur.</div>
-      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem;" id="customExBadge${i}"></div>
+      <div class="ccard-title">🎯 Exercice IA — niveau en cours</div>
       <div id="customExContent${i}"></div>
       <div id="customExStatus${i}" style="margin-top:.5rem;"></div>
     </div>
@@ -6921,27 +7233,31 @@ function goCustomModule(i){
     </div>`;
 
   showSection('m-custom');
-  // Render QCM
   if((m.qcm||[]).length)_renderCustomQCM(i,m.qcm);
   _renderCustomExBadge(i);
   if(done<3)showCustomExercise(i);
   else{
     const cec=document.getElementById('customExContent'+i);
-    if(cec)cec.innerHTML='<div style="color:#059669;font-weight:700;font-size:.82rem;padding:.5rem 0;">✅ Les 3 niveaux sont complétés !</div>';
+    if(cec)cec.innerHTML='<div style="text-align:center;padding:1.5rem 1rem;"><div style="font-size:2.5rem;margin-bottom:.5rem;">🎉</div><div style="font-weight:800;color:#059669;font-size:.9rem;">Les 3 niveaux sont complétés — vous pouvez valider le module !</div></div>';
     showCustomValidateBtn(i);
   }
 }
 
 function _renderCustomQCM(i,qcm){
   const el=document.getElementById('customQCM'+i);if(!el)return;
-  el.innerHTML=qcm.map((q,qi)=>`
-    <div style="margin-bottom:1rem;padding:.75rem .9rem;background:#f8fafc;border-radius:10px;border:1.5px solid #e2e8f0;">
-      <div style="font-size:.82rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;">${qi+1}. ${_escH(q.q)}</div>
-      <div style="display:flex;flex-direction:column;gap:.3rem;">
+  const total=qcm.length;
+  el.innerHTML=`<div style="display:flex;gap:3px;margin-bottom:.75rem;">${qcm.map((_,qi)=>`<div id="qcmBar${i}_${qi}" style="flex:1;height:4px;border-radius:2px;background:#dbeafe;transition:background .3s;"></div>`).join('')}</div>`+
+  qcm.map((q,qi)=>`
+    <div style="margin-bottom:.85rem;padding:.75rem .9rem;background:#f8fafc;border-radius:10px;border:1.5px solid #e2e8f0;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;margin-bottom:.45rem;">
+        <span style="font-size:.83rem;font-weight:700;color:#1e293b;">${qi+1}. ${_escH(q.q)}</span>
+        <span style="font-size:.62rem;font-weight:800;color:#3b82f6;background:#eff6ff;border-radius:20px;padding:.12rem .5rem;flex-shrink:0;white-space:nowrap;">Q${qi+1}/${total}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.28rem;">
         ${(q.opts||[]).map((opt,oi)=>`
-          <label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.79rem;color:#374151;padding:.3rem .5rem;border-radius:7px;border:1.5px solid transparent;transition:all .15s;" id="qcmLbl${i}_${qi}_${oi}" onclick="selectCustomQCM(${i},${qi},${oi})">
-            <input type="radio" name="cqcm${i}_${qi}" value="${oi}" style="accent-color:#1d4ed8;">
-            ${_escH(opt)}
+          <label style="display:flex;align-items:flex-start;gap:.45rem;cursor:pointer;font-size:.79rem;color:#374151;padding:.35rem .55rem;border-radius:7px;border:1.5px solid transparent;transition:all .15s;" id="qcmLbl${i}_${qi}_${oi}" onclick="selectCustomQCM(${i},${qi},${oi})">
+            <input type="radio" name="cqcm${i}_${qi}" value="${oi}" style="accent-color:#1d4ed8;margin-top:2px;flex-shrink:0;">
+            <span>${_escH(opt)}</span>
           </label>`).join('')}
       </div>
     </div>`).join('');
@@ -6949,40 +7265,98 @@ function _renderCustomQCM(i,qcm){
 
 function selectCustomQCM(i,qi,oi){
   const mods=getCustomModules();const m=mods[i];if(!m?.qcm)return;
-  const qcm=m.qcm;
-  // Highlight selected
-  (qcm[qi].opts||[]).forEach((_,j)=>{
+  (m.qcm[qi].opts||[]).forEach((_,j)=>{
     const lbl=document.getElementById(`qcmLbl${i}_${qi}_${j}`);
-    if(lbl)lbl.style.background=j===oi?'#dbeafe':'';
-    if(lbl)lbl.style.borderColor=j===oi?'#3b82f6':'transparent';
+    if(!lbl)return;
+    lbl.style.background=j===oi?'#dbeafe':'';
+    lbl.style.borderColor=j===oi?'#3b82f6':'transparent';
   });
+  const bar=document.getElementById(`qcmBar${i}_${qi}`);
+  if(bar)bar.style.background='#3b82f6';
 }
 
 function checkCustomQCM(i){
   const mods=getCustomModules();const m=mods[i];if(!m?.qcm)return;
-  let score=0;const total=m.qcm.length;
-  let detailHtml='';
+  let score=0;const total=m.qcm.length;let detailHtml='';
   m.qcm.forEach((q,qi)=>{
     const sel=document.querySelector(`input[name="cqcm${i}_${qi}"]:checked`);
     const chosen=sel?parseInt(sel.value):-1;
-    const correct=q.rep??0;
-    const ok=chosen===correct;
+    const correct=q.rep??0;const ok=chosen===correct;
     if(ok)score++;
-    // Color labels
     (q.opts||[]).forEach((_,oi)=>{
       const lbl=document.getElementById(`qcmLbl${i}_${qi}_${oi}`);
       if(!lbl)return;
+      lbl.style.background='';lbl.style.borderColor='transparent';
       if(oi===correct){lbl.style.background='#dcfce7';lbl.style.borderColor='#16a34a';}
       else if(oi===chosen&&!ok){lbl.style.background='#fee2e2';lbl.style.borderColor='#dc2626';}
     });
-    detailHtml+=`<div style="font-size:.75rem;margin:.2rem 0;padding:.3rem .6rem;border-radius:6px;background:${ok?'#f0fdf4':'#fef2f2'};color:${ok?'#15803d':'#dc2626'};">${ok?'✅':'❌'} Q${qi+1} — ${_escH(q.expl||'')}</div>`;
+    const bar=document.getElementById(`qcmBar${i}_${qi}`);
+    if(bar)bar.style.background=ok?'#16a34a':'#dc2626';
+    detailHtml+=`<div style="font-size:.74rem;margin:.2rem 0;padding:.3rem .6rem;border-radius:6px;display:flex;gap:.3rem;align-items:flex-start;background:${ok?'#f0fdf4':'#fef2f2'};color:${ok?'#15803d':'#dc2626'};">${ok?'✅':'❌'}<span>Q${qi+1} — ${_escH(q.expl||'')}</span></div>`;
   });
-  const pct=Math.round(score/total*100);
+  const pct=Math.round(score/total*100);const ok=pct>=60;
   const el=document.getElementById('customQCMResult'+i);
-  if(el)el.innerHTML=`<div style="padding:.75rem 1rem;border-radius:10px;background:${pct>=60?'#f0fdf4':'#fef2f2'};border:1.5px solid ${pct>=60?'#86efac':'#fca5a5'};margin-top:.4rem;">
-    <div style="font-weight:800;font-size:.88rem;color:${pct>=60?'#15803d':'#dc2626'};">${pct>=60?'✅':'❌'} Score : ${score}/${total} (${pct}%)</div>
-    <div style="margin-top:.5rem;">${detailHtml}</div>
+  if(el)el.innerHTML=`<div style="padding:.75rem 1rem;border-radius:10px;background:${ok?'#f0fdf4':'#fef2f2'};border:1.5px solid ${ok?'#86efac':'#fca5a5'};margin-top:.5rem;">
+    <div style="font-weight:800;font-size:.88rem;color:${ok?'#15803d':'#dc2626'};">${ok?'✅':'❌'} Score : ${score}/${total} — ${pct}%</div>
+    <div style="margin-top:.4rem;">${detailHtml}</div>
   </div>`;
+}
+
+async function regenCustomQCM(i){
+  const key=getKey();
+  const el=document.getElementById('customQCM'+i);
+  const btn=document.getElementById('regenQCMBtn'+i);
+  const res=document.getElementById('customQCMResult'+i);
+  if(!el||!key){
+    if(el)el.innerHTML='<div style="font-size:.78rem;color:#dc2626;">⚠️ Clé API requise.</div>';
+    return;
+  }
+  const mods=getCustomModules();const m=mods[i];if(!m)return;
+  if(btn){btn.disabled=true;btn.textContent='⏳ Génération…';}
+  if(res)res.innerHTML='';
+  el.innerHTML='<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 0;"><div class="ai-spinner"></div><span style="font-size:.77rem;color:#1e40af;font-weight:600;">Génération du nouveau QCM par l\'IA…</span></div>';
+  const sectionsCtx=(m.sections||[]).map(s=>`${s.titre}: ${(s.contenu||'').slice(0,300)}`).join('\n');
+  const cas=m.cas;
+  const casCtx=cas?`Cas industriel : ${cas.entreprise||''} — ${cas.probleme||''}`:'' ;
+  const prompt=`Tu es formateur expert en génie industriel et Lean Manufacturing.
+Génère un QCM de 5 questions sur le module "${m.titre}".
+${casCtx}
+Contenu du module :
+${sectionsCtx}
+
+Règles STRICTES :
+- 5 questions variées (définitions, calculs, applications pratiques)
+- 4 options par question (une seule bonne réponse)
+- Questions progressives (1 facile → 5 difficile)
+- Explications courtes et pédagogiques
+
+JSON UNIQUEMENT :
+{"qcm":[{"q":"Question ?","opts":["A","B","C","D"],"rep":0,"expl":"Explication courte"}]}`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1800,temperature:0.6,response_format:{type:'json_object'}})});
+    const data=await resp.json();
+    const parsed=JSON.parse(data.choices?.[0]?.message?.content||'{}');
+    const newQcm=parsed.qcm||[];
+    if(!newQcm.length)throw new Error('QCM vide');
+    m.qcm=newQcm;
+    const allMods=getCustomModules();allMods[i]=m;saveCustomModules(allMods);
+    _renderCustomQCM(i,newQcm);
+    // update verify button
+    const card=el.closest('.ccard');
+    if(card){
+      const existingVerify=card.querySelector('[onclick^="checkCustomQCM"]');
+      if(!existingVerify){
+        const vBtn=document.createElement('div');vBtn.style.marginTop='.7rem';
+        vBtn.innerHTML=`<button class="btn btn-primary" onclick="checkCustomQCM(${i})">✅ Vérifier mes réponses</button>`;
+        card.insertBefore(vBtn,card.querySelector('#customQCMResult'+i));
+      }
+    }
+    const titleEl=el.closest('.ccard')?.querySelector('.ccard-title');
+    if(titleEl)titleEl.textContent=`❓ Quiz de compréhension — ${newQcm.length} questions`;
+  }catch(e){
+    el.innerHTML=`<div style="font-size:.78rem;color:#dc2626;">❌ Erreur : ${_escH(e.message)}</div>`;
+  }
+  if(btn){btn.disabled=false;btn.textContent='🔄 Nouveau QCM';}
 }
 
 async function showCustomExercise(i){
@@ -6990,7 +7364,7 @@ async function showCustomExercise(i){
   const done=_getCustomLevDone(i);if(done>=3)return;
   const lv=_EX_LEVELS[done];
   const el=document.getElementById('customExContent'+i);if(!el)return;
-  el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.5rem;">${lv.stars} Exercice niveau ${lv.label}</div><div class="ai-spinner" style="margin:.8rem auto;display:block;"></div></div>`;
+  el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};text-align:center;"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.75rem;">${lv.stars} Génération de l'exercice niveau ${lv.label}…</div><div class="ai-spinner" style="margin:0 auto;display:block;"></div></div>`;
   const key=getKey();
   if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer l\'exercice.</div>';return;}
 
@@ -7002,7 +7376,7 @@ async function showCustomExercise(i){
 
   if(!exData){
     const cas=m.cas;
-    const casBlock=cas?`\nCAS INDUSTRIEL :\n- Entreprise : ${cas.entreprise||''}\n- Contexte : ${cas.contexte||''}\n- Données & KPIs : ${cas.donnees||''}\n- Enjeux : ${cas.enjeux||''}\n- Problème : ${cas.probleme||''}\n- Objectif : ${cas.objectif||''}\n- Contraintes : ${cas.contraintes||''}`:'';
+    const casBlock=cas?`\nCAS INDUSTRIEL :\n- Entreprise : ${cas.entreprise||''}\n- Contexte : ${cas.contexte||''}\n- Données & KPIs : ${_normDonnees(cas.donnees)}\n- Enjeux : ${cas.enjeux||''}\n- Problème : ${cas.probleme||''}\n- Objectif : ${cas.objectif||''}\n- Contraintes : ${cas.contraintes||''}`:'';
 
     // CV domain adaptation — the key personalization
     const dom=state.domain;
@@ -7045,19 +7419,19 @@ JSON avec cette structure exacte :
       state.customExercises[i][done]=exData;save();
     }catch(e){exData={question:`Appliquez la méthodologie "${m.titre}" sur le cas industriel. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
   }
-  const cvBadge=state.domain?`<span style="font-size:.67rem;font-weight:700;background:linear-gradient(135deg,#7c3aed22,#7c3aed11);color:#7c3aed;border:1px solid #c4b5fd;border-radius:20px;padding:.15rem .55rem;">🎯 Adapté à votre profil ${_escH(state.domain.secteur||'')}</span>`:'';
+  const cvBadge=state.domain?`<span class="gl-ex-cv">${_IC.target} Adapté · ${_escH(state.domain.secteur||'votre profil')}</span>`:'';
   el.innerHTML=`<div style="background:${lv.bg};border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};">
-    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;">
+    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.7rem;">
       <span style="font-size:.7rem;font-weight:800;color:${lv.color};">${lv.stars} Exercice niveau ${lv.label}</span>
       ${cvBadge}
+      <div id="exTimerCustom${i}" style="margin-left:auto;" title="Temps estimé par l'IA"></div>
     </div>
-    <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.6rem;line-height:1.55;">${_escH(exData.question||'')}</div>
-    ${exData.context?`<div style="font-size:.78rem;color:#374151;margin-bottom:.7rem;padding:.6rem .8rem;background:#fff;border-radius:8px;border:1px solid #e2e8f0;line-height:1.6;"><strong style="font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;">📊 Données de référence</strong><br>${_escH(exData.context).replace(/\n/g,'<br>')}</div>`:''}
-    <textarea id="customExAnswer${i}" placeholder="Rédigez votre réponse ici — méthode, calculs, justifications…" style="width:100%;min-height:110px;border:1.5px solid ${lv.border};border-radius:8px;padding:.55rem .75rem;font-size:.83rem;box-sizing:border-box;resize:vertical;outline:none;font-family:inherit;line-height:1.55;" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
-    <div style="display:flex;align-items:center;gap:.5rem;margin-top:.55rem;flex-wrap:wrap;">
+    <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.65rem;line-height:1.6;">${_escH(exData.question||'')}</div>
+    ${exData.context?`<div style="font-size:.78rem;color:#374151;margin-bottom:.7rem;padding:.65rem .85rem;background:#fff;border-radius:9px;border:1px solid #e2e8f0;line-height:1.65;"><strong style="font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;display:block;margin-bottom:.3rem;">📊 Données de référence</strong>${_escH(exData.context).replace(/\n/g,'<br>')}</div>`:''}
+    <textarea id="customExAnswer${i}" placeholder="Rédigez votre réponse — méthode, calculs, justifications…" style="width:100%;min-height:115px;border:1.5px solid ${lv.border};border-radius:9px;padding:.6rem .8rem;font-size:.83rem;box-sizing:border-box;resize:vertical;outline:none;font-family:inherit;line-height:1.6;background:#fff;" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
+    <div style="display:flex;align-items:center;gap:.45rem;margin-top:.55rem;flex-wrap:wrap;">
       <button class="btn btn-gold btn-sm" onclick="evalCustomAnswer(${i})">🤖 Feedback IA</button>
       <button class="btn btn-green btn-sm" onclick="completeCustomExLevel(${i})">✅ Valider ce niveau ${lv.stars}</button>
-      <div id="exTimerCustom${i}" style="margin-left:auto;" title="Temps estimé par l'IA"></div>
     </div>
     <div id="customExFeedback${i}" style="margin-top:.6rem;"></div>
   </div>`;
@@ -7126,8 +7500,8 @@ Sois exigeant. Niveau ingénieur requis.`;
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
     const lvAfter=_EX_LEVELS[Math.min(_getCustomLevDone(i),2)];
     feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
-      <div style="margin-top:.8rem;padding-top:.7rem;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">
-        <button class="btn btn-green btn-sm" onclick="completeCustomExLevel(${i})" style="font-size:.8rem;">✅ Valider ce niveau ${lvAfter.stars} et continuer →</button>
+      <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
+        <button class="btn btn-green btn-sm" onclick="completeCustomExLevel(${i})">✅ Valider ce niveau ${lvAfter.stars} et continuer →</button>
       </div>`;
   }catch(e){feedEl.innerHTML='<div class="alert alert-warning">Erreur lors de l\'évaluation.</div>';}
 }
@@ -7142,12 +7516,12 @@ function completeCustomExLevel(i){
   const statusEl=document.getElementById('customExStatus'+i);
   if(done>=3){
     const el=document.getElementById('customExContent'+i);
-    if(el)el.innerHTML='<div style="color:#059669;font-weight:800;font-size:.84rem;padding:.5rem 0;">🎉 Les 3 niveaux sont complétés — vous pouvez maintenant valider le module !</div>';
+    if(el)el.innerHTML='<div class="gl-tip" style="margin:0;">'+_IC.check+'<span>Les 3 niveaux sont complétés — vous pouvez maintenant valider le module !</span></div>';
     if(statusEl)statusEl.innerHTML='';
     showCustomValidateBtn(i);
   }else{
     const nextLv=_EX_LEVELS[done];
-    if(statusEl)statusEl.innerHTML=`<div style="color:${_EX_LEVELS[done-1].color};font-weight:700;font-size:.78rem;text-align:center;padding:.3rem 0;">✓ Niveau ${_EX_LEVELS[done-1].label} validé — passez au niveau ${nextLv.label} ${nextLv.stars}</div>`;
+    if(statusEl)statusEl.innerHTML=`<div style="color:${_EX_LEVELS[done-1].color};font-weight:700;font-size:.78rem;padding:.3rem 0;">✓ Niveau ${_EX_LEVELS[done-1].label} validé — passez au niveau ${nextLv.label} ${nextLv.stars}</div>`;
     showCustomExercise(i);
   }
 }
@@ -7171,14 +7545,27 @@ async function validateCustomModule(i){
   if(!state.scores)state.scores={};state.scores['c'+i]=score;save();
   const minScore=getThreshold(0);const pass=score>=minScore;
   const encouragement=pass?'✅ Module validé — excellente maîtrise !':'📖 Relisez le contenu et repassez les exercices.';
-  box.innerHTML=`<div class="score-result ${pass?'pass':'fail'}" style="margin-top:.8rem;">
-    <div class="score-ring" style="color:${pass?'var(--green)':'var(--red)'};">${score}%</div>
+  const _sc=pass?'#16a34a':'#dc2626';
+  const _r=38,_circ=(2*Math.PI*_r);
+  box.innerHTML=`<div class="score-result ${pass?'pass':'fail'}" style="margin-top:.8rem;align-items:center;">
+    <div style="flex-shrink:0;position:relative;width:90px;height:90px;">
+      <svg width="90" height="90" viewBox="0 0 90 90" style="transform:rotate(-90deg);">
+        <circle cx="45" cy="45" r="${_r}" fill="none" stroke="#e2e8f0" stroke-width="7"/>
+        <circle cx="45" cy="45" r="${_r}" fill="none" stroke="${_sc}" stroke-width="7"
+          stroke-dasharray="0 ${_circ.toFixed(1)}" stroke-linecap="round"
+          class="score-arc-anim-${i}" style="transition:stroke-dasharray 1.3s cubic-bezier(.4,0,.2,1);"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:1.3rem;font-weight:900;color:${_sc};line-height:1;">${score}%</span>
+      </div>
+    </div>
     <div style="flex:1;">
-      <div style="font-weight:800;font-size:1rem;color:${pass?'var(--green)':'var(--red)'};">${encouragement}</div>
+      <div style="font-weight:800;font-size:1rem;color:${_sc};">${encouragement}</div>
       <div style="font-size:.8rem;color:var(--gray400);margin-top:.2rem;">Score : ${score}% — Minimum requis : ${minScore}%</div>
       <div style="font-size:.78rem;color:#6b7280;margin-top:.2rem;">✓ 3 exercices ingénieur complétés avec feedback IA</div>
     </div>
   </div>`;
+  setTimeout(()=>{const arc=box.querySelector('.score-arc-anim-'+i);if(arc)arc.style.strokeDasharray=`${(score/100*_circ).toFixed(1)} ${_circ.toFixed(1)}`;},60);
   if(!pass)_tryRemCustom(i,score,minScore,m);
 }
 
