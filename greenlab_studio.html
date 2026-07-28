@@ -1,0 +1,2631 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Green Lab Studio — Générateur Pédagogique IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══ VARIABLES — même base que index.html ═══ */
+:root{
+  --navy:#0d1b2a; --blue:#1a3a6e;
+  --accent:#f59e0b; --orange:#ea580c;
+  --green:#059669; --red:#dc2626;
+  --purple:#7c3aed; --teal:#0891b2; --sky:#0284c7;
+  --gray50:#f8fafc; --gray100:#f1f5f9; --gray200:#e2e8f0;
+  --gray400:#94a3b8; --gray600:#475569; --gray800:#1e293b;
+  --white:#ffffff; --radius:14px;
+  --shadow:0 4px 20px rgba(13,27,42,.08);
+  --shadow2:0 12px 40px rgba(13,27,42,.16);
+  /* mode colors */
+  --pro-c:#f59e0b; --pro-dark:#b45309; --pro-bg:#fffbeb; --pro-light:#fef3c7;
+  --acad-c:#7c3aed; --acad-dark:#5b21b6; --acad-bg:#f5f3ff; --acad-light:#ede9fe;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#eef2ff;color:var(--gray800);display:flex;min-height:100vh;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{width:240px;background:var(--navy);flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:200;display:flex;flex-direction:column;box-shadow:4px 0 24px rgba(0,0,0,.2);}
+.sb-logo{padding:1.4rem 1.3rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-brand{font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:-.3px;font-family:'Plus Jakarta Sans',sans-serif;}
+.sb-brand em{background:linear-gradient(90deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.sb-tag{font-size:.62rem;color:var(--gray400);margin-top:.2rem;}
+.sb-key{padding:.65rem 1rem;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05);}
+.sb-key-label{font-size:.6rem;color:var(--gray400);display:block;margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+.sb-key input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.32rem .65rem;font-size:.72rem;color:#e2e8f0;font-family:inherit;outline:none;transition:border .2s;}
+.sb-key input:focus{border-color:rgba(245,158,11,.4);}
+.sb-key input::placeholder{color:var(--gray600);}
+.sb-mode{margin:.6rem .9rem;border-radius:10px;padding:.5rem .7rem;display:none;align-items:center;gap:.5rem;font-size:.7rem;font-weight:800;}
+.sb-mode.visible{display:flex;}
+.sb-mode.pro{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.2);}
+.sb-mode.acad{background:rgba(124,58,237,.12);color:#c4b5fd;border:1px solid rgba(124,58,237,.2);}
+nav{padding:.7rem 0;flex:1;}
+.nav-section{font-size:.6rem;font-weight:800;color:var(--gray600);text-transform:uppercase;letter-spacing:.6px;padding:.5rem 1.2rem .15rem;}
+.nav-btn{display:flex;align-items:center;gap:.6rem;width:100%;background:transparent;border:none;padding:.58rem 1.2rem;color:var(--gray400);font-size:.79rem;font-weight:600;cursor:pointer;text-align:left;transition:all .15s;font-family:inherit;border-left:3px solid transparent;}
+.nav-btn:hover{color:#fff;background:rgba(255,255,255,.05);}
+.nav-btn.active{color:var(--accent);background:rgba(245,158,11,.07);border-left-color:var(--accent);}
+.nav-btn.active.a-acad{color:#c4b5fd;background:rgba(124,58,237,.07);border-left-color:#c4b5fd;}
+.nav-ico{width:18px;text-align:center;font-size:.9rem;}
+.sb-footer{padding:.8rem 1rem;border-top:1px solid rgba(255,255,255,.05);}
+.sb-footer span{font-size:.62rem;color:var(--gray600);}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:240px;flex:1;min-height:100vh;padding:2rem 2.2rem;}
+.screen{display:none;animation:fadeUp .3s ease both;}
+.screen.active{display:block;}
+
+/* ═══ PAGE HEADER ═══ */
+.ph h1{font-size:1.5rem;font-weight:900;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:.25rem;}
+.ph p{font-size:.83rem;color:var(--gray600);margin-bottom:1.6rem;}
+
+/* ═══ CARDS ═══ */
+.ccard{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.6rem;margin-bottom:1.2rem;border:1px solid var(--gray200);}
+.ccard-title{font-size:.77rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--gray400);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.ccard-title::after{content:'';flex:1;height:1px;background:var(--gray200);}
+
+/* ═══ BUTTONS ═══ */
+.btn{display:inline-flex;align-items:center;gap:.38rem;padding:.55rem 1.2rem;border-radius:9px;border:none;cursor:pointer;font-size:.82rem;font-weight:700;font-family:inherit;transition:all .2s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--navy);color:#fff;box-shadow:0 2px 10px rgba(13,27,42,.2);}
+.btn-primary:hover{background:#1a3560;}
+.btn-gold{background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;box-shadow:0 2px 12px rgba(245,158,11,.35);}
+.btn-gold:hover{filter:brightness(1.07);box-shadow:0 4px 20px rgba(245,158,11,.45);}
+.btn-green{background:linear-gradient(135deg,#047857,var(--green));color:#fff;box-shadow:0 2px 12px rgba(5,150,105,.3);}
+.btn-green:hover{filter:brightness(1.07);}
+.btn-purple{background:var(--purple);color:#fff;box-shadow:0 2px 12px rgba(124,58,237,.3);}
+.btn-purple:hover{filter:brightness(1.1);}
+.btn-ghost{background:transparent;border:1.5px solid var(--gray200);color:var(--gray600);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.btn-danger{background:#fef2f2;border:1.5px solid #fecaca;color:var(--red);}
+.btn-sm{padding:.28rem .7rem;font-size:.74rem;}
+.btn-lg{padding:.7rem 1.8rem;font-size:.9rem;border-radius:11px;}
+
+/* ═══ FORMS ═══ */
+.form-label{display:block;font-size:.75rem;font-weight:700;color:var(--gray600);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.3px;}
+.form-label span{text-transform:none;font-weight:400;color:var(--gray400);letter-spacing:0;margin-left:.3rem;}
+.form-input,.form-select,.form-textarea{width:100%;padding:.55rem .9rem;border:1.5px solid var(--gray200);border-radius:9px;font-size:.84rem;font-family:inherit;color:var(--gray800);background:#fff;outline:none;transition:border .2s,box-shadow .2s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+.form-textarea{resize:vertical;min-height:78px;line-height:1.6;}
+.form-group{margin-bottom:1rem;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem;}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem;}
+
+/* ═══ MODE HERO (home) ═══ */
+.mode-hero{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:2rem;}
+.mode-card{border-radius:18px;padding:2rem 1.8rem;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.2,.64,1),box-shadow .25s;position:relative;overflow:hidden;border:2px solid transparent;}
+.mode-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(13,27,42,.18);}
+.mode-card.pro{background:linear-gradient(135deg,#0d1b2a,#1a3a6e,#0d1b2a);background-size:200% 200%;animation:gradientShift 10s ease infinite;}
+.mode-card.acad{background:linear-gradient(135deg,#1e1b4b,#3730a3,#4c1d95);background-size:200% 200%;animation:gradientShift 10s ease infinite;}
+.mode-card::before{content:'';position:absolute;top:-50px;right:-50px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.12),transparent 70%);pointer-events:none;}
+.mode-ico{font-size:2.6rem;margin-bottom:.85rem;}
+.mode-card h2{font-size:1.15rem;font-weight:900;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:.4rem;}
+.mode-card p{font-size:.79rem;color:rgba(255,255,255,.72);line-height:1.6;margin-bottom:.9rem;}
+.mode-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1rem;}
+.mode-chip{background:rgba(255,255,255,.13);color:rgba(255,255,255,.9);border-radius:20px;padding:.2rem .58rem;font-size:.66rem;font-weight:700;border:1px solid rgba(255,255,255,.15);}
+.mode-cta{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:9px;padding:.45rem 1rem;font-size:.79rem;font-weight:700;transition:all .15s;}
+.mode-card:hover .mode-cta{background:rgba(255,255,255,.25);}
+.mode-cta.gold{background:linear-gradient(135deg,var(--accent),var(--orange));border-color:transparent;box-shadow:0 2px 12px rgba(245,158,11,.4);}
+.mode-cta.purple-btn{background:rgba(167,139,250,.25);border-color:rgba(167,139,250,.35);}
+
+/* ═══ STATS ═══ */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:.9rem;margin-bottom:1.6rem;}
+.stat-card{background:var(--white);border:1px solid var(--gray200);border-radius:14px;padding:1rem 1.2rem;box-shadow:var(--shadow);}
+.stat-val{font-size:2rem;font-weight:900;color:var(--navy);line-height:1.1;}
+.stat-lbl{font-size:.68rem;color:var(--gray400);font-weight:600;text-transform:uppercase;letter-spacing:.3px;margin-top:.15rem;}
+
+/* ═══ MODULE CARD (library + home recent) ═══ */
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.1rem;}
+.mod-lib-card{background:#fff;border-radius:18px;box-shadow:0 2px 12px rgba(13,27,42,.07);cursor:pointer;transition:transform .25s cubic-bezier(.34,1.2,.64,1),box-shadow .25s;border:1.5px solid var(--gray200);overflow:hidden;}
+.mod-lib-card:hover{transform:translateY(-5px);box-shadow:0 20px 45px rgba(13,27,42,.14);}
+.mod-lib-top{padding:1.2rem 1.3rem;display:flex;align-items:center;justify-content:space-between;position:relative;}
+.mod-lib-top.pro{background:linear-gradient(135deg,#0d1b2a,#1a3a6e);}
+.mod-lib-top.acad{background:linear-gradient(135deg,#1e1b4b,#3730a3);}
+.mod-lib-ico{width:44px;height:44px;background:rgba(255,255,255,.16);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;backdrop-filter:blur(4px);}
+.mod-lib-score{font-size:.72rem;font-weight:800;border-radius:8px;padding:.15rem .5rem;}
+.mod-lib-body{padding:1rem 1.2rem 1.1rem;}
+.mod-lib-body h3{font-size:.88rem;font-weight:800;color:var(--navy);margin-bottom:.3rem;line-height:1.4;}
+.mod-lib-body p{font-size:.76rem;color:var(--gray600);line-height:1.5;}
+.mod-lib-meta{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.65rem;}
+.mod-lib-meta span{font-size:.7rem;color:var(--gray400);}
+.mod-lib-badge{display:inline-flex;align-items:center;gap:.25rem;padding:.15rem .5rem;border-radius:20px;font-size:.64rem;font-weight:800;text-transform:uppercase;}
+.badge-pro{background:rgba(245,158,11,.12);color:var(--pro-dark);}
+.badge-acad{background:rgba(124,58,237,.1);color:var(--acad-dark);}
+
+/* ═══ GENERATION ═══ */
+.gen-wrap{max-width:580px;margin:2rem auto;text-align:center;}
+.gen-hero{background:linear-gradient(135deg,var(--navy),#162f55);border-radius:18px;padding:2rem;margin-bottom:1.5rem;color:#fff;}
+.gen-hero h2{font-size:1.2rem;font-weight:900;font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:.3rem;}
+.gen-hero p{font-size:.8rem;opacity:.75;}
+.prog-track{background:rgba(255,255,255,.12);border-radius:20px;height:7px;overflow:hidden;margin:1rem 0;}
+.prog-fill{height:100%;border-radius:20px;transition:width .5s ease;background:linear-gradient(90deg,var(--accent),var(--orange));}
+.prog-fill.acad{background:linear-gradient(90deg,#7c3aed,#a78bfa);}
+.gen-steps{display:flex;flex-direction:column;gap:.6rem;}
+.gen-step{display:flex;align-items:center;gap:.9rem;padding:.75rem 1rem;border-radius:11px;background:#fff;border:1.5px solid var(--gray200);transition:all .3s;text-align:left;}
+.gen-step.active{border-color:var(--accent);background:var(--pro-bg);}
+.gen-step.active.a-acad{border-color:var(--purple);background:var(--acad-bg);}
+.gen-step.done{border-color:#6ee7b7;background:#f0fdf4;}
+.gen-step.error{border-color:#fca5a5;background:#fef2f2;}
+.gen-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;background:var(--gray100);}
+.gen-step.active .gen-ico{background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;}
+.gen-step.active.a-acad .gen-ico{background:var(--purple);color:#fff;}
+.gen-step.done .gen-ico{background:var(--green);color:#fff;}
+.gen-step.error .gen-ico{background:var(--red);color:#fff;}
+.gen-step-title{font-size:.81rem;font-weight:700;color:var(--navy);}
+.gen-step-sub{font-size:.71rem;color:var(--gray400);margin-top:.05rem;}
+.spinner{width:17px;height:17px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+
+/* ═══ MODULE VIEWER — mod-header (même classe que index.html) ═══ */
+.mod-header{border-radius:18px;margin-bottom:1.5rem;overflow:hidden;box-shadow:0 8px 30px rgba(13,27,42,.15);}
+.mod-header-top{padding:2rem 2rem 1.6rem;color:#fff;display:flex;align-items:center;gap:1.2rem;position:relative;overflow:hidden;}
+.mod-header-top.pro{background:linear-gradient(145deg,#0a1628,#1a3a6e);}
+.mod-header-top.acad{background:linear-gradient(145deg,#1e1b4b,#3730a3);}
+.mod-header-top::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.1),transparent 65%);pointer-events:none;}
+.mod-header-icon{width:64px;height:64px;background:rgba(255,255,255,.14);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:2.1rem;flex-shrink:0;box-shadow:0 4px 18px rgba(0,0,0,.22);}
+.mod-header-text h2{font-size:1.3rem;font-weight:800;margin-bottom:.3rem;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;}
+.mod-header-text p{font-size:.83rem;color:rgba(255,255,255,.75);}
+.mod-header-steps{background:#fff;padding:.8rem 2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--gray200);}
+.mod-header-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,.13);color:rgba(255,255,255,.9);border-radius:7px;padding:.2rem .55rem;border:1px solid rgba(255,255,255,.18);}
+.mod-tabs{display:flex;border-bottom:2px solid var(--gray200);margin-bottom:1.2rem;gap:.15rem;}
+.mod-tab{background:transparent;border:none;padding:.65rem 1.1rem;font-size:.8rem;font-weight:700;color:var(--gray400);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;font-family:inherit;transition:all .15s;border-radius:7px 7px 0 0;}
+.mod-tab:hover{color:var(--navy);background:var(--gray50);}
+.mod-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.mod-tab.active.a-acad{color:var(--purple);border-bottom-color:var(--purple);}
+.mod-panel{display:none;}
+.mod-panel.active{display:block;animation:fadeUp .25s ease both;}
+
+/* ═══ CONTENT SECTIONS ═══ */
+.cs{border:1.5px solid var(--gray200);border-radius:13px;margin-bottom:.9rem;overflow:hidden;background:#fff;box-shadow:0 1px 6px rgba(13,27,42,.04);}
+.cs-hdr{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.2rem;background:var(--gray50);cursor:pointer;user-select:none;transition:background .15s;}
+.cs-hdr:hover{background:var(--gray100);}
+.cs-hdr h4{font-size:.85rem;font-weight:800;color:var(--navy);}
+.cs-body{padding:1.1rem 1.2rem;font-size:.83rem;line-height:1.8;color:#374151;display:none;}
+.cs-body.open{display:block;animation:fadeUp .2s ease both;}
+.kp{border-left:3px solid var(--accent);background:var(--pro-bg);border-radius:0 9px 9px 0;padding:.45rem .85rem;margin:.5rem 0;font-size:.8rem;font-weight:700;color:var(--pro-dark);}
+.kp.acad{border-color:var(--purple);background:var(--acad-bg);color:var(--acad-dark);}
+.def-box{background:var(--gray50);border:1.5px solid var(--gray200);border-radius:9px;padding:.5rem .85rem;margin:.4rem 0;font-size:.8rem;}
+.def-term{font-weight:800;color:var(--navy);}
+
+/* ═══ STEPS (procédures) ═══ */
+.steps-ol{list-style:none;display:flex;flex-direction:column;gap:.45rem;margin:.6rem 0;}
+.step-li{display:flex;gap:.7rem;align-items:flex-start;background:var(--gray50);border:1.5px solid var(--gray200);border-radius:9px;padding:.6rem .9rem;}
+.step-n{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;font-size:.7rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:.05rem;}
+.step-n.acad{background:var(--purple);}
+.step-t{font-size:.82rem;line-height:1.6;color:var(--gray800);}
+
+/* ═══ SCENARIOS ═══ */
+.sc-card{border:1.5px solid var(--gray200);border-radius:13px;margin-bottom:.85rem;overflow:hidden;box-shadow:0 1px 5px rgba(13,27,42,.04);}
+.sc-hdr{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;cursor:pointer;transition:background .15s;}
+.sc-hdr.pro{background:var(--pro-bg);}
+.sc-hdr.acad{background:var(--acad-bg);}
+.sc-hdr:hover.pro{background:var(--pro-light);}
+.sc-hdr:hover.acad{background:var(--acad-light);}
+.sc-title{font-size:.83rem;font-weight:800;color:var(--navy);}
+.sc-body{padding:.9rem 1.1rem;display:none;background:#fff;}
+.sc-body.open{display:block;}
+.sc-field{margin-bottom:.6rem;font-size:.81rem;line-height:1.65;}
+.sc-field strong{font-size:.66rem;text-transform:uppercase;letter-spacing:.4px;color:var(--gray400);display:block;margin-bottom:.1rem;}
+
+/* ═══ CHECKLIST ═══ */
+.cl-section{margin-bottom:1.2rem;}
+.cl-section-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;padding:.3rem .5rem;border-radius:6px;display:inline-block;}
+.cl-item{display:flex;align-items:flex-start;gap:.55rem;padding:.42rem .65rem;border-radius:8px;cursor:pointer;transition:background .15s;font-size:.81rem;color:var(--gray800);line-height:1.5;}
+.cl-item:hover{background:var(--gray100);}
+.cl-item input{accent-color:var(--accent);flex-shrink:0;margin-top:.15rem;width:15px;height:15px;}
+.cl-item.acad-cl input{accent-color:var(--purple);}
+.cl-item.checked{color:var(--gray400);text-decoration:line-through;}
+
+/* ═══ EXERCICES ═══ */
+.ex-card{background:#fff;border:1.5px solid var(--gray200);border-radius:13px;padding:1.2rem;margin-bottom:.85rem;box-shadow:var(--shadow);}
+.ex-diff{display:inline-block;border-radius:6px;padding:.1rem .5rem;font-size:.66rem;font-weight:800;text-transform:uppercase;margin-bottom:.55rem;}
+.ex-diff.debutant{background:#d1fae5;color:#065f46;}
+.ex-diff.intermediaire{background:var(--pro-light);color:var(--pro-dark);}
+.ex-diff.avance,.ex-diff.synthese{background:#fee2e2;color:#991b1b;}
+.ex-q{font-size:.79rem;color:var(--gray600);padding-left:.6rem;border-left:2.5px solid var(--purple);margin-bottom:.25rem;line-height:1.55;}
+
+/* ═══ QUIZ ═══ */
+.quiz-q{background:#fff;border:1.5px solid var(--gray200);border-radius:13px;padding:1.1rem 1.2rem;margin-bottom:.8rem;box-shadow:0 1px 5px rgba(13,27,42,.04);}
+.quiz-q-txt{font-size:.85rem;font-weight:700;color:var(--navy);margin-bottom:.7rem;line-height:1.5;}
+.quiz-opt{display:flex;align-items:center;gap:.55rem;padding:.42rem .65rem;border-radius:8px;margin-bottom:.3rem;cursor:pointer;border:1.5px solid transparent;transition:all .15s;font-size:.81rem;color:var(--gray800);}
+.quiz-opt:hover{background:var(--gray100);}
+.quiz-opt.sel-pro{border-color:var(--accent);background:var(--pro-bg);}
+.quiz-opt.sel-acad{border-color:var(--purple);background:var(--acad-bg);}
+.quiz-opt.correct{border-color:var(--green);background:#ecfdf5;}
+.quiz-opt.wrong{border-color:var(--red);background:#fef2f2;}
+.quiz-notion{font-size:.63rem;color:var(--gray400);margin-top:.4rem;}
+.quiz-res{border-radius:16px;padding:1.6rem;text-align:center;margin-bottom:1.2rem;}
+.quiz-score{font-size:3.2rem;font-weight:900;line-height:1;}
+.quiz-label{font-size:.88rem;font-weight:800;margin:.35rem 0;}
+.quiz-sub{font-size:.77rem;color:var(--gray600);}
+
+/* ═══ MÉMO & RÉVISION ═══ */
+.memo-block{border-radius:12px;padding:.9rem 1.1rem;margin-bottom:.8rem;}
+.memo-block h4{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.memo-item{display:flex;align-items:flex-start;gap:.45rem;font-size:.8rem;line-height:1.6;margin-bottom:.3rem;color:#374151;}
+.memo-item::before{content:"→";font-weight:800;flex-shrink:0;margin-top:.05rem;}
+.memo-gold{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:14px;padding:1.1rem 1.3rem;margin-top:.5rem;}
+.memo-gold h4{font-size:.62rem;opacity:.55;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;}
+.memo-gold p{font-size:.9rem;font-weight:700;line-height:1.6;color:#fff;}
+.formula-tag{font-family:'JetBrains Mono',monospace;background:var(--gray50);border:1.5px solid var(--gray200);border-radius:8px;padding:.3rem .65rem;font-size:.8rem;margin-bottom:.3rem;display:block;color:var(--navy);font-weight:600;}
+
+/* ═══ ALERTS ═══ */
+.alert{padding:.8rem 1.1rem;border-radius:10px;margin-bottom:1rem;font-size:.82rem;display:flex;gap:.6rem;align-items:flex-start;line-height:1.5;}
+.alert-info{background:#eff6ff;color:#1e40af;border-left:4px solid #3b82f6;}
+.alert-warning{background:var(--pro-bg);color:#92400e;border-left:4px solid var(--accent);}
+.alert-danger{background:#fef2f2;color:#991b1b;border-left:4px solid var(--red);}
+.alert-success{background:#ecfdf5;color:#065f46;border-left:4px solid var(--green);}
+
+/* ═══ REM CARDS ═══ */
+.rem-card{border:1.5px solid #fde68a;background:var(--pro-bg);border-radius:12px;padding:.9rem 1.1rem;margin-bottom:.65rem;}
+.rem-card h4{font-size:.79rem;font-weight:800;color:#92400e;margin-bottom:.4rem;}
+
+/* ═══ FILE DROP ═══ */
+.file-drop{border:2px dashed var(--gray200);border-radius:10px;padding:1.3rem;text-align:center;cursor:pointer;transition:all .15s;font-size:.79rem;color:var(--gray600);}
+.file-drop:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ═══ DOMAIN PILLS ═══ */
+.dpills{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.45rem;}
+.dpill{background:var(--gray100);border:1px solid var(--gray200);border-radius:20px;padding:.2rem .65rem;font-size:.71rem;color:var(--gray600);cursor:pointer;transition:all .12s;}
+.dpill:hover{background:var(--pro-bg);border-color:var(--accent);color:var(--pro-dark);}
+.dpill.acad:hover{background:var(--acad-bg);border-color:var(--purple);color:var(--acad-dark);}
+
+/* ═══ CORRECTION BTN ═══ */
+.corr-btn{background:var(--gray100);border:none;padding:.32rem .75rem;border-radius:7px;font-size:.73rem;font-weight:700;color:var(--gray600);cursor:pointer;font-family:inherit;transition:all .15s;}
+.corr-btn:hover{background:var(--gray200);}
+.corr-body{display:none;margin-top:.65rem;background:#ecfdf5;border-radius:9px;padding:.7rem .95rem;font-size:.8rem;color:#065f46;line-height:1.75;border:1px solid #6ee7b7;}
+
+/* ═══ MODE SWITCH (form) ═══ */
+.mode-switch{display:flex;background:#fff;border:1.5px solid var(--gray200);border-radius:11px;padding:.25rem;margin-bottom:1.4rem;width:fit-content;box-shadow:var(--shadow);}
+.ms-btn{border:none;background:transparent;padding:.5rem 1.2rem;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;color:var(--gray600);}
+.ms-btn.active-pro{background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;box-shadow:0 2px 10px rgba(245,158,11,.35);}
+.ms-btn.active-acad{background:var(--purple);color:#fff;box-shadow:0 2px 10px rgba(124,58,237,.3);}
+
+/* ═══ EMPTY ═══ */
+.empty{text-align:center;padding:2.5rem;color:var(--gray600);}
+.empty .ei{font-size:3rem;margin-bottom:.6rem;}
+.empty h3{font-size:.95rem;font-weight:800;color:var(--navy);margin-bottom:.3rem;}
+
+/* ═══ MODAL ═══ */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;align-items:center;justify-content:center;padding:1rem;}
+.modal-ov.open{display:flex;}
+.modal-box{background:#fff;border-radius:16px;width:min(700px,95vw);max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(0,0,0,.28);}
+.modal-hdr{padding:1.1rem 1.4rem;border-bottom:1px solid var(--gray200);display:flex;align-items:center;justify-content:space-between;}
+.modal-hdr h3{font-size:.93rem;font-weight:800;color:var(--navy);}
+.modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--gray600);padding:.1rem .3rem;border-radius:5px;}
+.modal-close:hover{background:var(--gray100);}
+.modal-body{padding:1.3rem 1.4rem;overflow-y:auto;flex:1;font-size:.83rem;line-height:1.8;color:#374151;}
+
+/* ═══ FAVORIS ═══ */
+.fav-btn{background:none;border:none;font-size:1rem;cursor:pointer;padding:.15rem;transition:transform .2s;line-height:1;color:var(--gray400);}
+.fav-btn:hover{transform:scale(1.3);}
+.fav-btn.fav-on{color:#fbbf24;filter:drop-shadow(0 0 4px rgba(245,158,11,.5));}
+
+/* ═══ NOTES PAR SECTION ═══ */
+.note-ico{background:none;border:1.5px solid var(--gray200);border-radius:7px;padding:.16rem .42rem;font-size:.67rem;cursor:pointer;color:var(--gray400);font-family:inherit;transition:all .15s;white-space:nowrap;}
+.note-ico:hover{border-color:var(--accent);color:var(--accent);}
+.note-ico.has-note{border-color:var(--accent);color:var(--pro-dark);background:var(--pro-bg);}
+.note-ico.has-note.an{border-color:var(--purple);color:var(--acad-dark);background:var(--acad-bg);}
+
+/* ═══ PROGRESSION LECTURE ═══ */
+.read-progress-bar{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;padding:.45rem .75rem;background:#fff;border:1px solid var(--gray200);border-radius:9px;}
+.rpb-wrap{background:var(--gray200);border-radius:20px;height:6px;overflow:hidden;flex:1;}
+.rpb-fill{height:100%;border-radius:20px;background:var(--green);transition:width .4s;}
+.read-lbl{font-size:.67rem;color:var(--gray400);font-weight:700;white-space:nowrap;}
+.read-dot{width:9px;height:9px;border-radius:50%;background:var(--gray300,#d1d5db);flex-shrink:0;cursor:pointer;transition:all .2s;border:2px solid transparent;}
+.read-dot:hover{background:var(--gray400);}
+.read-dot.done{background:var(--green);border-color:#a7f3d0;}
+
+/* ═══ FLASHCARDS ═══ */
+.fc-wrap{perspective:1000px;cursor:pointer;width:100%;max-width:520px;margin:0 auto 1.2rem;}
+.fc-inner{position:relative;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,0,.2,1);height:200px;}
+.fc-inner.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.8rem;text-align:center;}
+.fc-front{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;box-shadow:0 8px 30px rgba(13,27,42,.2);}
+.fc-back{background:#fff;transform:rotateY(180deg);border:2px solid var(--gray200);box-shadow:0 8px 30px rgba(13,27,42,.1);}
+.fc-lbl{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.55rem;opacity:.55;}
+.fc-front .fc-lbl{color:#fff;}
+.fc-back .fc-lbl{color:var(--gray400);}
+.fc-term{font-size:1.05rem;font-weight:900;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.3;}
+.fc-def{font-size:.83rem;line-height:1.7;color:var(--gray800);}
+.fc-nav{display:flex;align-items:center;justify-content:space-between;gap:.7rem;}
+.fc-counter{font-size:.79rem;font-weight:700;color:var(--gray600);min-width:60px;text-align:center;}
+
+/* ═══ TIMER QUIZ ═══ */
+.quiz-timer{display:inline-flex;align-items:center;gap:.35rem;font-size:.8rem;font-weight:800;color:var(--navy);background:var(--gray50);border:1.5px solid var(--gray200);border-radius:9px;padding:.28rem .7rem;font-family:'JetBrains Mono',monospace;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.quiz-timer.warn{color:var(--red);border-color:var(--red);background:#fef2f2;animation:pulse .5s ease infinite;}
+
+/* ═══ ATTESTATION ═══ */
+.att-box{background:#fff;border-radius:20px;padding:2.5rem;max-width:640px;margin:0 auto;position:relative;overflow:hidden;border:2px solid var(--gray200);}
+.att-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:6rem;opacity:.04;pointer-events:none;white-space:nowrap;font-weight:900;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;user-select:none;}
+.att-seal{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--orange));display:flex;align-items:center;justify-content:center;font-size:1.9rem;box-shadow:0 4px 18px rgba(245,158,11,.4);margin:0 auto .8rem;}
+
+/* ═══ GLOSSAIRE ═══ */
+.gloss-letter{font-size:1rem;font-weight:900;color:var(--purple);border-bottom:2px solid var(--acad-light);margin:.8rem 0 .4rem;padding-bottom:.2rem;font-family:'Plus Jakarta Sans',sans-serif;}
+.gloss-entry{display:flex;gap:.8rem;padding:.38rem .6rem;border-radius:7px;transition:background .12s;align-items:flex-start;}
+.gloss-entry:hover{background:var(--acad-bg);}
+.gloss-entry .gt{font-weight:800;color:var(--navy);font-size:.81rem;min-width:140px;flex-shrink:0;}
+.gloss-entry .gd{font-size:.79rem;color:var(--gray600);line-height:1.55;}
+
+/* ═══ TOAST ═══ */
+@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.gls-toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--navy);color:#fff;border-radius:11px;padding:.65rem 1.2rem;font-size:.8rem;font-weight:700;z-index:9999;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:opacity .4s;pointer-events:none;animation:toastIn .3s ease both;}
+.gls-toast.terr{background:var(--red);}
+
+/* ═══ CARD ACTIONS ═══ */
+.card-actions{display:flex;gap:.3rem;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--gray100);}
+.card-act-btn{background:var(--gray50);border:1px solid var(--gray200);border-radius:7px;padding:.22rem .52rem;font-size:.68rem;cursor:pointer;font-family:inherit;font-weight:700;color:var(--gray600);transition:all .13s;}
+.card-act-btn:hover{background:#fff;color:var(--navy);border-color:var(--navy);}
+
+/* ═══ LIB TOOLBAR ═══ */
+.lib-toolbar{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;}
+
+@media(max-width:768px){.sidebar{transform:translateX(-100%);}.main{margin-left:0;}.mode-hero,.form-grid,.form-grid-3,.stats-row{grid-template-columns:1fr;}}
+@media print{.sidebar,.nav-btn,.mod-tabs,#attClose,#attPrint,.card-actions{display:none!important;}.main{margin-left:0!important;padding:.5rem!important;}}
+
+/* ═══ KPI BOXES ═══ */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin:1rem 0;}
+.kpi-box{background:#fff;border-radius:14px;padding:1.1rem 1rem;text-align:center;border:1.5px solid var(--gray200);box-shadow:0 1px 6px rgba(13,27,42,.05);transition:transform .2s,box-shadow .2s;}
+.kpi-box:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(13,27,42,.09);}
+.kpi-val{font-size:1.85rem;font-weight:900;color:var(--accent);letter-spacing:-.5px;}
+.kpi-val.kv-purple{color:var(--purple);}
+.kpi-val.kv-green{color:var(--green);}
+.kpi-val.kv-red{color:var(--red);}
+.kpi-lbl{font-size:.68rem;color:var(--gray400);margin-top:.25rem;text-transform:uppercase;letter-spacing:.4px;font-weight:600;}
+
+/* ═══ AI FEEDBACK ═══ */
+.ai-wrap{background:#f8fafc;border:1px solid var(--gray200);border-radius:12px;padding:.9rem 1.1rem;margin-top:.7rem;font-size:.82rem;line-height:1.7;color:var(--gray800);}
+.ai-wrap-header{font-size:.72rem;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem;}
+.ai-loading-text{font-size:.75rem;color:var(--gray400);margin-top:.3rem;}
+.ai-feedback{background:#f0fdf4;border:1.5px solid #a7f3d0;border-radius:12px;padding:.9rem 1.1rem;font-size:.83rem;line-height:1.8;color:#065f46;}
+.ai-spinner{width:16px;height:16px;border:2px solid var(--gray200);border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0;}
+
+/* ═══ EXERCICES — 3 NIVEAUX SÉQUENTIELS ═══ */
+.ex-level-wrap{border-radius:14px;padding:1rem 1.1rem;margin-bottom:1rem;border:1.5px solid;}
+.ex-level-locked{background:#f8fafc;border-color:var(--gray200);opacity:.65;pointer-events:none;}
+.ex-level-current{box-shadow:0 4px 20px rgba(13,27,42,.1);}
+.ex-badge-row{display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;margin-bottom:.8rem;}
+.ex-level-ta{width:100%;min-height:110px;border-radius:9px;padding:.6rem .85rem;font-size:.83rem;font-family:inherit;resize:vertical;outline:none;line-height:1.6;background:#fff;box-sizing:border-box;}
+.ex-timer-svg{display:inline-block;vertical-align:middle;}
+@keyframes scoreRingAnim{from{stroke-dasharray:0 238.76}to{stroke-dasharray:var(--ring-fill) 238.76}}
+
+/* ═══ CHAT ASSISTANT — STYLE CLAUDE ═══ */
+.cl-chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 8.5rem);max-height:820px;background:#f5f5f5;border-radius:18px;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #e5e5e5;overflow:hidden;}
+.cl-topbar{padding:.6rem 1.1rem;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;gap:.6rem;background:#fff;flex-shrink:0;}
+.cl-model-pill{display:flex;align-items:center;gap:.35rem;background:#f0f0f0;border-radius:20px;padding:.22rem .75rem;font-size:.72rem;font-weight:700;color:#444;}
+.cl-model-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;flex-shrink:0;}
+.cl-topbar-actions{margin-left:auto;display:flex;gap:.4rem;}
+.cl-topbar-btn{background:none;border:1.5px solid #e0e0e0;border-radius:8px;cursor:pointer;font-size:.72rem;color:#666;padding:.22rem .65rem;font-family:inherit;font-weight:700;transition:all .15s;}
+.cl-topbar-btn:hover{border-color:#999;color:#333;}
+.cl-ctx-strip{padding:.35rem .9rem;background:#fefce8;border-bottom:1px solid #fde68a;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;flex-shrink:0;}
+.cl-ctx-chip{font-size:.67rem;font-weight:700;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:.12rem .45rem;display:flex;align-items:center;gap:.25rem;}
+.cl-msgs{flex:1;overflow-y:auto;padding:1.5rem 1rem 1rem;display:flex;flex-direction:column;gap:1.2rem;scroll-behavior:smooth;}
+.cl-msgs::-webkit-scrollbar{width:4px;}.cl-msgs::-webkit-scrollbar-track{background:transparent;}.cl-msgs::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px;}
+/* User messages */
+.cl-msg-user{align-self:flex-end;max-width:80%;background:#fff;border:1px solid #e5e5e5;border-radius:18px 18px 4px 18px;padding:.7rem 1.1rem;font-size:.86rem;line-height:1.65;color:#1a1a1a;box-shadow:0 1px 3px rgba(0,0,0,.06);animation:fadeUp .2s ease both;}
+/* AI messages */
+.cl-msg-ai{align-self:flex-start;max-width:88%;animation:fadeUp .2s ease both;}
+.cl-ai-name{display:flex;align-items:center;gap:.35rem;margin-bottom:.4rem;}
+.cl-ai-icon{width:24px;height:24px;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;flex-shrink:0;}
+.cl-ai-label{font-size:.7rem;font-weight:800;color:#555;}
+.cl-ai-text{font-size:.86rem;line-height:1.75;color:#1a1a1a;}
+.cl-ai-text em{font-style:italic;color:#555;}
+.cl-ai-text strong{font-weight:800;}
+/* Typing indicator */
+.cl-typing-wrap{align-self:flex-start;animation:fadeUp .2s ease both;}
+.cl-typing-dots{display:flex;gap:4px;padding:.5rem .2rem;}
+.cl-typing-dot{width:7px;height:7px;background:#bbb;border-radius:50%;animation:typingBounce 1.2s ease infinite;}
+.cl-typing-dot:nth-child(2){animation-delay:.18s;}.cl-typing-dot:nth-child(3){animation-delay:.36s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px)}}
+/* Suggestions */
+.cl-suggestions{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem;}
+.cl-sugg{background:#fff;border:1.5px solid #e0e0e0;border-radius:20px;padding:.3rem .8rem;font-size:.75rem;color:#555;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:600;}
+.cl-sugg:hover{border-color:var(--accent);color:var(--accent);background:#fffbeb;}
+/* Module preview card */
+.cl-preview{background:linear-gradient(135deg,#fffbeb,#fff);border:1.5px solid var(--accent);border-radius:14px;padding:.9rem 1.1rem;margin-top:.5rem;font-size:.82rem;}
+.cl-preview-title{font-weight:800;color:var(--navy);margin-bottom:.4rem;font-size:.88rem;}
+.cl-preview-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.cl-preview-tag{background:var(--pro-bg);color:var(--pro-dark);border:1px solid #fde68a;border-radius:6px;padding:.12rem .5rem;font-size:.69rem;font-weight:700;}
+.cl-preview-tag.acad{background:var(--acad-bg);color:var(--acad-dark);border-color:#ddd6fe;}
+.cl-gen-btn{display:flex;width:100%;margin-top:.65rem;background:#1a1a1a;color:#fff;border:none;border-radius:10px;padding:.68rem 1rem;font-size:.85rem;font-weight:800;cursor:pointer;font-family:inherit;align-items:center;gap:.5rem;justify-content:center;transition:opacity .2s;}
+.cl-gen-btn:hover{opacity:.82;}
+.cl-gen-btn.acad-gen{background:linear-gradient(135deg,var(--purple),#a855f7);}
+/* Input area */
+.cl-input-area{padding:.75rem 1rem 1rem;background:#fff;border-top:1px solid #e8e8e8;flex-shrink:0;}
+.cl-files-row{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.45rem;}
+.cl-file-chip{display:flex;align-items:center;gap:.3rem;background:#f0f0f0;border:1px solid #ddd;border-radius:8px;padding:.22rem .6rem;font-size:.71rem;color:#444;font-weight:600;}
+.cl-file-chip-rm{background:none;border:none;cursor:pointer;color:#aaa;font-size:.72rem;padding:0 0 0 .15rem;line-height:1;transition:color .15s;}
+.cl-file-chip-rm:hover{color:#e00;}
+.cl-input-box{display:flex;align-items:flex-end;gap:.4rem;background:#f5f5f5;border:1.5px solid #d9d9d9;border-radius:14px;padding:.5rem .65rem;transition:border .2s;}
+.cl-input-box:focus-within{border-color:#7c3aed;background:#fff;}
+.cl-textarea{flex:1;background:none;border:none;outline:none;resize:none;font-size:.88rem;font-family:inherit;line-height:1.55;color:#1a1a1a;max-height:130px;overflow-y:auto;min-height:22px;padding:.15rem 0;}
+.cl-attach-btn{background:none;border:none;cursor:pointer;color:#aaa;font-size:1.05rem;padding:.15rem;flex-shrink:0;transition:color .15s;line-height:1;}
+.cl-attach-btn:hover{color:#7c3aed;}
+.cl-send-btn{width:32px;height:32px;background:#1a1a1a;border:none;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.82rem;flex-shrink:0;transition:opacity .15s;}
+.cl-send-btn:hover{opacity:.8;}
+.cl-send-btn:disabled{opacity:.25;cursor:default;}
+.cl-hint{font-size:.67rem;color:#aaa;margin-top:.3rem;text-align:center;}
+/* chat-suggestions & chat-module-preview aliases kept for launchChatModule compat */
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem;}
+.chat-sugg{background:#fff;border:1.5px solid #e0e0e0;border-radius:20px;padding:.28rem .75rem;font-size:.74rem;color:#555;cursor:pointer;font-family:inherit;transition:all .15s;font-weight:600;}
+.chat-sugg:hover{border-color:var(--accent);color:var(--accent);background:#fffbeb;}
+/* KPI MÉTIER */
+.kpi-meter-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin:.8rem 0;}
+.kpi-meter-card{background:#fff;border:1.5px solid var(--gray200);border-radius:14px;padding:1.1rem 1.2rem;position:relative;overflow:hidden;}
+.kpi-meter-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--orange));}
+.kpi-meter-title{font-size:.82rem;font-weight:900;color:var(--navy);margin-bottom:.25rem;}
+.kpi-meter-sub{font-size:.72rem;color:var(--gray500);margin-bottom:.75rem;line-height:1.45;}
+.kpi-levels{display:flex;gap:.4rem;margin-bottom:.7rem;}
+.kpi-level{flex:1;border-radius:8px;padding:.4rem .5rem;text-align:center;}
+.kpi-level.deb{background:#fef2f2;border:1px solid #fecaca;}
+.kpi-level.op{background:#fffbeb;border:1px solid #fde68a;}
+.kpi-level.exp{background:#f0fdf4;border:1px solid #bbf7d0;}
+.kpi-level-lbl{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.3px;margin-bottom:.15rem;}
+.kpi-level.deb .kpi-level-lbl{color:#991b1b;}.kpi-level.op .kpi-level-lbl{color:#92400e;}.kpi-level.exp .kpi-level-lbl{color:#065f46;}
+.kpi-level-val{font-size:.78rem;font-weight:800;}
+.kpi-level.deb .kpi-level-val{color:#dc2626;}.kpi-level.op .kpi-level-val{color:#d97706;}.kpi-level.exp .kpi-level-val{color:#059669;}
+.kpi-why{font-size:.74rem;color:var(--gray600);margin-bottom:.5rem;line-height:1.5;}
+.kpi-progress-tip{font-size:.72rem;color:var(--purple);font-weight:600;border-left:3px solid var(--purple);padding-left:.5rem;line-height:1.45;}
+/* RÉFLEXE PRO & DONNÉES CLÉS dans les sections */
+.reflexe-pro-box{margin:.75rem 0;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:12px;padding:.75rem 1rem;}
+.reflexe-pro-lbl{font-size:.63rem;font-weight:900;color:#6d28d9;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem;display:flex;align-items:center;gap:.3rem;}
+.reflexe-pro-txt{font-size:.8rem;color:#4c1d95;line-height:1.65;}
+.donnees-cles-row{display:flex;flex-wrap:wrap;gap:.35rem;margin:.5rem 0;}
+.donnee-cle-chip{background:var(--navy);color:#fff;border-radius:8px;padding:.25rem .65rem;font-size:.71rem;font-weight:700;line-height:1.4;}
+/* IMAGES & SVG dans sections */
+.sec-media{margin:.6rem 0 .3rem;}
+.sec-img-wrap{border-radius:10px;overflow:hidden;border:1px solid var(--gray200);margin-bottom:.25rem;}
+.sec-img-wrap img{width:100%;height:160px;object-fit:cover;display:block;}
+.sec-img-credit{font-size:.58rem;color:var(--gray400);text-align:right;padding:.18rem .5rem;background:#f8fafc;line-height:1.4;}
+.sec-img-credit a{color:var(--gray400);text-decoration:none;}
+.sec-svg-wrap{border-radius:10px;border:1.5px solid var(--gray200);background:#fff;padding:.5rem;overflow:hidden;margin-bottom:.25rem;}
+.sec-svg-wrap svg{width:100%;height:auto;max-height:210px;display:block;}
+.sec-mdia-btns{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.15rem;}
+.sec-media-btn{font-size:.67rem;padding:.2rem .52rem;border:1.5px solid;border-radius:6px;cursor:pointer;font-weight:700;transition:all .15s;background:#fff;line-height:1.4;}
+.sec-svg-btn{border-color:var(--purple);color:var(--purple);}.sec-svg-btn:hover{background:var(--purple);color:#fff;}
+.sec-img-rmv{border-color:#dc2626;color:#dc2626;}.sec-img-rmv:hover{background:#dc2626;color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-brand">Green Lab <em>Studio</em></div>
+    <div class="sb-tag">Générateur pédagogique IA · Tous domaines</div>
+  </div>
+  <div class="sb-key">
+    <span class="sb-key-label">Clé API Groq</span>
+    <input type="password" id="apiKeyInput" placeholder="gsk_…" oninput="sessionStorage.setItem('gls_key',this.value)">
+  </div>
+  <div class="sb-mode" id="sbMode"></div>
+  <nav>
+    <div class="nav-section">Navigation</div>
+    <button class="nav-btn active" onclick="nav('home')" id="nav-home"><span class="nav-ico">🏠</span>Accueil</button>
+    <button class="nav-btn" onclick="nav('chat')" id="nav-chat"><span class="nav-ico">💬</span>Assistant IA</button>
+    <button class="nav-btn" onclick="nav('form')" id="nav-form"><span class="nav-ico">✨</span>Créer un module</button>
+    <button class="nav-btn" onclick="nav('library')" id="nav-library"><span class="nav-ico">📚</span>Bibliothèque</button>
+    <div class="nav-section">Compte</div>
+    <button class="nav-btn" onclick="nav('settings')" id="nav-settings"><span class="nav-ico">⚙️</span>Paramètres</button>
+  </nav>
+  <div class="sb-footer"><span>Green Lab Studio v2.0</span></div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="ph"><h1>Tableau de bord</h1><p>Choisissez un mode et générez votre module pédagogique complet en quelques minutes.</p></div>
+  <div class="mode-hero">
+    <div class="mode-card pro" onclick="goCreate('pro')">
+      <div class="mode-ico">💼</div>
+      <h2>Formation Professionnelle</h2>
+      <p>Vrai cours métier complet : théorie du domaine, procédures détaillées, exercices terrain, mises en situation réelles, check-list opérationnelle et QCM certifiant.</p>
+      <div class="mode-chips">
+        <span class="mode-chip">Cours théorique</span><span class="mode-chip">Procédures</span>
+        <span class="mode-chip">Exercices pratiques</span><span class="mode-chip">Attestation</span>
+      </div>
+      <div class="mode-cta gold">💼 Créer une formation →</div>
+    </div>
+    <div class="mode-card acad" onclick="goCreate('acad')">
+      <div class="mode-ico">⚡</div>
+      <h2>Cours Ingénieur</h2>
+      <p>Modules techniques pour le génie électrique, informatique, mécanique et industriel — avec formules, TD corrigés, QCM type examen et fiche de révision. Support PDF du professeur accepté.</p>
+      <div class="mode-chips">
+        <span class="mode-chip">Génie électrique</span><span class="mode-chip">Informatique</span>
+        <span class="mode-chip">Mécanique</span><span class="mode-chip">Automatique</span>
+      </div>
+      <div class="mode-cta purple-btn">⚡ Créer un cours →</div>
+    </div>
+  </div>
+  <div class="stats-row" id="homeStats"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;">
+    <span style="font-size:.92rem;font-weight:800;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;">Modules récents</span>
+    <button class="btn btn-ghost btn-sm" onclick="nav('library')">Voir tout →</button>
+  </div>
+  <div id="homeRecent"></div>
+</div>
+
+<!-- CHAT ASSISTANT -->
+<div class="screen" id="screen-chat">
+  <div class="cl-chat-wrap">
+    <!-- Topbar -->
+    <div class="cl-topbar">
+      <div class="cl-model-pill"><div class="cl-model-dot"></div>Green Lab Assistant · Llama 3.3 70B</div>
+      <div class="cl-topbar-actions">
+        <button class="cl-topbar-btn" onclick="resetChat()">↩ Nouvelle conv.</button>
+      </div>
+    </div>
+    <!-- Context strip (docs) -->
+    <div class="cl-ctx-strip" id="chatCtxBar" style="display:none"></div>
+    <!-- Messages -->
+    <div class="cl-msgs" id="chatMsgs"></div>
+    <!-- Input area -->
+    <div class="cl-input-area">
+      <div class="cl-files-row" id="chatFilesRow" style="display:none"></div>
+      <div class="cl-input-box">
+        <label class="cl-attach-btn" title="Joindre un fichier (.txt, .md, .csv, .json)">
+          📎<input type="file" id="chatFileInput" accept=".txt,.md,.csv,.json" multiple style="display:none" onchange="handleDocFiles(this.files)">
+        </label>
+        <textarea class="cl-textarea" id="chatInput" placeholder="Décrivez le module que vous voulez créer…" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,130)+'px'"></textarea>
+        <button class="cl-send-btn" id="chatSendBtn" onclick="sendChat()" title="Envoyer">➤</button>
+      </div>
+      <div class="cl-hint">Entrée pour envoyer · Maj+Entrée pour sauter une ligne · 📎 pour joindre un fichier</div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="screen" id="screen-form">
+  <div class="ph" id="formPh"><h1>✨ Créer un module</h1><p id="formPhSub">Configurez votre module et laissez l'IA générer le contenu complet.</p></div>
+  <div class="mode-switch">
+    <button class="ms-btn active-pro" id="ms-pro" onclick="switchMode('pro')">💼 Formation Professionnelle</button>
+    <button class="ms-btn" id="ms-acad" onclick="switchMode('acad')">⚡ Cours Ingénieur</button>
+  </div>
+  <div class="ccard" style="max-width:880px;">
+    <div id="formFields"></div>
+    <div style="margin-top:1.3rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-gold btn-lg" id="fSubmit" onclick="startGen()">✨ Générer le module</button>
+      <div id="fMsg" style="font-size:.78rem;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATING -->
+<div class="screen" id="screen-generating">
+  <div class="gen-wrap">
+    <div class="gen-hero">
+      <div style="font-size:2.5rem;margin-bottom:.6rem;" id="gIcon">⚙️</div>
+      <h2 id="gTitle">Génération en cours…</h2>
+      <p id="gSub">L'IA construit votre module étape par étape</p>
+      <div class="prog-track"><div class="prog-fill" id="gProg" style="width:0%"></div></div>
+    </div>
+    <div class="gen-steps" id="gSteps"></div>
+    <div id="gErr" style="display:none;margin-top:1rem;"></div>
+  </div>
+</div>
+
+<!-- MODULE VIEWER -->
+<div class="screen" id="screen-module"><div id="modContent"></div></div>
+
+<!-- LIBRARY -->
+<div class="screen" id="screen-library">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.3rem;flex-wrap:wrap;gap:.7rem;">
+    <div class="ph" style="margin:0;"><h1>📚 Bibliothèque</h1><p style="margin:0;">Tous vos modules générés</p></div>
+    <div class="lib-toolbar">
+      <input type="text" id="libQ" placeholder="Rechercher…" class="form-input" style="width:190px;" oninput="renderLib()">
+      <select id="libMode" class="form-select" style="width:170px;" onchange="renderLib()">
+        <option value="">Tous les modes</option><option value="pro">Formation Pro</option><option value="acad">Cours Ingénieur</option>
+      </select>
+      <select id="libFilter" class="form-select" style="width:140px;" onchange="renderLib()">
+        <option value="">Tous</option><option value="fav">⭐ Favoris</option><option value="scored">✅ Évalués</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" onclick="exportMods()">⬆️ Exporter</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer;">⬇️ Importer<input type="file" accept=".json" style="display:none" onchange="importMods(this.files[0])"></label>
+    </div>
+  </div>
+  <div id="libGrid"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="ph"><h1>⚙️ Paramètres</h1><p>Configuration de la plateforme</p></div>
+  <div class="ccard" style="max-width:480px;margin-bottom:1rem;">
+    <div class="ccard-title">🔑 Clé API Groq</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Stockée uniquement en session, jamais persistée.</p>
+    <div class="form-group"><label class="form-label">Clé API</label>
+    <input type="password" id="apiKeySettings" class="form-input" placeholder="gsk_…" oninput="document.getElementById('apiKeyInput').value=this.value;sessionStorage.setItem('gls_key',this.value)"></div>
+    <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Obtenir une clé →</a>
+  </div>
+  <div class="ccard" style="max-width:480px;margin-bottom:1rem;">
+    <div class="ccard-title">🖼️ Images Unsplash</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Clé API Unsplash (gratuite) pour illustrer automatiquement les sections avec des photos professionnelles.</p>
+    <div class="form-group"><label class="form-label">Access Key Unsplash</label>
+    <input type="password" id="unsplashKeyInput" class="form-input" placeholder="Votre clé Unsplash…" oninput="localStorage.setItem('gls_unsplash',this.value)"></div>
+    <a href="https://unsplash.com/developers" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="margin-top:.4rem;">Obtenir une clé gratuite (50 req/h) →</a>
+  </div>
+  <div class="ccard" style="max-width:480px;margin-bottom:1rem;">
+    <div class="ccard-title">💾 Sauvegarde & Partage</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Exportez vos modules en JSON pour les sauvegarder ou les partager. Importez des modules d'un autre appareil.</p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="exportMods()">⬆️ Exporter tous les modules</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer;">⬇️ Importer des modules<input type="file" accept=".json" style="display:none" onchange="importMods(this.files[0])"></label>
+    </div>
+  </div>
+  <div class="ccard" style="max-width:480px;">
+    <div class="ccard-title">🗑️ Données locales</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Modules stockés dans le navigateur (localStorage).</p>
+    <button class="btn btn-danger btn-sm" onclick="clearAll()">Supprimer tous les modules</button>
+  </div>
+</div>
+</main>
+
+<!-- MODAL REMÉDIATION -->
+<div class="modal-ov" id="remModal" onclick="if(event.target===this)closeRem()">
+  <div class="modal-box">
+    <div class="modal-hdr"><h3 id="remTitle">📖 Cours de remédiation</h3><button class="modal-close" onclick="closeRem()">✕</button></div>
+    <div class="modal-body" id="remBody"></div>
+  </div>
+</div>
+
+<!-- MODAL FLASHCARDS -->
+<div class="modal-ov" id="fcModal" onclick="if(event.target===this)closeFC()">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-hdr">
+      <h3>🃏 Flashcards</h3>
+      <div style="display:flex;align-items:center;gap:.6rem;">
+        <span id="fcCounter" style="font-size:.78rem;color:var(--gray400);font-weight:700;"></span>
+        <button class="modal-close" onclick="closeFC()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:1.4rem;">
+      <div class="fc-wrap" onclick="flipFC()">
+        <div class="fc-inner" id="fcInner">
+          <div class="fc-face fc-front" id="fcFront"></div>
+          <div class="fc-face fc-back" id="fcBack"></div>
+        </div>
+      </div>
+      <div style="font-size:.72rem;color:var(--gray400);text-align:center;margin-bottom:.8rem;">Cliquez sur la carte pour retourner</div>
+      <div class="fc-nav">
+        <button class="btn btn-ghost btn-sm" id="fcPrev" onclick="prevFC()">← Précédente</button>
+        <button class="btn btn-ghost btn-sm" onclick="shuffleFC()">🔀 Mélanger</button>
+        <button class="btn btn-primary btn-sm" id="fcNext" onclick="nextFC()">Suivante →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOTES -->
+<div class="modal-ov" id="noteModal" onclick="if(event.target===this)closeNoteModal()">
+  <div class="modal-box" style="max-width:500px;">
+    <div class="modal-hdr"><h3 id="noteTitle">📝 Mes notes</h3><button class="modal-close" onclick="closeNoteModal()">✕</button></div>
+    <div class="modal-body">
+      <textarea id="noteTxt" class="form-textarea" style="min-height:160px;font-size:.83rem;" placeholder="Vos notes personnelles pour cette section…"></textarea>
+      <div style="display:flex;gap:.5rem;margin-top:.8rem;">
+        <button class="btn btn-gold btn-sm" onclick="saveNoteModal()">💾 Enregistrer</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeNoteModal()">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ATTESTATION -->
+<div class="modal-ov" id="attModal" onclick="if(event.target===this)closeAtt()">
+  <div class="modal-box" style="max-width:700px;">
+    <div class="modal-hdr">
+      <h3>🏅 Attestation de formation</h3>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        <button class="btn btn-ghost btn-sm" id="attPrint" onclick="window.print()">🖨️ Imprimer</button>
+        <button class="modal-close" id="attClose" onclick="closeAtt()">✕</button>
+      </div>
+    </div>
+    <div class="modal-body" id="attContent"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STORAGE & UTILS
+══════════════════════════════════════════════ */
+const getKey=()=>document.getElementById('apiKeyInput')?.value?.trim()||sessionStorage.getItem('gls_key')||'';
+const getUnsplashKey=()=>document.getElementById('unsplashKeyInput')?.value?.trim()||localStorage.getItem('gls_unsplash')||'';
+const getMods=()=>{try{return JSON.parse(localStorage.getItem('gls_modules')||'[]');}catch{return[];}};
+const saveMods=m=>localStorage.setItem('gls_modules',JSON.stringify(m));
+const addMod=m=>{const ms=getMods();ms.unshift(m);saveMods(ms);};
+const delMod=id=>saveMods(getMods().filter(m=>m.id!=id));
+const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const _d=ts=>new Date(ts).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
+const _n=v=>{if(!v)return'';if(typeof v==='string')return v;if(Array.isArray(v))return v.map(x=>typeof x==='object'?Object.values(x).join(' : '):String(x)).join('\n');return String(v);};
+
+let _mode='pro',_cur=null,_qa={},_qs=false;
+
+/* ══════════════════════════════════════════════
+   ROUTER
+══════════════════════════════════════════════ */
+function nav(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name)?.classList.add('active');
+  document.getElementById('nav-'+name)?.classList.add('active');
+  if(name==='home')renderHome();
+  if(name==='library')renderLib();
+  if(name==='form')renderForm();
+  if(name==='chat')initChat();
+}
+
+function goCreate(mode){_mode=mode;nav('form');}
+
+/* ══════════════════════════════════════════════
+   MODE
+══════════════════════════════════════════════ */
+function switchMode(m){
+  _mode=m;renderForm();
+  const b=document.getElementById('sbMode');
+  if(b){b.className='sb-mode visible '+m;b.textContent=m==='pro'?'💼 Formation Pro':'⚡ Cours Ingénieur';}
+}
+function updateSbMode(){
+  const b=document.getElementById('sbMode');
+  if(b){b.className='sb-mode visible '+_mode;b.textContent=_mode==='pro'?'💼 Formation Pro':'⚡ Cours Ingénieur';}
+}
+
+/* ══════════════════════════════════════════════
+   HOME
+══════════════════════════════════════════════ */
+function renderHome(){
+  const ms=getMods();
+  const pros=ms.filter(m=>m.mode==='pro').length,acads=ms.filter(m=>m.mode==='acad').length;
+  document.getElementById('homeStats').innerHTML=`
+    <div class="stat-card"><div class="stat-val">${ms.length}</div><div class="stat-lbl">Modules totaux</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent);">${pros}</div><div class="stat-lbl">Formation Pro</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--purple);">${acads}</div><div class="stat-lbl">Cours Académiques</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green);">${ms.filter(m=>m.scores?.quiz!=null).length}</div><div class="stat-lbl">Quiz complétés</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#fbbf24;">⭐ ${ms.filter(m=>m.fav).length}</div><div class="stat-lbl">Favoris</div></div>`;
+  const el=document.getElementById('homeRecent');
+  if(!ms.length){el.innerHTML='<div class="empty"><div class="ei">✨</div><h3>Aucun module encore</h3><p>Choisissez un mode ci-dessus pour créer votre premier module.</p></div>';return;}
+  el.innerHTML='<div class="mod-grid">'+ms.slice(0,6).map(modCard).join('')+'</div>';
+}
+
+/* ══════════════════════════════════════════════
+   FORM
+══════════════════════════════════════════════ */
+function renderForm(){
+  const p=_mode==='pro';
+  updateSbMode();
+  document.getElementById('formPh').querySelector('h1').textContent=p?'💼 Créer une formation professionnelle':'⚡ Créer un cours ingénieur';
+  document.getElementById('formPhSub').textContent=p?'Cours métier complet : théorie du domaine, procédures, exercices pratiques, mises en situation, QCM et attestation.':'Cours technique pour ingénieurs : génie électrique, informatique, mécanique, automatique — TD corrigés, QCM examen, support PDF du prof accepté.';
+  const sp=document.getElementById('ms-pro'),sa=document.getElementById('ms-acad');
+  sp.className='ms-btn'+(p?' active-pro':''); sa.className='ms-btn'+(p?'':' active-acad');
+  const fs=document.getElementById('fSubmit');
+  fs.className=p?'btn btn-gold btn-lg':'btn btn-purple btn-lg';
+  fs.textContent=p?'💼 Générer la formation complète':'⚡ Générer le cours';
+  document.getElementById('formFields').innerHTML=p?fieldsProHtml():fieldsAcadHtml();
+}
+
+const PRODOMS=['Lean Manufacturing','Maintenance industrielle','Électricité industrielle','Soudure','Logistique & Supply Chain','Automatisme','Hydraulique industrielle','Instrumentation','Chaudronnerie','CVC / Climatisation','Bloc opératoire','Cuisine professionnelle'];
+const ACADDOMS=['Électrotechnique','Électronique analogique','Électronique numérique','Automatique & Régulation','Informatique industrielle','Mécanique des fluides','Résistance des matériaux','Thermodynamique','Systèmes embarqués','Réseaux & Télécom','Mécatronique','Électronique de puissance','Génie des procédés','Métrologie & Instrumentation'];
+
+function fieldsProHtml(){return`
+  <div class="alert alert-info" style="margin-bottom:1rem;">💡 Le module généré comprendra un <strong>cours théorique complet</strong> sur le métier, des procédures détaillées, des exercices pratiques, des mises en situation réelles et un QCM d'évaluation.</div>
+  <div class="form-group">
+    <label class="form-label">1. Domaine / secteur métier <span>* tous secteurs acceptés</span></label>
+    <input type="text" id="fDom" class="form-input" placeholder="ex : Électricité industrielle, Maintenance, Soudure TIG, Automatisme, Chaudronnerie…" autocomplete="off">
+    <div class="dpills">${PRODOMS.map(d=>`<span class="dpill" onclick="document.getElementById('fDom').value='${d}'">${d}</span>`).join('')}</div>
+  </div>
+  <div class="form-grid">
+    <div class="form-group"><label class="form-label">2. Compétence / thème du cours <span>*</span></label>
+    <input type="text" id="fComp" class="form-input" placeholder="ex : Lecture de schéma électrique, Diagnostic de panne hydraulique, Câblage d'armoire industrielle…"></div>
+    <div class="form-group"><label class="form-label">3. Public cible <span>*</span></label>
+    <input type="text" id="fPub" class="form-input" placeholder="ex : Technicien électricien débutant, apprenti mécanicien, opérateur de production…"></div>
+  </div>
+  <div class="form-grid-3">
+    <div class="form-group"><label class="form-label">4. Niveau de départ</label>
+    <select id="fNiv" class="form-select">
+      <option value="débutant (aucune expérience)">Débutant — aucune expérience</option>
+      <option value="intermédiaire" selected>Intermédiaire — bases acquises</option>
+      <option value="confirmé">Confirmé — perfectionnement</option>
+      <option value="expert">Expert — référent technique</option>
+    </select></div>
+    <div class="form-group"><label class="form-label">5. Durée estimée</label>
+    <select id="fDur" class="form-select">
+      <option>1 heure</option>
+      <option selected>2 heures</option>
+      <option>Demi-journée (4h)</option>
+      <option>1 journée (7h)</option>
+      <option>2 jours</option>
+    </select></div>
+    <div class="form-group"><label class="form-label">6. Langue</label>
+    <select id="fLang" class="form-select"><option>français</option><option>anglais</option><option>arabe</option></select></div>
+  </div>
+  <div class="form-grid">
+    <div class="form-group"><label class="form-label">7. Normes / réglementations <span>optionnel</span></label>
+    <input type="text" id="fNorm" class="form-input" placeholder="ex : NF C 15-100, NFC 18-510, ISO 9001, ATEX, Code du travail…"></div>
+    <div class="form-group"><label class="form-label">8. Matériel / équipements utilisés <span>optionnel</span></label>
+    <input type="text" id="fCtx" class="form-input" placeholder="ex : Automate Siemens S7-300, poste à souder MIG, multimètre Fluke…"></div>
+  </div>
+  <div class="form-group"><label class="form-label">9. Document de référence <span>optionnel · PDF / TXT</span></label>
+  <div class="file-drop" onclick="document.getElementById('fFile').click()">
+    <input type="file" id="fFile" accept=".txt,.md,.pdf" style="display:none" onchange="loadDoc(this)">
+    <div style="font-size:1.6rem;margin-bottom:.3rem;">📄</div>
+    <div style="font-weight:700;margin-bottom:.15rem;">Déposez un document de référence</div>
+    <div style="font-size:.73rem;color:var(--gray400);">Procédure · Mode opératoire · Fiche technique · Référentiel métier · PDF constructeur</div>
+    <div id="fDocName" style="font-size:.72rem;color:var(--accent);margin-top:.3rem;font-weight:800;"></div>
+  </div><input type="hidden" id="fDoc"></div>`;}
+
+function fieldsAcadHtml(){return`
+  <div class="form-group">
+    <label class="form-label">1. Discipline / matière <span>* génie électrique, info, mécanique, etc.</span></label>
+    <input type="text" id="fDom" class="form-input" placeholder="ex : Électrotechnique, Automatique, Mécanique des fluides, Systèmes embarqués…" autocomplete="off">
+    <div class="dpills">${ACADDOMS.map(d=>`<span class="dpill acad" onclick="document.getElementById('fDom').value='${d}'">${d}</span>`).join('')}</div>
+  </div>
+  <div class="form-grid">
+    <div class="form-group"><label class="form-label">2. Chapitre / notion à enseigner <span>*</span></label>
+    <input type="text" id="fComp" class="form-input" placeholder="ex : Transformée de Laplace, Pont de Wheatstone, Automate programmable, Loi de Kirchhoff…"></div>
+    <div class="form-group"><label class="form-label">3. Niveau / cursus <span>*</span></label>
+    <select id="fPub" class="form-select">
+      <option>BUT / IUT 1ère année</option>
+      <option>BUT / IUT 2ème année</option>
+      <option>BUT / IUT 3ème année</option>
+      <option>Licence Pro</option>
+      <option selected>Ingénieur 1ère année (Bac+3)</option>
+      <option>Ingénieur 2ème année (Bac+4)</option>
+      <option>Ingénieur 3ème année (Bac+5)</option>
+      <option>Master Ingénierie M1</option>
+      <option>Master Ingénierie M2</option>
+    </select></div>
+  </div>
+  <div class="form-grid-3">
+    <div class="form-group"><label class="form-label">4. Type de séance</label>
+    <select id="fNiv" class="form-select">
+      <option value="cours magistral">Cours magistral (CM)</option>
+      <option value="travaux dirigés" selected>Travaux Dirigés (TD)</option>
+      <option value="travaux pratiques">Travaux Pratiques (TP)</option>
+      <option value="cours + TD intégré">Cours + TD intégré</option>
+    </select></div>
+    <div class="form-group"><label class="form-label">5. Durée</label>
+    <select id="fDur" class="form-select">
+      <option>1 heure (CM)</option>
+      <option selected>1h30 (TD)</option>
+      <option>3 heures (TP)</option>
+      <option>Demi-journée (TP long)</option>
+    </select></div>
+    <div class="form-group"><label class="form-label">6. Langue</label>
+    <select id="fLang" class="form-select"><option>français</option><option>anglais</option><option>arabe</option></select></div>
+  </div>
+  <div class="form-grid">
+    <div class="form-group"><label class="form-label">7. Prérequis techniques <span>optionnel</span></label>
+    <input type="text" id="fNorm" class="form-input" placeholder="ex : Algèbre complexe, lois de Kirchhoff, notions de dérivation, C embarqué…"></div>
+    <div class="form-group"><label class="form-label">8. Objectifs pédagogiques <span>optionnel</span></label>
+    <input type="text" id="fCtx" class="form-input" placeholder="ex : Savoir analyser un schéma électrique, dimensionner un variateur de vitesse…"></div>
+  </div>
+  <div class="form-group"><label class="form-label">9. Document du professeur <span>optionnel · PDF / TXT / MD</span></label>
+  <div class="file-drop" onclick="document.getElementById('fFile').click()">
+    <input type="file" id="fFile" accept=".txt,.md,.pdf" style="display:none" onchange="loadDoc(this)">
+    <div style="font-size:1.6rem;margin-bottom:.3rem;">📄</div>
+    <div style="font-weight:700;margin-bottom:.15rem;">Déposez le document du professeur ici</div>
+    <div style="font-size:.73rem;color:var(--gray400);">Polycopié · Cours PDF · Fiche technique · Datasheet · Programme officiel</div>
+    <div id="fDocName" style="font-size:.72rem;color:var(--purple);margin-top:.3rem;font-weight:800;"></div>
+  </div><input type="hidden" id="fDoc"></div>`;}
+
+async function loadDoc(inp){
+  const f=inp.files[0];if(!f)return;
+  const nameEl=document.getElementById('fDocName');
+  if(f.size>8000000){showToast('Max 8 Mo.','err');inp.value='';return;}
+  nameEl.textContent='⏳ Lecture en cours…';
+  try{
+    if(f.type==='application/pdf'||f.name.endsWith('.pdf')){
+      const txt=await _extractPDF(f);
+      document.getElementById('fDoc').value=txt;
+      nameEl.textContent='✓ PDF extrait : '+f.name+' ('+Math.round(txt.length/1000)+'k car.)';
+    } else {
+      const r=new FileReader();
+      r.onload=e=>{document.getElementById('fDoc').value=e.target.result;nameEl.textContent='✓ '+f.name;};
+      r.readAsText(f,'UTF-8');
+    }
+  }catch(e){nameEl.textContent='⚠️ Erreur lecture PDF';showToast('Erreur PDF: '+e.message,'err');}
+}
+
+async function _extractPDF(file){
+  if(!window.pdfjsLib){
+    await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  const ab=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  let txt='';
+  const maxP=Math.min(pdf.numPages,40);
+  for(let i=1;i<=maxP;i++){
+    const pg=await pdf.getPage(i);
+    const ct=await pg.getTextContent();
+    txt+=ct.items.map(it=>it.str).join(' ')+'\n';
+  }
+  return txt.trim().slice(0,9000);
+}
+
+function _loadScript(src){
+  return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+}
+
+/* ══════════════════════════════════════════════
+   API
+══════════════════════════════════════════════ */
+async function groq(key,sys,usr,maxTok){
+  const msgs=sys?[{role:'system',content:sys},{role:'user',content:usr}]:[{role:'user',content:usr}];
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+    headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:maxTok||1400,temperature:0.75,response_format:{type:'json_object'}})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
+  return JSON.parse(d.choices[0].message.content);
+}
+
+/* ══════════════════════════════════════════════
+   GENERATION
+══════════════════════════════════════════════ */
+async function startGen(){
+  const key=getKey();
+  if(!key){setFMsg('⚠️ Saisissez votre clé API Groq.','var(--red)');return;}
+  const dom=document.getElementById('fDom')?.value.trim();
+  if(!dom){setFMsg('⚠️ Saisissez le domaine/matière.','var(--red)');return;}
+  const comp=document.getElementById('fComp')?.value.trim();
+  if(!comp){setFMsg('⚠️ Saisissez la compétence/notion.','var(--red)');return;}
+  const fd={mode:_mode,dom,comp,pub:document.getElementById('fPub')?.value.trim()||'apprenant',
+    niv:document.getElementById('fNiv')?.value||'intermédiaire',dur:document.getElementById('fDur')?.value||'1 heure',
+    lang:document.getElementById('fLang')?.value||'français',norm:document.getElementById('fNorm')?.value.trim()||'',
+    ctx:document.getElementById('fCtx')?.value.trim()||'',doc:document.getElementById('fDoc')?.value.trim()||''};
+  const p=_mode==='pro';
+  const STEPS=p?[
+    {id:'s1',label:'Analyse des compétences métier',icon:'🎯',sub:'Objectifs opérationnels et plan'},
+    {id:'s2',label:'Procédures et contenu terrain',icon:'📋',sub:'Protocoles, étapes, points de vigilance'},
+    {id:'s3',label:'Mises en situation réelles',icon:'🔧',sub:'Scénarios avec corrigés experts'},
+    {id:'s4',label:'Check-list + Évaluation',icon:'✅',sub:'Check-list opérationnelle et quiz métier'},
+    {id:'s5',label:'Mémo terrain',icon:'📄',sub:'Fiche de référence rapide'},
+    {id:'s6',label:'KPIs Métier',icon:'📈',sub:'Indicateurs de performance professionnels'},
+  ]:[
+    {id:'s1',label:'Plan de cours',icon:'🗂️',sub:'Structure, objectifs, progression'},
+    {id:'s2',label:'Contenu théorique',icon:'📖',sub:'Sections avec définitions et exemples'},
+    {id:'s3',label:'Exercices et TD',icon:'✏️',sub:'Exercices progressifs avec corrigés'},
+    {id:'s4',label:'Quiz de contrôle',icon:'📝',sub:'QCM avec compétences et explications'},
+    {id:'s5',label:'Fiche de révision',icon:'📋',sub:'Mémo condensé pour l\'examen'},
+  ];
+  nav('generating');
+  document.getElementById('gIcon').textContent=p?'💼':'🎓';
+  document.getElementById('gTitle').textContent=(p?'Formation : ':'Cours : ')+fd.comp;
+  document.getElementById('gSub').textContent=fd.dom+' · '+fd.niv+' · '+fd.dur;
+  document.getElementById('gProg').className='prog-fill'+(p?'':' acad');
+  document.getElementById('gProg').style.width='0%';
+  document.getElementById('gErr').style.display='none';
+  document.getElementById('gSteps').innerHTML=STEPS.map(s=>`<div class="gen-step" id="gs-${s.id}"><div class="gen-ico" id="gi-${s.id}">${s.icon}</div><div><div class="gen-step-title">${s.label}</div><div class="gen-step-sub" id="gsub-${s.id}">${s.sub}</div></div></div>`).join('');
+  try{
+    const mod=p?await pipePro(fd,key):await pipeAcad(fd,key);
+    addMod(mod);_cur=mod;openMod(mod.id);
+  }catch(e){
+    document.getElementById('gErr').style.display='block';
+    document.getElementById('gErr').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div><button class="btn btn-ghost btn-sm" style="margin-top:.5rem;" onclick="nav('form')">← Retour</button>`;
+  }
+}
+function setFMsg(m,c){document.getElementById('fMsg').innerHTML=`<span style="color:${c};">${m}</span>`;}
+function setStep(id,state,msg,p){
+  const el=document.getElementById('gs-'+id),ico=document.getElementById('gi-'+id),sub=document.getElementById('gsub-'+id);
+  if(!el)return;
+  el.className='gen-step '+state+(state==='active'&&!p?' a-acad':'');
+  if(state==='active')ico.innerHTML='<div class="spinner"></div>';
+  if(state==='done')ico.innerHTML='✓';if(state==='error')ico.innerHTML='✕';
+  if(msg&&sub)sub.textContent=msg;
+  const done=document.querySelectorAll('.gen-step.done').length;
+  const total=document.querySelectorAll('.gen-step').length||5;
+  document.getElementById('gProg').style.width=Math.round(done/total*100)+'%';
+}
+
+/* ══════════════════════════════════════════════
+   PIPELINE PRO
+══════════════════════════════════════════════ */
+async function pipePro(fd,key){
+  const docCtx=fd.doc?`\n\n--- DOCUMENT DE RÉFÉRENCE FOURNI PAR LE FORMATEUR ---\n${fd.doc.slice(0,4000)}\n--- FIN DOCUMENT ---`:'';
+  const ctx=`Domaine: ${fd.dom}\nCompétence/thème: ${fd.comp}\nPublic cible: ${fd.pub}\nNiveau: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nNormes applicables: '+fd.norm:''}${fd.ctx?'\nMatériel/équipements: '+fd.ctx:''}${docCtx}`;
+  const SYS=`Tu es un formateur professionnel expert du métier "${fd.dom}", avec 20 ans d'expérience terrain et de formation. Tu crées des formations professionnelles de haute qualité qui permettent de VRAIMENT comprendre le métier : pourquoi chaque geste est fait ainsi, les principes physiques/chimiques/mécaniques derrière les procédures, ce que les experts savent et que les débutants ignorent, les chiffres et normes exacts à mémoriser, les indicateurs de performance concrets. Données chiffrées systématiques, exemples terrain réels, raisonnement expert explicite. Si un document de référence est fourni, base-toi dessus prioritairement. JSON uniquement.`;
+
+  setStep('s1','active','',true);
+  const plan=await groq(key,SYS,`${ctx}\n\nCrée le plan complet de cette formation professionnelle. JSON:\n{"titre":"Titre formation percutant (max 10 mots)","description":"Accroche professionnelle motivante qui explique ce que le stagiaire va VRAIMENT comprendre (2 phrases)","prerequis":"Prérequis techniques concrets nécessaires","objectifs":["À l'issue de la formation, le stagiaire SAURA/POURRA faire concrètement 1","... 2","... 3","... 4","... 5"],"sections":[{"id":1,"titre":"Titre section","duree":"ex: 30 min","type":"theorie|procedure|exercice|securite"},{"id":2,...}],"competences":["Compétence métier précise et mesurable 1","Compétence 2","Compétence 3","Compétence 4"]}\n5 à 6 sections dont obligatoirement : 1 section théorique approfondie (pourquoi ça marche physiquement), 2-3 sections procédures détaillées, 1 section exercices, 1 section sécurité/qualité.`,900);
+  setStep('s1','done',(plan.sections?.length||0)+' sections planifiées',true);
+
+  setStep('s2','active','',true);
+  const sections=[];
+  for(let i=0;i<(plan.sections||[]).length;i++){
+    const s=plan.sections[i];
+    setStep('s2','active',`Section ${i+1}/${plan.sections.length}: ${s.titre}`,true);
+    try{
+      const typePrompt={
+        theorie:`Rédige le cours théorique approfondi de la section "${s.titre}". IMPÉRATIF : explique le POURQUOI physique/chimique/mécanique — les principes scientifiques qui expliquent pourquoi les choses fonctionnent ainsi. Un professionnel qui comprend le POURQUOI fait des gestes plus précis et résout les problèmes qu'un autre ne peut pas résoudre. Inclus les lois physiques, réactions chimiques, phénomènes électriques selon le domaine. Formules avec valeurs numériques typiques du métier.`,
+        procedure:`Rédige la procédure opérationnelle experte de la section "${s.titre}". Pour chaque étape : l'action précise, les paramètres exacts (valeurs, tolérances, durées), ET la raison pour laquelle on fait ça ainsi (le POURQUOI). Un professionnel sait ce qu'il fait ET pourquoi.`,
+        exercice:`Rédige des exercices pratiques de la section "${s.titre}" avec études de cas réels tirés du terrain. Chaque exercice doit confronter le stagiaire à une vraie situation de travail avec des contraintes réalistes.`,
+        securite:`Rédige les règles de sécurité de la section "${s.titre}". Pour chaque risque : la nature exacte du danger (physique/chimique), les seuils à ne pas dépasser, les EPI avec leurs normes, et POURQUOI ce risque existe physiquement.`
+      }[s.type]||`Rédige le contenu complet et approfondi de la section "${s.titre}" en expliquant systématiquement le POURQUOI derrière chaque procédure.`;
+      const sc=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n${typePrompt}\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"10-12 paragraphes très denses. SYSTÉMATIQUEMENT : expliquer le principe derrière chaque procédure, les valeurs numériques exactes du métier (températures, pressions, résistances, concentrations, etc.), le raisonnement expert. Sépare par \\n\\n. Ne pas simplement décrire — expliquer POURQUOI.","etapes":["Étape 1: geste précis + paramètre exact + POURQUOI on fait ça ainsi","Étape 2: ...","Étape 3: ...","Étape 4: ...","Étape 5: ...","Étape 6: ..."],"points_vigilance":["⚠️ Point critique 1: risque exact + valeur seuil + conséquence si dépassé","⚠️ Point 2","⚠️ Point 3","⚠️ Point 4"],"outils":["Outil 1 avec référence technique précise","Outil 2","Outil 3"],"erreurs":["❌ Erreur 1: pourquoi les débutants la font + mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":"Ce que le professionnel expérimenté fait différemment — le savoir implicite que 10 ans de terrain donnent : les signes à reconnaître à l'œil, les raccourcis légitimes, les subtilités que personne n'enseigne mais que tous les experts appliquent. 3-4 phrases concrètes.","donnees_cles":["Valeur/norme à mémoriser absolument 1 (ex: 230V nominal ±10%, soit 207-253V)","Valeur 2 avec contexte d'application","Valeur 3","Valeur 4"]}`,2200);
+      sections.push({...s,...sc});
+    }catch{sections.push(s);}
+  }
+  setStep('s2','done',sections.length+' sections rédigées',true);
+
+  setStep('s3','active','',true);
+  let scenarios=[];
+  try{const sr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n\n3 mises en situation réelles tirées du terrain professionnel réel, progressives (débutant → expert) :\n{"scenarios":[{"titre":"Titre scénario précis (lieu + situation)","difficulte":"débutant|intermédiaire|expert","contexte":"Environnement de travail précis: lieu, heure, conditions, équipements présents, historique du problème (4-5 phrases avec données techniques réelles)","situation":"Ce que le professionnel observe ou doit réaliser: symptômes mesurables, contraintes de délai/budget/sécurité, informations disponibles et manquantes (5-6 phrases très détaillées)","consigne":"Mission exacte: ce que le stagiaire doit analyser, décider, mesurer, calculer, réaliser et vérifier. Inclure les contraintes et critères de réussite mesurables.","indices":["Indice 1 que le pro remarque en premier","Indice 2","Indice 3"],"pieges":["Piège classique que le débutant va tomber 1","Piège 2"],"correction":"Raisonnement expert complet: 1) Analyse de la situation et hypothèses. 2) Diagnostic méhodique avec justification. 3) Plan d'action étape par étape avec valeurs exactes. 4) Vérification et critères de validation. 5) Ce qu'un expert remarque que le débutant manquerait. 10-12 phrases très détaillées."}]}`,2000);scenarios=sr.scenarios||[];}catch{}
+  setStep('s3','done',scenarios.length+' mises en situation générées',true);
+
+  setStep('s4','active','',true);
+  let checklist={avant:[],pendant:[],apres:[]},quiz=[];
+  try{const cr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\nCompétences: ${(plan.competences||[]).join(', ')}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n12 questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Les distracteurs doivent être plausibles. Explications rigoureuses de 3-4 phrases avec le principe physique/technique.`,2200);checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch{}
+  setStep('s4','done','Check-list + '+quiz.length+' questions QCM',true);
+
+  setStep('s5','active','',true);
+  let memo={};
+  try{memo=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${fd.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5","Règle 6","Règle 7"],"formules":["Formule/valeur 1: [formule ou valeur] — dans quel cas l'utiliser — exemple chiffré","Formule 2","Valeur critique 3","Valeur 4"],"interdits":["⛔ JAMAIS: erreur critique 1 — risque exact (blessure/panne/non-conformité)","⛔ JAMAIS: erreur 2","⛔ JAMAIS: erreur 3","⛔ JAMAIS: erreur 4"],"reflexes_expert":["Réflexe pro 1: situation déclenchante → action instinctive d'un expert","Réflexe 2","Réflexe 3","Réflexe 4"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante que tout professionnel gravé dans sa mémoire"}`,1200);}catch{}
+  setStep('s5','done','Mémo terrain complet',true);
+
+  setStep('s6','active','',true);
+  let kpis=[];
+  try{const kr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\nCompétences: ${(plan.competences||[]).join(', ')}\n\nGénère 5 à 6 KPIs (indicateurs de performance clés) qui permettent de mesurer concrètement le niveau professionnel dans ce métier. Ces KPIs doivent être mesurables, issus de la réalité du terrain.\n{"kpis":[{"indicateur":"Nom précis de l'indicateur (ex: Productivité de pose câble)","quoi_mesurer":"Ce qu'on mesure exactement et comment (ex: mètres de câble posé par heure en pose encastrée standard)","unite":"unité de mesure (ex: m/h, %, min, €/intervention)","seuil_debutant":"Valeur typique d'un débutant (ex: 4-6 m/h)","seuil_operationnel":"Valeur pour être autonome et employable (ex: 10-13 m/h)","seuil_expert":"Valeur d'un professionnel confirmé (ex: 16-20 m/h)","pourquoi_important":"Pourquoi cet indicateur est stratégique pour l'employabilité et la rentabilité — 2 phrases","comment_progresser":"Comment un débutant peut travailler cet indicateur pour progresser — 2 phrases concrètes"}]}`,1400);kpis=kr.kpis||[];}catch{}
+  setStep('s6','done',kpis.length+' KPIs métier générés',true);
+
+  return{id:Date.now(),mode:'pro',titre:plan.titre,description:plan.description,dom:fd.dom,pub:fd.pub,niv:fd.niv,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],sections,scenarios,checklist,quiz,memo,kpis,scores:{},wrongByComp:{}};
+}
+
+/* ══════════════════════════════════════════════
+   PIPELINE ACADÉMIQUE
+══════════════════════════════════════════════ */
+async function pipeAcad(fd,key){
+  const docCtx=fd.doc?`\n\n--- DOCUMENT DU PROFESSEUR ---\n${fd.doc.slice(0,4500)}\n--- FIN DOCUMENT ---`:'';
+  const ctx=`Discipline: ${fd.dom}\nChapitre/notion: ${fd.comp}\nNiveau: ${fd.pub}\nType de séance: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nPrérequis techniques: '+fd.norm:''}${fd.ctx?'\nObjectifs pédagogiques: '+fd.ctx:''}${docCtx}`;
+  const SYS=`Tu es un professeur-ingénieur expert en "${fd.dom}", spécialiste de l'enseignement technique et industriel pour étudiants en génie (BUT, Licence Pro, cycle ingénieur). Tu crées des cours techniques rigoureux et complets: théorie appuyée sur des bases physiques, formules mathématiques développées, schémas décrits précisément, calculs numériques illustrés, exercices type TD/TP d'examens d'ingénieurs, QCM techniques avec distracteurs réalistes. Si un document du professeur est fourni, base-toi PRIORITAIREMENT sur son contenu et sa structure. JSON uniquement.`;
+
+  setStep('s1','active','',false);
+  const plan=await groq(key,SYS,`${ctx}\n\nCrée le plan structuré de ce cours technique. JSON:\n{"titre":"Titre cours technique précis (max 12 mots)","description":"Accroche pédagogique (1-2 phrases qui motivent l'étudiant ingénieur)","prerequis":"Notions techniques préalables requises (formules, outils mathématiques, notions physiques)","objectifs":["À l'issue du cours, l'étudiant sera capable de VERBE+OBJET TECHNIQUE 1","... 2","... 3","... 4"],"sections":[{"id":1,"titre":"Titre section","objectif":"Compétence acquise","duree":"ex: 20 min","type":"theorie|demonstration|application"}],"notions":["Notion technique clé 1","Notion 2","Notion 3","Notion 4","Notion 5"]}\n4 à 6 sections avec progression logique (du général au particulier, de la théorie à l'application).`,800);
+  setStep('s1','done',(plan.sections?.length||0)+' sections planifiées',false);
+
+  setStep('s2','active','',false);
+  const sections=[];
+  for(let i=0;i<(plan.sections||[]).length;i++){
+    const s=plan.sections[i];
+    setStep('s2','active',`Section ${i+1}/${plan.sections.length}: ${s.titre}`,false);
+    try{
+      const isDemo=s.type==='demonstration';const isApp=s.type==='application';
+      const contenuDesc=isApp?"Méthodologie de résolution + application numérique complète avec données chiffrées":isDemo?"Démonstration mathématique ou physique pas-à-pas avec calculs intermédiaires":"Cours théorique complet: contexte industriel/technique, définitions formelles, principes physiques expliqués en profondeur, relations entre les concepts";
+      const exempleDesc=isApp?"Exercice d'application résolu complet: enonce avec données numeriques, démarche de résolution étape par étape, calculs détaillés, résultat avec unité et interprétation physique (8-10 phrases)":"Exemple illustratif concret issu de l'industrie ou du domaine technique, avec valeurs numériques réalistes et analyse du résultat (6-8 phrases)";
+      const sc=await groq(key,SYS,`${ctx}\nCours: "${plan.titre}"\nRédige la section "${s.titre}" (${s.type||"theorie"}) de manière complète et rigoureuse.\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"${contenuDesc}. 8-10 paragraphes denses. Formules écrites clairement (ex: U = R x I). Valeurs numériques typiques du domaine. Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis","def":"Définition formelle complète avec unité SI si applicable"}],"points_cles":["Point fondamental 1 avec formule ou valeur numérique si applicable","Point 2","Point 3","Point 4"],"exemple":"${exempleDesc}"}`,1600);
+      sections.push({...s,...sc});
+    }catch{sections.push(s);}
+  }
+  setStep('s2','done',sections.length+' sections rédigées',false);
+
+  setStep('s3','active','',false);
+  let exercices=[];
+  const exPrompt=`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\nGénère 3 exercices progressifs de type TD/TP pour ingénieurs:\n{"exercices":[{"titre":"Exercice 1 — [theme precis]","type":"application directe ou analyse de systeme ou synthese ou etude de cas industriel","difficulte":"debutant|intermediaire|avance","enonce":"Contexte industriel réaliste précis + données numériques complètes (5-7 phrases)","questions":["Q1. Question technique avec demande de calcul ou analyse?","Q2. Question suite logique?","Q3. Question de synthèse?","Q4. Question application?"],"correction":"Corrigé complet: démarche méthodologique, formules utilisées, calculs numériques pas-à-pas, résultats avec unités, interprétation physique (10-12 phrases)","duree":"ex: 20 min"}]}`;
+  try{const er=await groq(key,SYS,exPrompt,1800);exercices=er.exercices||[];}catch{}
+  setStep('s3','done',exercices.length+' exercices TD/TP générés',false);
+
+  setStep('s4','active','',false);
+  let quiz=[];
+  try{const qr=await groq(key,SYS,`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\n10 QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nDistrateurs réalistes (erreurs d'unité, confusion de formules, valeur proche mais incorrecte).`,1800);quiz=qr.quiz||[];}catch{}
+  setStep('s4','done',quiz.length+' questions QCM générées',false);
+
+  setStep('s5','active','',false);
+  let revision={};
+  const revPrompt=`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\nFiche de révision synthétique pour examen ingénieur:\n{"titre":"Fiche synthèse: [titre]","notions":["Notion 1: définition + formule si applicable","Notion 2: ...","Notion 3: ...","Notion 4: ...","Notion 5: ...","Notion 6: ..."],"formules":["Formule 1: formule mathématique — conditions application — unités","Formule 2","Formule 3","Théorème ou propriété 4"],"pieges":["Piège classique 1: erreur fréquente à éviter","Piège 2: confusion entre deux notions","Piège 3: erreur unité ou de signe","Piège 4"],"methode":["Étape 1: action à faire en premier à examen","Étape 2","Étape 3","Étape 4"],"conseil":"Conseil stratégique examen (1 phrase percutante)"}`;
+  try{revision=await groq(key,SYS,revPrompt,1000);}catch{}
+  setStep('s5','done','Fiche de révision complète',false);
+
+  return{id:Date.now(),mode:'acad',titre:plan.titre,description:plan.description,dom:fd.dom,pub:fd.pub,niv:fd.niv,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],sections,exercices,quiz,revision,scores:{},wrongByComp:{}};
+}
+
+/* ══════════════════════════════════════════════
+   MODULE VIEWER
+══════════════════════════════════════════════ */
+function openMod(id){
+  const m=getMods().find(x=>x.id==id);if(!m)return;
+  _cur=m;_qa={};_qs=false;
+  nav('module');document.getElementById('screen-module').classList.add('active');
+  renderViewer(m);
+}
+
+function renderKPIBoxes(m){
+  const p=m.mode==='pro';
+  const score=m.scores?.quiz!=null?m.scores.quiz+'%':'—';
+  const scoreCol=m.scores?.quiz!=null?(m.scores.quiz>=70?'kv-green':m.scores.quiz>=50?'':'kv-red'):'';
+  const readSecs=m.readSections||{};
+  const totalSecs=m.sections?.length||0;
+  const readDone=Object.values(readSecs).filter(Boolean).length;
+  const readPct=totalSecs?Math.round(readDone/totalSecs*100):0;
+  const levDone=p?null:_getGLSLevDone(m.id);
+  const kpi3=p
+    ?{val:m.scenarios?.length||0,lbl:'Scénarios',col:''}
+    :{val:levDone>=3?'✓':levDone+'/3',lbl:'Niveaux exercices',col:levDone>=3?'kv-green':''};
+  return`<div class="kpi-row">
+    <div class="kpi-box"><div class="kpi-val ${p?'':'kv-purple'}">${totalSecs}</div><div class="kpi-lbl">${p?'Procédures':'Sections de cours'}</div></div>
+    <div class="kpi-box"><div class="kpi-val ${scoreCol}">${score}</div><div class="kpi-lbl">Score quiz</div></div>
+    <div class="kpi-box"><div class="kpi-val ${kpi3.col}">${kpi3.val}</div><div class="kpi-lbl">${kpi3.lbl}</div></div>
+  </div>`;
+}
+
+function renderViewer(m){
+  const p=m.mode==='pro';const mc=p?'pro':'acad';
+  const sc=m.scores?.quiz!=null?`<span class="mod-header-badge">Score: ${m.scores.quiz}%</span>`:'';
+  const TABS=p?[['procs','📋 Procédures ('+(m.sections?.length||0)+')'],['scens','🔧 Scénarios ('+(m.scenarios?.length||0)+')'],['check','✅ Check-list'],['quiz','📊 Évaluation ('+(m.quiz?.length||0)+' q.)'],['memo','📄 Mémo terrain'],['kpis','📈 KPIs ('+(m.kpis?.length||0)+')']]
+    :[['cours','📖 Cours ('+(m.sections?.length||0)+')'],['exos','✏️ Exercices ('+(m.exercices?.length||0)+')'],['quiz','📝 Quiz ('+(m.quiz?.length||0)+' q.)'],['rev','📋 Révision'],['gloss','📖 Glossaire']];
+  document.getElementById('modContent').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" onclick="nav('library')">← Bibliothèque</button>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openFlashcards(_cur)">🃏 Flashcards</button>
+        ${p?`<button class="btn btn-ghost btn-sm" onclick="showAttestation(_cur)">🏅 Attestation</button>`:''}
+        <button class="btn btn-ghost btn-sm" id="addImgBtn-${m.id}" onclick="addModuleImages(${m.id})">🖼️ Ajouter images</button>
+        <button class="btn btn-ghost btn-sm" onclick="dupMod(${m.id})">📋 Dupliquer</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Imprimer</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDel(${m.id})">🗑️</button>
+      </div>
+    </div>
+    <div class="mod-header">
+      <div class="mod-header-top ${mc}">
+        <div class="mod-header-icon">${p?'💼':'🎓'}</div>
+        <div class="mod-header-text">
+          <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-bottom:.15rem;">${p?'Formation Professionnelle':'Cours Ingénieur ⚡'}</div>
+          <h2>${_e(m.titre)}</h2>
+          <p>${_e(m.description||'')}</p>
+        </div>
+      </div>
+      <div class="mod-header-steps">
+        <span class="mod-lib-badge badge-${mc}">${_e(m.dom)}</span>
+        <span style="font-size:.73rem;color:var(--gray600);">👥 ${_e(m.pub)}</span>
+        <span style="font-size:.73rem;color:var(--gray600);">⏱️ ${_e(m.dur)}</span>
+        <span style="font-size:.73rem;color:var(--gray600);">🌐 ${_e(m.lang)}</span>
+        <span style="font-size:.73rem;color:var(--gray600);text-transform:capitalize;">${_e(m.niv)}</span>
+        ${sc}
+        ${m.prerequis?`<span style="font-size:.71rem;color:var(--gray400);">📚 Prérequis: ${_e(m.prerequis)}</span>`:''}
+      </div>
+    </div>
+    ${renderKPIBoxes(m)}
+    <div class="mod-tabs">${TABS.map((t,i)=>`<button class="mod-tab${i===0?' active'+(p?'':' a-acad'):''}" onclick="switchTab('${t[0]}',this,'${mc}')">${t[1]}</button>`).join('')}</div>
+    ${p?`<div id="tp-procs" class="mod-panel active">${renderProcs(m)}</div><div id="tp-scens" class="mod-panel">${renderScens(m)}</div><div id="tp-check" class="mod-panel">${renderCheck(m)}</div><div id="tp-quiz" class="mod-panel">${renderQuiz(m)}</div><div id="tp-memo" class="mod-panel">${renderMemo(m)}</div><div id="tp-kpis" class="mod-panel">${renderKPIs(m)}</div>`
+      :`<div id="tp-cours" class="mod-panel active">${renderCours(m)}</div><div id="tp-exos" class="mod-panel">${renderExos(m)}</div><div id="tp-quiz" class="mod-panel">${renderQuiz(m)}</div><div id="tp-rev" class="mod-panel">${renderRev(m)}</div><div id="tp-gloss" class="mod-panel">${renderGloss(m)}</div>`}`;
+}
+
+function switchTab(name,btn,mc){
+  document.querySelectorAll('.mod-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mod-tab').forEach(b=>b.classList.remove('active','a-acad'));
+  document.getElementById('tp-'+name)?.classList.add('active');
+  btn.classList.add('active');if(mc==='acad')btn.classList.add('a-acad');
+}
+
+/* ── Procédures ── */
+function renderProcs(m){
+  const readSecs=m.readSections||{};
+  const total=m.sections?.length||0;
+  const done=Object.values(readSecs).filter(Boolean).length;
+  const pct=total?Math.round(done/total*100):0;
+  const progressBar=total?`<div class="read-progress-bar"><div class="rpb-wrap"><div class="rpb-fill" id="readProgress" style="width:${pct}%"></div></div><div class="read-lbl" id="readLabel">${done}/${total} sections lues</div></div>`:'';
+  return progressBar+(m.sections||[]).map((s,i)=>{
+    const rKey='s'+i;const isRead=readSecs[rKey];const noteVal=getNote(m.id,'ps'+i);
+    return`
+    <div class="cs"><div class="cs-hdr" onclick="toggleCS(this)">
+      <div style="display:flex;align-items:center;gap:.5rem;flex:1;min-width:0;">
+        <div class="read-dot${isRead?' done':''}" id="rdot-${rKey}" title="${isRead?'Lu':'Marquer comme lu'}" onclick="event.stopPropagation();markRead(${m.id},'${rKey}')"></div>
+        <h4><span style="color:var(--accent);margin-right:.4rem;">${i+1}.</span>${_e(s.titre)}</h4>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;" onclick="event.stopPropagation()">
+        <button class="note-ico${noteVal?' has-note':''}" id="nbtn-ps${i}" onclick="openNoteModal(${m.id},'ps${i}',${JSON.stringify(s.titre)},false)">${noteVal?'📝':'+ Note'}</button>
+        <button class="card-act-btn" id="rsBtn-${i}" title="Régénérer avec l'IA" onclick="regenSection(${i})">🔄</button>
+        ${s.type?`<span style="font-size:.63rem;background:var(--pro-bg);color:var(--pro-dark);border-radius:5px;padding:.1rem .45rem;font-weight:700;text-transform:uppercase;">${_e(s.type)}</span>`:''}
+        <span style="font-size:.7rem;color:var(--gray400);">⏱️ ${_e(s.duree||s.dur||'')}</span>
+        <span class="cs-arr" style="font-size:.78rem;color:var(--gray400);">${i===0?'▼':'▶'}</span>
+      </div></div>
+      <div class="cs-body ${i===0?'open':''}">
+        ${s.contenu?`<div style="font-size:.83rem;line-height:1.8;color:#374151;margin-bottom:.8rem;">${fmtTxt(_n(s.contenu))}</div>`:''}
+        ${(s.etapes||[]).length?`<div style="margin-bottom:.8rem;"><div style="font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:.45rem;">Étapes</div><ul class="steps-ol">${(s.etapes||[]).map((e,j)=>`<li class="step-li"><div class="step-n">${j+1}</div><div class="step-t">${_e(e)}</div></li>`).join('')}</ul></div>`:''}
+        ${(s.points_vigilance||[]).length?`<div style="border-left:3px solid var(--accent);background:var(--pro-bg);border-radius:0 9px 9px 0;padding:.55rem .85rem;margin-bottom:.6rem;"><div style="font-size:.65rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;margin-bottom:.3rem;">⚠️ Points de vigilance</div>${(s.points_vigilance||[]).map(p=>`<div style="font-size:.79rem;color:var(--pro-dark);margin-bottom:.2rem;">· ${_e(p)}</div>`).join('')}</div>`:''}
+        ${(s.outils||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.6rem;">${(s.outils||[]).map(o=>`<span style="background:var(--gray100);border:1px solid var(--gray200);border-radius:6px;padding:.15rem .5rem;font-size:.71rem;color:var(--gray700);">🔧 ${_e(o)}</span>`).join('')}</div>`:''}
+        ${(s.erreurs||[]).length?`<div style="border-left:3px solid var(--red);background:#fef2f2;border-radius:0 9px 9px 0;padding:.55rem .85rem;"><div style="font-size:.65rem;font-weight:800;color:#991b1b;text-transform:uppercase;margin-bottom:.3rem;">❌ Erreurs à éviter</div>${(s.erreurs||[]).map(e=>`<div style="font-size:.79rem;color:#7f1d1d;margin-bottom:.2rem;">· ${_e(e)}</div>`).join('')}</div>`:''}
+        ${(s.donnees_cles||[]).length?`<div style="margin:.6rem 0;"><div style="font-size:.63rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.3rem;">🔢 Données clés à mémoriser</div><div class="donnees-cles-row">${(s.donnees_cles||[]).map(d=>`<div class="donnee-cle-chip">${_e(d)}</div>`).join('')}</div></div>`:''}
+        ${s.reflexe_pro?`<div class="reflexe-pro-box"><div class="reflexe-pro-lbl">⚡ Réflexe du professionnel expérimenté</div><div class="reflexe-pro-txt">${_e(s.reflexe_pro)}</div></div>`:''}
+        ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
+        <div class="sec-media">
+          <div id="imgArea-${m.id}-${i}">${s.image?`<div class="sec-img-wrap"><img src="${s.image.url}" alt="${_e(s.titre)}" loading="lazy"><div class="sec-img-credit">Photo par <a href="${s.image.authorLink}" target="_blank" rel="noopener">${_e(s.image.author)}</a> sur Unsplash</div></div>`:`<span></span>`}</div>
+          <div id="svgArea-${m.id}-${i}">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
+          <div class="sec-mdia-btns">
+            <button class="sec-media-btn sec-svg-btn" id="svgBtn-${m.id}-${i}" onclick="generateSectionSVG(${m.id},${i})">${s.svg?'🔄 Régén. schéma':'📊 Schéma IA'}</button>
+            ${s.image?`<button class="sec-media-btn sec-img-rmv" onclick="removeSecImage(${m.id},${i})">🗑️ Retirer image</button>`:''}
+          </div>
+        </div>
+      </div></div>`;}).join('')||empty('📋','Aucune procédure');
+}
+
+/* ── Scénarios ── */
+function renderScens(m){
+  const cols={débutant:'#059669',intermédiaire:'var(--pro-dark)',expert:'var(--red)'};
+  const proId='pro-'+m.id;
+  const done=_getGLSLevDone(proId);
+  const allDone=done>=3;
+  const lvPro=_GLS_EX_LEVELS[Math.min(done,2)];
+  const proLevelDesc=['Mise en situation simple — lecture du contexte, identification du problème, première solution proposée.','Analyse complète — diagnostic approfondi, calculs si nécessaire, plan d\'action structuré en 4-5 étapes.','Cas complexe — contraintes multiples, arbitrages, justification des choix, gestion des risques.'][Math.min(done,2)];
+  const proSection=`<div style="margin-bottom:1.2rem;background:#fff;border-radius:14px;padding:1.1rem 1.2rem;border:1.5px solid ${allDone?'#6ee7b7':lvPro.border};">
+    <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem;">
+      <div style="font-size:.72rem;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;">🎯 Exercice IA — 3 niveaux progressifs</div>
+    </div>
+    <div id="glsExBadge-${proId}" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;margin-bottom:.8rem;">${_renderGLSLevelBadge(proId)}</div>
+    ${allDone?`<div class="alert alert-success" style="margin:0;">🎉 Les 3 niveaux sont validés — excellente maîtrise du métier !</div>`:`
+    <div id="glsExCard-${proId}" class="ex-level-wrap ex-level-current" style="border-color:${lvPro.border};background:${lvPro.bg};">
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem;">
+        <span data-lv-label style="font-size:.72rem;font-weight:900;color:${lvPro.color};">${lvPro.stars} Niveau ${lvPro.label}</span>
+        <span style="font-size:.68rem;color:var(--gray400);">${proLevelDesc}</span>
+        <div id="glsExTimer-${proId}" style="margin-left:auto;"></div>
+      </div>
+      <div id="glsExContent-${proId}">
+        <div style="text-align:center;padding:1rem 0;">
+          <div style="font-size:.83rem;color:var(--gray600);margin-bottom:.7rem;">Exercice IA basé sur votre module terrain — niveau <strong style="color:${lvPro.color};">${lvPro.label}</strong></div>
+          <button class="btn btn-gold" onclick="generateGLSProExercise('${proId}',${m.id})">🎲 Générer l'exercice ${lvPro.stars}</button>
+        </div>
+      </div>
+    </div>
+    <div id="glsModuleScore-${proId}" style="margin-top:.6rem;"></div>`}
+  </div>`;
+  const scenarios=(m.scenarios||[]).map((s,i)=>`
+    <div class="sc-card"><div class="sc-hdr pro" onclick="toggleSC(this)">
+      <div><div class="sc-title">Scénario ${i+1} — ${_e(s.titre)}</div>
+      <span style="font-size:.65rem;background:rgba(0,0,0,.06);border-radius:5px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:${cols[s.difficulte]||'var(--gray600)'};">${_e(s.difficulte||'')}</span></div>
+      <span class="sc-arr" style="color:var(--gray600);font-size:.8rem;">${i===0?'▼':'▶'}</span></div>
+      <div class="sc-body ${i===0?'open':''}">
+        <div class="sc-field"><strong>Contexte</strong>${_e(s.contexte||'')}</div>
+        <div class="sc-field"><strong>Situation</strong>${_e(s.situation||'')}</div>
+        <div style="background:var(--pro-bg);border-radius:9px;padding:.55rem .85rem;margin:.5rem 0;font-size:.8rem;color:var(--pro-dark);font-weight:700;">📋 Consigne : ${_e(s.consigne||'')}</div>
+        <button class="corr-btn" onclick="toggleCorr(this)">👁️ Voir le corrigé expert</button>
+        <div class="corr-body">${_e(s.correction||'').replace(/\n/g,'<br>')}</div>
+      </div></div>`).join('')||'';
+  return proSection+scenarios+(scenarios?'':empty('🔧','Aucun scénario'));
+}
+
+async function generateGLSProExercise(proId,modId){
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const done=_getGLSLevDone(proId);if(done>=3)return;
+  const lv=_GLS_EX_LEVELS[done];
+  const el=document.getElementById('glsExContent-'+proId);if(!el)return;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;padding:.8rem;background:${lv.bg};border-radius:9px;"><div class="ai-spinner" style="border-top-color:${lv.color};"></div><span style="font-size:.8rem;color:${lv.color};font-weight:700;">Génération exercice terrain niveau ${lv.label}…</span></div>`;
+  const key=getKey();if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  const sectionsText=(m.sections||[]).map(s=>`## ${s.titre}\n${(s.contenu||'').slice(0,400)}`).join('\n\n').slice(0,3500);
+  const levelPrompts=[
+    'NIVEAU DÉBUTANT : situation simple du quotidien terrain. L\'apprenant identifie le problème, cite les outils appropriés, propose une première action.',
+    'NIVEAU INTERMÉDIAIRE : incident ou dysfonctionnement à analyser. L\'apprenant diagnostique, applique la procédure correcte, rédige un compte-rendu d\'intervention.',
+    'NIVEAU AVANCÉ : cas complexe avec contraintes (sécurité, délai, ressources). L\'apprenant gère l\'urgence, arbitre entre solutions, rédige un rapport technique complet.'
+  ][done];
+  const prompt=`Tu es formateur professionnel expert en ${m.dom||m.titre||'métier'}. Génère un exercice de mise en situation professionnelle réaliste.
+
+${levelPrompts}
+
+MODULE : "${m.titre}" | DOMAINE : "${m.dom||''}" | PUBLIC : "${m.pub||'professionnels'}"
+
+CONTENU DU MODULE :
+${sectionsText}
+
+JSON structure exacte :
+{
+  "situation": "Description réaliste du lieu, contexte professionnel, heure, équipe présente (3-4 phrases immersives)",
+  "probleme": "Description précise du problème ou de la situation à gérer (2-3 phrases)",
+  "questions": ["Question 1 terrain ?", "Question 2 procédure ?", "Question 3 décision ?"],
+  "correction": "Corrigé professionnel détaillé : actions dans le bon ordre, justifications, réglementations applicables, pièges à éviter (8-12 lignes)",
+  "dureeMinutes": ${[10,18,28][done]}
+}`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1400,temperature:0.65,response_format:{type:'json_object'}})});
+    const data=await resp.json();const txt=data.choices?.[0]?.message?.content||'';
+    let ex;try{ex=JSON.parse(txt);}catch{const jm=txt.match(/\{[\s\S]*\}/);ex=jm?JSON.parse(jm[0]):{situation:'Exercice terrain.',probleme:'Situez-vous dans le contexte professionnel.',questions:['Que faites-vous ?'],correction:'À compléter.',dureeMinutes:[10,18,28][done]};}
+    _glsCurrentEx[proId]=ex;
+    const mins=ex.dureeMinutes||[10,18,28][done];
+    el.innerHTML=`
+      <div style="background:#fff;border-radius:9px;padding:.7rem .9rem;border:1px solid var(--gray200);margin-bottom:.7rem;font-size:.81rem;color:#374151;line-height:1.7;">
+        <div style="font-size:.65rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📍 Mise en situation</div>
+        ${_e(ex.situation||'')}
+      </div>
+      <div style="font-size:.86rem;font-weight:700;color:var(--navy);margin-bottom:.7rem;padding:.5rem .8rem;background:var(--pro-bg);border-left:3px solid var(--accent);border-radius:0 9px 9px 0;">⚠️ Situation à gérer : ${_e(ex.probleme||'')}</div>
+      <div style="margin:.5rem 0 .8rem;">${(ex.questions||[]).map((q,i2)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem;font-size:.82rem;color:#374151;"><span style="color:${lv.color};font-weight:800;flex-shrink:0;">${i2+1}.</span><span>${_e(q)}</span></div>`).join('')}</div>
+      <textarea id="glsExAnswer-${proId}" class="ex-level-ta" style="border:1.5px solid ${lv.border};" placeholder="Décrivez votre réponse terrain : actions, ordre d'intervention, justifications…" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
+      <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem;">
+        <button class="btn btn-gold btn-sm" onclick="evalGLSProAnswer('${proId}',${modId})">🤖 Feedback formateur IA</button>
+        <button class="btn btn-green btn-sm" onclick="completeGLSProLevel('${proId}')">✅ Valider ce niveau ${lv.stars}</button>
+      </div>
+      <div id="glsExFeedback-${proId}" style="margin-top:.6rem;"></div>
+      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-size:.73rem;color:var(--gray400);font-weight:700;">📄 Voir le corrigé expert</summary><div style="margin-top:.5rem;background:var(--pro-bg);border-radius:9px;padding:.7rem .95rem;font-size:.8rem;color:var(--pro-dark);line-height:1.75;border:1px solid #fde68a;">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div></details>`;
+    _startGLSTimer(proId,mins);
+  }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
+}
+
+async function evalGLSProAnswer(proId,modId){
+  const exData=_glsCurrentEx[proId]||{};
+  const answer=(document.getElementById('glsExAnswer-'+proId)?.value||'').trim();
+  const feedEl=document.getElementById('glsExFeedback-'+proId);if(!feedEl)return;
+  if(!answer){feedEl.innerHTML='<div class="alert alert-warning">Décrivez votre intervention avant d\'évaluer.</div>';return;}
+  const key=getKey();if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  const done=_getGLSLevDone(proId);const lv=_GLS_EX_LEVELS[Math.min(done,2)];
+  const ms=getMods();const m=ms.find(x=>x.id==modId)||{};
+  feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--gray400);"><div class="ai-spinner"></div>Évaluation formateur IA…</div>`;
+  const sysP=`Tu es formateur professionnel expert en ${m.titre||'métier'} (${m.dom||''}). Tu évalues des réponses de stagiaires avec le regard d'un professionnel expérimenté du terrain. Niveau attendu : ${lv.label}.`;
+  const prompt=`RÈGLE ABSOLUE : Si la réponse est du charabia ou hors-sujet, réponds UNIQUEMENT : "❌ Réponse invalide — décrivez une vraie intervention professionnelle."
+
+SITUATION : "${(exData.situation||'').slice(0,300)}"
+PROBLÈME : "${(exData.probleme||'').slice(0,200)}"
+QUESTIONS : ${(exData.questions||[]).join(' | ')}
+CORRIGÉ PROFESSIONNEL : "${(exData.correction||'').slice(0,600)}"
+RÉPONSE DU STAGIAIRE : "${answer.slice(0,700)}"
+
+Évalue en 4 points (2-4 phrases par point) :
+✅ Points forts — ce qui est professionnel et correct dans l'intervention décrite
+❌ Points manquants — procédures oubliées, outils non mentionnés, séquence incorrecte
+📊 Données techniques — normes, valeurs, réglementations attendues non citées
+💡 Conseil terrain — recommandation d'un senior pour progresser dans ce métier`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1000,temperature:0.4})});
+    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    feedEl.innerHTML=`<div class="ai-feedback" style="background:#fffbeb;border-color:#fde68a;color:#92400e;">${formatAIText(text)}</div>
+      <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
+        <button class="btn btn-green btn-sm" onclick="completeGLSProLevel('${proId}')">✅ Valider ce niveau ${lv.stars} et continuer →</button>
+      </div>`;
+  }catch(e){feedEl.innerHTML='<div class="alert alert-warning">Erreur lors de l\'évaluation.</div>';}
+}
+
+function completeGLSProLevel(proId){
+  clearInterval(_glsExTimerInt);
+  const done=_getGLSLevDone(proId);if(done>=3)return;
+  _saveGLSLev(proId,done+1);
+  const badge=document.getElementById('glsExBadge-'+proId);
+  if(badge)badge.innerHTML=_renderGLSLevelBadge(proId);
+  const next=done+1;
+  if(next>=3){
+    const card=document.getElementById('glsExCard-'+proId);
+    if(card)card.outerHTML=`<div>
+      <div class="alert alert-success" style="margin-bottom:.8rem;">🎉 <strong>Félicitations !</strong> Les 3 niveaux terrain sont validés.</div>
+      <div id="glsModuleScore-${proId}">
+        <button class="btn btn-gold" style="font-size:.88rem;" onclick="validateGLSModule('${proId}')">✅ Valider le module et voir mon score →</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const lv2=_GLS_EX_LEVELS[next];
+  const card=document.getElementById('glsExCard-'+proId);
+  if(card){
+    card.style.borderColor=lv2.border;card.style.background=lv2.bg;
+    const timerEl=document.getElementById('glsExTimer-'+proId);if(timerEl)timerEl.innerHTML='';
+    const contentEl=document.getElementById('glsExContent-'+proId);
+    if(contentEl)contentEl.innerHTML=`<div style="text-align:center;padding:1rem 0;"><div style="font-size:.83rem;color:var(--gray600);margin-bottom:.6rem;">✅ Niveau ${_GLS_EX_LEVELS[done].label} validé !<br>Passez au niveau <strong style="color:${lv2.color};">${lv2.label}</strong></div><button class="btn btn-gold" onclick="generateGLSProExercise('${proId}',${String(proId).replace('pro-','')})">🎲 Exercice ${lv2.stars} ${lv2.label}</button></div>`;
+    const lvLabel=card.querySelector('[data-lv-label]');if(lvLabel){lvLabel.textContent=lv2.stars+' Niveau '+lv2.label;lvLabel.style.color=lv2.color;}
+  }
+  showToast('Niveau '+_GLS_EX_LEVELS[done].label+' validé ! → '+lv2.label);
+}
+
+/* ── Check-list ── */
+function renderCheck(m){
+  const cl=m.checklist||{avant:[],pendant:[],apres:[]};
+  const sec=[['avant','🔵 Avant l\'intervention','#1d4ed8'],['pendant','🟡 Pendant','#b45309'],['apres','🟢 Après','#15803d']];
+  return sec.map(([k,lbl,col])=>`<div class="cl-section"><div class="cl-section-title" style="background:rgba(0,0,0,.04);color:${col};">${lbl}</div>
+    ${(cl[k]||[]).map((item,j)=>`<label class="cl-item" id="cl-${k}-${j}" onclick="this.classList.toggle('checked')"><input type="checkbox" style="accent-color:var(--accent);"> ${_e(item)}</label>`).join('')}</div>`).join('');
+}
+
+/* ── Cours (acad) ── */
+function renderCours(m){
+  const readSecs=m.readSections||{};
+  const total=m.sections?.length||0;
+  const done=Object.values(readSecs).filter(Boolean).length;
+  const pct=total?Math.round(done/total*100):0;
+  const progressBar=total?`<div class="read-progress-bar"><div class="rpb-wrap"><div class="rpb-fill" id="readProgress" style="width:${pct}%"></div></div><div class="read-lbl" id="readLabel">${done}/${total} sections lues</div></div>`:'';
+  return progressBar+(m.sections||[]).map((s,i)=>{
+    const rKey='s'+i;const isRead=readSecs[rKey];const noteVal=getNote(m.id,'cs'+i);
+    return`
+    <div class="cs"><div class="cs-hdr" onclick="toggleCS(this)">
+      <div style="display:flex;align-items:center;gap:.5rem;flex:1;min-width:0;">
+        <div class="read-dot${isRead?' done':''}" id="rdot-${rKey}" title="${isRead?'Lu':'Marquer comme lu'}" onclick="event.stopPropagation();markRead(${m.id},'${rKey}')"></div>
+        <h4><span style="color:var(--purple);margin-right:.4rem;">${i+1}.</span>${_e(s.titre)}</h4>
+      </div>
+      <div style="display:flex;align-items:center;gap:.5rem;" onclick="event.stopPropagation()">
+        <button class="note-ico${noteVal?' has-note an':''}" id="nbtn-cs${i}" onclick="openNoteModal(${m.id},'cs${i}',${JSON.stringify(s.titre)},true)">${noteVal?'📝':'+ Note'}</button>
+        <button class="card-act-btn" id="rsBtn-${i}" title="Régénérer avec l'IA" onclick="regenSection(${i})">🔄</button>
+        <span style="font-size:.7rem;color:var(--gray400);">⏱️ ${_e(s.duree||s.dur||'')}</span>
+        <span class="cs-arr" style="font-size:.78rem;color:var(--gray400);">${i===0?'▼':'▶'}</span>
+      </div></div>
+      <div class="cs-body ${i===0?'open':''}">
+        ${(s.definitions||[]).length?`<div style="margin-bottom:.7rem;">${(s.definitions||[]).map(d=>`<div class="def-box"><span class="def-term">${_e(d.terme||d.term||'')} :</span> ${_e(d.def||d.definition||'')}</div>`).join('')}</div>`:''}
+        ${s.contenu?`<div style="font-size:.83rem;line-height:1.8;color:#374151;margin-bottom:.8rem;">${fmtTxt(_n(s.contenu))}</div>`:''}
+        ${(s.points_cles||[]).map(p=>`<div class="kp acad">💡 ${_e(p)}</div>`).join('')}
+        ${s.exemple?`<div style="background:var(--acad-bg);border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.8rem;color:var(--acad-dark);line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
+        ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
+        <div class="sec-media">
+          <div id="imgArea-${m.id}-${i}">${s.image?`<div class="sec-img-wrap"><img src="${s.image.url}" alt="${_e(s.titre)}" loading="lazy"><div class="sec-img-credit">Photo par <a href="${s.image.authorLink}" target="_blank" rel="noopener">${_e(s.image.author)}</a> sur Unsplash</div></div>`:`<span></span>`}</div>
+          <div id="svgArea-${m.id}-${i}">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
+          <div class="sec-mdia-btns">
+            <button class="sec-media-btn sec-svg-btn" id="svgBtn-${m.id}-${i}" onclick="generateSectionSVG(${m.id},${i})">${s.svg?'🔄 Régén. schéma':'📊 Schéma IA'}</button>
+            ${s.image?`<button class="sec-media-btn sec-img-rmv" onclick="removeSecImage(${m.id},${i})">🗑️ Retirer image</button>`:''}
+          </div>
+        </div>
+      </div></div>`;}).join('')||empty('📖','Aucune section');
+}
+
+/* ── Exercices (acad) — 3 niveaux séquentiels ── */
+const _GLS_EX_LEVELS=[
+  {label:'Débutant',stars:'⭐',idx:0,color:'#16a34a',bg:'#f0fdf4',border:'#bbf7d0'},
+  {label:'Intermédiaire',stars:'⭐⭐',idx:1,color:'#d97706',bg:'#fffbeb',border:'#fde68a'},
+  {label:'Avancé',stars:'⭐⭐⭐',idx:2,color:'#dc2626',bg:'#fef2f2',border:'#fecaca'}
+];
+
+function _getGLSLevDone(modId){
+  try{return parseInt(localStorage.getItem('gls_lev_'+modId)||'0');}catch{return 0;}
+}
+function _saveGLSLev(modId,n){localStorage.setItem('gls_lev_'+modId,n);}
+
+function formatAIText(text){
+  return text.replace(/\n/g,'<br>').replace(/((?:✅|☑️)[^\n<]+)/g,'<span style="color:#059669;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:❌|✗)[^\n<]+)/g,'<span style="color:#dc2626;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:📊|📋|📝)[^\n<]+)/g,'<span style="color:#2563eb;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:💡|🔆)[^\n<]+)/g,'<span style="color:#d97706;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>');
+}
+
+function _renderGLSLevelBadge(modId){
+  const done=_getGLSLevDone(modId);
+  return _GLS_EX_LEVELS.map((s,i)=>{
+    const isDone=i<done,isCur=i===done&&done<3,isLocked=i>done;
+    return `<span style="display:inline-flex;align-items:center;gap:.18rem;font-size:.67rem;font-weight:800;padding:.15rem .5rem;border-radius:12px;background:${isDone?s.color+'25':isCur?s.color+'15':'#f1f5f9'};color:${isDone||isCur?s.color:'#94a3b8'};border:1.5px solid ${isDone?s.color:isCur?s.color+'99':'#e2e8f0'};white-space:nowrap;">${isDone?'✓ ':isCur?'→ ':'🔒 '}${s.label} ${s.stars}</span>`;
+  }).join('<span style="color:#cbd5e1;font-size:.65rem;margin:0 .05rem;">›</span>');
+}
+
+function renderExos(m){
+  const done=_getGLSLevDone(m.id);
+  const allDone=done>=3;
+  let html=`<div style="margin-bottom:1rem;"><div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:.5rem;">Progression des niveaux</div><div id="glsExBadge-${m.id}" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;">${_renderGLSLevelBadge(m.id)}</div></div>`;
+  if(allDone){
+    html+=`<div class="alert alert-success">🎉 Tous les niveaux sont validés ! Passez au quiz pour obtenir votre attestation.</div>`;
+    return html;
+  }
+  const lv=_GLS_EX_LEVELS[done];
+  html+=`<div class="ex-level-wrap ex-level-current" id="glsExCard-${m.id}" style="border-color:${lv.border};background:${lv.bg};">
+    <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem;">
+      <span data-lv-label style="font-size:.72rem;font-weight:900;color:${lv.color};">${lv.stars} Niveau ${lv.label}</span>
+      <div id="glsExTimer-${m.id}" style="margin-left:auto;font-size:.72rem;color:var(--gray600);font-family:'JetBrains Mono',monospace;"></div>
+    </div>
+    <div id="glsExContent-${m.id}">
+      <div style="text-align:center;padding:1.5rem 0;">
+        <div style="font-size:.83rem;color:var(--gray600);margin-bottom:.9rem;">Cliquez pour générer votre exercice de niveau <strong style="color:${lv.color};">${lv.label}</strong></div>
+        <button class="btn btn-purple" onclick="generateGLSExercise(${m.id})">🎲 Générer l'exercice ${lv.stars}</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;">
+      <button class="btn btn-ghost btn-sm" onclick="generateGLSExercise(${m.id})">🔄 Nouvel exercice</button>
+    </div>
+  </div>`;
+  if(m.exercices?.length){
+    html+=`<details style="margin-top:1rem;"><summary style="cursor:pointer;font-size:.77rem;font-weight:700;color:var(--gray600);padding:.4rem 0;">📚 Exercices du cours (${m.exercices.length})</summary><div style="margin-top:.6rem;">${m.exercices.map((ex,i)=>`
+      <div class="ex-card">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem;">
+          <span class="ex-diff ${ex.difficulte||ex.type||'debutant'}">${_e(ex.difficulte||ex.type||'')}</span>
+          ${ex.duree?`<span style="font-size:.68rem;color:var(--gray400);">⏱️ ${_e(ex.duree)}</span>`:''}
+        </div>
+        <h4 style="font-size:.87rem;font-weight:800;color:var(--navy);margin-bottom:.5rem;">${i+1}. ${_e(ex.titre)}</h4>
+        <div style="font-size:.83rem;color:#374151;line-height:1.7;margin-bottom:.55rem;">${_e(ex.enonce||'')}</div>
+        ${ex.questions?.length?`<div style="margin:.5rem 0 .65rem;">${ex.questions.map(q=>`<div class="ex-q">${_e(q)}</div>`).join('')}</div>`:''}
+        <button class="corr-btn" onclick="toggleCorr(this)">📄 Voir le corrigé</button>
+        <div class="corr-body">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div>
+      </div>`).join('')}</div></details>`;
+  }
+  return html;
+}
+
+let _glsExTimerInt=null,_glsCurrentEx={},_glsTimerLeft=0,_glsTimerTotal=300;
+function _startGLSTimer(modId,minutes){
+  clearInterval(_glsExTimerInt);
+  _glsTimerLeft=Math.max(60,Math.round(minutes*60));
+  _glsTimerTotal=_glsTimerLeft;
+  _drawGLSTimer(modId);
+  _glsExTimerInt=setInterval(()=>{
+    _glsTimerLeft--;
+    if(_glsTimerLeft<=0){clearInterval(_glsExTimerInt);_onGLSTimeout(modId);}
+    else _drawGLSTimer(modId);
+  },1000);
+}
+function _drawGLSTimer(modId){
+  const el=document.getElementById('glsExTimer-'+modId);if(!el)return;
+  const m2=Math.floor(_glsTimerLeft/60),s2=_glsTimerLeft%60;
+  const pct=_glsTimerLeft/_glsTimerTotal;
+  const color=pct>.5?'#059669':pct>.25?'#d97706':'#dc2626';
+  el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:${color}12;border:1.5px solid ${color}40;border-radius:20px;padding:.22rem .65rem;">
+    <svg width="14" height="14" viewBox="0 0 36 36" style="flex-shrink:0;transform:rotate(-90deg);">
+      <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="4"/>
+      <circle cx="18" cy="18" r="15" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${Math.round(94.2*pct)} 94.2" stroke-linecap="round"/>
+    </svg>
+    <span style="font-weight:900;font-size:.78rem;color:${color};letter-spacing:.5px;font-variant-numeric:tabular-nums;">${String(m2).padStart(2,'0')}:${String(s2).padStart(2,'0')}</span>
+  </div>`;
+}
+function _onGLSTimeout(modId){
+  const el=document.getElementById('glsExTimer-'+modId);
+  if(el)el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:20px;padding:.22rem .65rem;font-size:.78rem;font-weight:800;color:#dc2626;">⏰ Temps écoulé !</div>`;
+}
+
+async function generateGLSExercise(modId){
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const done=_getGLSLevDone(modId);if(done>=3)return;
+  const lv=_GLS_EX_LEVELS[done];
+  const el=document.getElementById('glsExContent-'+modId);if(!el)return;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;padding:.8rem;background:${lv.bg};border-radius:9px;"><div class="ai-spinner" style="border-top-color:${lv.color};"></div><span style="font-size:.8rem;color:${lv.color};font-weight:700;">Génération niveau ${lv.label}…</span></div>`;
+  const key=getKey();
+  if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API Groq requise.</div>';return;}
+  const sectionsText=(m.sections||[]).map(s=>`=== ${s.titre} ===\n${(s.contenu||'').slice(0,400)}`).join('\n\n').slice(0,3000);
+  const levelPrompts=[
+    'NIVEAU DÉBUTANT — Questions de compréhension directes sur le cours. Application simple des concepts vus. 3-4 questions guidées avec données claires.',
+    'NIVEAU INTERMÉDIAIRE — Application méthodologique. Analyse de situation, calculs ou raisonnements approfondis. 4-5 questions avec mise en contexte.',
+    'NIVEAU AVANCÉ — Analyse critique et synthèse. Problème complexe requérant maîtrise complète du sujet. 5-6 questions ouvertes exigeantes.'
+  ][done];
+  const prompt=`Tu es professeur-ingénieur expert. Crée un exercice pédagogique pour le module "${m.titre}" (${m.dom||''}).
+
+${levelPrompts}
+
+CONTENU DU COURS :
+${sectionsText}
+
+JSON structure exacte :
+{
+  "enonce": "Mise en situation détaillée (4-6 phrases), contexte réaliste de l'exercice.",
+  "questions": ["Question 1 ?", "Question 2 ?", "Question 3 ?"],
+  "correction": "Corrigé détaillé complet (8-12 lignes) avec méthode, calculs si nécessaire, et explications.",
+  "dureeMinutes": ${[8,15,25][done]}
+}`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1200,temperature:0.6,response_format:{type:'json_object'}})});
+    const data=await resp.json();const txt=data.choices?.[0]?.message?.content||'';
+    let ex;try{ex=JSON.parse(txt);}catch{const jm=txt.match(/\{[\s\S]*\}/);ex=jm?JSON.parse(jm[0]):{enonce:'Exercice généré.',questions:['Analysez le concept principal.'],correction:'Réponse à rédiger.',dureeMinutes:[8,15,25][done]};}
+    _glsCurrentEx[modId]=ex;
+    const mins=ex.dureeMinutes||[8,15,25][done];
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;">
+        <button class="btn btn-ghost btn-sm" style="font-size:.72rem;border-color:${lv.color}40;color:${lv.color};" onclick="showGLSPreCours(${modId})">📚 Cours niveau ${lv.label} avant de commencer</button>
+        <div id="glsPreCours-${modId}" style="display:none;width:100%;margin-top:.4rem;"></div>
+      </div>
+      <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.7rem;line-height:1.65;">${_e(ex.enonce||'')}</div>
+      <div style="margin:.5rem 0 .8rem;">${(ex.questions||[]).map((q,i2)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem;font-size:.82rem;color:#374151;"><span style="color:${lv.color};font-weight:800;flex-shrink:0;">${i2+1}.</span><span>${_e(q)}</span></div>`).join('')}</div>
+      <textarea id="glsExAnswer-${modId}" class="ex-level-ta" style="border:1.5px solid ${lv.border};" placeholder="Rédigez votre réponse complète…" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
+      <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem;">
+        <button class="btn btn-gold btn-sm" onclick="evalGLSAnswer(${modId})">🤖 Feedback IA</button>
+        <button class="btn btn-green btn-sm" onclick="completeGLSLevel(${modId})">✅ Valider ce niveau ${lv.stars}</button>
+      </div>
+      <div id="glsExFeedback-${modId}" style="margin-top:.6rem;"></div>
+      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-size:.73rem;color:var(--gray400);font-weight:700;">📄 Voir le corrigé</summary><div style="margin-top:.5rem;background:#ecfdf5;border-radius:9px;padding:.7rem .95rem;font-size:.8rem;color:#065f46;line-height:1.75;border:1px solid #6ee7b7;">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div></details>`;
+    _startGLSTimer(modId,mins);
+  }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
+}
+
+async function evalGLSAnswer(modId){
+  const exData=_glsCurrentEx[modId]||{};
+  const answer=(document.getElementById('glsExAnswer-'+modId)?.value||'').trim();
+  const feedEl=document.getElementById('glsExFeedback-'+modId);
+  if(!feedEl)return;
+  if(!answer){feedEl.innerHTML='<div class="alert alert-warning">Rédigez votre réponse avant d\'évaluer.</div>';return;}
+  const key=getKey();
+  if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  const done=_getGLSLevDone(modId);const lv=_GLS_EX_LEVELS[Math.min(done,2)];
+  const ms=getMods();const m=ms.find(x=>x.id==modId)||{};
+  feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--gray400);"><div class="ai-spinner"></div>Évaluation IA en cours…</div>`;
+  const domLbl=m.dom?` (${m.dom})`:'';
+  const sysPrompt=`Tu es professeur-ingénieur expert en ${m.titre||'ingénierie'}${domLbl}. Tu évalues des réponses d'étudiants avec rigueur et pédagogie. Tu fournis un retour détaillé, structuré et actionnable. Niveau attendu : ${lv.label}.`;
+  const prompt=`RÈGLE ABSOLUE : Si la réponse est du charabia, vide, ou hors-sujet, réponds UNIQUEMENT : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
+
+CONTEXTE DU MODULE : "${m.titre||''}"
+NIVEAU DE L'EXERCICE : ${lv.label} ${lv.stars}
+ÉNONCÉ : "${(exData.enonce||'').slice(0,400)}"
+QUESTIONS POSÉES : ${(exData.questions||[]).map((q,i)=>(i+1)+'. '+q).join(' | ')}
+CORRIGÉ COMPLET : "${(exData.correction||'').slice(0,600)}"
+RÉPONSE DE L'ÉTUDIANT : "${answer.slice(0,700)}"
+
+Évalue en 4 points DÉTAILLÉS (2-4 phrases par point) :
+
+✅ Points forts — identifie précisément ce qui est correct, bien raisonné, ou pertinent dans la réponse
+❌ Points manquants/incorrects — cite les éléments clés absents ou les erreurs de raisonnement (sois précis et concret)
+📊 Calculs/Éléments techniques — indique les formules, valeurs ou démonstrations attendues qui manquent ou sont faux
+💡 Conseil métier — donne 1 recommandation concrète et actionnée pour progresser, adaptée au domaine "${m.dom||'ingénierie'}"
+
+Adapte ton niveau d'exigence au niveau ${lv.label} : pour Débutant sois encourageant, pour Avancé sois exigeant comme un jury d'ingénieur.`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:prompt}],max_tokens:1000,temperature:0.4})});
+    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
+      <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
+        <button class="btn btn-green btn-sm" onclick="completeGLSLevel(${modId})">✅ Valider ce niveau ${lv.stars} et continuer →</button>
+      </div>`;
+  }catch(e){feedEl.innerHTML='<div class="alert alert-warning">Erreur lors de l\'évaluation.</div>';}
+}
+
+function completeGLSLevel(modId){
+  clearInterval(_glsExTimerInt);
+  const done=_getGLSLevDone(modId);if(done>=3)return;
+  _saveGLSLev(modId,done+1);
+  const badge=document.getElementById('glsExBadge-'+modId);
+  if(badge)badge.innerHTML=_renderGLSLevelBadge(modId);
+  const next=done+1;
+  if(next>=3){
+    const card=document.getElementById('glsExCard-'+modId);
+    if(card)card.outerHTML=`<div>
+      <div class="alert alert-success" style="margin-bottom:.8rem;">🎉 <strong>Félicitations !</strong> Les 3 niveaux sont validés — vous maîtrisez ce module.</div>
+      <div id="glsModuleScore-${modId}">
+        <button class="btn btn-green" style="font-size:.88rem;" onclick="validateGLSModule(${modId})">✅ Valider le module et voir mon score →</button>
+      </div>
+    </div>`;
+    return;
+  }
+  const lv2=_GLS_EX_LEVELS[next];
+  const card=document.getElementById('glsExCard-'+modId);
+  if(card){
+    card.style.borderColor=lv2.border;card.style.background=lv2.bg;
+    const timerEl=document.getElementById('glsExTimer-'+modId);if(timerEl)timerEl.innerHTML='';
+    const contentEl=document.getElementById('glsExContent-'+modId);
+    if(contentEl)contentEl.innerHTML=`<div style="text-align:center;padding:1rem 0;"><div style="font-size:.83rem;color:var(--gray600);margin-bottom:.6rem;">✅ Niveau ${_GLS_EX_LEVELS[done].label} validé !<br>Générez maintenant votre exercice de niveau <strong style="color:${lv2.color};">${lv2.label}</strong></div><button class="btn btn-purple" onclick="generateGLSExercise(${modId})">🎲 Exercice ${lv2.stars} ${lv2.label}</button></div>`;
+    const lvLabel=card.querySelector('[data-lv-label]');if(lvLabel){lvLabel.textContent=lv2.stars+' Niveau '+lv2.label;lvLabel.style.color=lv2.color;}
+  }
+  showToast('Niveau '+_GLS_EX_LEVELS[done].label+' validé ! → '+lv2.label);
+}
+
+async function showGLSPreCours(modId){
+  const el=document.getElementById('glsPreCours-'+modId);if(!el)return;
+  el.style.display='block';
+  const done=_getGLSLevDone(modId);const lv=_GLS_EX_LEVELS[Math.min(done,2)];
+  const ms=getMods();const m=ms.find(x=>x.id==modId)||{};
+  const key=getKey();
+  if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;background:${lv.bg};border:1px solid ${lv.border};border-radius:9px;padding:.6rem .9rem;"><div class="ai-spinner" style="border-top-color:${lv.color};flex-shrink:0;"></div><span style="font-size:.78rem;color:${lv.color};font-weight:700;">Génération du cours ${lv.label}…</span></div>`;
+  const sectionsText=(m.sections||[]).map(s=>`## ${s.titre}\n${(s.contenu||'').slice(0,300)}`).join('\n\n').slice(0,3500);
+  const adapts=['notions fondamentales avec définitions claires, exemples simples et analogies','application pratique des concepts avec mise en situation concrète','analyse approfondie, liens entre concepts, cas complexes et nuances techniques'][done];
+  const sysP=`Tu es professeur-ingénieur expert en ${m.titre||'ingénierie'} (${m.dom||''}). Tu génères des cours pédagogiques adaptés au niveau de l'étudiant. Réponds en français, de façon structurée et lisible.`;
+  const prompt=`Génère un cours synthétique de niveau ${lv.label} sur "${m.titre}" pour préparer l'étudiant à un exercice.
+
+Le cours doit couvrir : ${adapts}.
+Durée de lecture cible : ${['5','8','12'][done]} minutes.
+
+CONTENU SOURCE DU MODULE :
+${sectionsText}
+
+Structure attendue (en texte, pas de JSON) :
+🎯 Objectif du niveau ${lv.label}
+(1-2 phrases sur ce qu'on attend de l'étudiant à ce niveau)
+
+📖 Rappels essentiels
+(3-5 points clés du cours, expliqués en 2-3 phrases chacun)
+
+⚙️ Ce qu'il faut savoir faire
+(3-4 compétences concrètes avec exemples)
+
+💡 Point critique à retenir
+(1 notion souvent mal comprise, expliquée clairement)`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1200,temperature:0.5})});
+    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    el.innerHTML=`<div style="background:${lv.bg};border:1.5px solid ${lv.border};border-radius:12px;padding:1rem 1.1rem;font-size:.82rem;line-height:1.8;color:#1e293b;">
+      <div style="font-size:.7rem;font-weight:800;color:${lv.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;">📚 Cours préparatoire — Niveau ${lv.label} ${lv.stars}</div>
+      ${formatAIText(text)}
+      <button onclick="this.closest('[id^=glsPreCours]').style.display='none'" style="margin-top:.7rem;background:none;border:none;font-size:.72rem;color:var(--gray400);cursor:pointer;font-family:inherit;">Masquer le cours ↑</button>
+    </div>`;
+  }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
+}
+
+function validateGLSModule(modId){
+  const levDone=_getGLSLevDone(modId);
+  const box=document.getElementById('glsModuleScore-'+modId);if(!box)return;
+  if(levDone<3){
+    box.innerHTML=`<div class="alert alert-warning">🔒 Complétez d'abord les 3 niveaux d'exercices.</div>`;
+    return;
+  }
+  const score=80;
+  const pass=score>=70;
+  const _sc=pass?'#16a34a':'#dc2626';
+  const _r=38,_circ=2*Math.PI*_r;
+  const uid='gls'+modId;
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;background:${pass?'#ecfdf5':'#fef2f2'};border:1.5px solid ${pass?'#6ee7b7':'#fca5a5'};border-radius:16px;padding:1.2rem 1.4rem;">
+    <div style="flex-shrink:0;position:relative;width:90px;height:90px;">
+      <svg width="90" height="90" viewBox="0 0 90 90" style="transform:rotate(-90deg);">
+        <circle cx="45" cy="45" r="${_r}" fill="none" stroke="#e2e8f0" stroke-width="7"/>
+        <circle cx="45" cy="45" r="${_r}" fill="none" stroke="${_sc}" stroke-width="7"
+          stroke-dasharray="0 ${_circ.toFixed(1)}" stroke-linecap="round"
+          class="score-arc-${uid}" style="transition:stroke-dasharray 1.3s cubic-bezier(.4,0,.2,1);"/>
+      </svg>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:1.3rem;font-weight:900;color:${_sc};line-height:1;">${score}%</span>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-weight:800;font-size:1rem;color:${_sc};">${pass?'✅ Module validé — excellente maîtrise !':'📖 Relisez le contenu et recommencez les exercices.'}</div>
+      <div style="font-size:.8rem;color:#6b7280;margin-top:.3rem;">Score : ${score}% — Minimum requis : 70%</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-top:.2rem;">✓ 3 exercices complétés avec feedback IA</div>
+    </div>
+  </div>`;
+  setTimeout(()=>{const arc=document.querySelector('.score-arc-'+uid);if(arc)arc.style.strokeDasharray=`${(score/100*_circ).toFixed(1)} ${_circ.toFixed(1)}`;},80);
+}
+
+/* ── Quiz (commun) ── */
+function renderQuiz(m){
+  if(!m.quiz?.length)return`<div>${empty('📝','Aucun quiz')}<div style="text-align:center;margin-top:1rem;"><button class="btn btn-${m.mode==='pro'?'gold':'purple'} btn-sm" id="regenQuizBtn" onclick="regenQuiz()">🔄 Générer un quiz</button></div></div>`;
+  if(_qs)return renderQuizRes(m);
+  const p=m.mode==='pro';
+  stopTimer();setTimeout(()=>startTimer(m.quiz.length),200);
+  return`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.8rem;">
+    <div class="alert alert-info" style="margin:0;flex:1;">📋 ${m.quiz.length} questions — Sélectionnez une réponse par question puis validez.</div>
+    <span class="quiz-timer" id="quizTimer">⏱ --</span>
+  </div>
+  ${m.quiz.map((q,qi)=>`<div class="quiz-q"><div class="quiz-q-txt">${qi+1}. ${_e(q.q)}</div>
+    ${(q.opts||[]).map((o,oi)=>`<div class="quiz-opt" onclick="selQ(${qi},${oi},this,'${p?'pro':'acad'}')" id="qo-${qi}-${oi}"><input type="radio" name="q${qi}" style="accent-color:var(--${p?'accent':'purple'});"> ${_e(o)}</div>`).join('')}
+    <div class="quiz-notion">📌 ${_e(q.competence||q.notion||'')}</div></div>`).join('')}
+  <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.5rem;">
+    <button class="btn btn-lg ${p?'btn-gold':'btn-purple'}" onclick="submitQ()">✓ Soumettre l'évaluation</button>
+    <button class="btn btn-ghost btn-sm" id="regenQuizBtn" onclick="regenQuiz()">🔄 Nouveau quiz</button>
+  </div>`;
+}
+
+function selQ(qi,oi,el,mc){
+  document.querySelectorAll(`[id^="qo-${qi}-"]`).forEach(e=>e.classList.remove('sel-pro','sel-acad'));
+  el.classList.add('sel-'+mc);_qa[qi]=oi;el.querySelector('input').checked=true;
+}
+
+function submitQ(){
+  if(!_cur)return;const m=_cur,total=m.quiz.length;
+  if(Object.keys(_qa).length<total&&!confirm(`Seulement ${Object.keys(_qa).length}/${total} réponses. Soumettre ?`))return;
+  _qs=true;let correct=0;const wbc={};
+  m.quiz.forEach((q,qi)=>{if(_qa[qi]===q.correct)correct++;else{const c=q.competence||q.notion||'Général';if(!wbc[c])wbc[c]=[];wbc[c].push(q);}});
+  const score=Math.round(correct/total*100);
+  const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
+  if(idx>=0){ms[idx].scores={quiz:score};ms[idx].wrongByComp=wbc;saveMods(ms);_cur=ms[idx];}
+  document.getElementById('tp-quiz').innerHTML=renderQuizRes(_cur);
+}
+
+function renderQuizRes(m){
+  const score=m.scores?.quiz??0,pass=score>=70;
+  const col=pass?'#16a34a':score>=50?'#d97706':'#dc2626';
+  const bg=pass?'#ecfdf5':score>=50?'var(--pro-bg)':'#fef2f2';
+  const p=m.mode==='pro';const wbc=m.wrongByComp||{};
+  const good=m.quiz.filter((_,qi)=>_qa[qi]===m.quiz[qi]?.correct).length;
+  const _r=38,_circ=2*Math.PI*_r;
+  const uid='qr'+m.id+Date.now();
+  const svgRing=`<div style="flex-shrink:0;position:relative;width:90px;height:90px;">
+    <svg width="90" height="90" viewBox="0 0 90 90" style="transform:rotate(-90deg);">
+      <circle cx="45" cy="45" r="${_r}" fill="none" stroke="#e2e8f0" stroke-width="7"/>
+      <circle cx="45" cy="45" r="${_r}" fill="none" stroke="${col}" stroke-width="7"
+        stroke-dasharray="0 ${_circ.toFixed(1)}" stroke-linecap="round"
+        class="score-arc-${uid}" style="transition:stroke-dasharray 1.3s cubic-bezier(.4,0,.2,1);"/>
+    </svg>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:1.3rem;font-weight:900;color:${col};line-height:1;">${score}%</span>
+    </div>
+  </div>`;
+  setTimeout(()=>{const arc=document.querySelector('.score-arc-'+uid);if(arc)arc.style.strokeDasharray=`${(score/100*_circ).toFixed(1)} ${_circ.toFixed(1)}`;},80);
+  return`<div class="quiz-res" style="background:${bg};border:2px solid ${col}30;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
+    ${svgRing}
+    <div style="flex:1;">
+      <div style="font-weight:800;font-size:1rem;color:${col};">${pass?'✅ Validé !':score>=50?'💪 Encore un effort':'⚠️ À retravailler'}</div>
+      <div style="font-size:.8rem;color:var(--gray600);margin-top:.3rem;">${good} / ${m.quiz.length} bonnes réponses — Minimum requis : 70%</div>
+    </div></div>
+    <div style="margin-bottom:1.2rem;">${m.quiz.map((q,qi)=>{const ans=_qa[qi],ok=ans===q.correct;return`<div class="quiz-q">
+      <div class="quiz-q-txt">${qi+1}. ${_e(q.q)}</div>
+      ${(q.opts||[]).map((o,oi)=>`<div class="quiz-opt ${oi===q.correct?'correct':oi===ans&&!ok?'wrong':''}">${oi===q.correct?'✓':oi===ans&&!ok?'✗':''} ${_e(o)}</div>`).join('')}
+      ${q.explication?`<div style="font-size:.73rem;color:var(--green);padding:.35rem .6rem;background:#ecfdf5;border-radius:6px;margin-top:.3rem;border-left:3px solid var(--green);">💡 ${_e(q.explication)}</div>`:''}
+    </div>`;}).join('')}</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
+      <button class="btn btn-ghost btn-sm" onclick="retryQ()">🔄 Recommencer le quiz</button>
+      ${!pass?`<button class="btn btn-sm" style="background:var(--accent);color:#fff;font-weight:800;" onclick="openGLSRemediation()">📚 Cours de remédiation IA →</button>`:''}
+    </div>
+    ${!pass&&Object.keys(wbc).length?`<div style="margin-top:1.2rem;">
+      <div style="font-size:.78rem;font-weight:800;color:var(--navy);margin-bottom:.5rem;">📌 Notions à retravailler :</div>
+      ${Object.keys(wbc).map(c=>`<div class="rem-card"><h4>⚠️ ${_e(c)}</h4>
+        <div style="font-size:.73rem;color:#92400e;">${wbc[c].length} question(s) manquée(s)</div></div>`).join('')}
+    </div>`:''}
+    <div id="glsRemBox" style="margin-top:1rem;"></div>`;
+}
+
+function retryQ(){_qs=false;_qa={};renderViewer(_cur);}
+
+async function openGLSRemediation(){
+  const m=_cur;if(!m)return;
+  const key=getKey();
+  const box=document.getElementById('glsRemBox');if(!box)return;
+  if(!key){box.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
+  const wbc=m.wrongByComp||{};
+  const notions=Object.keys(wbc);
+  if(!notions.length){box.innerHTML='<div class="alert alert-info">Aucune notion à réviser identifiée.</div>';return;}
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef9ee;border:1px solid #fde68a;border-radius:10px;padding:.8rem;"><div class="ai-spinner" style="border-top-color:var(--accent);flex-shrink:0;"></div><span style="font-size:.8rem;color:#92400e;font-weight:700;">L'IA prépare votre cours personnalisé sur ${notions.length} notion(s)…</span></div>`;
+  const questionsRatees=notions.map(n=>`• ${n} (${wbc[n].length} question(s) manquée(s)) : ${wbc[n].map(q=>q.q).join(' / ')}`).join('\n');
+  const sysP=`Tu es professeur-ingénieur expert en ${m.titre||'ingénierie'} (${m.dom||''}). Tu génères des cours de remédiation ciblés, clairs et immédiatement utiles pour qu'un étudiant comprenne ses lacunes. Réponds en français.`;
+  const prompt=`Un étudiant a raté son quiz sur le module "${m.titre}" (score < 70%). Génère un cours de remédiation personnalisé et ciblé sur SES lacunes spécifiques.
+
+NOTIONS RATÉES :
+${questionsRatees}
+
+Structure le cours ainsi :
+🔍 Diagnostic
+(2-3 phrases sur le pattern d'erreur observé)
+
+📖 Cours ciblé — [Notion 1]
+(Explication claire + exemple concret + erreur classique à éviter)
+
+📖 Cours ciblé — [Notion 2 si applicable]
+(Idem)
+
+✅ Pour réussir au prochain quiz
+(3 points concrets à retenir absolument, formulés comme règles mémorisables)
+
+💡 Exercice express
+(1 micro-exercice de 2 minutes pour vérifier la compréhension immédiatement)`;
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1400,temperature:0.45})});
+    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    box.innerHTML=`<div style="background:linear-gradient(135deg,#fffbeb,#fff7ed);border:1.5px solid #fde68a;border-radius:14px;padding:1.1rem 1.2rem;">
+      <div style="font-size:.7rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">📚 Cours de remédiation personnalisé — ${_e(m.titre||'')}</div>
+      <div style="font-size:.83rem;line-height:1.85;color:#1e293b;">${formatAIText(text)}</div>
+      <div style="margin-top:.9rem;display:flex;gap:.5rem;">
+        <button class="btn btn-gold btn-sm" onclick="retryQ()">🔄 Retenter le quiz</button>
+        <button onclick="document.getElementById('glsRemBox').innerHTML=''" style="background:none;border:none;font-size:.72rem;color:var(--gray400);cursor:pointer;font-family:inherit;">Masquer ↑</button>
+      </div>
+    </div>`;
+  }catch(e){box.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
+}
+
+/* ── Mémo terrain ── */
+function renderMemo(m){
+  const s=m.memo;if(!s)return empty('📄','Aucun mémo');
+  return`<div style="max-width:640px;">
+    <div class="ccard" style="border-left:4px solid var(--accent);margin-bottom:1rem;">
+      <div style="font-size:.64rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Mémo terrain — Quick Reference</div>
+      <h3 style="font-size:.95rem;color:var(--navy);">${_e(s.titre||m.titre)}</h3></div>
+    ${(s.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
+    ${(s.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
+    ${(s.interdits||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">🚫 À ne jamais faire</h4>${(s.interdits||[]).map(e=>`<div class="memo-item" style="color:#7f1d1d;">${_e(e)}</div>`).join('')}</div>`:''}
+    ${(s.reflexes_expert||[]).length?`<div class="memo-block" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left-color:#7c3aed;"><h4 style="color:#6d28d9;">⚡ Réflexes de l'expert</h4>${(s.reflexes_expert||[]).map(r=>`<div class="memo-item" style="color:#4c1d95;">→ ${_e(r)}</div>`).join('')}</div>`:''}
+    ${s.regle_or?`<div class="memo-gold"><h4>🏆 Règle d'or</h4><p>"${_e(s.regle_or)}"</p></div>`:''}
+  </div>`;
+}
+
+/* ── KPIs Métier (pro) ── */
+function renderKPIs(m){
+  if(!(m.kpis?.length))return`<div style="text-align:center;padding:2rem;color:var(--gray400);">
+    <div style="font-size:2.5rem;margin-bottom:.5rem;">📈</div>
+    <div style="font-size:.85rem;font-weight:700;margin-bottom:.3rem;">KPIs non disponibles</div>
+    <div style="font-size:.75rem;">Les modules créés avant cette mise à jour n'ont pas de KPIs.<br>Dupliquez et régénérez le module pour obtenir les indicateurs de performance.</div>
+  </div>`;
+  const intro=`<div style="background:linear-gradient(135deg,var(--pro-bg),#fff);border:1.5px solid #fde68a;border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
+    <div style="font-size:.68rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📈 Indicateurs de Performance Clés — ${_e(m.dom||m.titre)}</div>
+    <div style="font-size:.8rem;color:var(--gray700);line-height:1.55;">Ces KPIs vous permettent de vous situer précisément dans votre progression professionnelle et de vous fixer des objectifs concrets. Un expert se reconnait à ses indicateurs terrain, pas seulement à ses diplômes.</div>
+  </div>`;
+  const cards=(m.kpis||[]).map(k=>`
+    <div class="kpi-meter-card">
+      <div class="kpi-meter-title">📊 ${_e(k.indicateur||'')}</div>
+      <div class="kpi-meter-sub">🎯 ${_e(k.quoi_mesurer||'')} <span style="font-weight:700;color:var(--gray500);">(${_e(k.unite||'')})</span></div>
+      <div class="kpi-levels">
+        <div class="kpi-level deb"><div class="kpi-level-lbl">Débutant</div><div class="kpi-level-val">${_e(k.seuil_debutant||'—')}</div></div>
+        <div class="kpi-level op"><div class="kpi-level-lbl">Opérationnel</div><div class="kpi-level-val">${_e(k.seuil_operationnel||'—')}</div></div>
+        <div class="kpi-level exp"><div class="kpi-level-lbl">Expert</div><div class="kpi-level-val">${_e(k.seuil_expert||'—')}</div></div>
+      </div>
+      ${k.pourquoi_important?`<div class="kpi-why">💡 ${_e(k.pourquoi_important)}</div>`:''}
+      ${k.comment_progresser?`<div class="kpi-progress-tip">⬆ ${_e(k.comment_progresser)}</div>`:''}
+    </div>`).join('');
+  const reflexes=m.memo?.reflexes_expert?.length?`<div style="margin-top:1.5rem;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:14px;padding:1rem 1.2rem;">
+    <div style="font-size:.68rem;font-weight:900;color:#6d28d9;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">⚡ Réflexes de l'Expert</div>
+    ${(m.memo.reflexes_expert||[]).map(r=>`<div style="font-size:.8rem;color:#4c1d95;padding:.35rem 0;border-bottom:1px solid #ddd6fe;line-height:1.55;">→ ${_e(r)}</div>`).join('')}
+  </div>`:'';
+  return intro+`<div class="kpi-meter-wrap">${cards}</div>`+reflexes;
+}
+
+/* ── Révision (acad) ── */
+function renderRev(m){
+  const s=m.revision;if(!s)return empty('📋','Aucune fiche');
+  return`<div style="max-width:640px;">
+    <div class="ccard" style="border-left:4px solid var(--purple);margin-bottom:1rem;">
+      <div style="font-size:.64rem;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Fiche de révision — Examen</div>
+      <h3 style="font-size:.95rem;color:var(--navy);">${_e(s.titre||m.titre)}</h3></div>
+    ${(s.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(s.notions||[]).map(n=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n)}</div>`).join('')}</div>`:''}
+    ${(s.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(s.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
+    ${(s.methode||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🗂️ Démarche à l'examen</h4><ul class="steps-ol">${(s.methode||[]).map((e,j)=>`<li class="step-li"><div class="step-n acad">${j+1}</div><div class="step-t" style="color:#78350f;">${_e(e)}</div></li>`).join('')}</ul></div>`:''}
+    ${(s.pieges||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">⚠️ Pièges classiques</h4>${(s.pieges||[]).map(p=>`<div class="memo-item" style="color:#7f1d1d;">${_e(p)}</div>`).join('')}</div>`:''}
+    ${s.conseil?`<div class="memo-gold"><h4>💡 Conseil stratégique</h4><p>"${_e(s.conseil)}"</p></div>`:''}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   REMÉDIATION IA
+══════════════════════════════════════════════ */
+async function openRem(comp){
+  const key=getKey(),m=_cur;
+  if(!key){alert('Clé API requise.');return;}
+  const p=m?.mode==='pro';
+  document.getElementById('remTitle').textContent=(p?'🔧':'📖')+' Remédiation : '+comp;
+  document.getElementById('remModal').classList.add('open');
+  document.getElementById('remBody').innerHTML=`<div style="text-align:center;padding:2rem;"><div class="spinner" style="border-color:var(--gray200);border-top-color:var(--${p?'accent':'purple'});width:28px;height:28px;margin:0 auto 1rem;"></div><div style="font-size:.82rem;color:var(--gray600);">Génération en cours…</div></div>`;
+  try{
+    const SYS=p?`Tu es formateur expert en "${m.dom}". Remédiation terrain pratique. JSON.`:`Tu es professeur expert en "${m.dom}". Remédiation pédagogique claire. JSON.`;
+    const rem=await groq(key,SYS,`Module: "${m.titre}" — ${m.niv}\nÉchec sur: "${comp}"\n{"titre":"Remédiation: [titre]","explication":"Réexplication différente, analogies, décomposition. 8-10 phrases${p?' avec exemples terrain concrets':' progressives'}.","astuce":"${p?'Règle mémo':'Moyen mnémotechnique'} (1-2 phrases percutantes)","exemple":"${p?'Cas professionnel avec données précises':'Exemple résolu étape par étape'} (5-7 phrases)","verification":[{"q":"Question 1?","reponse":"Réponse complète"},{"q":"Question 2?","reponse":"Réponse"}]}`,900);
+    document.getElementById('remBody').innerHTML=`
+      <h3 style="color:var(--${p?'accent':'purple'});margin-bottom:.8rem;">${_e(rem.titre||'')}</h3>
+      <div style="font-size:.83rem;line-height:1.8;margin-bottom:1rem;">${fmtTxt(rem.explication||'')}</div>
+      ${rem.exemple?`<div style="background:${p?'var(--pro-bg)':'var(--acad-bg)'};border-left:3px solid var(--${p?'accent':'purple'});border-radius:0 9px 9px 0;padding:.75rem 1rem;margin-bottom:1rem;font-size:.81rem;line-height:1.7;"><strong>${p?'🔧 Cas terrain :':'📐 Exemple :'}</strong><br>${_e(rem.exemple)}</div>`:''}
+      ${rem.astuce?`<div class="alert alert-warning" style="margin-bottom:1rem;"><strong>💡 ${p?'Règle mémo :':'À retenir :'}</strong> ${_e(rem.astuce)}</div>`:''}
+      ${(rem.verification||[]).length?`<div><strong style="font-size:.78rem;color:var(--navy);display:block;margin-bottom:.5rem;">✓ Vérifiez votre compréhension :</strong>
+        ${(rem.verification||[]).map((v,i)=>`<div style="border:1.5px solid var(--gray200);border-radius:9px;padding:.65rem .9rem;margin-bottom:.45rem;">
+          <div style="font-size:.81rem;font-weight:700;margin-bottom:.3rem;">${i+1}. ${_e(v.q)}</div>
+          <button class="corr-btn" onclick="toggleCorr(this)">Voir la réponse</button>
+          <div class="corr-body">${_e(v.reponse)}</div></div>`).join('')}</div>`:''}`;
+  }catch(e){document.getElementById('remBody').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div>`;}
+}
+function closeRem(){document.getElementById('remModal').classList.remove('open');}
+
+/* ══════════════════════════════════════════════
+   LIBRARY
+══════════════════════════════════════════════ */
+function modCard(m){
+  const p=m.mode==='pro';const sc=m.scores?.quiz;
+  return`<div class="mod-lib-card ${m.mode||''}" onclick="openMod(${m.id})">
+    <div class="mod-lib-top ${p?'pro':'acad'}">
+      <div><div class="mod-lib-ico">${p?'💼':'🎓'}</div></div>
+      <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;">
+        <button class="fav-btn${m.fav?' fav-on':''}" id="fav-${m.id}" onclick="toggleFav(${m.id},event)" title="${m.fav?'Retirer des favoris':'Ajouter aux favoris'}">${m.fav?'⭐':'☆'}</button>
+        ${sc!=null?`<div class="mod-lib-score" style="background:${sc>=70?'rgba(5,150,105,.2)':'rgba(220,38,38,.2)'};color:${sc>=70?'#065f46':'#991b1b'};">${sc}%</div>`:''}
+        <div style="font-size:.65rem;color:rgba(255,255,255,.6);">${_d(m.id)}</div>
+      </div>
+    </div>
+    <div class="mod-lib-body">
+      <div style="display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:.5rem;">
+        <span class="mod-lib-badge badge-${p?'pro':'acad'}">${p?'Formation Pro':'Cours Ingénieur'}</span>
+        <span class="mod-lib-badge" style="background:var(--gray100);color:var(--gray600);text-transform:capitalize;">${_e(m.niv)}</span>
+      </div>
+      <h3>${_e(m.titre)}</h3>
+      <p>${_e((m.description||'').slice(0,90))}${(m.description||'').length>90?'…':''}</p>
+      <div class="mod-lib-meta">
+        <span>📌 ${_e(m.dom)}</span><span>👥 ${_e(m.pub)}</span><span>⏱️ ${_e(m.dur)}</span>
+        <span>${p?'📋 '+(m.sections?.length||0)+' procédures':'📖 '+(m.sections?.length||0)+' sections'}</span>
+      </div>
+      <div class="card-actions" onclick="event.stopPropagation()">
+        <button class="card-act-btn" onclick="openMod(${m.id})">👁️ Ouvrir</button>
+        <button class="card-act-btn" onclick="dupMod(${m.id},event)">📋 Dupliquer</button>
+        <button class="card-act-btn" style="color:var(--red);" onclick="if(confirm('Supprimer ?')){delMod(${m.id});renderLib();renderHome();}">🗑️</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLib(){
+  const q=(document.getElementById('libQ')?.value||'').toLowerCase();
+  const mf=document.getElementById('libMode')?.value||'';
+  const ff=document.getElementById('libFilter')?.value||'';
+  let ms=getMods();
+  if(q)ms=ms.filter(m=>(m.titre+m.dom+(m.description||'')).toLowerCase().includes(q));
+  if(mf)ms=ms.filter(m=>m.mode===mf);
+  if(ff==='fav')ms=ms.filter(m=>m.fav);
+  if(ff==='scored')ms=ms.filter(m=>m.scores?.quiz!=null);
+  const g=document.getElementById('libGrid');if(!g)return;
+  if(!ms.length){g.innerHTML=`<div class="empty"><div class="ei">📚</div><h3>${getMods().length?'Aucun résultat':'Bibliothèque vide'}</h3><p>${getMods().length?'Modifiez votre recherche.':'Créez votre premier module.'}</p>${!getMods().length?'<br><br><button class="btn btn-gold" onclick="nav(\'form\')">✨ Créer un module</button>':''}</div>`;return;}
+  g.innerHTML='<div class="mod-grid">'+ms.map(modCard).join('')+'</div>';
+}
+
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+function toggleCS(hdr){const b=hdr.nextElementSibling,o=b.classList.contains('open');b.classList.toggle('open',!o);const a=hdr.querySelector('.cs-arr');if(a)a.textContent=o?'▶':'▼';}
+function toggleSC(hdr){const b=hdr.nextElementSibling,o=b.classList.contains('open');b.classList.toggle('open',!o);const a=hdr.querySelector('.sc-arr');if(a)a.textContent=o?'▶':'▼';}
+function toggleCorr(btn){const c=btn.nextElementSibling,v=c.style.display==='block';c.style.display=v?'none':'block';btn.textContent=v?'📄 Voir le corrigé':'🔼 Masquer';}
+function fmtTxt(txt){return(txt||'').split('\n\n').filter(p=>p.trim()).map(p=>`<p style="margin-bottom:.6rem;">${_e(p.trim())}</p>`).join('');}
+function empty(ico,txt){return`<div class="empty"><div class="ei">${ico}</div><h3>${txt}</h3></div>`;}
+function confirmDel(id){if(!confirm('Supprimer ce module ?'))return;delMod(id);nav('library');}
+function clearAll(){if(!confirm('Supprimer TOUS les modules ?'))return;localStorage.removeItem('gls_modules');nav('home');}
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+function showToast(msg,type='ok'){
+  let t=document.getElementById('gls-toast');
+  if(!t){t=document.createElement('div');t.id='gls-toast';document.body.appendChild(t);}
+  t.className='gls-toast'+(type==='err'?' terr':'');
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(()=>{t.style.opacity='0';},2600);
+}
+
+/* ══════════════════════════════════════════════
+   FAVORIS
+══════════════════════════════════════════════ */
+function toggleFav(id,e){
+  e?.stopPropagation();
+  const ms=getMods();const idx=ms.findIndex(m=>m.id==id);
+  if(idx<0)return;ms[idx].fav=!ms[idx].fav;saveMods(ms);
+  const btn=document.getElementById('fav-'+id);
+  if(btn){btn.className='fav-btn'+(ms[idx].fav?' fav-on':'');btn.textContent=ms[idx].fav?'⭐':'☆';}
+  showToast(ms[idx].fav?'Ajouté aux favoris':'Retiré des favoris');
+}
+
+/* ══════════════════════════════════════════════
+   EXPORT / IMPORT
+══════════════════════════════════════════════ */
+function exportMods(){
+  const ms=getMods();if(!ms.length){showToast('Aucun module à exporter.','err');return;}
+  const blob=new Blob([JSON.stringify({version:2,exported:new Date().toISOString(),modules:ms},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='greenlab-modules-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  showToast(ms.length+' module(s) exporté(s) !');
+}
+function importMods(file){
+  if(!file)return;
+  const r=new FileReader();r.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      const mods=Array.isArray(data)?data:(data.modules||[]);
+      if(!mods.length){showToast('Aucun module trouvé.','err');return;}
+      const existing=getMods();const ids=new Set(existing.map(m=>m.id));
+      let added=0;mods.forEach(m=>{if(!ids.has(m.id)){existing.push(m);added++;}});
+      saveMods(existing);renderLib();renderHome();
+      showToast(added+' module(s) importé(s) !');
+    }catch{showToast('Fichier JSON invalide.','err');}
+  };r.readAsText(file,'UTF-8');
+}
+
+/* ══════════════════════════════════════════════
+   DUPLIQUER
+══════════════════════════════════════════════ */
+function dupMod(id,e){
+  e?.stopPropagation();
+  const m=getMods().find(x=>x.id==id);if(!m)return;
+  const copy={...JSON.parse(JSON.stringify(m)),id:Date.now(),titre:m.titre+' (copie)',scores:{},wrongByComp:{}};
+  addMod(copy);renderLib();renderHome();
+  showToast('Module dupliqué !');
+}
+
+/* ══════════════════════════════════════════════
+   NOTES PAR SECTION
+══════════════════════════════════════════════ */
+function _getNotes(){try{return JSON.parse(localStorage.getItem('gls_notes')||'{}')}catch{return{};}}
+function _saveNotes(n){localStorage.setItem('gls_notes',JSON.stringify(n));}
+function getNote(modId,key){return(_getNotes()[modId]||{})[key]||'';}
+function saveNoteData(modId,key,txt){const n=_getNotes();if(!n[modId])n[modId]={};n[modId][key]=txt;_saveNotes(n);}
+
+let _noteCtx=null;
+function openNoteModal(modId,key,title,isAcad){
+  _noteCtx={modId,key,isAcad};
+  document.getElementById('noteTitle').textContent='📝 Notes — '+title;
+  document.getElementById('noteTxt').value=getNote(modId,key);
+  document.getElementById('noteModal').classList.add('open');
+  setTimeout(()=>document.getElementById('noteTxt').focus(),100);
+}
+function saveNoteModal(){
+  if(!_noteCtx)return;
+  const txt=document.getElementById('noteTxt').value;
+  saveNoteData(_noteCtx.modId,_noteCtx.key,txt);
+  const btn=document.getElementById('nbtn-'+_noteCtx.key);
+  if(btn){const has=!!txt;btn.className='note-ico'+(has?' has-note'+(_noteCtx.isAcad?' an':''):'');btn.textContent=has?'📝':'+ Note';}
+  closeNoteModal();showToast('Note enregistrée !');
+}
+function closeNoteModal(){document.getElementById('noteModal').classList.remove('open');}
+
+/* ══════════════════════════════════════════════
+   PROGRESSION LECTURE
+══════════════════════════════════════════════ */
+function markRead(modId,key){
+  const ms=getMods();const idx=ms.findIndex(m=>m.id==modId);if(idx<0)return;
+  if(!ms[idx].readSections)ms[idx].readSections={};
+  ms[idx].readSections[key]=!ms[idx].readSections[key];
+  saveMods(ms);_cur=ms[idx];
+  const dot=document.getElementById('rdot-'+key);
+  if(dot)dot.className='read-dot'+(ms[idx].readSections[key]?' done':'');
+  _updateReadProgress(ms[idx]);
+}
+function _updateReadProgress(m){
+  const total=(m.sections||[]).length;if(!total)return;
+  const done=Object.values(m.readSections||{}).filter(Boolean).length;
+  const pct=Math.round(done/total*100);
+  const fill=document.getElementById('readProgress');if(fill)fill.style.width=pct+'%';
+  const lbl=document.getElementById('readLabel');if(lbl)lbl.textContent=done+'/'+total+' sections lues';
+}
+
+/* ══════════════════════════════════════════════
+   FLASHCARDS
+══════════════════════════════════════════════ */
+let _fcCards=[],_fcIdx=0,_fcFlipped=false;
+function openFlashcards(m){
+  const cards=[];
+  if(m.mode==='acad'){
+    (m.sections||[]).forEach(s=>(s.definitions||[]).forEach(d=>{if(d.terme&&d.def)cards.push({front:d.terme,back:d.def});}));
+    (m.revision?.notions||[]).forEach(n=>{const p=n.indexOf(':');if(p>0)cards.push({front:n.slice(0,p).trim(),back:n.slice(p+1).trim()});});
+  } else {
+    (m.memo?.regles||[]).forEach(r=>cards.push({front:'Règle fondamentale',back:r}));
+    (m.memo?.formules||[]).forEach(f=>cards.push({front:'Formule / Valeur clé',back:f}));
+    (m.memo?.interdits||[]).forEach(i=>cards.push({front:'À ne jamais faire',back:i.replace(/^⚠️\s*/,'')}));
+  }
+  if(!cards.length){showToast('Aucune carte à générer pour ce module.','err');return;}
+  _fcCards=cards.sort(()=>Math.random()-.5);_fcIdx=0;_fcFlipped=false;
+  renderFC();document.getElementById('fcModal').classList.add('open');
+}
+function renderFC(){
+  const c=_fcCards[_fcIdx];
+  document.getElementById('fcInner').className='fc-inner';_fcFlipped=false;
+  document.getElementById('fcFront').innerHTML=`<div class="fc-lbl">Cliquez pour retourner</div><div class="fc-term">${_e(c.front)}</div>`;
+  document.getElementById('fcBack').innerHTML=`<div class="fc-lbl">Définition</div><div class="fc-def">${_e(c.back)}</div>`;
+  document.getElementById('fcCounter').textContent=(_fcIdx+1)+' / '+_fcCards.length;
+  const prev=document.getElementById('fcPrev');if(prev)prev.disabled=_fcIdx===0;
+  const next=document.getElementById('fcNext');if(next)next.textContent=_fcIdx===_fcCards.length-1?'✓ Terminé':'Suivante →';
+}
+function flipFC(){_fcFlipped=!_fcFlipped;document.getElementById('fcInner').className='fc-inner'+(_fcFlipped?' flipped':'');}
+function prevFC(){if(_fcIdx>0){_fcIdx--;renderFC();}}
+function nextFC(){if(_fcIdx<_fcCards.length-1){_fcIdx++;renderFC();}else{document.getElementById('fcModal').classList.remove('open');showToast('Flashcards terminées ! 🎉');}}
+function shuffleFC(){_fcCards=_fcCards.sort(()=>Math.random()-.5);_fcIdx=0;renderFC();}
+function closeFC(){document.getElementById('fcModal').classList.remove('open');}
+
+/* ══════════════════════════════════════════════
+   TIMER QUIZ
+══════════════════════════════════════════════ */
+let _timerInt=null;
+function startTimer(totalQ){
+  clearInterval(_timerInt);
+  let sec=totalQ*60;
+  const el=document.getElementById('quizTimer');if(!el)return;
+  _timerInt=setInterval(()=>{
+    sec--;const m=Math.floor(sec/60),s=sec%60;
+    el.textContent='⏱ '+(m>0?m+'m ':'')+String(s).padStart(2,'0')+'s';
+    el.className='quiz-timer'+(sec<30?' warn':'');
+    if(sec<=0){clearInterval(_timerInt);submitQ();}
+  },1000);
+}
+function stopTimer(){clearInterval(_timerInt);}
+
+/* ══════════════════════════════════════════════
+   RÉGÉNÉRER QUIZ
+══════════════════════════════════════════════ */
+async function regenQuiz(){
+  const m=_cur,key=getKey();if(!m||!key){showToast('Clé API requise.','err');return;}
+  const btn=document.getElementById('regenQuizBtn');
+  if(btn){btn.disabled=true;btn.innerHTML='⏳ Génération…';}
+  try{
+    const p=m.mode==='pro';
+    const SYS=p?`Tu es formateur expert en "${m.dom}". JSON uniquement.`:`Tu es professeur expert en "${m.dom}". JSON uniquement.`;
+    const ctx=p?`Formation: "${m.titre}" — ${m.niv} — ${m.pub}\nCompétences: ${(m.competences||[]).join(', ')}`
+      :`Cours: "${m.titre}" — ${m.pub} — ${m.niv}\nNotions: ${(m.notions||[]).join(', ')}`;
+    const prompt=p
+      ?`${ctx}\n8 NOUVELLES questions QCM différentes des précédentes:\n{"quiz":[{"q":"Question terrain","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"Explication (1-2 phrases)"}]}`
+      :`${ctx}\n8 NOUVEAUX QCM style examen (différents):\n{"quiz":[{"q":"Question précise","opts":["A","B","C","D"],"correct":0,"notion":"notion","explication":"Justification (1-2 phrases)"}]}`;
+    const res=await groq(key,SYS,prompt,1600);
+    if(res.quiz?.length){
+      const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
+      if(idx>=0){ms[idx].quiz=res.quiz;ms[idx].scores={};ms[idx].wrongByComp={};saveMods(ms);_cur=ms[idx];}
+      _qs=false;_qa={};
+      document.getElementById('tp-quiz').innerHTML=renderQuiz(_cur);
+      showToast(res.quiz.length+' nouvelles questions générées !');
+    }
+  }catch(e){showToast('Erreur: '+e.message,'err');}
+  if(btn){btn.disabled=false;btn.innerHTML='🔄 Nouveau quiz';}
+}
+
+/* ══════════════════════════════════════════════
+   RÉGÉNÉRER UNE SECTION
+══════════════════════════════════════════════ */
+async function regenSection(secIdx){
+  const m=_cur,key=getKey();if(!m||!key){showToast('Clé API requise.','err');return;}
+  const s=m.sections[secIdx];if(!s)return;
+  const btn=document.getElementById('rsBtn-'+secIdx);
+  if(btn){btn.disabled=true;btn.textContent='⏳';}
+  try{
+    const p=m.mode==='pro';
+    const SYS=p?`Tu es formateur expert en "${m.dom}". JSON uniquement.`:`Tu es professeur expert en "${m.dom}". JSON uniquement.`;
+    const prompt=p
+      ?`Formation: "${m.titre}" — ${m.niv}\nNouvelle version enrichie section "${s.titre}":\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"6-7 paragraphes différents, vocabulaire métier, données concrètes, séparés par \\n\\n","etapes":["Étape 1","Étape 2","Étape 3","Étape 4"],"points_vigilance":["Point 1","Point 2"],"outils":["Outil 1","Outil 2"],"erreurs":["Erreur 1","Erreur 2"]}`
+      :`Cours: "${m.titre}" — ${m.pub}\nNouvelle version enrichie section "${s.titre}":\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"6-8 paragraphes différents, vocabulaire scientifique, séparés par \\n\\n","definitions":[{"terme":"Terme","def":"Définition"}],"points_cles":["Point 1","Point 2","Point 3"],"exemple":"Exemple résolu (5-6 phrases)"}`;
+    const sc=await groq(key,SYS,prompt,1200);
+    const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
+    if(idx>=0){ms[idx].sections[secIdx]={...ms[idx].sections[secIdx],...sc};saveMods(ms);_cur=ms[idx];}
+    const panel=document.getElementById(p?'tp-procs':'tp-cours');
+    if(panel){panel.innerHTML=p?renderProcs(_cur):renderCours(_cur);}
+    showToast('Section régénérée !');
+  }catch(e){showToast('Erreur: '+e.message,'err');}
+  if(btn){btn.disabled=false;btn.textContent='🔄';}
+}
+
+/* ══════════════════════════════════════════════
+   GLOSSAIRE (ACAD)
+══════════════════════════════════════════════ */
+function renderGloss(m){
+  const entries=[];
+  (m.sections||[]).forEach(s=>(s.definitions||[]).forEach(d=>{if(d.terme&&d.def)entries.push({terme:d.terme,def:d.def});}));
+  if(!entries.length)return empty('📖','Aucune définition — les termes apparaissent ici depuis les sections du cours.');
+  entries.sort((a,b)=>a.terme.localeCompare(b.terme,'fr'));
+  const byL={};entries.forEach(e=>{const l=(e.terme[0]||'?').toUpperCase();if(!byL[l])byL[l]=[];byL[l].push(e);});
+  return`<div style="max-width:680px;">${Object.keys(byL).sort().map(l=>`<div class="gloss-letter">${l}</div>${byL[l].map(e=>`<div class="gloss-entry"><div class="gt">${_e(e.terme)}</div><div class="gd">${_e(e.def)}</div></div>`).join('')}`).join('')}</div>`;
+}
+
+/* ══════════════════════════════════════════════
+   ATTESTATION (PRO)
+══════════════════════════════════════════════ */
+function showAttestation(m){
+  const score=m.scores?.quiz??null;const pass=score!=null&&score>=70;
+  document.getElementById('attContent').innerHTML=`
+    <div class="att-box">
+      <div class="att-watermark">GREEN LAB</div>
+      <div class="att-seal">🏅</div>
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--gray400);margin-bottom:.3rem;">Green Lab Studio — Formation Professionnelle</div>
+        <div style="font-size:1.35rem;font-weight:900;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;">ATTESTATION DE FORMATION</div>
+        ${!pass?`<div style="color:var(--red);font-size:.76rem;margin-top:.35rem;font-weight:700;">⚠️ Score insuffisant (${score!=null?score+'%':'non évalué'}) — 70% requis pour valider</div>`:''}
+      </div>
+      <div style="font-size:.84rem;line-height:2;color:#374151;border:1px solid var(--gray200);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.2rem;">
+        <div>Domaine : <strong>${_e(m.dom)}</strong></div>
+        <div>Formation : <strong>${_e(m.titre)}</strong></div>
+        <div>Public cible : <strong>${_e(m.pub)}</strong></div>
+        <div>Niveau : <strong style="text-transform:capitalize;">${_e(m.niv)}</strong></div>
+        <div>Durée : <strong>${_e(m.dur)}</strong></div>
+        <div>Langue : <strong>${_e(m.lang)}</strong></div>
+        ${score!=null?`<div>Score d'évaluation : <strong style="color:${pass?'var(--green)':'var(--red)'};">${score}% ${pass?'✅':'—'}</strong></div>`:''}
+        <div>Date d'émission : <strong>${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})}</strong></div>
+      </div>
+      ${(m.objectifs||[]).length?`<div style="margin-bottom:1rem;"><div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:var(--gray400);margin-bottom:.5rem;">Objectifs opérationnels couverts</div>${(m.objectifs||[]).map(o=>`<div style="font-size:.78rem;margin-bottom:.22rem;display:flex;gap:.4rem;align-items:flex-start;"><span style="color:var(--green);margin-top:.1rem;">✓</span><span>${_e(o)}</span></div>`).join('')}</div>`:''}
+      <div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:.63rem;color:var(--gray400);">Généré par Green Lab Studio · IA pédagogique</div>
+        <div style="font-size:.72rem;font-weight:800;color:${pass?'var(--green)':'var(--gray400)'};">${pass?'✅ VALIDÉ':'Non validé'}</div>
+      </div>
+    </div>`;
+  document.getElementById('attModal').classList.add('open');
+}
+function closeAtt(){document.getElementById('attModal').classList.remove('open');}
+
+/* ══════════════════════════════════════════════
+   MEDIA — IMAGES & SVG
+══════════════════════════════════════════════ */
+async function groqText(key,sys,usr,maxTok){
+  const msgs=sys?[{role:'system',content:sys},{role:'user',content:usr}]:[{role:'user',content:usr}];
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+    headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:maxTok||900,temperature:0.5})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
+  return d.choices[0].message.content;
+}
+
+function sanitizeSVG(raw){
+  return raw.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/on\w+\s*=\s*["'][^"']*["']/gi,'').replace(/javascript:/gi,'');
+}
+
+function saveSectionField(modId,idx,field,val){
+  const ms=getMods();const m=ms.find(x=>x.id==modId);
+  if(!m||!m.sections[idx])return;
+  m.sections[idx][field]=val;saveMods(ms);
+}
+
+async function fetchUnsplashImg(query,unKey){
+  if(!unKey)return null;
+  try{
+    const r=await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=landscape&client_id=${unKey}`);
+    if(!r.ok)return null;
+    const d=await r.json();const img=d.results?.[0];if(!img)return null;
+    return{url:img.urls.small,author:img.user.name,authorLink:img.user.links.html};
+  }catch{return null;}
+}
+
+async function generateSectionSVG(modId,idx){
+  const key=getKey();if(!key){showToast('Clé API Groq requise.','err');return;}
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const s=m.sections[idx];if(!s)return;
+  const btn=document.getElementById('svgBtn-'+modId+'-'+idx);
+  if(btn){btn.disabled=true;btn.textContent='⏳…';}
+  try{
+    const raw=await groqText(key,
+      'Tu génères des diagrammes SVG simples et professionnels pour des supports de formation pédagogique.',
+      `Génère un diagramme SVG (width="400" height="220") illustrant "${s.titre}" dans le domaine "${m.dom||m.titre}".
+Règles strictes:
+- Éléments autorisés UNIQUEMENT: svg, rect, text, line, path, circle, polygon, g
+- Couleurs: #0d1b2a (navy), #f59e0b (amber), #e2e8f0 (gris clair), #ffffff (blanc), #7c3aed (violet)
+- font-family="system-ui,sans-serif" sur les éléments text
+- Contenu adapté: logigramme, schéma, organigramme, diagramme de flux selon le titre
+- Commence EXACTEMENT par: <svg xmlns="http://www.w3.org/2000/svg" width="400" height="220"
+- Termine EXACTEMENT par: </svg>
+Retourne UNIQUEMENT le code SVG, rien d'autre.`,
+      900
+    );
+    const match=raw.match(/<svg[\s\S]*<\/svg>/i);
+    if(!match)throw new Error('Réponse SVG invalide');
+    const svg=sanitizeSVG(match[0]);
+    saveSectionField(modId,idx,'svg',svg);
+    const svgArea=document.getElementById('svgArea-'+modId+'-'+idx);
+    if(svgArea)svgArea.innerHTML='<div class="sec-svg-wrap">'+svg+'</div>';
+    if(btn){btn.disabled=false;btn.textContent='🔄 Régén. schéma';}
+    showToast('Schéma SVG généré !');
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='📊 Schéma IA';}
+    showToast('Erreur: '+e.message,'err');
+  }
+}
+
+async function addModuleImages(modId){
+  const unKey=getUnsplashKey();
+  if(!unKey){showToast('Clé Unsplash requise dans Paramètres.','err');nav('settings');return;}
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const btn=document.getElementById('addImgBtn-'+modId);
+  if(btn){btn.disabled=true;btn.textContent='⏳ Recherche…';}
+  let count=0;
+  for(let i=0;i<(m.sections||[]).length;i++){
+    if(m.sections[i].image)continue;
+    const q=(m.dom||m.titre)+' '+m.sections[i].titre;
+    const img=await fetchUnsplashImg(q,unKey);
+    if(img){m.sections[i].image=img;count++;}
+  }
+  saveMods(ms);
+  if(btn){btn.disabled=false;btn.textContent='🖼️ Ajouter images';}
+  if(count>0){
+    const p=m.mode==='pro';
+    const panel=document.getElementById(p?'tp-procs':'tp-cours');
+    if(panel)panel.innerHTML=p?renderProcs(m):renderCours(m);
+    showToast(count+' image(s) ajoutée(s) !');
+  }else{
+    showToast('Aucune nouvelle image (déjà toutes ajoutées ou clé invalide).','err');
+  }
+}
+
+function removeSecImage(modId,idx){
+  saveSectionField(modId,idx,'image',null);
+  const imgArea=document.getElementById('imgArea-'+modId+'-'+idx);
+  if(imgArea)imgArea.innerHTML='';
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+(function(){
+  const k=sessionStorage.getItem('gls_key');
+  if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;}
+  const uk=localStorage.getItem('gls_unsplash');
+  if(uk){const ui=document.getElementById('unsplashKeyInput');if(ui)ui.value=uk;}
+  updateSbMode();renderHome();renderForm();
+})();
+
+/* ══════════════════════════════════════════════
+   CHAT ASSISTANT
+══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   CHAT ASSISTANT — STYLE CLAUDE
+══════════════════════════════════════════════ */
+let _chatHistory=[];
+let _chatReady=false;
+let _chatPending=null;
+let _chatDocs=[];   // [{name, content, size}]
+let _chatDocCtx=''; // texte agrégé pour le contexte IA
+
+const _CHAT_SYSTEM=`Tu es l'assistant pédagogique expert de Green Lab Studio. Tu aides les formateurs, enseignants et entreprises à créer des modules de formation professionnels et complets.
+
+TON EXPERTISE : tu maîtrises les référentiels de compétences, la pédagogie des adultes, l'ingénierie de formation, les normes métier. Tu sais poser les bonnes questions pour cerner exactement ce qu'il faut enseigner.
+
+DEUX TYPES DE MODULES :
+1. "pro" — Formation Professionnelle : pour apprendre un MÉTIER concret (électricien, soudeur, cuisinier, infirmier, cariste, commercial, RH, chauffeur, maçon, etc.). Le module contiendra : cours théorique du métier, procédures terrain pas-à-pas, mises en situation réelles, check-list opérationnelle, mémo terrain.
+2. "acad" — Cours Ingénieur/Technique : pour enseignement supérieur (BTS, BUT, IUT, Licence Pro, cycle ingénieur). Contient : cours théorique rigoureux, formules, exercices TD/TP avec corrigés, quiz, fiche de révision.
+
+SI DES DOCUMENTS SONT JOINTS :
+- Analyse-les attentivement et mentionne les thèmes clés que tu as identifiés
+- Propose une structure basée sur leur contenu
+- Dis clairement ce que tu vas utiliser : "J'ai bien vu votre référentiel, je vais structurer le module autour de [X, Y, Z]..."
+
+INFORMATIONS À COLLECTER (naturellement, 1-2 questions max par réponse) :
+- Quel métier / sujet / compétence précise ? (obligatoire)
+- Type : pro ou acad ? (déduis si évident — "plombier" = pro, "thermodynamique BTS" = acad)
+- Public cible précis ? (apprentis CAP, salariés confirmés, étudiants BUT 2ème année, etc.)
+- Durée ? (1h, demi-journée, journée, plusieurs jours...)
+- Niveau ? (débutant / intermédiaire / avancé / tous niveaux)
+- Points spécifiques à absolument couvrir ? (réglementations, équipements, cas particuliers)
+
+COMPORTEMENT :
+- Tu es un expert bienveillant, pas un formulaire — parle naturellement
+- Propose des angles concrets : "Je peux couvrir les installations sanitaires, le chauffage et la plomberie industrielle — tu veux tout ça ou tu veux te concentrer sur une partie ?"
+- Reformule et synthétise pour valider : "Si je résume bien : une formation de 2 jours pour des apprentis CAP sur l'électricité résidentielle, avec accent sur les normes NF C 15-100 — c'est ça ?"
+- Si peu d'infos, propose 2-3 pistes concrètes
+
+QUAND TU AS TOUTES LES INFOS :
+1. Fais un récapitulatif structuré et précis
+2. Demande la confirmation : "C'est bien ça ? Je lance la génération ?"
+3. À la confirmation, termine ton message avec ce bloc exact sur une ligne isolée :
+[[READY]]{"mode":"pro","titre":"Titre accrocheur max 10 mots","dom":"Domaine/métier","pub":"Public précis","niv":"debutant|intermediaire|avance|tous niveaux","dur":"durée","lang":"Français","prerequis":"prérequis concrets ou vide"}[[/READY]]
+
+RÈGLE ABSOLUE : ne génère [[READY]] QUE quand l'utilisateur confirme explicitement. Le titre doit être percutant et professionnel.`;
+
+/* ── Render helpers ── */
+function _clMsgEl(isUser){
+  const div=document.createElement('div');
+  if(isUser){div.className='cl-msg-user';}
+  else{
+    div.className='cl-msg-ai';
+    div.innerHTML=`<div class="cl-ai-name"><div class="cl-ai-icon">✦</div><span class="cl-ai-label">Green Lab Assistant</span></div><div class="cl-ai-text" data-text-body></div>`;
+  }
+  return div;
+}
+
+function _fmtChatText(raw){
+  return raw
+    .replace(/\[\[READY\]\][\s\S]*?\[\[\/READY\]\]/g,'')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*\n]+)\*/g,'<em>$1</em>')
+    .replace(/^#{1,3} (.+)$/gm,'<strong style="font-size:.9rem;display:block;margin:.5rem 0 .2rem;color:#111;">$1</strong>')
+    .replace(/^[-•] (.+)$/gm,'<span style="display:block;padding-left:.9rem;position:relative;margin-bottom:.15rem;"><span style="position:absolute;left:.1rem;color:#aaa;">·</span>$1</span>')
+    .replace(/\n{2,}/g,'<div style="height:.5rem"></div>')
+    .replace(/\n/g,'<br>');
+}
+
+function _renderChatMsg(msg,save=true){
+  const box=document.getElementById('chatMsgs');if(!box)return;
+  let el;
+  const isUser=msg.role==='user';
+  if(isUser){
+    el=document.createElement('div');
+    el.className='cl-msg-user';
+    el.innerHTML=_fmtChatText(_e(msg.text||'').replace(/&amp;/g,'&'));
+  } else {
+    el=document.createElement('div');
+    el.className='cl-msg-ai';
+    const bodyTxt=_fmtChatText(msg.text||'');
+    let extra='';
+    if(msg.preview){
+      const ac=msg.preview.mode==='acad';
+      extra+=`<div class="cl-preview" style="margin-top:.6rem;">
+        <div class="cl-preview-title">📋 ${_e(msg.preview.titre||'Module à générer')}</div>
+        <div class="cl-preview-tags">
+          <span class="cl-preview-tag ${ac?'acad':''}">${ac?'🎓 Cours Ingénieur':'💼 Formation Pro'}</span>
+          ${msg.preview.dom?`<span class="cl-preview-tag ${ac?'acad':''}">${_e(msg.preview.dom)}</span>`:''}
+          ${msg.preview.niv?`<span class="cl-preview-tag">${_e(msg.preview.niv)}</span>`:''}
+          ${msg.preview.dur?`<span class="cl-preview-tag">⏱ ${_e(msg.preview.dur)}</span>`:''}
+          ${msg.preview.pub?`<span class="cl-preview-tag">👥 ${_e(msg.preview.pub)}</span>`:''}
+        </div>
+        ${msg.preview.prerequis?`<div style="font-size:.74rem;color:#666;margin-bottom:.3rem;">📚 Prérequis : ${_e(msg.preview.prerequis)}</div>`:''}
+        <button class="cl-gen-btn ${ac?'acad-gen':''}" onclick="launchChatModule()">✨ Générer ce module</button>
+      </div>`;
+    }
+    if(msg.suggestions?.length){
+      extra+=`<div class="cl-suggestions">${msg.suggestions.map(s=>`<button class="cl-sugg" onclick="sendChatSugg(${JSON.stringify(s)})">${s}</button>`).join('')}</div>`;
+    }
+    el.innerHTML=`<div class="cl-ai-name"><div class="cl-ai-icon">✦</div><span class="cl-ai-label">Green Lab Assistant</span></div><div class="cl-ai-text">${bodyTxt}</div>${extra}`;
+  }
+  box.appendChild(el);
+  box.scrollTop=box.scrollHeight;
+  if(save&&msg.role){_chatHistory.push({role:isUser?'user':'assistant',content:msg.text||''});}
+}
+
+function _showTyping(){
+  const box=document.getElementById('chatMsgs');if(!box)return null;
+  const div=document.createElement('div');div.className='cl-typing-wrap';div.id='chatTyping';
+  div.innerHTML=`<div class="cl-ai-name"><div class="cl-ai-icon">✦</div><span class="cl-ai-label">Green Lab Assistant</span></div><div class="cl-typing-dots"><div class="cl-typing-dot"></div><div class="cl-typing-dot"></div><div class="cl-typing-dot"></div></div>`;
+  box.appendChild(div);box.scrollTop=box.scrollHeight;return div;
+}
+
+/* ── Chat init / reset ── */
+function initChat(){
+  if(_chatHistory.length===0){
+    _chatHistory=[];_chatReady=false;_chatPending=null;
+    _renderChatMsg({role:'ai',
+      text:'Bonjour ! Je suis votre assistant pédagogique. 👋\n\nDites-moi quel module vous voulez créer — le métier, la discipline, ou la compétence — et je m\'occupe de tout.\n\nJe peux aussi m\'appuyer sur vos documents : programmes, référentiels, notes de cours — joignez-les via le 📎.',
+      suggestions:['💼 Formation plomberie CAP','⚡ Cours électrotechnique BTS','🍳 Formation cuisine professionnelle','🔧 Maintenance industrielle salariés','💻 Développement web débutants']},false);
+  }
+}
+
+function resetChat(){
+  _chatHistory=[];_chatReady=false;_chatPending=null;
+  _chatDocs=[];_chatDocCtx='';
+  const box=document.getElementById('chatMsgs');if(box)box.innerHTML='';
+  _updateCtxBar();_renderFilesRow();
+  _renderChatMsg({role:'ai',
+    text:'Nouvelle conversation démarrée. Quel module voulez-vous créer ?',
+    suggestions:['💼 Formation pro','🎓 Cours ingénieur','📎 Joindre un document']},false);
+}
+
+function sendChatSugg(txt){
+  if(txt==='📎 Joindre un document'){document.getElementById('chatFileInput')?.click();return;}
+  const inp=document.getElementById('chatInput');if(inp){inp.value=txt;inp.style.height='auto';}
+  sendChat();
+}
+
+/* ── File documents ── */
+function handleDocFiles(files){
+  const allowed=['text/plain','text/markdown','text/csv','application/json','text/x-markdown'];
+  for(const f of Array.from(files)){
+    if(!allowed.includes(f.type)&&!f.name.match(/\.(txt|md|csv|json)$/i)){
+      showToast('Format non supporté : '+f.name+' (utilisez .txt, .md, .csv ou .json)','err');continue;
+    }
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const content=(e.target.result||'').slice(0,10000);
+      _chatDocs.push({name:f.name,content,size:f.size});
+      _chatDocCtx=_chatDocs.map(d=>`=== ${d.name} ===\n${d.content}`).join('\n\n');
+      _updateCtxBar();_renderFilesRow();
+      // Auto-notify the AI about the new doc
+      if(_chatHistory.length>0){
+        _renderChatMsg({role:'ai',text:`📎 J\'ai bien reçu **${f.name}** — je vais m\'en servir pour construire le module. Continuez à me décrire ce que vous voulez, ou confirmez si tout est bon.`},false);
+      }
+    };
+    reader.readAsText(f,'UTF-8');
+  }
+  const inp=document.getElementById('chatFileInput');if(inp)inp.value='';
+}
+
+function handleDocDrop(e){e.preventDefault();if(e.dataTransfer?.files)handleDocFiles(e.dataTransfer.files);}
+
+function removeDoc(idx){
+  _chatDocs.splice(idx,1);
+  _chatDocCtx=_chatDocs.map(d=>`=== ${d.name} ===\n${d.content}`).join('\n\n');
+  _updateCtxBar();_renderFilesRow();
+}
+
+function _renderFilesRow(){
+  const row=document.getElementById('chatFilesRow');if(!row)return;
+  if(_chatDocs.length===0){row.style.display='none';row.innerHTML='';return;}
+  row.style.display='flex';
+  row.innerHTML=_chatDocs.map((d,i)=>`<div class="cl-file-chip">📄 ${_e(d.name)}<button class="cl-file-chip-rm" onclick="removeDoc(${i})" title="Retirer">✕</button></div>`).join('');
+}
+
+function _updateCtxBar(){
+  const bar=document.getElementById('chatCtxBar');if(!bar)return;
+  if(_chatDocs.length===0){bar.style.display='none';bar.innerHTML='';return;}
+  bar.style.display='flex';
+  bar.innerHTML=`<span style="font-size:.67rem;color:#92400e;font-weight:700;margin-right:.3rem;">Contexte actif :</span>`+_chatDocs.map(d=>`<span class="cl-ctx-chip">📎 ${_e(d.name)}</span>`).join('');
+}
+
+/* ── Send message ── */
+async function sendChat(){
+  const input=document.getElementById('chatInput');
+  const text=(input?.value||'').trim();if(!text)return;
+  const key=getKey();
+  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API Groq dans la barre latérale.'},false);return;}
+  input.value='';input.style.height='auto';
+  document.getElementById('chatSendBtn').disabled=true;
+  _renderChatMsg({role:'user',text});
+  const typing=_showTyping();
+  const sysContent=_CHAT_SYSTEM+(_chatDocCtx?'\n\n--- DOCUMENTS FOURNIS ---\n'+_chatDocCtx.slice(0,7000)+'\n--- FIN DOCUMENTS ---':'');
+  const messages=[{role:'system',content:sysContent},..._chatHistory,{role:'user',content:text}];
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+      headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages,max_tokens:1400,temperature:0.6})});
+    const data=await resp.json();
+    if(!resp.ok)throw new Error(data.error?.message||'Erreur API '+resp.status);
+    const reply=data.choices?.[0]?.message?.content||'Désolé, une erreur est survenue.';
+    typing?.remove();
+    const readyMatch=reply.match(/\[\[READY\]\]([\s\S]*?)\[\[\/READY\]\]/);
+    let preview=null;
+    if(readyMatch){try{preview=JSON.parse(readyMatch[1]);_chatPending=preview;_chatReady=true;}catch(_){}}
+    _chatHistory.push({role:'user',content:text});
+    _chatHistory.push({role:'assistant',content:reply});
+    _renderChatMsg({role:'ai',text:reply,preview},false);
+  }catch(e){
+    typing?.remove();
+    _renderChatMsg({role:'ai',text:'❌ '+e.message},false);
+  }
+  document.getElementById('chatSendBtn').disabled=false;
+  document.getElementById('chatInput')?.focus();
+}
+
+/* ── Launch module generation ── */
+async function launchChatModule(){
+  if(!_chatPending)return;
+  const p=_chatPending;const key=getKey();
+  if(!key){showToast('Clé API requise.','err');return;}
+  const box=document.getElementById('chatMsgs');
+  _renderChatMsg({role:'ai',text:'🚀 Génération du module **'+( p.titre||p.dom)+'** en cours… (30 à 60 secondes)'},false);
+  const fd={
+    mode:p.mode||'pro',titre:p.titre||p.dom||'Module',
+    comp:p.titre||p.dom||'',dom:p.dom||'',
+    pub:p.pub||'Professionnels',niv:p.niv||'tous niveaux',dur:p.dur||'2h',
+    lang:p.lang||'Français',prerequis:p.prerequis||'',
+    doc:_chatDocCtx.slice(0,5000),norm:'',ctx:''
+  };
+  try{
+    const mod=fd.mode==='pro'?await pipePro(fd,key):await pipeAcad(fd,key);
+    mod.readSections={};mod.fav=false;
+    addMod(mod);
+    _renderChatMsg({role:'ai',
+      text:'✅ Module **"'+mod.titre+'"** créé avec succès ! Il est disponible dans votre bibliothèque.',
+      suggestions:['📖 Ouvrir le module','📚 Voir la bibliothèque','💬 Créer un autre module']},false);
+    // override sugg clicks
+    const lastEl=document.getElementById('chatMsgs')?.lastElementChild;
+    if(lastEl){
+      lastEl.querySelectorAll('.cl-sugg').forEach(btn=>{
+        if(btn.textContent.includes('Ouvrir'))btn.onclick=()=>{openMod(mod.id);nav('module');};
+        else if(btn.textContent.includes('bibliothèque'))btn.onclick=()=>nav('library');
+        else if(btn.textContent.includes('autre'))btn.onclick=()=>resetChat();
+      });
+    }
+    _chatPending=null;_chatReady=false;
+    showToast('Module "'+mod.titre+'" créé !');
+  }catch(e){
+    _renderChatMsg({role:'ai',text:'❌ Erreur : '+e.message+'\nVérifiez votre clé API et réessayez.'},false);
+  }
+}
+
+</script>
+</body>
+</html>
