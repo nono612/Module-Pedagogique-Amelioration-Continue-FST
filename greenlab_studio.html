@@ -1030,7 +1030,7 @@ async function pipePro(fd,key){
   const SYS=`Tu es un formateur professionnel expert du métier "${fd.dom}", avec 20 ans d'expérience terrain et de formation. Tu crées des formations professionnelles de haute qualité qui permettent de VRAIMENT comprendre le métier : pourquoi chaque geste est fait ainsi, les principes physiques/chimiques/mécaniques derrière les procédures, ce que les experts savent et que les débutants ignorent, les chiffres et normes exacts à mémoriser, les indicateurs de performance concrets. Données chiffrées systématiques, exemples terrain réels, raisonnement expert explicite. Si un document de référence est fourni, base-toi dessus prioritairement. JSON uniquement.`;
 
   setStep('s1','active','',true);
-  const plan=await groq(key,SYS,`${ctx}\n\nCrée le plan complet de cette formation professionnelle. JSON:\n{"titre":"Titre formation percutant (max 10 mots)","description":"Accroche professionnelle motivante qui explique ce que le stagiaire va VRAIMENT comprendre (2 phrases)","prerequis":"Prérequis techniques concrets nécessaires","objectifs":["À l'issue de la formation, le stagiaire SAURA/POURRA faire concrètement 1","... 2","... 3","... 4","... 5"],"sections":[{"id":1,"titre":"Titre section","duree":"ex: 30 min","type":"theorie|procedure|exercice|securite"},{"id":2,...}],"competences":["Compétence métier précise et mesurable 1","Compétence 2","Compétence 3","Compétence 4"]}\n5 à 6 sections dont obligatoirement : 1 section théorique approfondie (pourquoi ça marche physiquement), 2-3 sections procédures détaillées, 1 section exercices, 1 section sécurité/qualité.`,900);
+  const plan=await groq(key,SYS,`${ctx}\n\nCrée le plan complet de cette formation professionnelle. JSON:\n{"icone":"emoji unique représentant ce métier (1 seul emoji, ex: ⚡ électricien, 🔧 mécanicien, 🏗️ BTP, 🧪 chimie, 💊 santé)","titre":"Titre formation percutant (max 10 mots)","description":"Accroche professionnelle motivante qui explique ce que le stagiaire va VRAIMENT comprendre (2 phrases)","prerequis":"Prérequis techniques concrets nécessaires","objectifs":["À l'issue de la formation, le stagiaire SAURA/POURRA faire concrètement 1","... 2","... 3","... 4","... 5"],"etapes":[{"id":"E1","titre":"Étape principale du processus professionnel (ex: Préparation du chantier)","outil":"Outil ou équipement principal"},{"id":"E2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","duree":"ex: 30 min","type":"theorie|procedure|exercice|securite"},{"id":2,...}],"competences":["Compétence métier précise et mesurable 1","Compétence 2","Compétence 3","Compétence 4"]}\n5 à 6 sections. etapes = les 4-6 grandes étapes du processus de travail réel dans ce métier (pas les sections de cours).`,900);
   setStep('s1','done',(plan.sections?.length||0)+' sections planifiées',true);
 
   setStep('s2','active','',true);
@@ -1052,9 +1052,9 @@ async function pipePro(fd,key){
   setStep('s2','done',sections.length+' sections rédigées',true);
 
   setStep('s3','active','',true);
-  let scenarios=[];
-  try{const sr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n\n3 mises en situation réelles tirées du terrain professionnel réel, progressives (débutant → expert) :\n{"scenarios":[{"titre":"Titre scénario précis (lieu + situation)","difficulte":"débutant|intermédiaire|expert","contexte":"Environnement de travail précis: lieu, heure, conditions, équipements présents, historique du problème (4-5 phrases avec données techniques réelles)","situation":"Ce que le professionnel observe ou doit réaliser: symptômes mesurables, contraintes de délai/budget/sécurité, informations disponibles et manquantes (5-6 phrases très détaillées)","consigne":"Mission exacte: ce que le stagiaire doit analyser, décider, mesurer, calculer, réaliser et vérifier. Inclure les contraintes et critères de réussite mesurables.","indices":["Indice 1 que le pro remarque en premier","Indice 2","Indice 3"],"pieges":["Piège classique que le débutant va tomber 1","Piège 2"],"correction":"Raisonnement expert complet: 1) Analyse de la situation et hypothèses. 2) Diagnostic méhodique avec justification. 3) Plan d'action étape par étape avec valeurs exactes. 4) Vérification et critères de validation. 5) Ce qu'un expert remarque que le débutant manquerait. 10-12 phrases très détaillées."}]}`,2000);scenarios=sr.scenarios||[];}catch{}
-  setStep('s3','done',scenarios.length+' mises en situation générées',true);
+  let scenarios=[],cas={};
+  try{const sr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n\nGénère un cas terrain réel ET 3 mises en situation progressives.\n{"cas":{"entreprise":"Nom entreprise fictive réaliste (ex: ELEC Solutions, Chantier Dupont)","contexte":"Présentation de l'entreprise, du secteur, de l'environnement de travail (3-4 phrases réalistes)","donnees":"Données chiffrées clés du contexte: effectifs, production, équipements, chiffres terrain (ex: 120 salariés, 3 lignes de production, maintenance 4h/semaine)","enjeux":"Enjeux financiers/opérationnels concrets (ex: 15 000€ de pertes/semaine en cas de panne)","probleme":"Le problème concret observé sur le terrain — symptômes mesurables, situation actuelle (3-4 phrases)","objectif":"Objectif SMART à atteindre avec cette formation (ex: réduire les pannes de 40% en 3 mois)","contraintes":"Contraintes réelles: budget, délai, normes, équipe (1-2 phrases)"},"scenarios":[{"titre":"Titre scénario précis (lieu + situation)","difficulte":"débutant|intermédiaire|expert","contexte":"Environnement précis: lieu, heure, conditions, équipements (4-5 phrases)","situation":"Ce que le professionnel observe (5-6 phrases très détaillées avec données techniques)","consigne":"Mission exacte avec critères de réussite mesurables.","indices":["Indice 1","Indice 2","Indice 3"],"pieges":["Piège 1","Piège 2"],"correction":"Raisonnement expert complet: analyse, diagnostic, plan d'action, vérification. 10-12 phrases."}]}`,2000);scenarios=sr.scenarios||[];cas=sr.cas||{};}catch{}
+  setStep('s3','done',scenarios.length+' mises en situation + cas terrain générés',true);
 
   setStep('s4','active','',true);
   let checklist={avant:[],pendant:[],apres:[]},quiz=[];
@@ -1063,7 +1063,7 @@ async function pipePro(fd,key){
 
   setStep('s5','active','',true);
   let memo={};
-  try{memo=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${fd.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5","Règle 6","Règle 7"],"formules":["Formule/valeur 1: [formule ou valeur] — dans quel cas l'utiliser — exemple chiffré","Formule 2","Valeur critique 3","Valeur 4"],"interdits":["⛔ JAMAIS: erreur critique 1 — risque exact (blessure/panne/non-conformité)","⛔ JAMAIS: erreur 2","⛔ JAMAIS: erreur 3","⛔ JAMAIS: erreur 4"],"reflexes_expert":["Réflexe pro 1: situation déclenchante → action instinctive d'un expert","Réflexe 2","Réflexe 3","Réflexe 4"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante que tout professionnel gravé dans sa mémoire"}`,1200);}catch{}
+  try{memo=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${fd.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5","Règle 6","Règle 7"],"formules":["Formule/valeur 1: [formule ou valeur] — dans quel cas l'utiliser — exemple chiffré","Formule 2","Valeur critique 3","Valeur 4"],"formules_kv":[{"nom":"Nom court (ex: Loi d'Ohm)","valeur":"U = R × I"},{"nom":"Nom 2","valeur":"formule ou valeur numérique exacte"},{"nom":"Nom 3","valeur":"..."},{"nom":"Nom 4","valeur":"..."},{"nom":"Nom 5","valeur":"..."},{"nom":"Nom 6","valeur":"..."}],"interdits":["⛔ JAMAIS: erreur critique 1 — risque exact (blessure/panne/non-conformité)","⛔ JAMAIS: erreur 2","⛔ JAMAIS: erreur 3","⛔ JAMAIS: erreur 4"],"reflexes_expert":["Réflexe pro 1: situation déclenchante → action instinctive d'un expert","Réflexe 2","Réflexe 3","Réflexe 4"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante que tout professionnel gravé dans sa mémoire"}`,1400);}catch{}
   setStep('s5','done','Mémo terrain complet',true);
 
   setStep('s6','active','',true);
@@ -1071,7 +1071,7 @@ async function pipePro(fd,key){
   try{const kr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\nCompétences: ${(plan.competences||[]).join(', ')}\n\nGénère 5 à 6 KPIs (indicateurs de performance clés) qui permettent de mesurer concrètement le niveau professionnel dans ce métier. Ces KPIs doivent être mesurables, issus de la réalité du terrain.\n{"kpis":[{"indicateur":"Nom précis de l'indicateur (ex: Productivité de pose câble)","quoi_mesurer":"Ce qu'on mesure exactement et comment (ex: mètres de câble posé par heure en pose encastrée standard)","unite":"unité de mesure (ex: m/h, %, min, €/intervention)","seuil_debutant":"Valeur typique d'un débutant (ex: 4-6 m/h)","seuil_operationnel":"Valeur pour être autonome et employable (ex: 10-13 m/h)","seuil_expert":"Valeur d'un professionnel confirmé (ex: 16-20 m/h)","pourquoi_important":"Pourquoi cet indicateur est stratégique pour l'employabilité et la rentabilité — 2 phrases","comment_progresser":"Comment un débutant peut travailler cet indicateur pour progresser — 2 phrases concrètes"}]}`,1400);kpis=kr.kpis||[];}catch{}
   setStep('s6','done',kpis.length+' KPIs métier générés',true);
 
-  return{id:Date.now(),mode:'pro',titre:plan.titre,description:plan.description,dom:fd.dom,pub:fd.pub,niv:fd.niv,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],sections,scenarios,checklist,quiz,memo,kpis,scores:{},wrongByComp:{}};
+  return{id:Date.now(),mode:'pro',icone:plan.icone||'💼',titre:plan.titre,description:plan.description,dom:fd.dom,pub:fd.pub,niv:fd.niv,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],etapes:plan.etapes||[],formules:(memo.formules_kv||[]),cas,sections,scenarios,checklist,quiz,memo,kpis,scores:{},wrongByComp:{}};
 }
 
 /* ══════════════════════════════════════════════
@@ -1083,7 +1083,7 @@ async function pipeAcad(fd,key){
   const SYS=`Tu es un professeur-ingénieur expert en "${fd.dom}", spécialiste de l'enseignement technique et industriel pour étudiants en génie (BUT, Licence Pro, cycle ingénieur). Tu crées des cours techniques rigoureux et complets: théorie appuyée sur des bases physiques, formules mathématiques développées, schémas décrits précisément, calculs numériques illustrés, exercices type TD/TP d'examens d'ingénieurs, QCM techniques avec distracteurs réalistes. Si un document du professeur est fourni, base-toi PRIORITAIREMENT sur son contenu et sa structure. JSON uniquement.`;
 
   setStep('s1','active','',false);
-  const plan=await groq(key,SYS,`${ctx}\n\nCrée le plan structuré de ce cours technique. JSON:\n{"titre":"Titre cours technique précis (max 12 mots)","description":"Accroche pédagogique (1-2 phrases qui motivent l'étudiant ingénieur)","prerequis":"Notions techniques préalables requises (formules, outils mathématiques, notions physiques)","objectifs":["À l'issue du cours, l'étudiant sera capable de VERBE+OBJET TECHNIQUE 1","... 2","... 3","... 4"],"sections":[{"id":1,"titre":"Titre section","objectif":"Compétence acquise","duree":"ex: 20 min","type":"theorie|demonstration|application"}],"notions":["Notion technique clé 1","Notion 2","Notion 3","Notion 4","Notion 5"]}\n4 à 6 sections avec progression logique (du général au particulier, de la théorie à l'application).`,800);
+  const plan=await groq(key,SYS,`${ctx}\n\nCrée le plan structuré de ce cours technique. JSON:\n{"icone":"emoji représentant cette discipline (1 seul emoji, ex: ⚡ électrotechnique, 🔩 mécanique, 🧪 chimie, 📡 réseaux, 🏗️ génie civil)","titre":"Titre cours technique précis (max 12 mots)","description":"Accroche pédagogique (1-2 phrases qui motivent l'étudiant ingénieur)","prerequis":"Notions techniques préalables requises (formules, outils mathématiques, notions physiques)","objectifs":["À l'issue du cours, l'étudiant sera capable de VERBE+OBJET TECHNIQUE 1","... 2","... 3","... 4"],"etapes":[{"id":"1","titre":"Étape de la démarche pédagogique ou du processus technique (ex: Analyse du système)","outil":"Outil ou méthode utilisée"},{"id":"2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","objectif":"Compétence acquise","duree":"ex: 20 min","type":"theorie|demonstration|application"}],"notions":["Notion technique clé 1","Notion 2","Notion 3","Notion 4","Notion 5"]}\n4 à 6 sections avec progression logique. etapes = les 4-6 grandes étapes de la démarche technique ou du processus étudié.`,900);
   setStep('s1','done',(plan.sections?.length||0)+' sections planifiées',false);
 
   setStep('s2','active','',false);
@@ -1102,10 +1102,10 @@ async function pipeAcad(fd,key){
   setStep('s2','done',sections.length+' sections rédigées',false);
 
   setStep('s3','active','',false);
-  let exercices=[];
-  const exPrompt=`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\nGénère 3 exercices progressifs de type TD/TP pour ingénieurs:\n{"exercices":[{"titre":"Exercice 1 — [theme precis]","type":"application directe ou analyse de systeme ou synthese ou etude de cas industriel","difficulte":"debutant|intermediaire|avance","enonce":"Contexte industriel réaliste précis + données numériques complètes (5-7 phrases)","questions":["Q1. Question technique avec demande de calcul ou analyse?","Q2. Question suite logique?","Q3. Question de synthèse?","Q4. Question application?"],"correction":"Corrigé complet: démarche méthodologique, formules utilisées, calculs numériques pas-à-pas, résultats avec unités, interprétation physique (10-12 phrases)","duree":"ex: 20 min"}]}`;
-  try{const er=await groq(key,SYS,exPrompt,1800);exercices=er.exercices||[];}catch{}
-  setStep('s3','done',exercices.length+' exercices TD/TP générés',false);
+  let exercices=[],cas={};
+  const exPrompt=`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\nGénère un cas industriel pédagogique ET 3 exercices TD/TP:\n{"cas":{"entreprise":"Nom entreprise industrielle fictive réaliste (ex: Usine MECA-TECH, Centrale EDF Sud)","contexte":"Contexte industriel réaliste: secteur, équipements, organisation (3-4 phrases)","donnees":"Données techniques numériques du contexte: puissances, débits, tensions, dimensions, capacités (données chiffrées)","enjeux":"Enjeux pédagogiques et industriels — ce qu'on cherche à résoudre ou optimiser","probleme":"Problème technique concret observé sur le terrain qui motive le cours (3-4 phrases)","objectif":"Objectif technique à atteindre grâce aux compétences du cours (formulation SMART)","contraintes":"Contraintes techniques, réglementaires ou économiques"},"exercices":[{"titre":"Exercice 1 — [theme precis]","type":"application directe ou analyse de systeme ou synthese ou etude de cas industriel","difficulte":"debutant|intermediaire|avance","enonce":"Contexte industriel réaliste + données numériques complètes (5-7 phrases)","questions":["Q1. Question technique?","Q2. ...","Q3. ...","Q4. ..."],"correction":"Corrigé complet: démarche, formules, calculs pas-à-pas, résultats avec unités (10-12 phrases)","duree":"ex: 20 min"}]}`;
+  try{const er=await groq(key,SYS,exPrompt,2000);exercices=er.exercices||[];cas=er.cas||{};}catch{}
+  setStep('s3','done',exercices.length+' exercices TD/TP + cas industriel générés',false);
 
   setStep('s4','active','',false);
   let quiz=[];
@@ -1114,11 +1114,60 @@ async function pipeAcad(fd,key){
 
   setStep('s5','active','',false);
   let revision={};
-  const revPrompt=`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\nFiche de révision synthétique pour examen ingénieur:\n{"titre":"Fiche synthèse: [titre]","notions":["Notion 1: définition + formule si applicable","Notion 2: ...","Notion 3: ...","Notion 4: ...","Notion 5: ...","Notion 6: ..."],"formules":["Formule 1: formule mathématique — conditions application — unités","Formule 2","Formule 3","Théorème ou propriété 4"],"pieges":["Piège classique 1: erreur fréquente à éviter","Piège 2: confusion entre deux notions","Piège 3: erreur unité ou de signe","Piège 4"],"methode":["Étape 1: action à faire en premier à examen","Étape 2","Étape 3","Étape 4"],"conseil":"Conseil stratégique examen (1 phrase percutante)"}`;
-  try{revision=await groq(key,SYS,revPrompt,1000);}catch{}
+  const revPrompt=`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\nFiche de révision synthétique pour examen ingénieur:\n{"titre":"Fiche synthèse: [titre]","notions":["Notion 1: définition + formule si applicable","Notion 2: ...","Notion 3: ...","Notion 4: ...","Notion 5: ...","Notion 6: ..."],"formules":["Formule 1: formule mathématique — conditions application — unités","Formule 2","Formule 3","Théorème ou propriété 4"],"formules_kv":[{"nom":"Nom court (ex: Loi de Kirchhoff)","valeur":"formule mathématique exacte (ex: ΣI = 0)"},{"nom":"Nom 2","valeur":"formule 2"},{"nom":"Nom 3","valeur":"formule 3"},{"nom":"Nom 4","valeur":"formule 4"},{"nom":"Nom 5","valeur":"formule 5"},{"nom":"Nom 6","valeur":"formule 6"}],"pieges":["Piège classique 1: erreur fréquente à éviter","Piège 2: confusion entre deux notions","Piège 3: erreur unité ou de signe","Piège 4"],"methode":["Étape 1: action à faire en premier à examen","Étape 2","Étape 3","Étape 4"],"conseil":"Conseil stratégique examen (1 phrase percutante)"}`;
+  try{revision=await groq(key,SYS,revPrompt,1200);}catch{}
   setStep('s5','done','Fiche de révision complète',false);
 
-  return{id:Date.now(),mode:'acad',titre:plan.titre,description:plan.description,dom:fd.dom,pub:fd.pub,niv:fd.niv,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],sections,exercices,quiz,revision,scores:{},wrongByComp:{}};
+  return{id:Date.now(),mode:'acad',icone:plan.icone||'🎓',titre:plan.titre,description:plan.description,dom:fd.dom,pub:fd.pub,niv:fd.niv,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],etapes:plan.etapes||[],formules:(revision.formules_kv||[]),cas,sections,exercices,quiz,revision,scores:{},wrongByComp:{}};
+}
+
+/* ══════════════════════════════════════════════
+   HELPERS VIEWER
+══════════════════════════════════════════════ */
+function _parseSteps(text){
+  if(!text)return null;
+  const lines=text.split(/\n+/).map(s=>s.replace(/^[📝✅⚠️💡🔍⚙️🏭🎯•\-–]\s*/,'').trim()).filter(s=>s.length>5);
+  const pat=/^(D\d{1,2}|Étape\s*\d+|ÉTAPE\s*\d+|\d{1,2}[\.\)\-–]|[A-Z]\d[\.\)])\s*[\-–:\.]\s*(.*)/i;
+  const steps=lines.map(l=>{const m=l.match(pat);return m?{id:m[1].trim(),titre:m[2].slice(0,90)}:null;}).filter(Boolean);
+  return steps.length>=3?steps:null;
+}
+
+function _renderStepGrid(steps,mc,mcd){
+  const palettes=[mc,mcd,'#059669','#d97706','#dc2626','#6366f1','#ec4899','#0891b2'];
+  return`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.5rem;margin:.5rem 0 .2rem;">
+    ${steps.map((s,i)=>`<div style="background:#fff;border:1.5px solid ${mc}33;border-radius:10px;padding:.65rem .8rem;border-top:3px solid ${palettes[i%palettes.length]||mc};">
+      <div style="font-size:.69rem;font-weight:800;color:${palettes[i%palettes.length]||mc};letter-spacing:.03em;margin-bottom:.25rem;">${_e(s.id)}</div>
+      <div style="font-size:.77rem;font-weight:600;color:#1e293b;line-height:1.4;">${_e(s.titre)}</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function _renderRoadmap(etapes,mc,mcd){
+  if(!etapes||!etapes.length)return'';
+  const gradColors=['#2563eb','#6366f1','#059669','#d97706','#dc2626','#8b5cf6','#0891b2','#ec4899'];
+  const n=etapes.length;
+  return`<div class="ccard" style="padding:1.2rem 1.4rem;">
+    <div class="ccard-title">🗺️ Processus — ${n} étapes</div>
+    <div style="overflow-x:auto;padding:.3rem 0 .8rem;">
+      <div style="display:flex;align-items:flex-start;min-width:max-content;gap:0;padding:.2rem .4rem;">
+        ${etapes.map((e,i)=>{
+          const c=gradColors[i%gradColors.length];
+          const isLast=i===n-1;
+          return`<div style="display:flex;align-items:flex-start;gap:0;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:.35rem;width:88px;">
+              <div style="width:50px;height:50px;border-radius:50%;background:${c};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;box-shadow:0 4px 14px ${c}55;flex-shrink:0;line-height:1;">${_e(e.id||String(i+1))}</div>
+              <div style="font-size:.62rem;font-weight:700;text-align:center;color:#1e293b;line-height:1.3;max-width:80px;">${_e(e.titre||'')}</div>
+              ${e.outil?`<div style="font-size:.55rem;color:#9ca3af;text-align:center;max-width:80px;">${_e(e.outil)}</div>`:''}
+            </div>
+            ${!isLast?`<div style="display:flex;align-items:center;margin-top:25px;flex-shrink:0;">
+              <div style="width:22px;height:2px;background:${c};opacity:.4;"></div>
+              <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid ${gradColors[(i+1)%gradColors.length]};opacity:.7;"></div>
+            </div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`;
 }
 
 /* ══════════════════════════════════════════════
@@ -1135,41 +1184,270 @@ function renderKPIBoxes(m){
   const p=m.mode==='pro';
   const score=m.scores?.quiz!=null?m.scores.quiz+'%':'—';
   const scoreCol=m.scores?.quiz!=null?(m.scores.quiz>=70?'kv-green':m.scores.quiz>=50?'':'kv-red'):'';
-  const readSecs=m.readSections||{};
   const totalSecs=m.sections?.length||0;
-  const readDone=Object.values(readSecs).filter(Boolean).length;
-  const readPct=totalSecs?Math.round(readDone/totalSecs*100):0;
-  const levDone=p?null:_getGLSLevDone(m.id);
-  const kpi3=p
-    ?{val:m.scenarios?.length||0,lbl:'Scénarios',col:''}
-    :{val:levDone>=3?'✓':levDone+'/3',lbl:'Niveaux exercices',col:levDone>=3?'kv-green':''};
+  const exId=p?'pro-'+m.id:String(m.id);
+  const levDone=_getGLSLevDone(p?exId:String(m.id));
+  const kpi3={val:levDone>=3?'✓':levDone+'/3',lbl:'Niveaux exercices',col:levDone>=3?'kv-green':''};
   return`<div class="kpi-row">
-    <div class="kpi-box"><div class="kpi-val ${p?'':'kv-purple'}">${totalSecs}</div><div class="kpi-lbl">${p?'Procédures':'Sections de cours'}</div></div>
+    <div class="kpi-box"><div class="kpi-val ${p?'':'kv-purple'}">${totalSecs}</div><div class="kpi-lbl">${p?'Sections':'Sections cours'}</div></div>
     <div class="kpi-box"><div class="kpi-val ${scoreCol}">${score}</div><div class="kpi-lbl">Score quiz</div></div>
     <div class="kpi-box"><div class="kpi-val ${kpi3.col}">${kpi3.val}</div><div class="kpi-lbl">${kpi3.lbl}</div></div>
   </div>`;
 }
 
+function toggleGLSSection(hdr){
+  const body=hdr.parentElement.querySelector('.gls-sec-body');
+  const arrow=hdr.querySelector('.gls-sec-arrow');
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(arrow)arrow.textContent=open?'▶ Lire':'▼ Fermer';
+}
+
+function _renderInlineQuiz(m){
+  const el=document.getElementById('tp-quiz-inline');if(!el)return;
+  if(_qs){el.innerHTML=renderQuizRes(m);return;}
+  const p=m.mode==='pro';
+  el.innerHTML=`<div style="font-size:.76rem;color:#1e40af;margin-bottom:.7rem;">📋 ${m.quiz.length} questions — Sélectionnez une réponse puis validez.</div>
+  ${m.quiz.map((q,qi)=>`<div class="quiz-q"><div class="quiz-q-txt">${qi+1}. ${_e(q.q)}</div>
+    ${(q.opts||[]).map((o,oi)=>`<div class="quiz-opt" onclick="selQ(${qi},${oi},this,'${p?'pro':'acad'}')" id="qo-${qi}-${oi}"><input type="radio" name="q${qi}" style="accent-color:var(--${p?'accent':'purple'});"> ${_e(o)}</div>`).join('')}
+    <div class="quiz-notion">📌 ${_e(q.competence||q.notion||'')}</div></div>`).join('')}
+  <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.5rem;">
+    <button class="btn btn-lg ${p?'btn-gold':'btn-purple'}" onclick="submitQ()">✓ Soumettre l'évaluation</button>
+  </div>`;
+}
+
 function renderViewer(m){
-  const p=m.mode==='pro';const mc=p?'pro':'acad';
-  const sc=m.scores?.quiz!=null?`<span class="mod-header-badge">Score: ${m.scores.quiz}%</span>`:'';
-  const TABS=p?[['procs','📋 Procédures ('+(m.sections?.length||0)+')'],['scens','🔧 Scénarios ('+(m.scenarios?.length||0)+')'],['check','✅ Check-list'],['quiz','📊 Évaluation ('+(m.quiz?.length||0)+' q.)'],['memo','📄 Mémo terrain'],['kpis','📈 KPIs ('+(m.kpis?.length||0)+')']]
-    :[['cours','📖 Cours ('+(m.sections?.length||0)+')'],['exos','✏️ Exercices ('+(m.exercices?.length||0)+')'],['quiz','📝 Quiz ('+(m.quiz?.length||0)+' q.)'],['rev','📋 Révision'],['gloss','📖 Glossaire']];
+  const p=m.mode==='pro';
+  const mc=p?'#f59e0b':'#7c3aed';
+  const mcd=p?'#b45309':'#5b21b6';
+  const bg=mc+'18';
+  const bd=mc+'44';
+  const sColors=['#3b82f6','#8b5cf6','#059669','#f59e0b'];
+
+  // ── Cas terrain/industriel ──
+  const cas=m.cas||{};
+  const casHtml=cas&&cas.entreprise?`<div class="ccard">
+    <div class="ccard-title"><span style="background:${mc};color:#fff;border-radius:6px;padding:.12rem .55rem;font-size:.7rem;font-weight:800;margin-right:.35rem;">${p?'TERRAIN':'INDUSTRIEL'}</span>${p?'Cas terrain':'Cas industriel'} — ${_e(cas.entreprise)}</div>
+    <div style="background:linear-gradient(135deg,${bg},${mc}0d);border-radius:12px;padding:.95rem 1.1rem;border:1.5px solid ${bd};margin-bottom:.85rem;">
+      <div style="display:flex;gap:.8rem;align-items:flex-start;flex-wrap:wrap;">
+        <div style="font-size:2.5rem;line-height:1;">${p?'🏭':'🎓'}</div>
+        <div style="flex:1;min-width:160px;">
+          <div style="font-weight:900;font-size:.9rem;color:${mcd};margin-bottom:.3rem;">${_e(cas.entreprise)}</div>
+          <p style="font-size:.81rem;line-height:1.7;color:#374151;margin:0;">${_e(cas.contexte||'')}</p>
+        </div>
+      </div>
+      ${cas.donnees?`<div style="margin-top:.75rem;padding:.5rem .75rem;background:#fff;border-radius:9px;border:1px solid ${bd};font-size:.77rem;color:#374151;line-height:1.55;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:${mcd};">📊 Données — </strong>${_e(cas.donnees)}</div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.7rem;">
+      <div style="background:#fef2f2;border-radius:10px;padding:.75rem .85rem;border:1.5px solid #fecaca;">
+        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;color:#dc2626;letter-spacing:.4px;margin-bottom:.28rem;">⚠️ Problème</div>
+        <p style="font-size:.79rem;color:#374151;line-height:1.55;margin:0;">${_e(cas.probleme||'')}</p>
+      </div>
+      <div style="background:#f0fdf4;border-radius:10px;padding:.75rem .85rem;border:1.5px solid #86efac;">
+        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;color:#15803d;letter-spacing:.4px;margin-bottom:.28rem;">🎯 Objectif</div>
+        <p style="font-size:.79rem;color:#374151;line-height:1.55;margin:0;">${_e(cas.objectif||'')}</p>
+      </div>
+    </div>
+    ${cas.enjeux?`<div style="background:#fffbeb;border-radius:9px;padding:.55rem .85rem;border:1px solid #fcd34d;font-size:.79rem;color:#374151;margin-bottom:.55rem;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:#b45309;">💰 Enjeux — </strong>${_e(cas.enjeux)}</div>`:''}
+    ${cas.contraintes?`<div style="font-size:.75rem;color:#6b7280;padding:.4rem .65rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;"><strong>🔒 Contraintes :</strong> ${_e(cas.contraintes)}</div>`:''}
+  </div>`:'';
+
+  // ── Objectifs ──
+  const objHtml=(m.objectifs||[]).length?`<div class="ccard">
+    <div class="ccard-title">🎯 Objectifs pédagogiques</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:.42rem;">
+      ${(m.objectifs||[]).map((o,oi)=>`<div style="display:flex;align-items:flex-start;gap:.45rem;background:${bg};border:1px solid ${bd};border-radius:9px;padding:.5rem .65rem;">
+        <span style="background:${mc};color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.61rem;font-weight:800;margin-top:1px;">${oi+1}</span>
+        <span style="font-size:.78rem;color:#374151;line-height:1.45;font-weight:500;">${_e(o)}</span>
+      </div>`).join('')}
+    </div>
+  </div>`:'';
+
+  // ── Roadmap ──
+  const roadmapHtml=_renderRoadmap(m.etapes||[],mc,mcd);
+
+  // ── Formules grid (dark navy) ──
+  const formHtml=(m.formules||[]).length?`<div class="ccard">
+    <div class="ccard-title">🔑 Formules &amp; outils clés</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.55rem;">
+      ${(m.formules||[]).map(f=>`<div style="background:#1e293b;border-radius:10px;padding:.7rem .85rem;text-align:center;">
+        <div style="font-size:.58rem;font-weight:700;color:${mc};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.32rem;">${_e(f.nom||'')}</div>
+        <div style="font-size:.9rem;font-family:'JetBrains Mono','Courier New',monospace;color:#e2e8f0;font-weight:700;line-height:1.35;">${_e(f.valeur||'')}</div>
+      </div>`).join('')}
+    </div>
+  </div>`:'';
+
+  // ── Sections accordion (colored headers) ──
+  const readSecs=m.readSections||{};
+  const totalSecs=m.sections?.length||0;
+  const readDone=Object.values(readSecs).filter(Boolean).length;
+  const readPct=totalSecs?Math.round(readDone/totalSecs*100):0;
+  const sectionsHtml=`<div class="ccard">
+    <div class="ccard-title">📚 ${p?'Cours &amp; Procédures':'Cours théorique'} — ${totalSecs} sections</div>
+    ${totalSecs?`<div class="read-progress-bar" style="margin-bottom:.8rem;"><div class="rpb-wrap"><div class="rpb-fill" id="readProgress" style="width:${readPct}%"></div></div><div class="read-lbl" id="readLabel">${readDone}/${totalSecs} lues</div></div>`:''}
+    <div style="display:flex;flex-direction:column;gap:.5rem;">
+      ${(m.sections||[]).map((s,idx)=>{
+        const sc2=sColors[idx%4];
+        const rKey='s'+idx;
+        const isRead=readSecs[rKey];
+        const noteVal=getNote(m.id,(p?'ps':'cs')+idx);
+        const steps=_parseSteps(_n(s.contenu));
+        const preview=steps?_renderStepGrid(steps.slice(0,4),mc,mcd)
+          :`<p style="font-size:.78rem;color:#6b7280;margin:0;line-height:1.6;font-style:italic;">${_e(_n(s.contenu).slice(0,220))}${_n(s.contenu).length>220?'…':''}</p>`;
+        const allSteps=steps?_renderStepGrid(steps,mc,mcd):'';
+        const prose=_n(s.contenu).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+        const fullBody=steps?`${allSteps}<details style="margin-top:.6rem;"><summary style="font-size:.72rem;color:#6b7280;cursor:pointer;">▶ Lire le contenu détaillé</summary><div style="font-size:.8rem;color:#374151;line-height:1.78;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #f1f5f9;">${prose}</div></details>`:prose;
+        return`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+          <div style="background:${sc2};padding:.5rem .9rem;display:flex;align-items:center;gap:.55rem;cursor:pointer;" onclick="toggleGLSSection(this)">
+            <div class="read-dot${isRead?' done':''}" id="rdot-${rKey}" onclick="event.stopPropagation();markRead(${m.id},'${rKey}')" style="flex-shrink:0;"></div>
+            <span style="background:rgba(255,255,255,.2);border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:.71rem;font-weight:800;color:#fff;">${idx+1}</span>
+            <span style="font-weight:800;font-size:.83rem;color:#fff;flex:1;">${_e((s.titre||'').replace(/^[📘⚙️🏭💡]\s*/,''))}</span>
+            ${s.type?`<span style="font-size:.6rem;background:rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:.1rem .35rem;font-weight:700;text-transform:uppercase;">${_e(s.type)}</span>`:''}
+            ${s.duree||s.dur?`<span style="font-size:.64rem;color:rgba(255,255,255,.85);">⏱️ ${_e(s.duree||s.dur||'')}</span>`:''}
+            <span class="gls-sec-arrow" style="font-size:.66rem;color:rgba(255,255,255,.85);white-space:nowrap;flex-shrink:0;">▶ Lire</span>
+          </div>
+          <div style="padding:.7rem 1rem;background:#fff;">
+            ${preview}
+            <div class="gls-sec-body" style="display:none;border-top:1px solid #f1f5f9;padding-top:.55rem;margin-top:.4rem;">
+              ${fullBody}
+              ${p&&(s.donnees_cles||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin:.6rem 0;">${(s.donnees_cles||[]).map(d=>`<div class="donnee-cle-chip">${_e(d)}</div>`).join('')}</div>`:''}
+              ${p&&s.reflexe_pro?`<div class="reflexe-pro-box"><div class="reflexe-pro-lbl">⚡ Réflexe du pro expérimenté</div><div class="reflexe-pro-txt">${_e(s.reflexe_pro)}</div></div>`:''}
+              ${p&&(s.points_vigilance||[]).length?`<div style="margin-top:.5rem;">${(s.points_vigilance||[]).map(v=>`<div class="kp">${_e(v)}</div>`).join('')}</div>`:''}
+              ${!p&&(s.definitions||[]).length?`<div style="margin-top:.5rem;">${(s.definitions||[]).map(d=>`<div class="def-box"><span class="def-term">${_e(d.terme||d.term||'')} :</span> ${_e(d.def||d.definition||'')}</div>`).join('')}</div>`:''}
+              ${!p&&s.exemple?`<div style="background:${bg};border-left:3px solid ${mc};border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.8rem;color:${mcd};line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
+              ${!p&&(s.points_cles||[]).length?`<div>${(s.points_cles||[]).map(pt=>`<div class="kp acad">💡 ${_e(pt)}</div>`).join('')}</div>`:''}
+              ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
+              <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem;">
+                <button class="note-ico${noteVal?' has-note':p?'':' an'}" id="nbtn-${p?'ps':'cs'}${idx}" onclick="openNoteModal(${m.id},'${p?'ps':'cs'}${idx}',${JSON.stringify(s.titre||'')},${!p})">${noteVal?'📝':'+ Note'}</button>
+                <button class="card-act-btn" id="rsBtn-${idx}" onclick="regenSection(${idx})">🔄 Régénérer</button>
+                <button class="sec-media-btn sec-svg-btn" id="svgBtn-${m.id}-${idx}" onclick="generateSectionSVG(${m.id},${idx})">${s.svg?'🔄 Régén. schéma':'📊 Schéma IA'}</button>
+              </div>
+              <div id="svgArea-${m.id}-${idx}" style="margin-top:.4rem;">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
+              <div id="imgArea-${m.id}-${idx}">${s.image?`<div class="sec-img-wrap"><img src="${s.image.url}" alt="${_e(s.titre||'')}" loading="lazy"><div class="sec-img-credit">Photo par <a href="${s.image.authorLink}" target="_blank" rel="noopener">${_e(s.image.author)}</a> sur Unsplash</div></div>`:''}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')||empty('📚','Aucune section')}
+    </div>
+  </div>`;
+
+  // ── QCM (blue card) ──
+  const quiz=m.quiz||[];
+  const qcmHtml=`<div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.65rem;">
+      <div class="ccard-title" style="color:#1e40af;margin:0;">❓ Quiz de compréhension${quiz.length?' — '+quiz.length+' questions':''}</div>
+      <button class="btn btn-ghost btn-sm" id="regenQuizBtn" onclick="regenQuiz()" style="font-size:.71rem;border-color:#93c5fd;color:#1e40af;">🔄 Nouveau quiz</button>
+    </div>
+    <div id="tp-quiz-inline">${quiz.length?'':'<div style="font-size:.76rem;color:#1e40af;opacity:.8;">Cliquez sur "Nouveau quiz" pour en générer un.</div>'}</div>
+    <div id="tp-quiz"></div>
+  </div>`;
+
+  // ── Exercise 3 niveaux ──
+  const exId=p?'pro-'+m.id:String(m.id);
+  const exDone=_getGLSLevDone(exId);
+  const allExDone=exDone>=3;
+  const lvEx=_GLS_EX_LEVELS[Math.min(exDone,2)];
+  const exercisesCard=`<div class="ccard" style="background:linear-gradient(135deg,${bg},${mc}0d);border:2px solid ${bd};">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin-bottom:.4rem;">
+      <div>
+        <div style="font-weight:800;font-size:.88rem;color:${mcd};">🎯 Exercices IA — 3 niveaux progressifs</div>
+        <div style="font-size:.73rem;color:#6b7280;margin-top:.15rem;">Complétez Débutant → Intermédiaire → Avancé dans l'ordre.</div>
+      </div>
+      <div id="glsExBadge-${exId}" style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">${_renderGLSLevelBadge(exId)}</div>
+    </div>
+    ${allExDone?`<div class="alert alert-success" style="margin:0;">🎉 Les 3 niveaux sont validés !</div>`:`
+    <div id="glsExCard-${exId}" class="ex-level-wrap ex-level-current" style="border-color:${lvEx.border};background:${lvEx.bg};margin-top:.6rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem;">
+        <span style="font-size:.72rem;font-weight:900;color:${lvEx.color};">${lvEx.stars} Niveau ${lvEx.label}</span>
+        <div id="glsExTimer-${exId}" style="margin-left:auto;"></div>
+      </div>
+      <div id="glsExContent-${exId}">
+        <div style="text-align:center;padding:1rem 0;">
+          <div style="font-size:.83rem;color:var(--gray600);margin-bottom:.7rem;">Exercice — niveau <strong style="color:${lvEx.color};">${lvEx.label}</strong></div>
+          <button class="btn btn-gold" onclick="${p?`generateGLSProExercise('${exId}',${m.id})`:`generateExo(${m.id},${exDone})`}">🎲 Générer l'exercice ${lvEx.stars}</button>
+        </div>
+      </div>
+    </div>
+    <div id="glsModuleScore-${exId}" style="margin-top:.6rem;"></div>`}
+  </div>`;
+
+  // ── Pro specifics ──
+  let extra='';
+  if(p){
+    const cols={débutant:'#059669',intermédiaire:'#b45309',expert:'#dc2626'};
+    const scens=(m.scenarios||[]).map((s2,i)=>`
+      <div class="sc-card"><div class="sc-hdr pro" onclick="toggleSC(this)">
+        <div><div class="sc-title">Scénario ${i+1} — ${_e(s2.titre)}</div>
+        <span style="font-size:.65rem;background:rgba(0,0,0,.06);border-radius:5px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:${cols[s2.difficulte]||'var(--gray600)'};">${_e(s2.difficulte||'')}</span></div>
+        <span class="sc-arr" style="color:var(--gray600);font-size:.8rem;">${i===0?'▼':'▶'}</span></div>
+        <div class="sc-body ${i===0?'open':''}">
+          <div class="sc-field"><strong>Contexte</strong>${_e(s2.contexte||'')}</div>
+          <div class="sc-field"><strong>Situation</strong>${_e(s2.situation||'')}</div>
+          <div style="background:var(--pro-bg);border-radius:9px;padding:.55rem .85rem;margin:.5rem 0;font-size:.8rem;color:var(--pro-dark);font-weight:700;">📋 Consigne : ${_e(s2.consigne||'')}</div>
+          ${(s2.indices||[]).length?`<div style="font-size:.77rem;color:#374151;margin:.4rem 0;"><strong>🔍 Indices :</strong> ${s2.indices.map(x=>_e(x)).join(' · ')}</div>`:''}
+          <button class="corr-btn" onclick="toggleCorr(this)">👁️ Voir le corrigé expert</button>
+          <div class="corr-body">${_e(s2.correction||'').replace(/\n/g,'<br>')}</div>
+        </div></div>`).join('');
+    if(scens) extra+=`<div class="ccard"><div class="ccard-title">🔧 Mises en situation terrain (${m.scenarios?.length||0})</div>${scens}</div>`;
+    const cl=m.checklist||{avant:[],pendant:[],apres:[]};
+    extra+=`<div class="ccard"><div class="ccard-title">✅ Check-list terrain</div>
+      ${[['avant','🔵 Avant l\'intervention','#1d4ed8'],['pendant','🟡 Pendant','#b45309'],['apres','🟢 Après','#15803d']].map(([k,lbl,col])=>`<div class="cl-section"><div class="cl-section-title" style="background:rgba(0,0,0,.04);color:${col};">${lbl}</div>
+        ${(cl[k]||[]).map((item,j)=>`<label class="cl-item" id="cl-${k}-${j}" onclick="this.classList.toggle('checked')"><input type="checkbox" style="accent-color:var(--accent);"> ${_e(item)}</label>`).join('')}</div>`).join('')}
+    </div>`;
+    const s2=m.memo||{};
+    extra+=`<div class="ccard"><div class="ccard-title">📄 Mémo terrain</div><div style="max-width:640px;">
+      <div style="border-left:4px solid var(--accent);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.64rem;font-weight:800;color:var(--accent);text-transform:uppercase;">Mémo terrain — Quick Reference</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(s2.titre||m.titre)}</h3></div>
+      ${(s2.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s2.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
+      ${(s2.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s2.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
+      ${(s2.interdits||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">🚫 À ne jamais faire</h4>${(s2.interdits||[]).map(e2=>`<div class="memo-item" style="color:#7f1d1d;">${_e(e2)}</div>`).join('')}</div>`:''}
+      ${(s2.reflexes_expert||[]).length?`<div class="memo-block" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left-color:#7c3aed;"><h4 style="color:#6d28d9;">⚡ Réflexes de l'expert</h4>${(s2.reflexes_expert||[]).map(r=>`<div class="memo-item" style="color:#4c1d95;">→ ${_e(r)}</div>`).join('')}</div>`:''}
+      ${s2.regle_or?`<div class="memo-gold"><h4>🏆 Règle d'or</h4><p>"${_e(s2.regle_or)}"</p></div>`:''}
+    </div></div>`;
+    extra+=`<div class="ccard">${renderKPIs(m)}</div>`;
+  } else {
+    const exos=(m.exercices||[]).map((ex,i)=>`
+      <div class="sc-card"><div class="sc-hdr" style="background:var(--acad-bg);" onclick="toggleSC(this)">
+        <div><div class="sc-title" style="color:var(--acad-dark);">${_e(ex.titre||'Exercice '+(i+1))}</div>
+        <span style="font-size:.65rem;background:rgba(0,0,0,.06);border-radius:5px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:var(--purple);">${_e(ex.difficulte||'')}</span></div>
+        <span class="sc-arr" style="color:var(--gray600);font-size:.8rem;">${i===0?'▼':'▶'}</span></div>
+        <div class="sc-body ${i===0?'open':''}">
+          ${ex.enonce?`<div style="font-size:.81rem;line-height:1.7;color:#374151;margin-bottom:.75rem;">${_e(ex.enonce)}</div>`:''}
+          ${(ex.questions||[]).length?`<ul style="margin:.4rem 0 .6rem;padding-left:1.1rem;">${(ex.questions||[]).map(q=>`<li style="font-size:.8rem;color:#374151;margin-bottom:.3rem;">${_e(q)}</li>`).join('')}</ul>`:''}
+          <button class="corr-btn" onclick="toggleCorr(this)">👁️ Voir le corrigé</button>
+          <div class="corr-body">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div>
+        </div></div>`).join('');
+    if(exos) extra+=`<div class="ccard"><div class="ccard-title">✏️ Exercices TD/TP (${m.exercices?.length||0})</div>${exos}</div>`;
+    const rv=m.revision||{};
+    if(rv.titre||rv.notions?.length){
+      extra+=`<div class="ccard"><div class="ccard-title">📋 Fiche de révision</div><div style="max-width:640px;">
+        <div style="border-left:4px solid var(--purple);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.64rem;font-weight:800;color:var(--purple);text-transform:uppercase;">Fiche synthèse — Examen</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(rv.titre||m.titre)}</h3></div>
+        ${(rv.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(rv.notions||[]).map(n2=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n2)}</div>`).join('')}</div>`:''}
+        ${(rv.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(rv.formules||[]).map(f2=>`<span class="formula-tag">${_e(f2)}</span>`).join('')}</div>`:''}
+        ${(rv.methode||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🗂️ Démarche à l'examen</h4><ul class="steps-ol">${(rv.methode||[]).map((e2,j)=>`<li class="step-li"><div class="step-n acad">${j+1}</div><div class="step-t" style="color:#78350f;">${_e(e2)}</div></li>`).join('')}</ul></div>`:''}
+        ${(rv.pieges||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">⚠️ Pièges classiques</h4>${(rv.pieges||[]).map(pg=>`<div class="memo-item" style="color:#7f1d1d;">${_e(pg)}</div>`).join('')}</div>`:''}
+        ${rv.conseil?`<div class="memo-gold"><h4>💡 Conseil stratégique</h4><p>"${_e(rv.conseil)}"</p></div>`:''}
+      </div></div>`;
+    }
+  }
+
+  const score=m.scores?.quiz!=null?`<span class="mod-header-badge">Score: ${m.scores.quiz}%</span>`:'';
+
   document.getElementById('modContent').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem;flex-wrap:wrap;">
       <button class="btn btn-ghost btn-sm" onclick="nav('library')">← Bibliothèque</button>
       <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="openFlashcards(_cur)">🃏 Flashcards</button>
         ${p?`<button class="btn btn-ghost btn-sm" onclick="showAttestation(_cur)">🏅 Attestation</button>`:''}
-        <button class="btn btn-ghost btn-sm" id="addImgBtn-${m.id}" onclick="addModuleImages(${m.id})">🖼️ Ajouter images</button>
+        <button class="btn btn-ghost btn-sm" id="addImgBtn-${m.id}" onclick="addModuleImages(${m.id})">🖼️ Images</button>
         <button class="btn btn-ghost btn-sm" onclick="dupMod(${m.id})">📋 Dupliquer</button>
         <button class="btn btn-ghost btn-sm" onclick="window.print()">🖨️ Imprimer</button>
         <button class="btn btn-danger btn-sm" onclick="confirmDel(${m.id})">🗑️</button>
       </div>
     </div>
     <div class="mod-header">
-      <div class="mod-header-top ${mc}">
-        <div class="mod-header-icon">${p?'💼':'🎓'}</div>
+      <div class="mod-header-top ${p?'pro':'acad'}">
+        <div class="mod-header-icon">${_e(m.icone||p?'💼':'🎓')}</div>
         <div class="mod-header-text">
           <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-bottom:.15rem;">${p?'Formation Professionnelle':'Cours Ingénieur ⚡'}</div>
           <h2>${_e(m.titre)}</h2>
@@ -1177,26 +1455,32 @@ function renderViewer(m){
         </div>
       </div>
       <div class="mod-header-steps">
-        <span class="mod-lib-badge badge-${mc}">${_e(m.dom)}</span>
+        <span class="mod-lib-badge badge-${p?'pro':'acad'}">${_e(m.dom)}</span>
         <span style="font-size:.73rem;color:var(--gray600);">👥 ${_e(m.pub)}</span>
         <span style="font-size:.73rem;color:var(--gray600);">⏱️ ${_e(m.dur)}</span>
         <span style="font-size:.73rem;color:var(--gray600);">🌐 ${_e(m.lang)}</span>
         <span style="font-size:.73rem;color:var(--gray600);text-transform:capitalize;">${_e(m.niv)}</span>
-        ${sc}
+        ${score}
         ${m.prerequis?`<span style="font-size:.71rem;color:var(--gray400);">📚 Prérequis: ${_e(m.prerequis)}</span>`:''}
       </div>
     </div>
     ${renderKPIBoxes(m)}
-    <div class="mod-tabs">${TABS.map((t,i)=>`<button class="mod-tab${i===0?' active'+(p?'':' a-acad'):''}" onclick="switchTab('${t[0]}',this,'${mc}')">${t[1]}</button>`).join('')}</div>
-    ${p?`<div id="tp-procs" class="mod-panel active">${renderProcs(m)}</div><div id="tp-scens" class="mod-panel">${renderScens(m)}</div><div id="tp-check" class="mod-panel">${renderCheck(m)}</div><div id="tp-quiz" class="mod-panel">${renderQuiz(m)}</div><div id="tp-memo" class="mod-panel">${renderMemo(m)}</div><div id="tp-kpis" class="mod-panel">${renderKPIs(m)}</div>`
-      :`<div id="tp-cours" class="mod-panel active">${renderCours(m)}</div><div id="tp-exos" class="mod-panel">${renderExos(m)}</div><div id="tp-quiz" class="mod-panel">${renderQuiz(m)}</div><div id="tp-rev" class="mod-panel">${renderRev(m)}</div><div id="tp-gloss" class="mod-panel">${renderGloss(m)}</div>`}`;
-}
+    ${exercisesCard}
+    ${casHtml}
+    ${objHtml}
+    ${roadmapHtml}
+    ${formHtml}
+    ${sectionsHtml}
+    ${qcmHtml}
+    ${extra}
+    <div class="ccard">
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="nav('library')">← Retour à la bibliothèque</button>
+        ${p?`<button class="btn btn-primary" onclick="showAttestation(_cur)">🏅 Attestation</button>`:''}
+      </div>
+    </div>`;
 
-function switchTab(name,btn,mc){
-  document.querySelectorAll('.mod-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.mod-tab').forEach(b=>b.classList.remove('active','a-acad'));
-  document.getElementById('tp-'+name)?.classList.add('active');
-  btn.classList.add('active');if(mc==='acad')btn.classList.add('a-acad');
+  if((m.quiz||[]).length) _renderInlineQuiz(m);
 }
 
 /* ── Procédures ── */
@@ -1770,7 +2054,8 @@ function submitQ(){
   const score=Math.round(correct/total*100);
   const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
   if(idx>=0){ms[idx].scores={quiz:score};ms[idx].wrongByComp=wbc;saveMods(ms);_cur=ms[idx];}
-  document.getElementById('tp-quiz').innerHTML=renderQuizRes(_cur);
+  const qel=document.getElementById('tp-quiz-inline');
+  if(qel)qel.innerHTML=renderQuizRes(_cur);
 }
 
 function renderQuizRes(m){
@@ -2184,7 +2469,7 @@ async function regenQuiz(){
       const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
       if(idx>=0){ms[idx].quiz=res.quiz;ms[idx].scores={};ms[idx].wrongByComp={};saveMods(ms);_cur=ms[idx];}
       _qs=false;_qa={};
-      document.getElementById('tp-quiz').innerHTML=renderQuiz(_cur);
+      _renderInlineQuiz(_cur);
       showToast(res.quiz.length+' nouvelles questions générées !');
     }
   }catch(e){showToast('Erreur: '+e.message,'err');}
@@ -2208,8 +2493,7 @@ async function regenSection(secIdx){
     const sc=await groq(key,SYS,prompt,1200);
     const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
     if(idx>=0){ms[idx].sections[secIdx]={...ms[idx].sections[secIdx],...sc};saveMods(ms);_cur=ms[idx];}
-    const panel=document.getElementById(p?'tp-procs':'tp-cours');
-    if(panel){panel.innerHTML=p?renderProcs(_cur):renderCours(_cur);}
+    renderViewer(_cur);
     showToast('Section régénérée !');
   }catch(e){showToast('Erreur: '+e.message,'err');}
   if(btn){btn.disabled=false;btn.textContent='🔄';}
@@ -2344,9 +2628,7 @@ async function addModuleImages(modId){
   saveMods(ms);
   if(btn){btn.disabled=false;btn.textContent='🖼️ Ajouter images';}
   if(count>0){
-    const p=m.mode==='pro';
-    const panel=document.getElementById(p?'tp-procs':'tp-cours');
-    if(panel)panel.innerHTML=p?renderProcs(m):renderCours(m);
+    renderViewer(m);
     showToast(count+' image(s) ajoutée(s) !');
   }else{
     showToast('Aucune nouvelle image (déjà toutes ajoutées ou clé invalide).','err');
