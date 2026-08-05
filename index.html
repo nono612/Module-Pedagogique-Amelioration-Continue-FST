@@ -2090,6 +2090,7 @@ async function authLogin(){
     if(error.message?.includes('Email not confirmed'))errMsg='Votre email n\'est pas encore confirmé — cherchez l\'email de Supabase dans vos spams et cliquez le lien, ou contactez votre professeur.';
     if(error.message?.includes('Invalid login credentials'))errMsg='Email ou mot de passe incorrect. Si vous venez de créer votre compte, vérifiez vos spams pour confirmer votre email.';
     if(error.message?.includes('too many requests')||error.message?.includes('rate limit'))errMsg='Trop de tentatives. Attendez quelques minutes avant de réessayer.';
+    if(error.message?.includes('Load failed')||error.message?.includes('Failed to fetch')||error.message?.includes('NetworkError')||error.message?.includes('fetch'))errMsg='⚠️ Impossible de contacter le serveur. Le projet Supabase est peut-être en pause — demandez à votre professeur de le réactiver sur supabase.com.';
     if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${errMsg}</span>`;
     return;
   }
@@ -2123,9 +2124,12 @@ async function authForgotPassword(){
   const{error}=await _sb.auth.resetPasswordForEmail(email,{redirectTo:'https://nono612.github.io/Module-Pedagogique-Amelioration-Continue-FST/'});
   if(form)form.style.display='block';
   if(error){
-    if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${error.message}</span>`;
+    let errMsg=error.message;
+    if(error.message?.includes('Load failed')||error.message?.includes('Failed to fetch')||error.message?.includes('fetch'))errMsg='⚠️ Impossible de contacter le serveur — le projet Supabase est peut-être en pause. Demandez à votre professeur de le réactiver sur supabase.com.';
+    if(error.message?.includes('rate limit')||error.message?.includes('too many'))errMsg='Limite atteinte (2 emails/heure). Attendez 1 heure avant de réessayer.';
+    if(msg)msg.innerHTML=`<span style="color:#dc2626;">❌ ${errMsg}</span>`;
   } else {
-    if(msg)msg.innerHTML='<span style="color:#059669;">✅ Email envoyé ! Vérifiez aussi vos spams.</span>';
+    if(msg)msg.innerHTML='<span style="color:#059669;">✅ Email envoyé ! Vérifiez aussi vos spams (expéditeur : noreply@supabase.io).</span>';
   }
 }
 
