@@ -634,33 +634,177 @@ nav{padding:.7rem 0;flex:1;}
 
 <!-- SETTINGS -->
 <div class="screen" id="screen-settings">
-  <div class="ph"><h1>⚙️ Paramètres</h1><p>Configuration de la plateforme</p></div>
-  <div class="ccard" style="max-width:480px;margin-bottom:1rem;">
+  <div class="ph"><h1>⚙️ Administration</h1><p>Configuration complète de la plateforme — tous les paramètres sont persistés automatiquement.</p></div>
+
+  <!-- ① IDENTITÉ -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">🏫 Identité de la plateforme</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Ces informations apparaissent dans le header, les attestations et les exports.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;">
+      <div class="form-group"><label class="form-label">Nom de la plateforme</label>
+        <input type="text" id="cfg-platformName" class="form-input" placeholder="Green Lab Studio" oninput="saveCfg('platformName',this.value);applyPlatformName()"></div>
+      <div class="form-group"><label class="form-label">Établissement / Organisation</label>
+        <input type="text" id="cfg-etablissement" class="form-input" placeholder="FST Tanger, Mon Entreprise…" oninput="saveCfg('etablissement',this.value)"></div>
+      <div class="form-group"><label class="form-label">Nom du formateur / responsable</label>
+        <input type="text" id="cfg-formateur" class="form-input" placeholder="Pr. Dupont, Dr. Martin…" oninput="saveCfg('formateur',this.value)"></div>
+      <div class="form-group"><label class="form-label">Titre du signataire</label>
+        <input type="text" id="cfg-formateurTitre" class="form-input" placeholder="Formateur / Directeur pédagogique…" oninput="saveCfg('formateurTitre',this.value)"></div>
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Intitulé de la certification</label>
+        <input type="text" id="cfg-certifIntitule" class="form-input" placeholder="Attestation de Formation" oninput="saveCfg('certifIntitule',this.value)"></div>
+    </div>
+  </div>
+
+  <!-- ② CLÉ API GROQ -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
     <div class="ccard-title">🔑 Clé API Groq</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Stockée uniquement en session, jamais persistée.</p>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Stockée uniquement en session (non persistée). Récupérez-la sur console.groq.com.</p>
     <div class="form-group"><label class="form-label">Clé API</label>
     <input type="password" id="apiKeySettings" class="form-input" placeholder="gsk_…" oninput="document.getElementById('apiKeyInput').value=this.value;sessionStorage.setItem('gls_key',this.value)"></div>
     <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">Obtenir une clé →</a>
   </div>
-  <div class="ccard" style="max-width:480px;margin-bottom:1rem;">
-    <div class="ccard-title">🖼️ Images Unsplash</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Clé API Unsplash (gratuite) pour illustrer automatiquement les sections avec des photos professionnelles.</p>
-    <div class="form-group"><label class="form-label">Access Key Unsplash</label>
-    <input type="password" id="unsplashKeyInput" class="form-input" placeholder="Votre clé Unsplash…" oninput="localStorage.setItem('gls_unsplash',this.value)"></div>
-    <a href="https://unsplash.com/developers" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="margin-top:.4rem;">Obtenir une clé gratuite (50 req/h) →</a>
+
+  <!-- ③ MOTEUR IA -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">🤖 Moteur IA</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle et la créativité de génération. Les changements s'appliquent dès la prochaine génération.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:end;">
+      <div class="form-group"><label class="form-label">Modèle Groq</label>
+        <select id="cfg-model" class="form-input" onchange="saveCfg('model',this.value);updateModelPill()">
+          <option value="llama-3.3-70b-versatile">Llama 3.3 · 70B Versatile (défaut)</option>
+          <option value="llama-3.1-70b-versatile">Llama 3.1 · 70B Versatile</option>
+          <option value="llama3-70b-8192">Llama 3 · 70B 8K context</option>
+          <option value="mixtral-8x7b-32768">Mixtral · 8×7B 32K context</option>
+          <option value="gemma2-9b-it">Gemma 2 · 9B (rapide)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Créativité — Température : <span id="cfg-temp-val">0.75</span></label>
+        <input type="range" id="cfg-temperature" min="0.1" max="1.2" step="0.05" style="width:100%;accent-color:var(--accent);"
+          oninput="document.getElementById('cfg-temp-val').textContent=parseFloat(this.value).toFixed(2);saveCfg('temperature',parseFloat(this.value))">
+        <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--gray400);margin-top:.2rem;"><span>Précis (0.1)</span><span>Équilibré (0.75)</span><span>Créatif (1.2)</span></div>
+      </div>
+    </div>
+    <div id="cfg-model-info" style="margin-top:.6rem;font-size:.73rem;color:var(--gray400);background:#f8fafc;border-radius:8px;padding:.5rem .8rem;border:1px solid var(--gray200);"></div>
   </div>
-  <div class="ccard" style="max-width:480px;margin-bottom:1rem;">
-    <div class="ccard-title">💾 Sauvegarde & Partage</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Exportez vos modules en JSON pour les sauvegarder ou les partager. Importez des modules d'un autre appareil.</p>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="exportMods()">⬆️ Exporter tous les modules</button>
-      <label class="btn btn-ghost btn-sm" style="cursor:pointer;">⬇️ Importer des modules<input type="file" accept=".json" style="display:none" onchange="importMods(this.files[0])"></label>
+
+  <!-- ④ PÉDAGOGIE PAR DÉFAUT -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">📚 Paramètres pédagogiques par défaut</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Valeurs pré-remplies dans le formulaire de création. L'apprenant peut les modifier à la demande.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;">
+      <div class="form-group"><label class="form-label">Mode par défaut</label>
+        <select id="cfg-defaultMode" class="form-input" onchange="saveCfg('defaultMode',this.value)">
+          <option value="pro">Formation Pro</option>
+          <option value="acad">Cours Académique</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Niveau par défaut</label>
+        <select id="cfg-defaultNiveau" class="form-input" onchange="saveCfg('defaultNiveau',this.value)">
+          <option value="débutant (aucune expérience)">Débutant</option>
+          <option value="intermédiaire">Intermédiaire</option>
+          <option value="expert">Expert</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Langue par défaut</label>
+        <select id="cfg-defaultLang" class="form-input" onchange="saveCfg('defaultLang',this.value)">
+          <option value="Français">Français</option>
+          <option value="English">English</option>
+          <option value="Arabe">Arabe (العربية)</option>
+          <option value="Espagnol">Espagnol</option>
+        </select>
+      </div>
+      <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Nombre de sections générées par module : <strong id="cfg-nbSec-val"></strong></label>
+        <input type="range" id="cfg-nbSections" min="2" max="10" step="1" style="width:100%;accent-color:var(--accent);"
+          oninput="document.getElementById('cfg-nbSec-val').textContent=this.value+' sections';saveCfg('nbSections',parseInt(this.value))">
+        <div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--gray400);margin-top:.2rem;"><span>2 (rapide)</span><span>5 (recommandé)</span><span>10 (exhaustif)</span></div>
+      </div>
     </div>
   </div>
-  <div class="ccard" style="max-width:480px;">
+
+  <!-- ⑤ QUIZ & ÉVALUATION -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">📊 Quiz &amp; Évaluation</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Configurez les règles d'évaluation appliquées à tous les modules.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:end;">
+      <div class="form-group"><label class="form-label">Nombre de questions QCM</label>
+        <select id="cfg-quizCount" class="form-input" onchange="saveCfg('quizCount',parseInt(this.value))">
+          <option value="5">5 questions (rapide)</option>
+          <option value="8">8 questions</option>
+          <option value="10">10 questions</option>
+          <option value="12">12 questions (recommandé)</option>
+          <option value="15">15 questions</option>
+          <option value="20">20 questions (complet)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Score minimum de validation</label>
+        <select id="cfg-quizScoreMin" class="form-input" onchange="saveCfg('quizScoreMin',parseInt(this.value))">
+          <option value="50">50% — Passable</option>
+          <option value="60">60% — Satisfaisant</option>
+          <option value="70">70% — Bien (recommandé)</option>
+          <option value="75">75% — Très bien</option>
+          <option value="80">80% — Excellence</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label" style="display:flex;align-items:center;gap:.5rem;cursor:pointer;">
+        <input type="checkbox" id="cfg-quizTimer" style="width:16px;height:16px;accent-color:var(--accent);" onchange="saveCfg('quizTimer',this.checked);document.getElementById('cfg-timer-row').style.display=this.checked?'block':'none'">
+        <span>Activer le minuteur de quiz</span>
+      </label></div>
+      <div class="form-group" id="cfg-timer-row" style="display:none;"><label class="form-label">Durée du quiz (minutes)</label>
+        <select id="cfg-quizTimerMin" class="form-input" onchange="saveCfg('quizTimerMin',parseInt(this.value))">
+          <option value="10">10 min</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="45">45 min</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑥ AFFICHAGE DES SECTIONS -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">👁️ Sections affichées dans les modules</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Masquez les sections que vos apprenants n'utilisent pas pour simplifier l'interface.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+      ${[
+        ['showRoadmap','🗺️ Processus / Roadmap'],
+        ['showFormules','🔑 Formules & outils clés'],
+        ['showCas','🏭 Cas terrain / industriel'],
+        ['showExercices','🎯 Exercices IA 3 niveaux'],
+        ['showChecklist','✅ Check-list terrain (pro)'],
+        ['showKpis','📈 KPIs métier (pro)'],
+        ['showImages','🖼️ Images Unsplash'],
+      ].map(([k,lbl])=>`<label style="display:flex;align-items:center;gap:.55rem;font-size:.82rem;color:var(--gray700);cursor:pointer;padding:.4rem .5rem;border-radius:8px;border:1px solid var(--gray200);background:#f8fafc;">
+        <input type="checkbox" id="cfg-${k}" style="width:15px;height:15px;accent-color:var(--accent);" onchange="saveCfg('${k}',this.checked)">
+        <span>${lbl}</span>
+      </label>`).join('')}
+    </div>
+  </div>
+
+  <!-- ⑦ IMAGES UNSPLASH -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">🖼️ Images Unsplash</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Clé API Unsplash (gratuite, 50 req/h) pour illustrer automatiquement les sections.</p>
+    <div class="form-group"><label class="form-label">Access Key Unsplash</label>
+    <input type="password" id="unsplashKeyInput" class="form-input" placeholder="Votre clé Unsplash…" oninput="localStorage.setItem('gls_unsplash',this.value)"></div>
+    <a href="https://unsplash.com/developers" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="margin-top:.4rem;">Obtenir une clé gratuite →</a>
+  </div>
+
+  <!-- ⑧ SAUVEGARDE & PARTAGE -->
+  <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
+    <div class="ccard-title">💾 Sauvegarde &amp; Partage</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Exportez modules et configuration. Importez sur un autre appareil.</p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="exportMods()">⬆️ Exporter les modules</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportConfig()">⬆️ Exporter la config</button>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer;">⬇️ Importer modules<input type="file" accept=".json" style="display:none" onchange="importMods(this.files[0])"></label>
+      <label class="btn btn-ghost btn-sm" style="cursor:pointer;">⬇️ Importer config<input type="file" accept=".json" style="display:none" onchange="importConfig(this.files[0])"></label>
+    </div>
+  </div>
+
+  <!-- ⑨ DONNÉES LOCALES -->
+  <div class="ccard" style="max-width:680px;">
     <div class="ccard-title">🗑️ Données locales</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Modules stockés dans le navigateur (localStorage).</p>
-    <button class="btn btn-danger btn-sm" onclick="clearAll()">Supprimer tous les modules</button>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">Actions irréversibles — procédez avec précaution.</p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑️ Supprimer tous les modules</button>
+      <button class="btn btn-ghost btn-sm" style="border-color:#f59e0b;color:#b45309;" onclick="if(confirm('Réinitialiser toute la configuration ?'))resetCfg()">↩️ Réinitialiser la config</button>
+    </div>
   </div>
 </div>
 </main>
@@ -738,6 +882,36 @@ const getMods=()=>{try{return JSON.parse(localStorage.getItem('gls_modules')||'[
 const saveMods=m=>localStorage.setItem('gls_modules',JSON.stringify(m));
 const addMod=m=>{const ms=getMods();ms.unshift(m);saveMods(ms);};
 const delMod=id=>saveMods(getMods().filter(m=>m.id!=id));
+
+/* ── Configuration persistante ── */
+const _CFG_KEY='gls_cfg';
+const _CFG_DEFAULTS={
+  platformName:'Green Lab Studio',
+  etablissement:'',
+  formateur:'',
+  formateurTitre:'Formateur / Responsable pédagogique',
+  certifIntitule:'Attestation de Formation',
+  model:'llama-3.3-70b-versatile',
+  temperature:0.75,
+  defaultMode:'pro',
+  defaultNiveau:'intermédiaire',
+  defaultLang:'Français',
+  nbSections:5,
+  quizCount:12,
+  quizScoreMin:70,
+  quizTimer:false,
+  quizTimerMin:20,
+  showRoadmap:true,
+  showFormules:true,
+  showCas:true,
+  showExercices:true,
+  showImages:true,
+  showChecklist:true,
+  showKpis:true
+};
+const getCfg=()=>{try{return Object.assign({},_CFG_DEFAULTS,JSON.parse(localStorage.getItem(_CFG_KEY)||'{}'));}catch{return{..._CFG_DEFAULTS};}};
+const saveCfg=(k,v)=>{const c=getCfg();c[k]=v;localStorage.setItem(_CFG_KEY,JSON.stringify(c));};
+const resetCfg=()=>{localStorage.removeItem(_CFG_KEY);loadSettingsUI();showToast('Configuration réinitialisée.');applyPlatformName();};
 const _e=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const _d=ts=>new Date(ts).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'});
 const _n=v=>{if(!v)return'';if(typeof v==='string')return v;if(Array.isArray(v))return v.map(x=>typeof x==='object'?Object.values(x).join(' : '):String(x)).join('\n');return String(v);};
@@ -804,6 +978,10 @@ function renderForm(){
   fs.className=p?'btn btn-gold btn-lg':'btn btn-purple btn-lg';
   fs.textContent=p?'💼 Générer la formation complète':'⚡ Générer le cours';
   document.getElementById('formFields').innerHTML=p?fieldsProHtml():fieldsAcadHtml();
+  // Apply config defaults
+  const _c=getCfg();
+  const _niv=document.getElementById('fNiv');if(_niv&&_c.defaultNiveau){[..._niv.options].forEach(o=>{o.selected=o.value===_c.defaultNiveau;});}
+  const _lang=document.getElementById('fLang');if(_lang&&_c.defaultLang){[..._lang.options].forEach(o=>{o.selected=o.value.toLowerCase()===_c.defaultLang.toLowerCase()||o.text.toLowerCase().startsWith(_c.defaultLang.toLowerCase());});}
 }
 
 const PRODOMS=['Lean Manufacturing','Maintenance industrielle','Électricité industrielle','Soudure','Logistique & Supply Chain','Automatisme','Hydraulique industrielle','Instrumentation','Chaudronnerie','CVC / Climatisation','Bloc opératoire','Cuisine professionnelle'];
@@ -957,7 +1135,7 @@ async function groq(key,sys,usr,maxTok){
   const msgs=sys?[{role:'system',content:sys},{role:'user',content:usr}]:[{role:'user',content:usr}];
   const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
     headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
-    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:maxTok||1400,temperature:0.75,response_format:{type:'json_object'}})});
+    body:JSON.stringify({model:getCfg().model,messages:msgs,max_tokens:maxTok||1400,temperature:getCfg().temperature,response_format:{type:'json_object'}})});
   const d=await r.json();
   if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
   return JSON.parse(d.choices[0].message.content);
@@ -1058,7 +1236,7 @@ async function pipePro(fd,key){
 
   setStep('s4','active','',true);
   let checklist={avant:[],pendant:[],apres:[]},quiz=[];
-  try{const cr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\nCompétences: ${(plan.competences||[]).join(', ')}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n12 questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Les distracteurs doivent être plausibles. Explications rigoureuses de 3-4 phrases avec le principe physique/technique.`,2200);checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch{}
+  try{const cr=await groq(key,SYS,`${ctx}\nFormation: "${plan.titre}"\nCompétences: ${(plan.competences||[]).join(', ')}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n${getCfg().quizCount} questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Les distracteurs doivent être plausibles. Explications rigoureuses de 3-4 phrases avec le principe physique/technique.`,2200);checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch{}
   setStep('s4','done','Check-list + '+quiz.length+' questions QCM',true);
 
   setStep('s5','active','',true);
@@ -1109,7 +1287,7 @@ async function pipeAcad(fd,key){
 
   setStep('s4','active','',false);
   let quiz=[];
-  try{const qr=await groq(key,SYS,`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\n10 QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nDistrateurs réalistes (erreurs d'unité, confusion de formules, valeur proche mais incorrecte).`,1800);quiz=qr.quiz||[];}catch{}
+  try{const qr=await groq(key,SYS,`${ctx}\nCours: "${plan.titre}"\nNotions: ${(plan.notions||[]).join(', ')}\n\n${getCfg().quizCount} QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nDistrateurs réalistes (erreurs d'unité, confusion de formules, valeur proche mais incorrecte).`,1800);quiz=qr.quiz||[];}catch{}
   setStep('s4','done',quiz.length+' questions QCM générées',false);
 
   setStep('s5','active','',false);
@@ -1227,7 +1405,7 @@ function renderViewer(m){
 
   // ── Cas terrain/industriel ──
   const cas=m.cas||{};
-  const casHtml=cas&&cas.entreprise?`<div class="ccard">
+  const casHtml=_cfg.showCas&&cas&&cas.entreprise?`<div class="ccard">
     <div class="ccard-title"><span style="background:${mc};color:#fff;border-radius:6px;padding:.12rem .55rem;font-size:.7rem;font-weight:800;margin-right:.35rem;">${p?'TERRAIN':'INDUSTRIEL'}</span>${p?'Cas terrain':'Cas industriel'} — ${_e(cas.entreprise)}</div>
     <div style="background:linear-gradient(135deg,${bg},${mc}0d);border-radius:12px;padding:.95rem 1.1rem;border:1.5px solid ${bd};margin-bottom:.85rem;">
       <div style="display:flex;gap:.8rem;align-items:flex-start;flex-wrap:wrap;">
@@ -1265,10 +1443,11 @@ function renderViewer(m){
   </div>`:'';
 
   // ── Roadmap ──
-  const roadmapHtml=_renderRoadmap(m.etapes||[],mc,mcd);
+  const _cfg=getCfg();
+  const roadmapHtml=_cfg.showRoadmap?_renderRoadmap(m.etapes||[],mc,mcd):'';
 
   // ── Formules grid (dark navy) ──
-  const formHtml=(m.formules||[]).length?`<div class="ccard">
+  const formHtml=_cfg.showFormules&&(m.formules||[]).length?`<div class="ccard">
     <div class="ccard-title">🔑 Formules &amp; outils clés</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.55rem;">
       ${(m.formules||[]).map(f=>`<div style="background:#1e293b;border-radius:10px;padding:.7rem .85rem;text-align:center;">
@@ -1348,7 +1527,7 @@ function renderViewer(m){
   const exDone=_getGLSLevDone(exId);
   const allExDone=exDone>=3;
   const lvEx=_GLS_EX_LEVELS[Math.min(exDone,2)];
-  const exercisesCard=`<div class="ccard" style="background:linear-gradient(135deg,${bg},${mc}0d);border:2px solid ${bd};">
+  const exercisesCard=_cfg.showExercices?`<div class="ccard" style="background:linear-gradient(135deg,${bg},${mc}0d);border:2px solid ${bd};">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin-bottom:.4rem;">
       <div>
         <div style="font-weight:800;font-size:.88rem;color:${mcd};">🎯 Exercices IA — 3 niveaux progressifs</div>
@@ -1370,7 +1549,7 @@ function renderViewer(m){
       </div>
     </div>
     <div id="glsModuleScore-${exId}" style="margin-top:.6rem;"></div>`}
-  </div>`;
+  </div>`:'';
 
   // ── Pro specifics ──
   let extra='';
@@ -1391,7 +1570,7 @@ function renderViewer(m){
         </div></div>`).join('');
     if(scens) extra+=`<div class="ccard"><div class="ccard-title">🔧 Mises en situation terrain (${m.scenarios?.length||0})</div>${scens}</div>`;
     const cl=m.checklist||{avant:[],pendant:[],apres:[]};
-    extra+=`<div class="ccard"><div class="ccard-title">✅ Check-list terrain</div>
+    if(_cfg.showChecklist) extra+=`<div class="ccard"><div class="ccard-title">✅ Check-list terrain</div>
       ${[['avant','🔵 Avant l\'intervention','#1d4ed8'],['pendant','🟡 Pendant','#b45309'],['apres','🟢 Après','#15803d']].map(([k,lbl,col])=>`<div class="cl-section"><div class="cl-section-title" style="background:rgba(0,0,0,.04);color:${col};">${lbl}</div>
         ${(cl[k]||[]).map((item,j)=>`<label class="cl-item" id="cl-${k}-${j}" onclick="this.classList.toggle('checked')"><input type="checkbox" style="accent-color:var(--accent);"> ${_e(item)}</label>`).join('')}</div>`).join('')}
     </div>`;
@@ -1404,7 +1583,7 @@ function renderViewer(m){
       ${(s2.reflexes_expert||[]).length?`<div class="memo-block" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left-color:#7c3aed;"><h4 style="color:#6d28d9;">⚡ Réflexes de l'expert</h4>${(s2.reflexes_expert||[]).map(r=>`<div class="memo-item" style="color:#4c1d95;">→ ${_e(r)}</div>`).join('')}</div>`:''}
       ${s2.regle_or?`<div class="memo-gold"><h4>🏆 Règle d'or</h4><p>"${_e(s2.regle_or)}"</p></div>`:''}
     </div></div>`;
-    extra+=`<div class="ccard">${renderKPIs(m)}</div>`;
+    if(_cfg.showKpis) extra+=`<div class="ccard">${renderKPIs(m)}</div>`;
   } else {
     const exos=(m.exercices||[]).map((ex,i)=>`
       <div class="sc-card"><div class="sc-hdr" style="background:var(--acad-bg);" onclick="toggleSC(this)">
@@ -1600,7 +1779,7 @@ JSON structure exacte :
   "dureeMinutes": ${[10,18,28][done]}
 }`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1400,temperature:0.65,response_format:{type:'json_object'}})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:getCfg().model,messages:[{role:'user',content:prompt}],max_tokens:1400,temperature:getCfg().temperature,response_format:{type:'json_object'}})});
     const data=await resp.json();const txt=data.choices?.[0]?.message?.content||'';
     let ex;try{ex=JSON.parse(txt);}catch{const jm=txt.match(/\{[\s\S]*\}/);ex=jm?JSON.parse(jm[0]):{situation:'Exercice terrain.',probleme:'Situez-vous dans le contexte professionnel.',questions:['Que faites-vous ?'],correction:'À compléter.',dureeMinutes:[10,18,28][done]};}
     _glsCurrentEx[proId]=ex;
@@ -1647,7 +1826,7 @@ RÉPONSE DU STAGIAIRE : "${answer.slice(0,700)}"
 📊 Données techniques — normes, valeurs, réglementations attendues non citées
 💡 Conseil terrain — recommandation d'un senior pour progresser dans ce métier`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1000,temperature:0.4})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:getCfg().model,messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1000,temperature:0.4})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
     feedEl.innerHTML=`<div class="ai-feedback" style="background:#fffbeb;border-color:#fde68a;color:#92400e;">${formatAIText(text)}</div>
       <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
@@ -1855,7 +2034,7 @@ JSON structure exacte :
   "dureeMinutes": ${[8,15,25][done]}
 }`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1200,temperature:0.6,response_format:{type:'json_object'}})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:getCfg().model,messages:[{role:'user',content:prompt}],max_tokens:1200,temperature:getCfg().temperature,response_format:{type:'json_object'}})});
     const data=await resp.json();const txt=data.choices?.[0]?.message?.content||'';
     let ex;try{ex=JSON.parse(txt);}catch{const jm=txt.match(/\{[\s\S]*\}/);ex=jm?JSON.parse(jm[0]):{enonce:'Exercice généré.',questions:['Analysez le concept principal.'],correction:'Réponse à rédiger.',dureeMinutes:[8,15,25][done]};}
     _glsCurrentEx[modId]=ex;
@@ -1909,7 +2088,7 @@ RÉPONSE DE L'ÉTUDIANT : "${answer.slice(0,700)}"
 
 Adapte ton niveau d'exigence au niveau ${lv.label} : pour Débutant sois encourageant, pour Avancé sois exigeant comme un jury d'ingénieur.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:prompt}],max_tokens:1000,temperature:0.4})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:getCfg().model,messages:[{role:'system',content:sysPrompt},{role:'user',content:prompt}],max_tokens:1000,temperature:0.4})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
     feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
       <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
@@ -1979,7 +2158,7 @@ Structure attendue (en texte, pas de JSON) :
 💡 Point critique à retenir
 (1 notion souvent mal comprise, expliquée clairement)`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1200,temperature:0.5})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:getCfg().model,messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1200,temperature:0.5})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
     el.innerHTML=`<div style="background:${lv.bg};border:1.5px solid ${lv.border};border-radius:12px;padding:1rem 1.1rem;font-size:.82rem;line-height:1.8;color:#1e293b;">
       <div style="font-size:.7rem;font-weight:800;color:${lv.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;">📚 Cours préparatoire — Niveau ${lv.label} ${lv.stars}</div>
@@ -2059,9 +2238,10 @@ function submitQ(){
 }
 
 function renderQuizRes(m){
-  const score=m.scores?.quiz??0,pass=score>=70;
-  const col=pass?'#16a34a':score>=50?'#d97706':'#dc2626';
-  const bg=pass?'#ecfdf5':score>=50?'var(--pro-bg)':'#fef2f2';
+  const _smin=getCfg().quizScoreMin;
+  const score=m.scores?.quiz??0,pass=score>=_smin;
+  const col=pass?'#16a34a':score>=(_smin-20)?'#d97706':'#dc2626';
+  const bg=pass?'#ecfdf5':score>=(_smin-20)?'var(--pro-bg)':'#fef2f2';
   const p=m.mode==='pro';const wbc=m.wrongByComp||{};
   const good=m.quiz.filter((_,qi)=>_qa[qi]===m.quiz[qi]?.correct).length;
   const _r=38,_circ=2*Math.PI*_r;
@@ -2081,8 +2261,8 @@ function renderQuizRes(m){
   return`<div class="quiz-res" style="background:${bg};border:2px solid ${col}30;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;">
     ${svgRing}
     <div style="flex:1;">
-      <div style="font-weight:800;font-size:1rem;color:${col};">${pass?'✅ Validé !':score>=50?'💪 Encore un effort':'⚠️ À retravailler'}</div>
-      <div style="font-size:.8rem;color:var(--gray600);margin-top:.3rem;">${good} / ${m.quiz.length} bonnes réponses — Minimum requis : 70%</div>
+      <div style="font-weight:800;font-size:1rem;color:${col};">${pass?'✅ Validé !':score>=(_smin-20)?'💪 Encore un effort':'⚠️ À retravailler'}</div>
+      <div style="font-size:.8rem;color:var(--gray600);margin-top:.3rem;">${good} / ${m.quiz.length} bonnes réponses — Minimum requis : ${_smin}%</div>
     </div></div>
     <div style="margin-bottom:1.2rem;">${m.quiz.map((q,qi)=>{const ans=_qa[qi],ok=ans===q.correct;return`<div class="quiz-q">
       <div class="quiz-q-txt">${qi+1}. ${_e(q.q)}</div>
@@ -2135,7 +2315,7 @@ Structure le cours ainsi :
 💡 Exercice express
 (1 micro-exercice de 2 minutes pour vérifier la compréhension immédiatement)`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1400,temperature:0.45})});
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:getCfg().model,messages:[{role:'system',content:sysP},{role:'user',content:prompt}],max_tokens:1400,temperature:0.45})});
     const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
     box.innerHTML=`<div style="background:linear-gradient(135deg,#fffbeb,#fff7ed);border:1.5px solid #fde68a;border-radius:14px;padding:1.1rem 1.2rem;">
       <div style="font-size:.7rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">📚 Cours de remédiation personnalisé — ${_e(m.titre||'')}</div>
@@ -2515,15 +2695,17 @@ function renderGloss(m){
    ATTESTATION (PRO)
 ══════════════════════════════════════════════ */
 function showAttestation(m){
-  const score=m.scores?.quiz??null;const pass=score!=null&&score>=70;
+  const _smin=getCfg().quizScoreMin;
+  const score=m.scores?.quiz??null;const pass=score!=null&&score>=_smin;
   document.getElementById('attContent').innerHTML=`
     <div class="att-box">
-      <div class="att-watermark">GREEN LAB</div>
+      <div class="att-watermark">${_e(getCfg().platformName||'GREEN LAB').toUpperCase()}</div>
       <div class="att-seal">🏅</div>
       <div style="text-align:center;margin-bottom:1.5rem;">
-        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--gray400);margin-bottom:.3rem;">Green Lab Studio — Formation Professionnelle</div>
-        <div style="font-size:1.35rem;font-weight:900;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;">ATTESTATION DE FORMATION</div>
-        ${!pass?`<div style="color:var(--red);font-size:.76rem;margin-top:.35rem;font-weight:700;">⚠️ Score insuffisant (${score!=null?score+'%':'non évalué'}) — 70% requis pour valider</div>`:''}
+        ${getCfg().etablissement?`<div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);margin-bottom:.2rem;">${_e(getCfg().etablissement)}</div>`:''}
+        <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--gray400);margin-bottom:.3rem;">${_e(getCfg().platformName||'Green Lab Studio')} — Formation</div>
+        <div style="font-size:1.35rem;font-weight:900;color:var(--navy);font-family:'Plus Jakarta Sans',sans-serif;">${_e(getCfg().certifIntitule||'ATTESTATION DE FORMATION').toUpperCase()}</div>
+        ${!pass?`<div style="color:var(--red);font-size:.76rem;margin-top:.35rem;font-weight:700;">⚠️ Score insuffisant (${score!=null?score+'%':'non évalué'}) — ${_smin}% requis pour valider</div>`:''}
       </div>
       <div style="font-size:.84rem;line-height:2;color:#374151;border:1px solid var(--gray200);border-radius:12px;padding:1.2rem 1.5rem;margin-bottom:1.2rem;">
         <div>Domaine : <strong>${_e(m.dom)}</strong></div>
@@ -2536,10 +2718,7 @@ function showAttestation(m){
         <div>Date d'émission : <strong>${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})}</strong></div>
       </div>
       ${(m.objectifs||[]).length?`<div style="margin-bottom:1rem;"><div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:var(--gray400);margin-bottom:.5rem;">Objectifs opérationnels couverts</div>${(m.objectifs||[]).map(o=>`<div style="font-size:.78rem;margin-bottom:.22rem;display:flex;gap:.4rem;align-items:flex-start;"><span style="color:var(--green);margin-top:.1rem;">✓</span><span>${_e(o)}</span></div>`).join('')}</div>`:''}
-      <div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:.63rem;color:var(--gray400);">Généré par Green Lab Studio · IA pédagogique</div>
-        <div style="font-size:.72rem;font-weight:800;color:${pass?'var(--green)':'var(--gray400)'};">${pass?'✅ VALIDÉ':'Non validé'}</div>
-      </div>
+      ${getCfg().formateur?`<div style="margin-top:1rem;border-top:1px solid var(--gray200);padding-top:.9rem;display:flex;align-items:flex-end;justify-content:space-between;"><div><div style="font-size:.63rem;color:var(--gray400);margin-bottom:.15rem;">${_e(getCfg().formateurTitre)}</div><div style="font-size:.82rem;font-weight:800;color:var(--navy);">${_e(getCfg().formateur)}</div></div><div style="font-size:.72rem;font-weight:800;color:${pass?'var(--green)':'var(--gray400)'};">${pass?'✅ VALIDÉ':'Non validé'}</div></div>`:`<div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;display:flex;align-items:center;justify-content:space-between;"><div style="font-size:.63rem;color:var(--gray400);">Généré par ${_e(getCfg().platformName||'Green Lab Studio')} · IA pédagogique</div><div style="font-size:.72rem;font-weight:800;color:${pass?'var(--green)':'var(--gray400)'};">${pass?'✅ VALIDÉ':'Non validé'}</div></div>`}
     </div>`;
   document.getElementById('attModal').classList.add('open');
 }
@@ -2552,7 +2731,7 @@ async function groqText(key,sys,usr,maxTok){
   const msgs=sys?[{role:'system',content:sys},{role:'user',content:usr}]:[{role:'user',content:usr}];
   const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
     headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
-    body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:msgs,max_tokens:maxTok||900,temperature:0.5})});
+    body:JSON.stringify({model:getCfg().model,messages:msgs,max_tokens:maxTok||900,temperature:getCfg().temperature})});
   const d=await r.json();
   if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
   return d.choices[0].message.content;
@@ -2642,6 +2821,75 @@ function removeSecImage(modId,idx){
 }
 
 /* ══════════════════════════════════════════════
+   SETTINGS UI HELPERS
+══════════════════════════════════════════════ */
+const _MODEL_INFO={
+  'llama-3.3-70b-versatile':'Recommandé — meilleur équilibre qualité/vitesse pour la formation professionnelle.',
+  'llama-3.1-70b-versatile':'Variante 3.1 — légèrement différente, bon pour les formats structurés.',
+  'llama3-70b-8192':'Contexte limité à 8K tokens — éviter pour les modules longs.',
+  'mixtral-8x7b-32768':'Contexte 32K — idéal pour traiter des documents PDF longs.',
+  'gemma2-9b-it':'Rapide et léger — adapté aux tests et prototypage rapide.'
+};
+
+function applyPlatformName(){
+  const n=getCfg().platformName||'Green Lab Studio';
+  const el=document.querySelector('.sb-brand');
+  if(el){
+    const parts=n.split(' ');
+    if(parts.length>=2){const last=parts.pop();el.innerHTML=parts.join(' ')+' <em>'+_e(last)+'</em>';}
+    else el.textContent=n;
+  }
+}
+
+function updateModelPill(){
+  const m=getCfg().model;
+  const info=document.getElementById('cfg-model-info');
+  if(info)info.textContent=_MODEL_INFO[m]||'Modèle sélectionné.';
+  const pill=document.querySelector('.cl-model-pill');
+  if(pill){
+    const labels={'llama-3.3-70b-versatile':'Llama 3.3 70B','llama-3.1-70b-versatile':'Llama 3.1 70B','llama3-70b-8192':'Llama 3 70B','mixtral-8x7b-32768':'Mixtral 8×7B','gemma2-9b-it':'Gemma 2 9B'};
+    pill.innerHTML='<div class="cl-model-dot"></div>'+(getCfg().platformName||'Green Lab')+' Assistant · '+(labels[m]||m);
+  }
+}
+
+function loadSettingsUI(){
+  const c=getCfg();
+  const set=(id,val)=>{const el=document.getElementById(id);if(!el)return;if(el.type==='checkbox')el.checked=!!val;else if(el.type==='range'){el.value=val;}else el.value=val||'';};
+  set('cfg-platformName',c.platformName);
+  set('cfg-etablissement',c.etablissement);
+  set('cfg-formateur',c.formateur);
+  set('cfg-formateurTitre',c.formateurTitre);
+  set('cfg-certifIntitule',c.certifIntitule);
+  set('cfg-model',c.model);
+  set('cfg-temperature',c.temperature);
+  const tv=document.getElementById('cfg-temp-val');if(tv)tv.textContent=parseFloat(c.temperature).toFixed(2);
+  set('cfg-defaultMode',c.defaultMode);
+  set('cfg-defaultNiveau',c.defaultNiveau);
+  set('cfg-defaultLang',c.defaultLang);
+  set('cfg-nbSections',c.nbSections);
+  const nv=document.getElementById('cfg-nbSec-val');if(nv)nv.textContent=c.nbSections+' sections';
+  set('cfg-quizCount',c.quizCount);
+  set('cfg-quizScoreMin',c.quizScoreMin);
+  set('cfg-quizTimer',c.quizTimer);
+  set('cfg-quizTimerMin',c.quizTimerMin);
+  const tr=document.getElementById('cfg-timer-row');if(tr)tr.style.display=c.quizTimer?'block':'none';
+  ['showRoadmap','showFormules','showCas','showExercices','showChecklist','showKpis','showImages'].forEach(k=>{set('cfg-'+k,c[k]);});
+  updateModelPill();
+}
+
+function exportConfig(){
+  const blob=new Blob([JSON.stringify(getCfg(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gls_config_'+new Date().toISOString().slice(0,10)+'.json';a.click();
+}
+
+function importConfig(file){
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{try{const c=JSON.parse(e.target.result);localStorage.setItem(_CFG_KEY,JSON.stringify({..._CFG_DEFAULTS,...c}));loadSettingsUI();applyPlatformName();showToast('Configuration importée avec succès.');}catch{showToast('Fichier invalide.','err');}};
+  r.readAsText(file);
+}
+
+/* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
 (function(){
@@ -2649,6 +2897,8 @@ function removeSecImage(modId,idx){
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;}
   const uk=localStorage.getItem('gls_unsplash');
   if(uk){const ui=document.getElementById('unsplashKeyInput');if(ui)ui.value=uk;}
+  loadSettingsUI();
+  applyPlatformName();
   updateSbMode();renderHome();renderForm();
 })();
 
@@ -2852,7 +3102,7 @@ async function sendChat(){
   try{
     const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
       headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages,max_tokens:1400,temperature:0.6})});
+      body:JSON.stringify({model:getCfg().model,messages,max_tokens:1400,temperature:getCfg().temperature})});
     const data=await resp.json();
     if(!resp.ok)throw new Error(data.error?.message||'Erreur API '+resp.status);
     const reply=data.choices?.[0]?.message?.content||'Désolé, une erreur est survenue.';
