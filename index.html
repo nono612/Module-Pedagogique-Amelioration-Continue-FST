@@ -582,6 +582,77 @@ textarea{resize:vertical;min-height:80px;}
 .amdec-num{width:44px;border:1px solid #e2e8f0;border-radius:6px;padding:.3rem;font-size:.78rem;font-weight:700;text-align:center;background:#fff;outline:none;}
 .amdec-num:focus{border-color:#dc2626;box-shadow:0 0 0 2px rgba(220,38,38,.12);}
 
+/* ── Mini-quiz par module ── */
+.mod-mq-wrap{background:linear-gradient(135deg,#fffbeb,#fef9ec);border:2px dashed #fbbf24;border-radius:11px;padding:.9rem 1.1rem;margin-top:.55rem;}
+.mod-mq-progress{font-size:.68rem;font-weight:700;color:#92400e;margin-bottom:.5rem;letter-spacing:.3px;}
+.mod-mq-q{font-size:.82rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;line-height:1.4;}
+.mod-mq-opt{display:flex;align-items:center;gap:.5rem;padding:.35rem .65rem;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.78rem;cursor:pointer;background:#fff;margin-bottom:.24rem;transition:all .12s;color:#374151;}
+.mod-mq-opt:hover{border-color:#fbbf24;background:#fffbeb;}
+.mod-mq-opt.mq-ok{background:#ecfdf5;border-color:#059669;color:#065f46;font-weight:700;pointer-events:none;}
+.mod-mq-opt.mq-ko{background:#fef2f2;border-color:#dc2626;color:#991b1b;pointer-events:none;}
+.mod-mq-expl{font-size:.72rem;color:#065f46;background:#ecfdf5;border-left:3px solid #059669;border-radius:0 7px 7px 0;padding:.35rem .6rem;margin-top:.4rem;}
+/* YouTube links */
+.mod-yt-grid{display:flex;flex-direction:column;gap:.4rem;margin-top:.6rem;}
+.mod-yt-link{display:flex;align-items:center;gap:.55rem;padding:.6rem 1rem;background:#fff5f5;border:1.5px solid #fecaca;border-radius:9px;color:#dc2626;font-size:.8rem;font-weight:600;text-decoration:none;transition:background .15s,color .15s,border-color .15s;line-height:1.3;}
+.mod-yt-link:hover{background:#dc2626;color:#fff;border-color:#dc2626;}
+/* Plan de révision — accueil */
+.idx-revplan-day{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:.55rem .9rem;margin-bottom:.45rem;}
+.idx-revplan-day-lbl{font-size:.7rem;font-weight:800;color:var(--accent);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.4px;}
+.idx-revplan-mods{display:flex;gap:.32rem;flex-wrap:wrap;}
+.idx-revplan-chip{background:var(--navy);color:#fff;border-radius:20px;padding:.15rem .65rem;font-size:.7rem;font-weight:700;cursor:pointer;transition:opacity .15s;border:none;}
+.idx-revplan-chip:hover{opacity:.82;}
+.idx-revplan-sel-btn{padding:.28rem .75rem;border-radius:20px;border:1.5px solid var(--gray200);background:#fff;font-size:.76rem;font-weight:700;cursor:pointer;color:var(--gray600);transition:all .15s;}
+.idx-revplan-sel-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+/* Replay erreurs quiz final */
+.idx-replay-banner{background:#fff7ed;border:2px solid #fdba74;border-radius:10px;padding:.55rem .85rem;margin-bottom:.7rem;font-size:.8rem;font-weight:700;color:#92400e;display:flex;align-items:center;gap:.5rem;}
+.idx-replay-q{background:#fff;border:1.5px solid var(--gray200);border-radius:12px;padding:1.1rem;margin-bottom:.9rem;transition:border .2s;}
+
+/* ─ Tuteur IA ─ */
+.idx-tuteur-wrap{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:2px solid #7dd3fc;border-radius:13px;padding:.9rem 1.1rem;margin-top:.55rem;}
+.idx-tuteur-hdr{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--gray400);display:flex;align-items:center;gap:.5rem;margin-bottom:.6rem;}
+.idx-tuteur-msgs{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem;}
+.idx-tuteur-msg{border-radius:10px;padding:.45rem .7rem;font-size:.8rem;line-height:1.55;max-width:88%;}
+.idx-tuteur-msg.user{background:var(--navy);color:#fff;align-self:flex-end;margin-left:auto;}
+.idx-tuteur-msg.ai{background:#fff;border:1.5px solid #bae6fd;color:#0c4a6e;align-self:flex-start;}
+.idx-tuteur-msg.thinking{background:#f1f5f9;border:1.5px dashed #94a3b8;color:#64748b;font-style:italic;align-self:flex-start;}
+.idx-tuteur-row{display:flex;gap:.4rem;}
+.idx-tuteur-input{flex:1;border:1.5px solid #93c5fd;border-radius:9px;padding:.38rem .65rem;font-size:.8rem;outline:none;transition:border .2s;}
+.idx-tuteur-input:focus{border-color:var(--navy);}
+.idx-tuteur-send{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:.38rem .85rem;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity .15s;}
+.idx-tuteur-send:hover{opacity:.85;}
+.idx-tuteur-send:disabled{opacity:.4;cursor:default;}
+.idx-tuteur-think{margin:.3rem 0 .1rem;border:1.5px solid #bae6fd;border-radius:9px;background:#f0f9ff;overflow:hidden;font-size:.75rem;}
+.idx-tuteur-think summary{padding:.3rem .6rem;cursor:pointer;color:#0369a1;font-weight:700;display:flex;align-items:center;gap:.35rem;list-style:none;user-select:none;}
+.idx-tuteur-think summary::-webkit-details-marker{display:none;}
+.idx-tuteur-think summary::before{content:'▶';font-size:.6rem;transition:transform .2s;display:inline-block;}
+.idx-tuteur-think[open] summary::before{transform:rotate(90deg);}
+.idx-tuteur-think-body{padding:.4rem .65rem .5rem;color:#0c4a6e;line-height:1.55;white-space:pre-wrap;border-top:1px solid #bae6fd;}
+
+/* ─ Correction réponse libre ─ */
+.idx-libre-wrap{background:linear-gradient(135deg,#fdf4ff,#fae8ff);border:2px dashed #c084fc;border-radius:13px;padding:.9rem 1.1rem;margin-top:.55rem;}
+.idx-libre-hdr{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--gray400);display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;}
+.idx-libre-q{font-size:.83rem;font-weight:700;color:#6b21a8;background:#fff;border:1.5px solid #e9d5ff;border-radius:9px;padding:.55rem .75rem;margin-bottom:.5rem;line-height:1.55;}
+.idx-libre-ta{width:100%;box-sizing:border-box;border:1.5px solid #d8b4fe;border-radius:9px;padding:.5rem .75rem;font-size:.8rem;font-family:inherit;resize:vertical;min-height:80px;outline:none;transition:border .2s;}
+.idx-libre-ta:focus{border-color:#7c3aed;}
+.idx-libre-btn{margin-top:.5rem;background:#7c3aed;color:#fff;border:none;border-radius:9px;padding:.4rem 1rem;font-size:.8rem;font-weight:700;cursor:pointer;transition:opacity .15s;}
+.idx-libre-btn:hover{opacity:.85;}
+.idx-libre-btn:disabled{opacity:.4;cursor:default;}
+.idx-libre-result{margin-top:.7rem;background:#fff;border:1.5px solid #e9d5ff;border-radius:10px;padding:.7rem .9rem;font-size:.8rem;line-height:1.6;color:#3b0764;}
+.idx-libre-score{font-size:1.1rem;font-weight:900;color:#7c3aed;margin-bottom:.3rem;}
+
+/* ─ Simplifier / Approfondir ─ */
+.idx-adapt-wrap{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:2px solid #86efac;border-radius:13px;padding:.9rem 1.1rem;margin-top:.55rem;}
+.idx-adapt-hdr{font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--gray400);display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;}
+.idx-adapt-desc{font-size:.78rem;color:#4b5563;margin-bottom:.55rem;}
+.idx-adapt-btns{display:flex;gap:.5rem;flex-wrap:wrap;}
+.idx-adapt-btn{border:none;border-radius:9px;padding:.4rem 1rem;font-size:.79rem;font-weight:700;cursor:pointer;transition:all .15s;}
+.idx-adapt-btn.simplif{background:#f59e0b;color:#fff;}
+.idx-adapt-btn.deepen{background:#0ea5e9;color:#fff;}
+.idx-adapt-btn:hover{filter:brightness(1.08);}
+.idx-adapt-btn:disabled{opacity:.4;cursor:default;}
+.idx-adapt-out{margin-top:.75rem;background:#fff;border:1.5px solid #bbf7d0;border-radius:10px;padding:.75rem .9rem;font-size:.8rem;line-height:1.65;color:#14532d;display:none;}
+.idx-adapt-out.active{display:block;}
+
 /* ─ Certificate ─ */
 .cert-wrap{
   background:linear-gradient(135deg,#0d1b2a 0%,#1a3a6e 50%,#1e3a8a 100%);
@@ -852,6 +923,21 @@ textarea{resize:vertical;min-height:80px;}
 .gl-ex-body{padding:1.1rem 1.2rem;}
 .gl-ex-ctx{display:flex;align-items:flex-start;gap:.55rem;background:#FAFAF9;border:1px solid var(--gl-border);border-radius:var(--gl-r-sm);padding:.7rem .9rem;margin-bottom:.85rem;font-size:.79rem;color:var(--gl-text-2);line-height:1.6;}
 .gl-ex-ctx svg{flex-shrink:0;margin-top:2px;color:var(--gl-text-3);}
+/* ── Agent IA panel ── */
+.idx-agent-panel{position:fixed;right:-420px;top:0;bottom:0;width:400px;max-width:93vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.16);z-index:820;display:flex;flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);}
+.idx-agent-panel.open{right:0;}
+.idx-agent-hdr{padding:.8rem 1rem;background:linear-gradient(135deg,#2d1b69,#4c1d95);color:#fff;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
+.idx-agent-msgs{flex:1;overflow-y:auto;padding:.7rem;display:flex;flex-direction:column;gap:.55rem;scroll-behavior:smooth;}
+.idx-amsg-user{background:#f5f3ff;border-radius:12px 12px 4px 12px;padding:.5rem .75rem;font-size:.79rem;color:#374151;align-self:flex-end;max-width:86%;line-height:1.55;}
+.idx-amsg-ai{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #c4b5fd;border-radius:4px 12px 12px 12px;padding:.55rem .8rem;font-size:.79rem;color:#1e293b;max-width:94%;line-height:1.65;}
+.idx-agent-inp-row{padding:.6rem .7rem;border-top:1px solid #e2e8f0;display:flex;gap:.4rem;flex-shrink:0;background:#fafafa;}
+.idx-agent-inp{flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:.45rem .65rem;font-size:.79rem;outline:none;resize:none;font-family:inherit;line-height:1.4;}
+.idx-agent-inp:focus{border-color:#7c3aed;}
+.idx-agent-sugg-chip{font-size:.7rem;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px;padding:.22rem .6rem;cursor:pointer;color:#4c1d95;white-space:nowrap;}
+.idx-agent-sugg-chip:hover{background:#ede9fe;border-color:#a78bfa;}
+.idx-agent-patch{margin:.4rem 0;background:#f0fdf4;border:1.5px solid #86efac;border-radius:9px;padding:.5rem .75rem;}
+.idx-agent-newsec{margin:.4rem 0;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:9px;padding:.5rem .75rem;}
+.idx-agent-apply-btn{font-size:.72rem;font-weight:700;border:none;border-radius:7px;padding:.28rem .7rem;cursor:pointer;margin-top:.3rem;}
 </style>
 </head>
 <body>
@@ -925,16 +1011,12 @@ textarea{resize:vertical;min-height:80px;}
     <img src="fst_logo.png" alt="FST Tanger" style="height:52px;width:auto;display:block;">
   </div>
   <div class="header-right">
-    <div class="api-field" style="position:relative;">
-      <span>Clé Groq</span>
-      <input type="password" id="apiKey" placeholder="gsk_..." oninput="saveKey()">
-      <a href="https://console.groq.com/keys" target="_blank" rel="noopener"
-         title="Obtenir une clé Groq gratuite"
-         style="color:rgba(245,158,11,.7);font-size:.72rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:.2rem;border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:.1rem .35rem;transition:all .2s;"
-         onmouseover="this.style.color='#f59e0b';this.style.borderColor='rgba(245,158,11,.7)'"
-         onmouseout="this.style.color='rgba(245,158,11,.7)';this.style.borderColor='rgba(245,158,11,.3)'">
-        ? Obtenir
-      </a>
+    <div class="api-field" style="position:relative;display:flex;flex-direction:column;gap:.15rem;">
+      <div style="display:flex;align-items:center;gap:.4rem;">
+        <span style="color:inherit;font-weight:700;font-size:.75rem;white-space:nowrap;">Clé API</span>
+        <input type="password" id="apiKey" placeholder="gsk_… / sk-… / sk-ant-… / AIza…" oninput="saveKey();_idxUpdateProviderBadge(this.value)" style="width:195px;">
+      </div>
+      <div id="idxProviderBadge" style="display:none;font-size:.62rem;font-weight:800;padding:.1rem .45rem;border-radius:12px;align-self:flex-start;"></div>
     </div>
     <div class="progress-pill" id="globalBadge">0 / 9 modules</div>
     <div id="adminBadge" style="display:none;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:.68rem;font-weight:800;padding:.28rem .7rem;border-radius:20px;letter-spacing:.5px;box-shadow:0 2px 10px rgba(124,58,237,.4);">🔑 ADMIN</div>
@@ -1094,6 +1176,23 @@ textarea{resize:vertical;min-height:80px;}
     <div style="font-size:1.1rem;font-weight:900;color:#fff;margin-bottom:.3rem;">Parcours complet !</div>
     <div style="font-size:.82rem;color:rgba(255,255,255,.85);margin-bottom:1rem;">Félicitations — Vous avez validé les 11 modules du parcours Amélioration Continue.</div>
     <button class="btn btn-gold btn-sm" onclick="openStudentReport()">📄 Télécharger mon rapport PDF</button>
+  </div>
+
+  <!-- Plan de révision personnalisé -->
+  <div style="background:#fff;border-radius:14px;padding:1.1rem 1.5rem;box-shadow:var(--shadow);margin-bottom:1.5rem;border:1px solid var(--gray200);">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.75rem;">
+      <div>
+        <div style="font-weight:800;font-size:.85rem;color:#374151;">🗓️ Plan de révision personnalisé</div>
+        <div style="font-size:.74rem;color:#6b7280;margin-top:.15rem;">Répartissez les 11 modules sur plusieurs jours pour ancrer vos apprentissages durablement.</div>
+      </div>
+      <div id="idxRevplanSel" style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        <button class="idx-revplan-sel-btn" onclick="genIndexRevPlan(3,this)">3 j</button>
+        <button class="idx-revplan-sel-btn active" onclick="genIndexRevPlan(7,this)">7 j</button>
+        <button class="idx-revplan-sel-btn" onclick="genIndexRevPlan(14,this)">14 j</button>
+        <button class="idx-revplan-sel-btn" onclick="genIndexRevPlan(30,this)">30 j</button>
+      </div>
+    </div>
+    <div id="idxRevplanContent"></div>
   </div>
 
   <!-- Mode Révision feedbacks IA -->
@@ -2156,7 +2255,7 @@ async function _onAuthSuccess(user,forcedName,isNewReg=false){
   if(profile?.cv_domain)state.domain=profile.cv_domain;
   if(profile?.api_key){
     const kf=document.getElementById('apiKey');if(kf)kf.value=profile.api_key;
-    sessionStorage.setItem('ac_groq_key',profile.api_key);
+    localStorage.setItem('ac_grok_key',profile.api_key);
   }
   // Charge la progression cloud
   await _sbPullState(displayName);
@@ -2346,15 +2445,15 @@ function copySessionCode(){
 function saveKey(){
   const v=document.getElementById('apiKey')?.value||'';
   if(!v.trim())return;
-  sessionStorage.setItem('ac_groq_key',v.trim());
-  // Persiste dans le profil Supabase (si connecté)
+  localStorage.setItem('ac_grok_key',v.trim());
+  _idxUpdateProviderBadge(v.trim());
   if(_currentUser){
     _sb.from('profiles').upsert({user_id:_currentUser.id,api_key:v.trim()},{onConflict:'user_id'});
   }
 }
 function getKey(){
   const el=document.getElementById('apiKey');
-  return (el&&el.value.trim())||'';
+  return (el&&el.value.trim())||localStorage.getItem('ac_grok_key')||'';
 }
 
 /* ── Empty state card pour modules M2-M10 ── */
@@ -2392,7 +2491,7 @@ function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
   if(v.trim()){
-    sessionStorage.setItem('ac_groq_key',v.trim());
+    localStorage.setItem('ac_grok_key',v.trim());
     if(_currentUser)_sb.from('profiles').upsert({user_id:_currentUser.id,api_key:v.trim()},{onConflict:'user_id'});
   }
   const keyStep=document.getElementById('cvKeyStep');
@@ -2448,6 +2547,7 @@ function goModule(n){
   if(n>=1&&n<=10){_refreshExBadge(n);_showExValidateBtn(n);}
   if(n>=2&&n<=10)_initExEmptyState(n);
   if(n===2)_refreshM2Badge();
+  _injectModuleFeatures(n);
 }
 function updateNav(){
   const _cvActive=state.cvFilter&&state.cvRecoIds&&state.cvRecoIds.length>0;
@@ -2489,8 +2589,8 @@ function cvApplyParcours(){state.cvFilter=true;state.cvRecoIds=(state.cvReco||[]
 function cvClearFilter(){state.cvFilter=false;state.cvRecoIds=[];save();renderGrid();updateNav();}
 
 async function generateAIParcours(){
-  const key=(document.getElementById('apiKey')?.value||'').trim()||sessionStorage.getItem('ac_groq_key')||'';
-  if(!key){alert('Entrez votre clé API Groq en haut du site d\'abord.');return;}
+  const key=(document.getElementById('apiKey')?.value||'').trim()||localStorage.getItem('ac_grok_key')||'';
+  if(!key){alert('Entrez votre clé API Grok en haut du site d\'abord.');return;}
   const panel=document.getElementById('aiParcoursResult');
   const btnRegen=document.getElementById('btnRegenParcours');
   if(panel){panel.style.display='block';panel.innerHTML='<div class="ai-wrap" style="margin:0;"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse de votre profil en cours…</div></div>';}
@@ -2530,9 +2630,7 @@ Réponds UNIQUEMENT en JSON strict sans aucun texte avant ou après :
 
 RÈGLE ABSOLUE : utilise uniquement les IDs et titres de la liste ci-dessus. Les IDs standards sont des nombres (1,2,3...), les IDs des modules personnalisés sont des chaînes ("c0","c1"...). Ne jamais inventer de modules.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1200,temperature:0.7})});
-    const data=await resp.json();
-    const raw=data.choices?.[0]?.message?.content||'';
+    const raw=await _geminiRaw(key,prompt,1200,0.7);
     const jsonMatch=raw.match(/\{[\s\S]*\}/);
     if(!jsonMatch)throw new Error('Réponse IA invalide');
     const result=JSON.parse(jsonMatch[0]);
@@ -2779,27 +2877,95 @@ function formatAIText(text){
   );
 }
 
-/* ── AI Call ── */
-async function callGroq(prompt,elId,maxTokens=1024){
+/* ── AI Call (Grok / xAI) ── */
+/* ══════════════════════════════════════════════
+   MULTI-PROVIDER — Groq · OpenAI · Anthropic · Google AI
+══════════════════════════════════════════════ */
+function _idxDetectProvider(key){
+  if(!key)return null;
+  if(key.startsWith('gsk_'))return'groq';
+  if(key.startsWith('sk-ant-'))return'anthropic';
+  if(key.startsWith('AIza'))return'google';
+  if(key.startsWith('sk-'))return'openai';
+  return null;
+}
+const _IDX_PROVIDER_INFO={
+  groq:  {label:'⚡ Groq · Llama', color:'#f59e0b', model:'llama-3.3-70b-versatile'},
+  openai:{label:'🟢 OpenAI · GPT',  color:'#10b981', model:'gpt-4o-mini'},
+  anthropic:{label:'🟣 Anthropic · Claude',color:'#7c3aed',model:'claude-haiku-4-5-20251001'},
+  google:{label:'🔵 Google · Gemini',color:'#3b82f6',model:'gemini-2.0-flash'},
+};
+
+async function _idxCallOAICompat(endpoint,key,sys,usr,maxTok,temp,model){
+  const msgs=[];
+  if(sys)msgs.push({role:'system',content:sys});
+  msgs.push({role:'user',content:usr});
+  const r=await fetch(endpoint,{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model,messages:msgs,max_tokens:maxTok||1024,temperature:temp!==undefined?temp:0.7})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
+  return d.choices?.[0]?.message?.content||'';
+}
+
+async function _idxCallAnthropic(key,sys,usr,maxTok,temp){
+  const body={model:'claude-haiku-4-5-20251001',max_tokens:maxTok||1024,messages:[{role:'user',content:usr}]};
+  if(sys)body.system=sys;
+  if(temp!==undefined)body.temperature=Math.min(temp,1.0);
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify(body)});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Erreur Anthropic '+r.status);
+  return d.content?.[0]?.text||'';
+}
+
+async function _idxCallGoogle(key,sys,usr,maxTok){
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+  const prompt=sys?`${sys}\n\n${usr}`:usr;
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok||1024}})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Erreur Google AI '+r.status);
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
+
+async function _geminiRaw(key,prompt,maxTokens,temp,sys){
+  const provider=_idxDetectProvider(key);
+  if(!provider)throw new Error('Clé non reconnue. Formats : gsk_… (Groq), sk-… (OpenAI), sk-ant-… (Anthropic), AIza… (Google AI).');
+  const info=_IDX_PROVIDER_INFO[provider];
+  switch(provider){
+    case'groq':   return _idxCallOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,prompt,maxTokens,temp,info.model);
+    case'openai': return _idxCallOAICompat('https://api.openai.com/v1/chat/completions',key,sys,prompt,maxTokens,temp,info.model);
+    case'anthropic': return _idxCallAnthropic(key,sys,prompt,maxTokens,temp);
+    case'google':    return _idxCallGoogle(key,sys,prompt,maxTokens);
+  }
+}
+
+function _idxUpdateProviderBadge(key){
+  const badge=document.getElementById('idxProviderBadge');if(!badge)return;
+  const provider=_idxDetectProvider(key);
+  if(!provider){badge.style.display='none';return;}
+  const info=_IDX_PROVIDER_INFO[provider];
+  badge.textContent=info.label+' ✓';
+  badge.style.cssText=`display:inline-block;font-size:.62rem;font-weight:800;padding:.1rem .45rem;border-radius:12px;background:${info.color}22;color:${info.color};border:1.5px solid ${info.color}55;`;
+}
+
+async function callGeminiAI(prompt,elId,maxTokens=1024,sys=''){
   const key=getKey();
   const el=document.getElementById(elId);
-  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API Groq requise.</div>';return null;}
+  if(!el)return null;
+  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API requise — entrez-la en haut de la page (Groq, OpenAI, Anthropic ou Google AI).</div>';return null;}
+  if(!_idxDetectProvider(key)){el.innerHTML='<div class="alert alert-danger">⚠️ Clé non reconnue — formats : gsk_… (Groq) · sk-… (OpenAI) · sk-ant-… (Anthropic) · AIza… (Google AI).</div>';return null;}
   el.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse en cours...</div><div class="ai-loading-text">L\'IA traite votre demande...</div></div>';
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:maxTokens})
-    });
-    if(!resp.ok){const e=await resp.json();el.innerHTML=`<div class="alert alert-danger">Erreur API : ${e.error?.message||resp.statusText}</div>`;return null;}
-    const data=await resp.json();
-    const text=data.choices[0].message.content;
+    const text=await _geminiRaw(key,prompt,maxTokens,0.7,sys||undefined);
     el.innerHTML=`<div class="ai-wrap"><div class="ai-wrap-header">🤖 Analyse de l'IA</div>${formatAIText(text)}</div>`;
     return text;
-  }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur réseau : ${e.message}</div>`;return null;}
+  }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur : ${e.message}</div>`;return null;}
 }
-async function callClaude(prompt,elId){return callGroq(prompt,elId);}
-async function callGemini(prompt,elId){return callGroq(prompt,elId);}
+async function callClaude(prompt,elId){return callGeminiAI(prompt,elId);}
+async function callGemini(prompt,elId){return callGeminiAI(prompt,elId);}
 
 /* ══ M1 – PDCA ══ */
 const PDCA_FALLBACKS=[
@@ -2848,9 +3014,8 @@ function generatePDCAProblem(){
   }
   const _pdcaSeed=Math.floor(Math.random()*99999);
   const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\n[Variation #${_pdcaSeed} — entreprise fictive ORIGINALE, problème DIFFÉRENT des précédents.]\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`+_buildDocsPromptSection(1);
-  fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:1.0})})
-  .then(r=>r.json()).then(data=>{
-    const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
+  _geminiRaw(key,prompt,600,1.0).then(raw=>{
+    const m=raw.match(/\{[\s\S]*\}/);
     if(!m)throw new Error();
     const prob=JSON.parse(m[0]);
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
@@ -2962,10 +3127,8 @@ async function evaluatePDCA(){
   el.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Évaluation en cours...</div><div class="ai-loading-text">L\'IA analyse vos réponses quadrant par quadrant...</div></div>';
   const prompt=`Tu es formateur expert Lean Six Sigma. Évalue STRICTEMENT les réponses PDCA de cet étudiant.\n\nPROBLÈME: ${prob.probleme}\nOBJECTIF: ${prob.objectif}\nCONTRAINTES: ${prob.contraintes}\n\nRÉPONSES:\nPLAN – Objectif: "${p.plan1||'[Vide]'}"\nPLAN – Actions: "${p.plan2||'[Vide]'}"\nDO – Actions: "${p.do1||'[Vide]'}"\nDO – Ressources: "${p.do2||'[Vide]'}"\nCHECK – Résultats: "${p.check1||'[Vide]'}"\nCHECK – KPIs: "${p.check2||'[Vide]'}"\nACT – Standardisation: "${p.act1||'[Vide]'}"\nACT – Prochain cycle: "${p.act2||'[Vide]'}"\n\nRéponds UNIQUEMENT en JSON valide:\n{"plan":{"score":0-100,"avis":"feedback 1 phrase"},"do":{"score":0-100,"avis":"feedback 1 phrase"},"check":{"score":0-100,"avis":"feedback 1 phrase"},"act":{"score":0-100,"avis":"feedback 1 phrase"},"total":0-100}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:500})});
-    if(!resp.ok){const e=await resp.json();el.innerHTML=`<div class="alert alert-danger">Erreur API : ${e.error?.message||resp.statusText}</div>`;return;}
-    const data=await resp.json();
-    const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
+    const raw=await _geminiRaw(key,prompt,500);
+    const m=raw.match(/\{[\s\S]*\}/);
     if(!m)throw new Error('JSON not found');
     const r=JSON.parse(m[0]);
     state.scores[1]=r.total;save();
@@ -3087,10 +3250,7 @@ Réponds UNIQUEMENT avec ce JSON (aucun texte avant ou après) :
 {"plan1":X,"plan2":X,"do1":X,"do2":X,"check1":X,"check2":X,"act1":X,"act2":X}
 où X est le score numérique entre 0 et le max de chaque champ.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:120,temperature:0.1})});
-    if(!resp.ok)return scorePDCA();
-    const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=await _geminiRaw(key,prompt,120,0.1);
     const m=text.match(/\{[\s\S]*?\}/);
     if(!m)return scorePDCA();
     const sc=JSON.parse(m[0]);
@@ -3119,8 +3279,7 @@ Contraintes : ${prob.contraintes}
 Génère des réponses modèles pour les 8 champs PDCA. JSON uniquement :
 {"plan1":"Objectif SMART complet avec métriques et délai","plan2":"Plan d'action détaillé semaine par semaine","do1":"Actions concrètes réalisées avec précisions","do2":"Ressources mobilisées (budget, équipes, outils)","check1":"Résultats mesurés avec chiffres avant/après","check2":"KPIs suivis et valeurs mesurées","act1":"Standardisation des améliorations (procédures, formation)","act2":"Prochain cycle PDCA et nouvel objectif"}`;
     try{
-      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:900,temperature:0.3})});
-      const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+      const text=await _geminiRaw(key,prompt,900,0.3);
       const mm=text.match(/\{[\s\S]*\}/);
       if(!mm)throw new Error();
       prob.correction=JSON.parse(mm[0]);
@@ -3641,8 +3800,7 @@ async function aiIshikawa(){
   const _sec5M=state.domain?state.domain.secteur:'industriel';
   const prompt=`Pour le problème: "${effect}" dans un contexte ${_sec5M}, suggère 3 causes par catégorie 5M adaptées à ce secteur. JSON strict uniquement: {"Matière":["...","...","..."],"Méthode":[...],"Main-d'œuvre":[...],"Machines":[...],"Milieu":[...]}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:800})});
-    const data=await resp.json();const text=data.choices[0].message.content;
+    const text=await _geminiRaw(key,prompt,800);
     const m=text.match(/\{[\s\S]*\}/);
     if(m){
       const sug=JSON.parse(m[0]);
@@ -3722,10 +3880,7 @@ Réponds UNIQUEMENT avec ce JSON :
 {"effet":X,"causes_score":X,"racines":X}
 où causes_score est entre 0 et 55, effet entre 0 et 15, racines entre 0 et 15.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:80,temperature:0.1})});
-    if(!resp.ok)return scoreIshikawa();
-    const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=await _geminiRaw(key,prompt,80,0.1);
     const m=text.match(/\{[\s\S]*?\}/);
     if(!m)return scoreIshikawa();
     const sc=JSON.parse(m[0]);
@@ -4718,14 +4873,7 @@ async function generateModuleExercise(modId){
   prompt+=`\n[Variation #${_seed} — génère un scénario ORIGINAL, entreprise et secteur différents des exercices précédents.]`;
   prompt+=_buildDocsPromptSection(modId);
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:750,temperature:1.0})
-    });
-    const rdata=await resp.json();
-    if(!resp.ok)throw new Error(rdata.error?.message||'Erreur API '+resp.status);
-    const text=rdata.choices[0].message.content;
+    const text=await _geminiRaw(key,prompt,750,1.0);
     const mm=text.match(/\{[\s\S]*\}/);
     if(!mm)throw new Error('Réponse IA invalide — pas de JSON');
     const ex=JSON.parse(mm[0]);
@@ -4780,9 +4928,7 @@ Calcule mentalement :
 
 Réponds UNIQUEMENT avec un entier (minutes totales). Rien d'autre.`;
   try{
-    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:8,temperature:0.1})});
-    const d=await r.json();
-    const raw=d.choices?.[0]?.message?.content?.trim()||'';
+    const raw=(await _geminiRaw(key,prompt,8,0.1)).trim();
     const parsed=parseInt(raw.match(/\d+/)?.[0]);
     if(parsed>0)return Math.max(2,Math.min(35,parsed));
   }catch(_){}
@@ -4903,8 +5049,7 @@ async function generateQuiz(){
   const _quizSeed=Math.floor(Math.random()*99999);
   const prompt=`Génère 10 questions QCM en français sur Lean/Six Sigma/PDCA/5S/Ishikawa/Pareto/Kanban/VSM/SPC/SMED pour ingénieurs.${domainHintQuiz} [Variation #${_quizSeed} — questions ORIGINALES, différentes des sessions précédentes.] JSON uniquement:\n[{"q":"?","opts":["A","B","C","D"],"correct":0},...]\n10 questions exactes, index correct 0-based.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500,temperature:1.0})});
-    const data=await resp.json();const text=data.choices[0].message.content;
+    const text=await _geminiRaw(key,prompt,1500,1.0);
     const m=text.match(/\[[\s\S]*\]/);
     quizData=m?JSON.parse(m[0]):FALLBACK;
   }catch(e){quizData=FALLBACK;}
@@ -4934,6 +5079,7 @@ function pickQ(qi,oi){
 function submitQuiz(){
   stopExTimer();
   let ok=0;
+  _wrongQI=[];
   quizData.forEach((q,qi)=>{
     const ans=quizAnswers[qi];
     q.opts.forEach((_,oi)=>{
@@ -4942,14 +5088,17 @@ function submitQuiz(){
       else if(ans===oi)el.classList.add('wrong');
     });
     if(ans===q.correct)ok++;
+    else _wrongQI.push(qi);
   });
   const pct=Math.round(ok/quizData.length*100),pass=pct>=getThreshold(11);
+  const replayBtn=_wrongQI.length?`<button class="btn btn-sm" style="background:#f59e0b;color:#fff;font-weight:800;margin-top:.5rem;" onclick="replayWrongQuiz()">🎯 Revoir mes ${_wrongQI.length} erreur(s)</button>`:'';
   document.getElementById('quizScore').innerHTML=`
     <div style="text-align:center;padding:2rem;">
       <div class="quiz-score-big">${pct}%</div>
       <div style="font-size:1.1rem;font-weight:800;color:${pass?'var(--green)':'var(--red)'};margin:.6rem 0;">${pass?'🎉 Félicitations ! Parcours validé !':`❌ Score insuffisant – ${getThreshold(11)}% requis`}</div>
-      <div style="color:var(--gray400);font-size:.88rem;margin-bottom:1.4rem;">${ok} / ${quizData.length} bonnes réponses</div>
+      <div style="color:var(--gray400);font-size:.88rem;margin-bottom:1rem;">${ok} / ${quizData.length} bonnes réponses</div>
       <button class="btn btn-gold" onclick="generateQuiz()" style="font-size:.92rem;padding:.6rem 1.6rem;">🔄 Générer un nouveau quiz (10 nouvelles questions)</button>
+      ${replayBtn}
     </div>`;
   state.scores[11]=pct;
   if(pass&&!state.completed.includes(11))state.completed.push(11);
@@ -5023,7 +5172,7 @@ async function generateAmdecExercise(){
   stopExTimer();
   const btn=document.getElementById('genExBtnM9');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const ctx=document.getElementById('amdecExContext');if(ctx)ctx.innerHTML='<div class="ai-loading">🤖 Génération d\'un contexte industriel…</div>';
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||localStorage.getItem('ac_grok_key')||'';
   if(!key){if(ctx)ctx.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer un exercice.</div>';if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}return;}
   const lv=getExLevel(9);
   const lvDescs=[
@@ -5034,9 +5183,7 @@ async function generateAmdecExercise(){
   const _amdecSeed=Math.floor(Math.random()*99999);
   const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction. [Variation #${_amdecSeed} — scénario ORIGINAL, entreprise et secteur différents des précédents.]`+_buildDocsPromptSection(9);
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:1.0})});
-    const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'';
+    const txt=await _geminiRaw(key,prompt,400,1.0);
     const lv=getExLevel(9);
     if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.4rem;">${lv.stars} Exercice niveau ${lv.label}</div>${formatAIText(txt)}</div>`;
     amdecRows=[];renderAmdecTable();
@@ -5048,7 +5195,7 @@ async function generateAmdecExercise(){
   if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
 }
 async function analyzeAmdec(){
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||localStorage.getItem('ac_grok_key')||'';
   const el=document.getElementById('amdecAI');if(el)el.innerHTML='<div class="ai-loading">🤖 Analyse AMDEC en cours…</div>';
   if(!key){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const filled=amdecRows.filter(r=>r.g&&r.o&&r.d);
@@ -5093,9 +5240,7 @@ Feedback expert structuré en FRANÇAIS :
 — Lien avec le PDCA : IPR critique → Plan d'action PDCA
 — Score estimé /100`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:.5})});
-    const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'Pas de réponse.';
+    const txt=(await _geminiRaw(key,prompt,600,.5))||'Pas de réponse.';
     if(el)el.innerHTML=`<div class="ai-feedback">${formatAIText(txt)}</div>`;
   }catch(e){if(el)el.innerHTML='<div class="alert alert-warning">Erreur IA.</div>';}
 }
@@ -5117,16 +5262,14 @@ function generateCapstoneProblem(){generateModuleExercise(10);}
 async function _generateCapstoneProblemLegacy(){
   const btn=document.querySelector('#m10 .btn-primary');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const statusEl=document.getElementById('capstoneGenStatus');if(statusEl)statusEl.textContent='';
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||localStorage.getItem('ac_grok_key')||'';
   if(!key){if(statusEl)statusEl.innerHTML='<span style="color:#dc2626;font-size:.78rem;">⚠️ Clé API requise</span>';if(btn){btn.disabled=false;btn.textContent='🤖 Générer un cas industriel';}return;}
   const sectors=['automobile','aéronautique','agroalimentaire','pharmaceutique','textile','logistique','sidérurgie'];
   const sector=sectors[Math.floor(Math.random()*sectors.length)];
   const prompt=`Génère un cas industriel complexe multi-problèmes pour un projet de synthèse Lean en génie industriel, secteur ${sector}. Décris une situation réelle avec 3-4 problèmes imbriqués (ex: taux de rebuts élevé + pannes machines + retards livraison + surstock). Sois très précis avec des chiffres réels (%, heures, nombre de pièces). Le cas doit nécessiter au moins 3-4 outils Lean différents. Format : paragraphe narratif de 6-8 phrases, concret et technique. Pas d'introduction, commence directement par la description.`;
   const pc=document.getElementById('capstoneProblemCard'),pt=document.getElementById('capstoneProblemText'),tc=document.getElementById('capstoneToolsCard'),jc=document.getElementById('capstoneJustifCard');
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:500,temperature:.8})});
-    const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'';
+    const txt=await _geminiRaw(key,prompt,500,.8);
     if(pt)pt.innerHTML=formatAIText(txt);
     if(pc)pc.style.display='block';
     if(tc)tc.style.display='block';
@@ -5154,7 +5297,7 @@ function updateCapstoneScore(){
   </div>`;
 }
 async function analyzeCapstone(){
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||localStorage.getItem('ac_grok_key')||'';
   const el=document.getElementById('capstoneAI');if(el)el.innerHTML='<div class="ai-loading">🤖 Évaluation du projet…</div>';
   if(!key){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const tools=[...document.querySelectorAll('#capstoneToolGrid input[type=checkbox]:checked')].map(cb=>cb.closest('label').textContent.trim()).join(', ');
@@ -5199,9 +5342,7 @@ RÈGLE ABSOLUE : Si la justification est du charabia ou hors-sujet → signale a
 — KPIs à suivre pour mesurer l'efficacité de ce plan Lean
 — Score estimé /100`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:.5})});
-    const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'Pas de réponse.';
+    const txt=(await _geminiRaw(key,prompt,700,.5))||'Pas de réponse.';
     if(el)el.innerHTML=`<div class="ai-feedback">${formatAIText(txt)}</div>`;
   }catch(e){if(el)el.innerHTML='<div class="alert alert-warning">Erreur IA.</div>';}
 }
@@ -5255,10 +5396,7 @@ Réponds UNIQUEMENT avec ce JSON :
 {"justif":X,"plan":X}
 où X est le score entre 0 et le maximum indiqué.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:80,temperature:0.1})});
-    if(!resp.ok)return scoreCapstone();
-    const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=await _geminiRaw(key,prompt,80,0.1);
     const m=text.match(/\{[\s\S]*?\}/);
     if(!m)return scoreCapstone();
     const sc=JSON.parse(m[0]);
@@ -5700,15 +5838,7 @@ Réponds UNIQUEMENT avec ce JSON, sans aucun texte avant ou après :
 
 CV :
 ${txt.slice(0,4000)}`;
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:300})});
-    const data=await resp.json();
-    if(!resp.ok){
-      const msg=data.error?.message||`Erreur API ${resp.status}`;
-      if(resp.status===401)throw new Error('Clé API invalide — vérifiez votre clé sur console.groq.com');
-      if(resp.status===429)throw new Error('Quota dépassé — attendez quelques secondes et réessayez');
-      throw new Error(msg);
-    }
-    const content=(data.choices?.[0]?.message?.content||'');
+    const content=await _geminiRaw(key,prompt,300);
     console.log('[CV IA] Réponse brute :', content);
     // Extraire le JSON même s'il est entouré de ```json ... ```
     const mm=content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)||content.match(/(\{[\s\S]*?\})/s);
@@ -5758,9 +5888,7 @@ async function genererRecommandationCV(){
   const actifNames=MODULES.filter(m=>isModuleActive(m.id)).map(m=>`M${m.id}: ${m.name}`).join(', ');
   const prompt=`Tu es un conseiller pédagogique Lean/Six Sigma. Voici le profil d'un étudiant :\n- Poste : ${state.domain.poste||'ingénieur'}\n- Entreprise : ${state.domain.entreprise||'industrie'}\n- Secteur : ${state.domain.secteur||'industrie'}\n- Contexte : ${state.domain.contexte||''}\n\nModules disponibles : ${actifNames}\n\nRecommande 7 modules prioritaires pour CE profil. JSON uniquement : [{"id":1,"justification":"une phrase"},...] (exactement 7 items, id = numéro du module parmi ceux disponibles)`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700})});
-    const data=await resp.json();
-    const text=data.choices[0].message.content;
+    const text=await _geminiRaw(key,prompt,700);
     const m=text.match(/\[[\s\S]*\]/);
     return m?JSON.parse(m[0]):null;
   }catch(e){return null;}
@@ -5921,10 +6049,7 @@ Réponds UNIQUEMENT avec un JSON valide (aucun texte avant ou après) :
 
 Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri, seiton, seiso, seiketsu, shitsuke. Minimum 3 items par catégorie. Les zones doivent être parmi : usinage, stockage, controle, allee, bureau, vestiaire.`+_buildDocsPromptSection(2);
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:1.0})});
-    if(!resp.ok)throw new Error((await resp.json()).error?.message||resp.statusText);
-    const data=await resp.json();
-    const raw=data.choices[0].message.content;
+    const raw=await _geminiRaw(key,prompt,2600,1.0);
     const jm=raw.match(/\{[\s\S]*\}/);if(!jm)throw new Error('JSON non trouvé');
     const ex=JSON.parse(jm[0]);
     if(!ex.items||ex.items.length<12)throw new Error('Données incomplètes');
@@ -6388,8 +6513,8 @@ function updateMudaScore(){
 window.addEventListener('DOMContentLoaded',()=>{
   updateNav();loadPDCA();initPareto();renderParetoRows();
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
-  const savedKey=sessionStorage.getItem('ac_groq_key');
-  if(savedKey){const kf=document.getElementById('apiKey');if(kf)kf.value=savedKey;const cf=document.getElementById('cvApiKey');if(cf)cf.value=savedKey;}
+  const savedKey=localStorage.getItem('ac_grok_key');
+  if(savedKey){const kf=document.getElementById('apiKey');if(kf)kf.value=savedKey;const cf=document.getElementById('cvApiKey');if(cf)cf.value=savedKey;_idxUpdateProviderBadge(savedKey);}
   // CV modal setup
   const inp=document.getElementById('cvFileInput');
   const drop=document.getElementById('cvDropZone');
@@ -6415,6 +6540,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Init révision badge count
   const rb=document.getElementById('revisionBadge');
   if(rb)rb.textContent=Object.keys(state.feedbacks||{}).length;
+  genIndexRevPlan(7,document.querySelector('.idx-revplan-sel-btn.active'));
 });
 
 /* ══════════════════════════════════════════
@@ -6553,7 +6679,7 @@ async function generateRemediationCourse(n,score,minScore){
   body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem 1rem;color:#6b7280;"><div class="ai-spinner"></div><span style="font-size:.88rem;">Génération de votre cours personnalisé en cours…</span></div>`;
   const key=getKey();
   if(!key){
-    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Groq requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
+    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Google AI requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
     return;
   }
   const ctx=_REM_CTX[n]||{concepts:modName,pitfalls:'Erreurs communes',formulas:'',example:'Cas industriel',tools:'Outils associés'};
@@ -6636,10 +6762,7 @@ Un problème complexe avec données partielles ou contradictoires, nécessitant 
   };
 
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:sections[niveau]}],max_tokens:2000,temperature:0.4})});
-    if(!resp.ok){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">Erreur API ('+resp.status+'). Vérifiez votre clé API.</div>';return;}
-    const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=await _geminiRaw(key,sections[niveau],2000,0.4);
     body.innerHTML=_renderRemCourse(text,modName,score,minScore,niveau,color,n);
   }catch(e){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">Erreur réseau. Vérifiez votre connexion et réessayez.</div>';}
 }
@@ -6742,13 +6865,27 @@ async function generateCustomModule(){
   const prev=document.getElementById('genPreview');
   const msg=document.getElementById('admGenMsg');
   if(!title||!rawDesc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et les objectifs pédagogiques.</span>';return;}
-  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
+  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Google AI requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
-  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module complet en cours — théorie, quiz, cas industriel…</div></div>';
+  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>🔍 Analyse du domaine…</div></div>';
   const sysPrompt=`Tu es un expert formateur en Génie Industriel, Lean Manufacturing et Excellence Opérationnelle. Tu crées des modules pédagogiques professionnels de niveau universitaire. Réponds UNIQUEMENT en JSON valide, sans markdown ni texte autour.`;
+
+  // Passe 1 : collecte des données terrain spécifiques au domaine
+  let _idxTerrainCtx='';
+  try{
+    const _tdRaw=await _geminiRaw(key,
+      `Pour un module sur "${title}" (secteur: ${sector}, niveau: ${level}), identifie précisément :\n{"valeurs_cles":["5-7 valeurs numériques typiques avec unités propres à ce domaine"],"normes":["3-4 normes/standards réels applicables"],"erreurs_frequentes":["4-5 erreurs concrètes des débutants dans ce domaine"],"termes_cles":["8-10 termes techniques propres à ce sujet"]}`,
+      600,0.3,sysPrompt);
+    const _td=JSON.parse(_tdRaw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim());
+    if(_td) _idxTerrainCtx=`\n\nDONNÉES TERRAIN PRÉ-COLLECTÉES — à intégrer obligatoirement dans chaque section :\n- Valeurs numériques : ${(_td.valeurs_cles||[]).join(' | ')}\n- Normes/standards : ${(_td.normes||[]).join(', ')}\n- Erreurs fréquentes : ${(_td.erreurs_frequentes||[]).join(' | ')}\n- Termes clés : ${(_td.termes_cles||[]).join(', ')}`;
+  }catch(_){}
+  if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module complet en cours — contenu enrichi, quiz, cas industriel…</div></div>';
+
   const userPrompt=`Crée un MODULE PÉDAGOGIQUE COMPLET et PROFESSIONNEL sur : "${title}"
 Secteur : ${sector} | Type : ${modType} | Niveau : ${level} | Durée : ${dur||'~45 min'}
-Objectifs : ${desc}${prereq?'\nPrérequis : '+prereq:''}
+Objectifs : ${desc}${prereq?'\nPrérequis : '+prereq:''}${_idxTerrainCtx}
+
+CONTRAINTES OBLIGATOIRES dans chaque section : (A) au moins 5 valeurs numériques avec unités ; (B) au moins 2 normes/standards applicables ; (C) au moins 1 erreur terrain réelle avec mécanisme et conséquence.
 
 STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai contenu — NE PAS laisser de descriptions) :
 {
@@ -6779,19 +6916,23 @@ STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai conte
   "sections": [
     {
       "titre": "📘 Fondamentaux — ${title}",
-      "contenu": "RÉDIGE ICI 500 MOTS MINIMUM de contenu pédagogique riche : définitions précises, historique, principes fondamentaux, normes et standards industriels (ISO, IATF, etc.), données chiffrées issues de l'industrie réelle, exemples concrets du secteur ${sector}. Structure avec des sous-titres émojis. Style : cours universitaire de niveau ${level}."
+      "contenu": "RÉDIGE ICI 800 MOTS MINIMUM de contenu pédagogique riche : définitions précises avec étymologie si pertinent, historique et contexte d'émergence, principes fondamentaux avec le POURQUOI physique/organisationnel derrière chaque concept, normes et standards industriels (ISO, IATF, etc.) avec leurs exigences concrètes, au moins 5 données chiffrées issues de l'industrie réelle, exemples concrets du secteur ${sector}. Structure avec des sous-titres émojis. Dans chaque paragraphe, entoure de **...** les 2-3 éléments clés (valeur chiffrée, terme technique, norme). Style : cours universitaire de niveau ${level}.",
+      "intuition_expert": ["Ce que les experts comprennent instinctivement et que les manuels n'écrivent pas — pattern implicite ou lien non évident (2 phrases)", "Connexion entre ce concept et un phénomène observable dans la réalité industrielle (2 phrases)", "Pourquoi ce principe fonctionne : l'explication profonde derrière le résultat (2 phrases)"]
     },
     {
       "titre": "⚙️ Méthodologie et outils pratiques",
-      "contenu": "RÉDIGE ICI 500 MOTS MINIMUM : démarche étape par étape numérotée (1 à 8 étapes minimum), description détaillée de chaque étape, outils associés (avec leur usage exact), indicateurs KPI avec valeurs cibles industrielles typiques, méthodes de calcul avec formules, matrice de décision si pertinent. Style : guide pratique d'ingénieur."
+      "contenu": "RÉDIGE ICI 800 MOTS MINIMUM : démarche étape par étape numérotée (1 à 10 étapes minimum), description détaillée de chaque étape avec le POURQUOI de l'ordre et de la méthode, outils associés avec leur usage exact et leurs limites, indicateurs KPI avec valeurs cibles industrielles typiques chiffrées, méthodes de calcul avec formules développées, au moins 2 normes applicables, 1 erreur terrain typique avec mécanisme et correction experte. Style : guide pratique d'ingénieur.",
+      "intuition_expert": ["Réflexe 1 : signe visuel ou indicateur que l'expert détecte immédiatement — et que le débutant manque (2 phrases)", "Réflexe 2 : raccourci légitime que l'expérience permet, avec la condition qui le rend sûr (2 phrases)", "Réflexe 3 : vérification instinctive que tout expert fait avant/après, avec le critère exact contrôlé (2 phrases)"]
     },
     {
       "titre": "🏭 Application et mise en œuvre industrielle",
-      "contenu": "RÉDIGE ICI 500 MOTS MINIMUM : guide d'implémentation terrain complet, facteurs clés de succès (FCS), erreurs les plus fréquentes et comment les éviter, retours d'expérience d'entreprises réelles (anonymisés), ROI typique observé, comparaison avant/après avec données chiffrées, conseils d'expert terrain."
+      "contenu": "RÉDIGE ICI 800 MOTS MINIMUM : guide d'implémentation terrain complet avec séquencement, facteurs clés de succès (FCS) avec données chiffrées sur leur impact, erreurs les plus fréquentes avec leur mécanisme exact et comment les corriger, retours d'expérience d'entreprises réelles (anonymisés) avec chiffres avant/après, ROI typique observé avec hypothèses de calcul, comparaison avant/après avec KPIs mesurés, conseils d'expert terrain que les manuels n'écrivent pas.",
+      "intuition_expert": ["Ce que les implémentations réussies ont en commun que les plans officiels ne mentionnent pas (2 phrases)", "Le signal faible qui indique que le déploiement va mal — avant que les indicateurs le montrent (2 phrases)"]
     },
     {
       "titre": "💡 Synthèse — Points clés à retenir",
-      "contenu": "RÉDIGE ICI un résumé structuré : les 5-7 points essentiels à mémoriser absolument, les pièges à éviter, la check-list de mise en œuvre, les indicateurs de succès, et un conseil de praticien expérimenté. Format : liste numérotée avec émojis, facile à mémoriser."
+      "contenu": "RÉDIGE ICI un résumé structuré et dense : les 7-9 points essentiels à mémoriser avec leur valeur ou formule associée, les 4-5 pièges classiques à éviter avec pourquoi ils surviennent, la check-list de mise en œuvre (10 points minimum), les indicateurs de succès avec leurs valeurs cibles, et 2-3 conseils de praticien expérimenté que seul le terrain enseigne. Format : liste numérotée avec émojis, chaque point actionnable immédiatement.",
+      "intuition_expert": ["La règle d'or que tout expert de ce domaine garde en tête — 1 phrase percutante", "Ce qu'on comprend seulement après avoir fait l'erreur — le vrai apprentissage terrain (2 phrases)"]
     }
   ],
   "qcm": [
@@ -6814,17 +6955,18 @@ STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai conte
 
 IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de descriptions génériques.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysPrompt},{role:'user',content:userPrompt}],max_tokens:8000,temperature:0.7,response_format:{type:'json_object'}})});
-    const data=await resp.json();
-    if(!resp.ok){
-      const errMsg=data.error?.message||'';
-      if(errMsg.includes('Request too large')||errMsg.includes('TPM')||errMsg.includes('too large'))throw new Error('Description trop longue — le texte a été raccourci automatiquement, mais réessayez en réduisant un peu votre description.');
-      if(errMsg.includes('rate limit')||errMsg.includes('too many')||errMsg.includes('Rate limit'))throw new Error('Trop de requêtes — attendez 30 secondes et réessayez.');
-      if(errMsg.includes('invalid_api_key')||errMsg.includes('Incorrect API key'))throw new Error('Clé API invalide — vérifiez votre clé Groq dans les paramètres.');
-      if(errMsg.includes('model_not_found')||errMsg.includes('does not exist'))throw new Error('Modèle IA indisponible — réessayez dans quelques instants.');
-      throw new Error(`Erreur serveur (${resp.status}) — réessayez dans quelques instants.`);
+    const _gr=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({systemInstruction:{parts:[{text:sysPrompt}]},contents:[{role:'user',parts:[{text:userPrompt}]}],generationConfig:{maxOutputTokens:12000,temperature:0.7,responseMimeType:'application/json'}})
+    });
+    const _gd=await _gr.json();
+    if(!_gr.ok){
+      const errMsg=_gd.error?.message||'';
+      if(errMsg.includes('quota')||errMsg.includes('RESOURCE_EXHAUSTED'))throw new Error('Quota dépassé — attendez quelques secondes et réessayez.');
+      if(errMsg.includes('API_KEY_INVALID')||errMsg.includes('invalid'))throw new Error('Clé API invalide — vérifiez votre clé Google AI dans les paramètres.');
+      throw new Error(`Erreur serveur (${_gr.status}) — réessayez dans quelques instants.`);
     }
-    const text=data.choices[0].message.content;
+    const text=_gd.candidates?.[0]?.content?.parts?.[0]?.text||'';
     try{_genPreviewData=JSON.parse(text);}
     catch(pe){
       const m=text.match(/\{[\s\S]*\}/);
@@ -7184,7 +7326,7 @@ function goCustomModule(i){
           </div>
           <div style="padding:.7rem 1rem;background:#fff;">
             ${previewHtml}
-            <div id="csBody_${sid}" style="display:none;border-top:1px solid #f1f5f9;padding-top:.55rem;margin-top:.4rem;">${fullHtml}</div>
+            <div id="csBody_${sid}" style="display:none;border-top:1px solid #f1f5f9;padding-top:.55rem;margin-top:.4rem;">${fullHtml}${(s.intuition_expert||[]).length?`<div style="margin-top:.8rem;border-left:3px solid #7c3aed;background:#f5f3ff;border-radius:0 9px 9px 0;padding:.6rem .9rem;"><div style="font-size:.65rem;font-weight:800;color:#6d28d9;text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem;">🧠 Intuition de l'expert</div><ul style="margin:0;padding-left:1.1rem;">${(s.intuition_expert||[]).map(r=>`<li style="font-size:.78rem;color:#4c1d95;margin-bottom:.3rem;line-height:1.6;">${_escH(r)}</li>`).join('')}</ul></div>`:''}</div>
           </div>
         </div>`;
       }).join('')}
@@ -7250,6 +7392,8 @@ function goCustomModule(i){
     <div class="ccard">
       <div class="btn-row">
         <div id="customValidateBtn${i}"></div>
+        <button class="btn btn-ghost" onclick="openIdxAgentPanel(${i})">🤖 Assistant</button>
+        <button class="btn btn-ghost" onclick="openIdxEnrichPanel(${i})">📎 Enrichir</button>
         <button class="btn btn-ghost" onclick="showSection('home');updateNav();">← Retour aux modules</button>
       </div>
       <div id="customScoreResult${i}"></div>
@@ -7356,9 +7500,7 @@ Règles STRICTES :
 JSON UNIQUEMENT :
 {"qcm":[{"q":"Question ?","opts":["A","B","C","D"],"rep":0,"expl":"Explication courte"}]}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1800,temperature:0.6,response_format:{type:'json_object'}})});
-    const data=await resp.json();
-    const parsed=JSON.parse(data.choices?.[0]?.message?.content||'{}');
+    const parsed=JSON.parse((await _geminiRaw(key,prompt,1800,0.6))||'{}');
     const newQcm=parsed.qcm||[];
     if(!newQcm.length)throw new Error('QCM vide');
     m.qcm=newQcm;
@@ -7434,8 +7576,7 @@ JSON avec cette structure exacte :
   "tempsMinutes": ${[6,12,20][done]}
 }`;
     try{
-      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'system',content:sysP},{role:'user',content:userP}],max_tokens:3000,temperature:0.6,response_format:{type:'json_object'}})});
-      const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+      const text=await _geminiRaw(key,userP,3000,0.6,sysP);
       try{exData=JSON.parse(text);}
       catch(_){const jm=text.match(/\{[\s\S]*\}/);exData=jm?JSON.parse(jm[0]):{question:`Appliquez la méthodologie "${m.titre}" sur le cas industriel. Niveau ${lv.label}.`,context:'',expectedAnswer:''};}
       // Cache in student state (NOT in global module)
@@ -7481,8 +7622,7 @@ Estime le temps total réaliste en minutes pour un étudiant de niveau ${lv.labe
 
 Réponds UNIQUEMENT avec un entier (total en minutes). Rien d'autre.`;
   try{
-    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:10,temperature:0.2})});
-    const d=await r.json();const raw=d.choices?.[0]?.message?.content?.trim()||'';
+    const raw=(await _geminiRaw(key,prompt,10,0.2)).trim();
     const parsed=parseInt(raw.match(/\d+/)?.[0]);
     if(parsed>0)return Math.max(2,Math.min(25,parsed));
   }catch(_){}
@@ -7519,8 +7659,7 @@ Réponse de l'étudiant : "${answer}"
 
 Sois exigeant. Niveau ingénieur requis.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:450,temperature:0.4})});
-    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    const text=await _geminiRaw(key,prompt,450,0.4);
     const lvAfter=_EX_LEVELS[Math.min(_getCustomLevDone(i),2)];
     feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
       <div style="margin-top:.8rem;display:flex;justify-content:flex-end;">
@@ -7639,9 +7778,7 @@ async function _genRemCustom(i,score,minScore,m){
   };
   const prompt=`Tu es formateur expert. Un étudiant a obtenu ${score}% au module "${m.titre}" (seuil: ${minScore}%).${domCtx}\n\nCONTENU DU MODULE :\n${sectionsText}\n\nGénère un cours de rattrapage très détaillé et complet (minimum 600 mots) EXACTEMENT avec ces 6 sections :\n${levelSections[niveau]}\n\nChaque section doit être développée avec des exemples concrets liés au contenu du module. Sois très pédagogique.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2000,temperature:0.4})});
-    if(!resp.ok){body.innerHTML='<div class="alert alert-warning">Erreur API.</div>';return;}
-    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    const text=await _geminiRaw(key,prompt,2000,0.4);
     body.innerHTML=_renderRemCourse(text,m.titre,score,minScore,niveau,color,'c'+i);
   }catch(e){body.innerHTML='<div class="alert alert-warning">Erreur réseau.</div>';}
 }
@@ -7859,6 +7996,500 @@ function _buildDocsPromptSection(modId){
   return `\n\nDOCUMENTS DE COURS FOURNIS PAR LE PROFESSEUR — utilise ces contenus pour que l'exercice généré soit cohérent avec ce qui a été enseigné en cours (terminologie, exemples, niveau de difficulté) :\n${content}\n`;
 }
 
+/* ══════════════════════════════════════════
+   AMÉLIORATIONS PÉDAGOGIQUES
+   · Mini-quiz par module (2 questions)
+   · Liens YouTube par module
+   · Plan de révision (accueil)
+   · Replay erreurs quiz final
+══════════════════════════════════════════ */
+
+const MODULE_QUIZ={
+  1:[
+    {q:'Que représente l\'étape "Check" dans le cycle PDCA ?',opts:['Vérifier les résultats vs objectifs','Planifier les actions correctives','Déployer les ressources nécessaires','Standardiser les bonnes pratiques'],correct:0,expl:'CHECK = Vérifier : on compare les résultats obtenus aux objectifs fixés lors de la phase Plan.'},
+    {q:'La "Roue de Deming" est un autre nom pour :',opts:['Le diagramme Ishikawa','La loi de Pareto','Le cycle PDCA','La méthode SMED'],correct:2,expl:'Le PDCA est aussi appelé Roue de Deming car il tourne en continu pour améliorer les processus.'}
+  ],
+  2:[
+    {q:'Parmi les 5S, quel S signifie "Trier" ?',opts:['Seiton','Seiso','Shitsuke','Seiri'],correct:3,expl:'Seiri = Trier : éliminer tout ce qui est inutile au poste de travail.'},
+    {q:'L\'objectif principal de la méthode 5S est de :',opts:['Réduire uniquement les coûts de production','Organiser le poste et éliminer les gaspillages','Former les opérateurs aux nouvelles machines','Calculer le taux de rebuts'],correct:1,expl:'La 5S améliore l\'organisation, la sécurité et la productivité en éliminant les gaspillages d\'espace et de temps.'}
+  ],
+  3:[
+    {q:'Dans le diagramme d\'Ishikawa, que représente la "tête du poisson" ?',opts:['Les 5M (causes)','Les actions correctives','L\'effet / problème étudié','Les indicateurs de suivi'],correct:2,expl:'La tête du poisson = l\'effet ou problème analysé ; les arêtes représentent les familles de causes (les 5M).'},
+    {q:'Combien de familles de causes contient le diagramme 5M ?',opts:['7','3','4','5'],correct:3,expl:'Les 5M : Matière, Méthode, Milieu, Matériel, Main-d\'œuvre. Parfois 6M avec Management ou 7M avec Money.'}
+  ],
+  4:[
+    {q:'La loi de Pareto (80/20) signifie que :',opts:['50% des effets viennent de 50% des causes','20% des effets viennent de 80% des causes','80% des effets sont produits par 20% des causes','60% des effets sont dus à 40% des causes'],correct:2,expl:'80% des problèmes sont causés par seulement 20% des causes → prioriser ces quelques causes clés.'},
+    {q:'Le diagramme de Pareto sert principalement à :',opts:['Planifier la production hebdomadaire','Mesurer la capabilité d\'un procédé','Suivre l\'avancement d\'un projet','Hiérarchiser les causes pour prioriser les actions'],correct:3,expl:'Le Pareto classe les causes par fréquence ou impact pour identifier et traiter en priorité celles qui ont le plus d\'effet.'}
+  ],
+  5:[
+    {q:'WIP dans le système Kanban signifie :',opts:['Weekly Inventory Protocol','Work Is Possible','Workflow Integration Process','Work In Progress'],correct:3,expl:'WIP (Work In Progress) = volume de travail en cours que le Kanban limite pour fluidifier le flux de production.'},
+    {q:'Le principe fondamental du Kanban est de :',opts:['Produire en avance pour constituer des stocks','Planifier la production sur 3 mois','Limiter les en-cours et produire ce qui est nécessaire','Automatiser tous les flux'],correct:2,expl:'Kanban = flux tiré : on ne produit que ce que le client (aval) consomme, en limitant strictement les en-cours (WIP).'}
+  ],
+  6:[
+    {q:'VSM est l\'acronyme de :',opts:['Variable Supply Monitoring','Vertical Stream Method','Visual System Management','Value Stream Mapping'],correct:3,expl:'Value Stream Mapping = cartographie de la chaîne de valeur, pour visualiser tous les flux matière et information.'},
+    {q:'Parmi les 7 mudas (gaspillages) Lean, lequel N\'en fait PAS partie ?',opts:['Surproduction','Innovation trop rapide','Attentes','Mouvements inutiles'],correct:1,expl:'Les 7 mudas = Surproduction, Attentes, Transports inutiles, Sur-traitement, Stocks, Mouvements inutiles, Défauts. L\'innovation n\'est pas un muda !'}
+  ],
+  7:[
+    {q:'En SPC, que surveille la carte de contrôle X̄-R ?',opts:['Le taux de rebuts quotidien','La cadence de production','Le nombre de défauts par unité','La moyenne et l\'étendue des sous-groupes'],correct:3,expl:'Carte X̄-R : X̄ surveille la moyenne (dérive de centrage), R surveille l\'étendue (dérive de dispersion) des sous-groupes.'},
+    {q:'Un procédé est dit "capable" si son Cpk est :',opts:['Entre 0,8 et 1,0','≤ 0,5','= 1,0','≥ 1,33'],correct:3,expl:'Cpk ≥ 1,33 = procédé capable (standard industrie). Cpk ≥ 2,0 = six sigma. En dessous de 1,0 = procédé non capable.'}
+  ],
+  8:[
+    {q:'L\'objectif principal du SMED est de :',opts:['Supprimer tous les changements d\'outils','Former les opérateurs à la maintenance','Calculer les coûts d\'arrêt machine','Réduire les changements de série à moins de 10 min'],correct:3,expl:'SMED = Single Minute Exchange of Die : viser moins de 10 minutes de changement de série pour gagner en flexibilité.'},
+    {q:'Dans le SMED, une opération "externe" est :',opts:['Nécessitant l\'arrêt machine','Une tâche administrative hors atelier','Effectuée par un prestataire','Réalisable machine en marche'],correct:3,expl:'Opérations EXTERNES = peuvent se faire machine en marche (ex : préparer les outils à l\'avance). Elles n\'impactent pas le temps d\'arrêt.'}
+  ],
+  9:[
+    {q:'Dans l\'AMDEC, l\'IPR est calculé par :',opts:['Gravité + Occurrence + Détection','(Gravité + Occurrence) × Détection','Gravité × Détection / Occurrence','Gravité × Occurrence × Détection'],correct:3,expl:'IPR = Gravité × Occurrence × Détection. Ex : G=8, O=5, D=3 → IPR=120 → action corrective requise.'},
+    {q:'Quel seuil d\'IPR déclenche généralement une action corrective obligatoire ?',opts:['IPR ≥ 10','IPR ≥ 50','IPR ≥ 200','IPR ≥ 100'],correct:3,expl:'Seuil standard : IPR ≥ 100 → action corrective obligatoire. Certaines entreprises utilisent 50 (secteur critique) ou 200 (tolérance élevée).'}
+  ],
+  10:[
+    {q:'Quelle méthode de gestion de projet utilise sprints et backlogs ?',opts:['Waterfall (cycle en V)','Diagramme de Gantt','Agile / Scrum','PERT'],correct:2,expl:'Agile/Scrum organise le travail en itérations courtes (sprints) avec un backlog priorisé — idéal pour les projets complexes et évolutifs.'},
+    {q:'Le diagramme de Gantt est principalement utilisé pour :',opts:['Analyser les causes de retard','Évaluer les risques projet','Calculer le chemin critique','Visualiser l\'ordonnancement des tâches dans le temps'],correct:3,expl:'Le Gantt offre une vue temporelle claire des tâches, dépendances et avancement — outil de référence en gestion de projet.'}
+  ]
+};
+
+const MODULE_YOUTUBE={
+  1:['PDCA cycle amélioration continue lean','Plan Do Check Act exemple industriel tutoriel','roue de Deming management qualité formation'],
+  2:['méthode 5S lean atelier organisation','5S sécurité poste travail tutoriel complet','5S lean manufacturing formation industrie'],
+  3:['diagramme Ishikawa 5M cause effet tutoriel','Ishikawa lean six sigma exemple pratique','causes effets qualité industrie formation'],
+  4:['diagramme Pareto 80 20 lean qualité','analyse Pareto industrielle tutoriel complet','Pareto priorisation problèmes qualité cours'],
+  5:['Kanban système flux tiré lean production','Kanban WIP gestion production tutoriel','méthode Kanban industrie agile formation'],
+  6:['VSM value stream mapping lean tutoriel','cartographie flux valeur gaspillages lean','VSM muda lean manufacturing cours'],
+  7:['SPC statistical process control maîtrise','cartes contrôle capabilité Cp Cpk cours','maîtrise statistique procédé MSP tutoriel'],
+  8:['SMED changement rapide série lean tutoriel','Single Minute Exchange Die formation','réduction temps changement série production lean'],
+  9:['AMDEC analyse modes défaillances tutoriel','AMDEC IPR cotation exemple industrie','FMEA failure mode effects analysis cours'],
+  10:['gestion projet lean six sigma agile','méthodes projet ingénierie industrielle cours','PERT Gantt chemin critique formation'],
+  11:['lean six sigma révision quiz QCM','amélioration continue outils lean révision complète','lean manufacturing outils cours certification']
+};
+
+// ─── Injection automatique des cartes au chargement d'un module ───
+let _modMQState={};
+
+function _injectModuleFeatures(n){
+  if(n<1||n>11)return;
+  const sec=document.getElementById('m'+n);
+  if(!sec||sec.dataset.featuresInjected)return;
+
+  const ytDiv=document.createElement('div');
+  ytDiv.className='ccard';
+  ytDiv.style.marginTop='1rem';
+  ytDiv.innerHTML=_buildModYTCard(n);
+  sec.appendChild(ytDiv);
+
+  if(n>=1&&n<=10&&MODULE_QUIZ[n]){
+    const mqDiv=document.createElement('div');
+    mqDiv.className='ccard';
+    mqDiv.style.marginTop='.75rem';
+    mqDiv.id='mod-mq-card-'+n;
+    mqDiv.innerHTML=_buildModMQCard(n);
+    sec.appendChild(mqDiv);
+  }
+
+  if(n>=1&&n<=10){
+    const adaptDiv=document.createElement('div');
+    adaptDiv.className='ccard';
+    adaptDiv.style.marginTop='.75rem';
+    adaptDiv.innerHTML=_buildAdaptCard(n);
+    sec.appendChild(adaptDiv);
+
+    if(MODULE_FREE_QUESTION[n]){
+      const libreDiv=document.createElement('div');
+      libreDiv.className='ccard';
+      libreDiv.style.marginTop='.75rem';
+      libreDiv.innerHTML=_buildLibreCard(n);
+      sec.appendChild(libreDiv);
+    }
+  }
+
+  const tuteurDiv=document.createElement('div');
+  tuteurDiv.className='ccard';
+  tuteurDiv.style.marginTop='.75rem';
+  tuteurDiv.innerHTML=_buildTuteurCard(n);
+  sec.appendChild(tuteurDiv);
+
+  sec.dataset.featuresInjected='1';
+}
+
+function _buildModYTCard(n){
+  const qs=MODULE_YOUTUBE[n]||[];
+  const links=qs.map(q=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}" target="_blank" rel="noopener" class="mod-yt-link">▶ ${q}</a>`).join('');
+  return `<div style="font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--gray400);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem;">📺 Ressources vidéo<div style="flex:1;height:1px;background:var(--gray200);"></div></div>
+<div style="font-size:.78rem;color:#6b7280;margin-bottom:.4rem;">Recherches YouTube suggérées pour approfondir ce module :</div>
+<div class="mod-yt-grid">${links}</div>`;
+}
+
+function _buildModMQCard(n){
+  _modMQState[n]={cur:0,score:0};
+  const qs=MODULE_QUIZ[n];
+  return `<div style="font-size:.74rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--gray400);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem;">🧪 Mini-quiz de validation<div style="flex:1;height:1px;background:var(--gray200);"></div></div>
+<div style="font-size:.78rem;color:#6b7280;margin-bottom:.6rem;">Testez vos connaissances — ${qs.length} questions rapides sur ce module.</div>
+<div id="mod-mq-inner-${n}">${_buildModMQQuestion(n,0)}</div>`;
+}
+
+function _buildModMQQuestion(n,qi){
+  const qs=MODULE_QUIZ[n];
+  if(!qs)return '';
+  if(qi>=qs.length){
+    const st=_modMQState[n]||{score:0};
+    const total=qs.length;
+    const col=st.score===total?'#059669':st.score>=total/2?'#d97706':'#dc2626';
+    const msg=st.score===total?'Parfait — vous maîtrisez ce module !':st.score>=total/2?'Bonne base — relisez les points manquants.':'Revoyez ce module avant de continuer.';
+    return `<div class="mod-mq-wrap" style="text-align:center;padding:1rem;">
+      <div style="font-size:2rem;margin-bottom:.3rem;">${st.score===total?'🎉':st.score>=total/2?'💪':'📖'}</div>
+      <div style="font-size:.95rem;font-weight:800;color:${col};">${st.score} / ${total} correct${st.score>1?'s':''}</div>
+      <div style="font-size:.77rem;color:#6b7280;margin:.3rem 0 .7rem;">${msg}</div>
+      <button style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:.38rem .9rem;font-size:.77rem;font-weight:700;cursor:pointer;" onclick="_restartModMQ(${n})">🔄 Recommencer</button>
+    </div>`;
+  }
+  const q=qs[qi];
+  const opts=q.opts.map((o,oi)=>`<div class="mod-mq-opt" onclick="checkModMQ(${n},${qi},${oi})">${o}</div>`).join('');
+  return `<div class="mod-mq-wrap">
+    <div class="mod-mq-progress">Question ${qi+1} / ${qs.length}</div>
+    <div class="mod-mq-q">${q.q}</div>
+    ${opts}
+    <div id="mod-mq-expl-${n}-${qi}" style="display:none;" class="mod-mq-expl"></div>
+  </div>`;
+}
+
+function checkModMQ(n,qi,chosen){
+  const q=MODULE_QUIZ[n]?.[qi];if(!q)return;
+  const inner=document.getElementById('mod-mq-inner-'+n);if(!inner)return;
+  const opts=inner.querySelectorAll('.mod-mq-opt');
+  const isOk=chosen===q.correct;
+  if(!_modMQState[n])_modMQState[n]={cur:qi,score:0};
+  if(isOk)_modMQState[n].score=(_modMQState[n].score||0)+1;
+  opts.forEach((el,oi)=>{
+    if(oi===q.correct)el.classList.add('mq-ok');
+    else if(oi===chosen)el.classList.add('mq-ko');
+    el.onclick=null;
+  });
+  const expl=document.getElementById(`mod-mq-expl-${n}-${qi}`);
+  if(expl&&q.expl){expl.style.display='block';expl.textContent=q.expl;}
+  setTimeout(()=>{
+    _modMQState[n].cur=qi+1;
+    if(inner)inner.innerHTML=_buildModMQQuestion(n,qi+1);
+  },1500);
+}
+
+function _restartModMQ(n){
+  _modMQState[n]={cur:0,score:0};
+  const inner=document.getElementById('mod-mq-inner-'+n);
+  if(inner)inner.innerHTML=_buildModMQQuestion(n,0);
+}
+
+// ─── Tuteur IA, Correction libre, Simplifier/Approfondir ───
+
+const MODULE_FREE_QUESTION={
+  1:'Décrivez comment vous appliqueriez le cycle PDCA pour résoudre un problème de non-conformité sur une ligne de production. Détaillez chaque phase avec un exemple concret.',
+  2:'Expliquez les 5 étapes de la méthode 5S dans l\'ordre logique et justifiez pourquoi cet ordre est important pour la durabilité de la démarche.',
+  3:'À partir d\'un problème de votre choix (ex : taux de rebuts élevé), construisez un diagramme Ishikawa en identifiant au moins 3 causes par famille de M.',
+  4:'Vous disposez d\'une liste de défauts sur une chaîne de montage. Expliquez comment utiliser la loi de Pareto pour prioriser vos actions correctives, en décrivant les étapes de construction du diagramme.',
+  5:'Expliquez le principe du flux tiré dans Kanban et le rôle des limites WIP. Pourquoi est-il contre-productif de supprimer ces limites en cas de surcharge ?',
+  6:'Décrivez les étapes de création d\'une VSM (Value Stream Mapping) et expliquez comment identifier les gaspillages dans la chaîne de valeur.',
+  7:'Qu\'est-ce qu\'un procédé sous contrôle statistique (SPC) ? Expliquez la différence entre un point hors limites et une dérive progressive, et la réaction appropriée dans chaque cas.',
+  8:'Quelles sont les 3 étapes clés de la méthode SMED ? Illustrez la distinction entre opérations internes et externes avec un exemple de votre secteur.',
+  9:'Expliquez le calcul de l\'IPR dans l\'AMDEC. Pour un mode de défaillance donné (ex : fuite hydraulique), attribuez des scores G, O et D en justifiant vos choix.',
+  10:'Comment combiner plusieurs outils Lean (PDCA, 5S, Pareto, Kanban) dans un projet d\'amélioration d\'une ligne de production ? Décrivez un plan d\'action cohérent.'
+};
+
+const MODULE_TOPICS={
+  1:'Cycle Plan-Do-Check-Act, roue de Deming, amélioration continue, standardisation, objectifs SMART',
+  2:'Seiri (Trier), Seiton (Ranger), Seiso (Nettoyer), Seiketsu (Standardiser), Shitsuke (Soutenir), organisation du poste de travail',
+  3:'Diagramme causes-effets, 5M (Main-d\'œuvre, Matière, Méthode, Milieu, Matériel), brainstorming, analyse des causes racines',
+  4:'Loi 80/20, diagramme de Pareto, hiérarchisation des causes, cumul des fréquences, priorisation des actions',
+  5:'Flux tiré, WIP (Work In Progress), tableau Kanban, colonnes To Do/En cours/Terminé, signal Kanban',
+  6:'Value Stream Mapping, chaîne de valeur, flux matière et information, takt time, gaspillages (mudas), lead time',
+  7:'Cartes de contrôle X̄-R, limites de contrôle UCL/LCL, capabilité Cp et Cpk, règles de Nelson, dérive et instabilité',
+  8:'Single Minute Exchange of Die, opérations internes/externes, conversion interne→externe, chronométrage, temps de changement de série',
+  9:'Analyse des Modes de Défaillance et de leurs Effets et Criticité, IPR = Gravité × Occurrence × Détection, seuil d\'action, plan d\'actions correctives',
+  10:'Gestion de projet Lean, Gantt, chemin critique, Agile/Scrum, intégration multi-outils, cas industriel synthèse'
+};
+
+const _tuteurHistory={};
+const _adaptCache={};
+
+function _buildTuteurCard(n){
+  return `<div class="idx-tuteur-wrap" id="tuteur-card-${n}">
+  <div class="idx-tuteur-hdr">💬 Tuteur IA<div style="flex:1;height:1px;background:#bae6fd;"></div></div>
+  <div style="font-size:.78rem;color:#0369a1;margin-bottom:.55rem;">Posez n'importe quelle question sur ce module — le tuteur connaît son contenu.</div>
+  <div class="idx-tuteur-msgs" id="tuteur-msgs-${n}"></div>
+  <div class="idx-tuteur-row">
+    <input class="idx-tuteur-input" id="tuteur-inp-${n}" placeholder="Ex : Explique-moi la différence entre…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTuteurMsg(${n});}">
+    <button class="idx-tuteur-send" id="tuteur-send-${n}" onclick="sendTuteurMsg(${n})">Envoyer ▶</button>
+  </div>
+</div>`;
+}
+
+async function sendTuteurMsg(n){
+  const inp=document.getElementById('tuteur-inp-'+n);
+  const msgs=document.getElementById('tuteur-msgs-'+n);
+  const btn=document.getElementById('tuteur-send-'+n);
+  const key=document.getElementById('apiKey')?.value?.trim();
+  if(!key){_tuteurAddMsg(msgs,'ai','⚠️ Clé API manquante — saisissez votre clé en haut de page.');return;}
+  const text=inp.value.trim();
+  if(!text)return;
+  inp.value='';
+  _tuteurAddMsg(msgs,'user',text);
+  btn.disabled=true;
+  const thinkingEl=_tuteurAddMsg(msgs,'thinking','🧠 Réflexion en cours…');
+  if(!_tuteurHistory[n])_tuteurHistory[n]=[];
+  const prevHistory=_tuteurHistory[n].slice(-8);
+  _tuteurHistory[n].push({role:'user',content:text});
+  const mod=MODULES.find(m=>m.id===n)||{name:'Module '+n,desc:''};
+  const sys=`Tu es un tuteur pédagogique expert en Lean Manufacturing et qualité industrielle. Tu aides un étudiant sur le module "${mod.name}" (${mod.desc}).
+Concepts clés : ${MODULE_TOPICS[n]||''}
+
+Processus obligatoire :
+1. Raisonne d'abord dans des balises <think>...</think> : analyse la question, identifie les concepts pertinents, construis ta réponse étape par étape, anticipe les malentendus fréquents.
+2. Ensuite donne ta réponse finale APRÈS les balises think : claire, pédagogique, 3-6 phrases max, avec un exemple industriel concret si pertinent.
+Ne répète PAS le raisonnement dans la réponse finale.`;
+  let userPrompt=text;
+  if(prevHistory.length){
+    const ctx=prevHistory.map(h=>`${h.role==='user'?'Étudiant':'Tuteur'} : ${h.content}`).join('\n');
+    userPrompt=`[Historique de la conversation :]\n${ctx}\n\n[Nouvelle question :]\n${text}`;
+  }
+  try{
+    const raw=await _geminiRaw(key,userPrompt,800,0.7,sys);
+    if(thinkingEl&&thinkingEl.parentNode)thinkingEl.parentNode.removeChild(thinkingEl);
+    const {thinking,answer}=_parseTuteurResponse(raw);
+    _tuteurHistory[n].push({role:'assistant',content:answer});
+    _tuteurAddMsgAI(msgs,thinking,answer);
+  }catch(e){
+    if(thinkingEl&&thinkingEl.parentNode)thinkingEl.parentNode.removeChild(thinkingEl);
+    _tuteurAddMsg(msgs,'ai','⚠️ Erreur : '+e.message);
+  }
+  btn.disabled=false;
+  inp.focus();
+}
+
+function _parseTuteurResponse(raw){
+  const thinkMatch=raw.match(/<think>([\s\S]*?)<\/think>/i);
+  const thinking=thinkMatch?thinkMatch[1].trim():null;
+  const answer=raw.replace(/<think>[\s\S]*?<\/think>/gi,'').trim();
+  return{thinking,answer};
+}
+
+function _renderThinkBlock(thinking){
+  if(!thinking)return'';
+  return`<details class="idx-tuteur-think" style="margin-bottom:.6rem;">
+  <summary>🧠 Raisonnement</summary>
+  <div class="idx-tuteur-think-body">${_escH(thinking)}</div>
+</details>`;
+}
+
+function _tuteurAddMsgAI(container,thinking,answer){
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:.2rem;max-width:92%;';
+  if(thinking){
+    const det=document.createElement('details');
+    det.className='idx-tuteur-think';
+    det.innerHTML=`<summary>🧠 Raisonnement</summary><div class="idx-tuteur-think-body">${_escH(thinking)}</div>`;
+    wrap.appendChild(det);
+  }
+  const ans=document.createElement('div');
+  ans.className='idx-tuteur-msg ai';
+  ans.style.marginTop=thinking?'0':'';
+  ans.textContent=answer;
+  wrap.appendChild(ans);
+  container.appendChild(wrap);
+  container.scrollTop=container.scrollHeight;
+}
+
+function _tuteurAddMsg(container,type,text){
+  const div=document.createElement('div');
+  div.className='idx-tuteur-msg '+type;
+  div.textContent=text;
+  container.appendChild(div);
+  container.scrollTop=container.scrollHeight;
+  return div;
+}
+
+function _buildLibreCard(n){
+  const q=MODULE_FREE_QUESTION[n];
+  if(!q)return '';
+  return `<div class="idx-libre-wrap" id="libre-card-${n}">
+  <div class="idx-libre-hdr">✍️ Correction réponse libre<div style="flex:1;height:1px;background:#d8b4fe;"></div></div>
+  <div class="idx-libre-q">📝 ${q}</div>
+  <textarea class="idx-libre-ta" id="libre-ta-${n}" placeholder="Écrivez votre réponse ici…"></textarea>
+  <button class="idx-libre-btn" id="libre-btn-${n}" onclick="submitLibreAnswer(${n})">🤖 Corriger ma réponse</button>
+  <div class="idx-libre-result" id="libre-result-${n}" style="display:none;"></div>
+</div>`;
+}
+
+async function submitLibreAnswer(n){
+  const key=document.getElementById('apiKey')?.value?.trim();
+  if(!key){alert('Clé API manquante.');return;}
+  const ta=document.getElementById('libre-ta-'+n);
+  const btn=document.getElementById('libre-btn-'+n);
+  const res=document.getElementById('libre-result-'+n);
+  if(btn&&btn.disabled)return;
+  const ans=ta?ta.value.trim():'';
+  if(ans.length<20){alert('Réponse trop courte — développez votre réponse.');return;}
+  btn.disabled=true;btn.textContent='🧠 Analyse en cours…';
+  res.style.display='block';
+  res.innerHTML='<em style="color:#6b7280;">⏳ L\'IA évalue votre réponse…</em>';
+  const mod=MODULES.find(m=>m.id===n)||{name:'Module '+n};
+  const sys=`Tu es un correcteur pédagogique expert en Lean Manufacturing et qualité industrielle. Tu corriges la réponse d'un étudiant sur le module "${mod.name}".
+Concepts attendus : ${MODULE_TOPICS[n]||''}
+Question posée : ${MODULE_FREE_QUESTION[n]||''}
+
+Processus obligatoire :
+1. Raisonne d'abord dans des balises <think>...</think> : analyse ce que l'étudiant a écrit, identifie les points forts et les lacunes, calibre le score, justifie point par point.
+2. Ensuite donne l'évaluation structurée APRÈS les balises think :
+   - Score sur 10 (format "Score : X/10")
+   - Points forts (2-3 éléments)
+   - Points à améliorer (2-3 éléments)
+   - Une phrase de conclusion encourageante
+Sois bienveillant mais précis. Max 200 mots pour l'évaluation finale.`;
+  try{
+    const raw=await _geminiRaw(key,`Réponse de l'étudiant :\n${ans}`,700,0.4,sys);
+    const {thinking,answer}=_parseTuteurResponse(raw);
+    const lines=answer.split('\n');
+    const scoreLine=lines.find(l=>/score\s*:/i.test(l))||'';
+    const scoreMatch=scoreLine.match(/(\d+)\s*\/\s*10/);
+    const score=scoreMatch?scoreMatch[0]:'';
+    const rest=lines.filter(l=>l!==scoreLine).join('\n').trim();
+    res.innerHTML=_renderThinkBlock(thinking)
+      +(score?`<div class="idx-libre-score">📊 ${score}</div>`:'')
+      +'<div style="white-space:pre-wrap;">'+_escH(rest)+'</div>';
+  }catch(e){
+    res.innerHTML='⚠️ Erreur : '+_escH(e.message);
+  }
+  btn.disabled=false;btn.textContent='🔄 Recorriger';
+}
+
+function _buildAdaptCard(n){
+  return `<div class="idx-adapt-wrap" id="adapt-card-${n}">
+  <div class="idx-adapt-hdr">🎚️ Adapter le niveau<div style="flex:1;height:1px;background:#86efac;"></div></div>
+  <div class="idx-adapt-desc">Obtenez une explication du module adaptée à votre niveau.</div>
+  <div class="idx-adapt-btns">
+    <button class="idx-adapt-btn simplif" id="adapt-simplif-${n}" onclick="adaptModule(${n},'simple')">📚 Simplifier</button>
+    <button class="idx-adapt-btn deepen"  id="adapt-deepen-${n}"  onclick="adaptModule(${n},'deep')">🔬 Approfondir</button>
+  </div>
+  <div class="idx-adapt-out" id="adapt-out-${n}"></div>
+</div>`;
+}
+
+async function adaptModule(n,mode){
+  const key=document.getElementById('apiKey')?.value?.trim();
+  if(!key){alert('Clé API manquante.');return;}
+  const cacheKey=n+'-'+mode;
+  const out=document.getElementById('adapt-out-'+n);
+  const s=document.getElementById('adapt-simplif-'+n);
+  const d=document.getElementById('adapt-deepen-'+n);
+  if(_adaptCache[cacheKey]){
+    out.innerHTML=_adaptCache[cacheKey];out.classList.add('active');return;
+  }
+  s.disabled=true;d.disabled=true;
+  out.classList.add('active');out.innerHTML='<em style="color:#6b7280;">🧠 Réflexion en cours…</em>';
+  const mod=MODULES.find(m=>m.id===n)||{name:'Module '+n,desc:''};
+  const modeLabel=mode==='simple'?'simplifié (débutant, analogies du quotidien, vocabulaire accessible)':'approfondi (expert, formules, nuances techniques, cas limites, comparaisons entre méthodes)';
+  const sys=`Tu es un formateur expert en Lean Manufacturing et qualité industrielle.
+
+Processus obligatoire :
+1. Raisonne d'abord dans des balises <think>...</think> : identifie le niveau cible, choisis les concepts les plus importants à mettre en avant, pense à l'analogie ou aux nuances les plus éclairantes.
+2. Génère ensuite l'explication APRÈS les balises think.`;
+  const usr=`Génère une explication ${modeLabel} du module "${mod.name}" (${mod.desc}).
+Concepts clés : ${MODULE_TOPICS[n]||''}
+Format de l'explication finale :
+- Titre court
+- Explication principale (4-6 phrases)
+- ${mode==='simple'?'1 analogie du quotidien':'2 nuances techniques importantes'}
+- 1 exemple industriel concret
+Max 200 mots. En français, style direct et engageant.`;
+  try{
+    const raw=await _geminiRaw(key,usr,600,mode==='simple'?0.6:0.4,sys);
+    const {thinking,answer}=_parseTuteurResponse(raw);
+    const html=_renderThinkBlock(thinking)+'<div style="white-space:pre-wrap;">'+_escH(answer)+'</div>';
+    _adaptCache[cacheKey]=html;
+    out.innerHTML=html;
+  }catch(e){
+    out.innerHTML='⚠️ Erreur : '+_escH(e.message);
+  }
+  s.disabled=false;d.disabled=false;
+}
+
+// ─── Plan de révision — Accueil ───
+const _IDX_ALL_MODS=[
+  {id:1,name:'PDCA'},{id:2,name:'5S'},{id:3,name:'Ishikawa'},
+  {id:4,name:'Pareto'},{id:5,name:'Kanban'},{id:6,name:'VSM'},
+  {id:7,name:'SPC'},{id:8,name:'SMED'},{id:9,name:'AMDEC'},
+  {id:10,name:'Projet'},{id:11,name:'Quiz Final'}
+];
+
+function _buildIndexRevPlan(days){
+  const mods=[..._IDX_ALL_MODS];
+  const perDay=Math.ceil(mods.length/days);
+  let html='';
+  for(let d=0;d<days&&mods.length>0;d++){
+    const dayMods=mods.splice(0,perDay);
+    html+=`<div class="idx-revplan-day">
+      <div class="idx-revplan-day-lbl">Jour ${d+1}</div>
+      <div class="idx-revplan-mods">${dayMods.map(m=>`<button class="idx-revplan-chip" onclick="goModule(${m.id})" title="Aller au module ${m.name}">${m.name}</button>`).join('')}</div>
+    </div>`;
+  }
+  return html;
+}
+
+function genIndexRevPlan(days,btn){
+  document.querySelectorAll('.idx-revplan-sel-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const el=document.getElementById('idxRevplanContent');
+  if(el)el.innerHTML=_buildIndexRevPlan(days);
+}
+
+// ─── Replay erreurs Quiz Final ───
+let _wrongQI=[];
+let _replayQs=[], _rAnswers={};
+
+function replayWrongQuiz(){
+  if(!_wrongQI.length){alert('Aucune erreur à revoir !');return;}
+  _replayQs=_wrongQI.map(qi=>({...quizData[qi],_origIdx:qi}));
+  _rAnswers={};
+  const scoreEl=document.getElementById('quizScore');
+  if(scoreEl)scoreEl.innerHTML='';
+  const el=document.getElementById('quizArea');if(!el)return;
+
+  const questions=_replayQs.map((q,qi)=>{
+    const opts=q.opts.map((o,oi)=>`<div class="q-opt" id="rqo-${qi}-${oi}" onclick="selRQ(${qi},${oi},this)">${o}</div>`).join('');
+    return `<div class="idx-replay-q"><div class="q-num">Erreur ${qi+1} / ${_replayQs.length} — question originale n°${q._origIdx+1}</div><div class="q-text">${q.q}</div>${opts}</div>`;
+  }).join('');
+
+  el.innerHTML=`<div class="idx-replay-banner">🎯 Mode révision — ${_replayQs.length} question(s) à retravailler</div>
+    ${questions}
+    <div style="text-align:center;margin-top:1rem;display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="submitReplayQ()">✅ Valider les corrections</button>
+      <button class="btn btn-ghost btn-sm" onclick="generateQuiz()">🔄 Nouveau quiz</button>
+    </div>`;
+}
+
+function selRQ(qi,oi,el){
+  document.querySelectorAll(`[id^="rqo-${qi}-"]`).forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+  _rAnswers[qi]=oi;
+}
+
+function submitReplayQ(){
+  if(!_replayQs.length)return;
+  let ok=0;
+  _replayQs.forEach((q,qi)=>{
+    const ans=_rAnswers[qi];
+    q.opts.forEach((_,oi)=>{
+      const el=document.getElementById(`rqo-${qi}-${oi}`);if(!el)return;
+      if(oi===q.correct)el.classList.add('correct');
+      else if(ans===oi)el.classList.add('wrong');
+      el.onclick=null;
+    });
+    if(ans===q.correct)ok++;
+  });
+  const pct=Math.round(ok/_replayQs.length*100);
+  const col=pct>=70?'var(--green)':'var(--red)';
+  const existing=document.querySelector('#quizArea .btn-primary');
+  const wrap=existing?existing.closest('div'):null;
+  if(wrap)wrap.innerHTML=`<div style="font-size:1.4rem;font-weight:900;color:${col};">${pct}%</div>
+    <div style="font-size:.85rem;color:#6b7280;margin:.3rem 0 .8rem;">${ok} / ${_replayQs.length} corrigé(s) — ${pct>=70?'Bravo !':'Continuez à travailler.'}</div>
+    <button class="btn btn-sm" onclick="generateQuiz()" style="background:#f59e0b;color:#fff;font-weight:800;">🔄 Générer un nouveau quiz</button>`;
+}
+
 function handleDocFile(input){
   const file=input.files[0];if(!file)return;
   if(file.size>150000){document.getElementById('admDocMsg').innerHTML='<span style="color:#dc2626;">⚠️ Fichier trop volumineux (max 150 Ko). Résumez le document.</span>';input.value='';return;}
@@ -7932,11 +8563,11 @@ function renderDocsList(){
     <div class="cv-body">
       <!-- ÉTAPE 1 : Clé API -->
       <div id="cvKeyStep" style="background:#f5f3ff;border:2px solid #c4b5fd;border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem;">
-        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Groq</div>
-        <input type="password" id="cvApiKey" placeholder="gsk_..." oninput="cvSyncKey(this.value)"
+        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Google AI</div>
+        <input type="password" id="cvApiKey" placeholder="AIza…" oninput="cvSyncKey(this.value)"
           style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:.45rem .7rem;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:border .2s;box-sizing:border-box;"
           onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#c4b5fd'">
-        <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">console.groq.com</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
+        <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">aistudio.google.com ↗</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
       </div>
       <!-- ÉTAPE 2 : Dépôt CV -->
       <div style="font-size:.78rem;font-weight:800;color:#374151;margin-bottom:.4rem;">📄 Étape 2 — Déposez votre CV (PDF)</div>
@@ -8240,6 +8871,288 @@ function renderDocsList(){
     <div id="resetPwdMsg" style="margin-top:.8rem;font-size:.78rem;text-align:center;min-height:1.1rem;"></div>
   </div>
 </div>
+
+<!-- ── Agent IA panel (custom modules) ── -->
+<div id="idxAgentPanel" class="idx-agent-panel">
+  <div class="idx-agent-hdr">
+    <span style="font-size:1.25rem;line-height:1;">🤖</span>
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:800;font-size:.87rem;">Assistant IA</div>
+      <div id="idxAgentModLabel" style="font-size:.66rem;opacity:.65;margin-top:.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+    </div>
+    <button onclick="toggleIdxAgentPanel()" style="background:rgba(255,255,255,.14);border:none;color:#fff;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:1rem;line-height:1;flex-shrink:0;">✕</button>
+  </div>
+  <div id="idxAgentMsgs" class="idx-agent-msgs"></div>
+  <div class="idx-agent-inp-row">
+    <textarea id="idxAgentInput" class="idx-agent-inp" rows="2" placeholder="Posez une question sur ce module…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIdxAgentMsg();}"></textarea>
+    <button onclick="sendIdxAgentMsg()" style="background:#4c1d95;color:#fff;border:none;border-radius:10px;padding:.45rem .75rem;cursor:pointer;font-size:1rem;flex-shrink:0;align-self:flex-end;">↑</button>
+  </div>
+</div>
+<div id="idxAgentOverlay" style="display:none;position:fixed;inset:0;z-index:810;background:rgba(0,0,0,.25);" onclick="toggleIdxAgentPanel()"></div>
+
+<script>
+let _idxAgentOpen=false,_idxAgentHistory=[],_idxAgentModIdx=null;
+
+function openIdxAgentPanel(i){
+  _idxAgentModIdx=i;
+  if(!_idxAgentOpen)toggleIdxAgentPanel();
+  else _initIdxAgentWelcome();
+}
+function toggleIdxAgentPanel(){
+  _idxAgentOpen=!_idxAgentOpen;
+  document.getElementById('idxAgentPanel').classList.toggle('open',_idxAgentOpen);
+  document.getElementById('idxAgentOverlay').style.display=_idxAgentOpen?'block':'none';
+  if(_idxAgentOpen){
+    const m=getCustomModules()[_idxAgentModIdx];
+    if(m)document.getElementById('idxAgentModLabel').textContent=m.titre||'';
+    _initIdxAgentWelcome();
+  }
+}
+
+function _initIdxAgentWelcome(){
+  const msgs=document.getElementById('idxAgentMsgs');if(!msgs)return;
+  const m=getCustomModules()[_idxAgentModIdx];if(!m)return;
+  const saved=m.agentChat||[];
+  if(saved.length){
+    _idxAgentHistory=saved.slice();
+    msgs.innerHTML='';
+    saved.forEach(h=>_appendIdxAgentMsg(h.role,h.content));
+    return;
+  }
+  _idxAgentHistory=[];
+  const suggestions=['Ce module est-il complet ?','Quelles sections manquent ?','Points faibles à renforcer ?','Ajoute une section sur la sécurité'];
+  msgs.innerHTML=`<div style="padding:.8rem .5rem;">
+    <div style="text-align:center;margin-bottom:.8rem;">
+      <div style="font-size:1.8rem;margin-bottom:.3rem;">🤖</div>
+      <div style="font-size:.82rem;font-weight:700;color:#1e293b;">Ancré sur <strong>${_escH(m.titre)}</strong></div>
+      <div style="font-size:.72rem;color:#6b7280;margin-top:.2rem;">Je connais tout le contenu de ce module. Demandez une analyse, une amélioration ou une nouvelle section.</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;">
+      ${suggestions.map(q=>`<button class="idx-agent-sugg-chip" onclick="prefillIdxAgent(${JSON.stringify(q)})">${_escH(q)}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+function prefillIdxAgent(q){
+  const inp=document.getElementById('idxAgentInput');
+  if(inp){inp.value=q;inp.focus();}
+}
+
+function _buildIdxAgentSys(m){
+  const secs=(m.sections||[]).map((s,i)=>`[${i}] ${_escH(s.titre||'')} : ${_normContent(s.contenu).slice(0,350)}`).join('\n');
+  return `Tu es l'assistant pédagogique du formateur qui a créé ce module. Tu en connais tout le contenu.
+
+MODULE :
+- Titre : ${m.titre}
+- Domaine : ${m.secteur||m.dom||''}
+- Public : ${m.niv||''} | Durée : ${m.duree||'~45 min'}
+- Objectifs : ${(m.objectifs||[]).slice(0,4).join(' / ')}
+
+SECTIONS (${(m.sections||[]).length}) :
+${secs}
+
+CONSIGNES :
+- Réponds en français, de façon concise et pratique.
+- Si tu proposes de modifier le contenu d'une section existante, utilise ce marqueur EXACT (index 0-based) :
+[[PATCH:N]]{"contenu":"...","points_cles":["..."],"exemple":"..."}[[/PATCH]]
+- Si tu proposes une nouvelle section à ajouter :
+[[NEWSEC]]{"titre":"...","contenu":"..."}[[/NEWSEC]]
+- Pour les autres réponses, écris du texte normal.`;
+}
+
+async function sendIdxAgentMsg(){
+  const inp=document.getElementById('idxAgentInput');
+  const text=(inp?.value||'').trim();
+  if(!text)return;
+  const i=_idxAgentModIdx;const key=getKey();
+  if(!key){_appendIdxAgentMsg('ai','⚠️ Clé API requise.');return;}
+  inp.value='';
+  const m=getCustomModules()[i];if(!m)return;
+  _appendIdxAgentMsg('user',text);
+  _idxAgentHistory.push({role:'user',content:text});
+  const tid='iat-'+Date.now();
+  _appendIdxAgentTyping(tid);
+  try{
+    const sys=_buildIdxAgentSys(m);
+    const histCtx=_idxAgentHistory.slice(-8).map(h=>`${h.role==='user'?'Formateur':'Assistant'}: ${h.content}`).join('\n');
+    const prompt=histCtx+'\nFormateur: '+text+'\nAssistant:';
+    const reply=await _geminiRaw(key,prompt,1400,0.65,sys);
+    document.getElementById(tid)?.remove();
+    _idxAgentHistory.push({role:'assistant',content:reply});
+    _appendIdxAgentMsg('ai',reply);
+    const mods=getCustomModules();mods[i].agentChat=_idxAgentHistory.slice(-20);saveCustomModules(mods);
+  }catch(e){
+    document.getElementById(tid)?.remove();
+    _appendIdxAgentMsg('ai','❌ '+_escH(e.message));
+  }
+}
+
+function _appendIdxAgentTyping(id){
+  const msgs=document.getElementById('idxAgentMsgs');if(!msgs)return;
+  const d=document.createElement('div');d.id=id;
+  d.style.cssText='display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;';
+  d.innerHTML='<div class="ai-spinner" style="border-top-color:#7c3aed;"></div><span style="font-size:.73rem;color:#9ca3af;">L\'assistant rédige…</span>';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function _appendIdxAgentMsg(role,text){
+  const msgs=document.getElementById('idxAgentMsgs');if(!msgs)return;
+  const d=document.createElement('div');
+  if(role==='user'){d.className='idx-amsg-user';d.textContent=text;}
+  else{d.className='idx-amsg-ai';d.innerHTML=_renderIdxAgentText(text);}
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+
+function _renderIdxAgentText(raw){
+  let html=_escH(raw).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  html=html.replace(/\[\[PATCH:(\d+)\]\]([\s\S]*?)\[\[\/PATCH\]\]/g,(_,n,jsonRaw)=>{
+    const safeJson=jsonRaw.replace(/<br\s*\/?>/g,'\\n').replace(/<[^>]+>/g,'').trim();
+    return`<div class="idx-agent-patch">
+      <div style="font-size:.67rem;font-weight:800;color:#15803d;margin-bottom:.25rem;">📝 Proposition — Section ${parseInt(n)+1}</div>
+      <button class="idx-agent-apply-btn" style="background:#15803d;color:#fff;" onclick="applyIdxAgentPatch(${_idxAgentModIdx},${n},${JSON.stringify(safeJson)})">✅ Appliquer à la section ${parseInt(n)+1}</button>
+    </div>`;
+  });
+  html=html.replace(/\[\[NEWSEC\]\]([\s\S]*?)\[\[\/NEWSEC\]\]/g,(_,jsonRaw)=>{
+    const safeJson=jsonRaw.replace(/<br\s*\/?>/g,'\\n').replace(/<[^>]+>/g,'').trim();
+    return`<div class="idx-agent-newsec">
+      <div style="font-size:.67rem;font-weight:800;color:#1e40af;margin-bottom:.25rem;">➕ Nouvelle section proposée</div>
+      <button class="idx-agent-apply-btn" style="background:#1e40af;color:#fff;" onclick="applyIdxAgentNewSec(${_idxAgentModIdx},${JSON.stringify(safeJson)})">➕ Ajouter la section</button>
+    </div>`;
+  });
+  return html;
+}
+
+function applyIdxAgentPatch(modIdx,secIdx,jsonStr){
+  try{
+    const patch=JSON.parse(jsonStr.replace(/\\n/g,'\n'));
+    const mods=getCustomModules();
+    if(!mods[modIdx]||!mods[modIdx].sections[secIdx])return;
+    mods[modIdx].sections[secIdx]={...mods[modIdx].sections[secIdx],...patch};
+    saveCustomModules(mods);
+    goCustomModule(modIdx);
+    setTimeout(()=>{openIdxAgentPanel(modIdx);},150);
+  }catch(e){alert('Erreur: '+e.message);}
+}
+
+function applyIdxAgentNewSec(modIdx,jsonStr){
+  try{
+    const sec=JSON.parse(jsonStr.replace(/\\n/g,'\n'));
+    const mods=getCustomModules();
+    if(!mods[modIdx])return;
+    mods[modIdx].sections=mods[modIdx].sections||[];
+    mods[modIdx].sections.push(sec);
+    saveCustomModules(mods);
+    goCustomModule(modIdx);
+    setTimeout(()=>{openIdxAgentPanel(modIdx);},150);
+  }catch(e){alert('Erreur: '+e.message);}
+}
+</script>
+
+<!-- ── Enrich custom module panel ── -->
+<div id="idxEnrichPanel" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.45);align-items:flex-end;justify-content:center;" onclick="if(event.target===this)closeIdxEnrichPanel()">
+  <div style="background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:720px;padding:1.5rem 1.5rem 2rem;box-shadow:0 -8px 40px rgba(0,0,0,.18);max-height:88vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem;">
+      <div style="font-weight:800;font-size:1rem;color:#0d1b2a;">📎 Enrichir le module avec de nouveaux documents</div>
+      <button onclick="closeIdxEnrichPanel()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#9ca3af;line-height:1;">✕</button>
+    </div>
+    <div style="font-size:.8rem;color:#6b7280;margin-bottom:1.1rem;">Ajoutez un document (cours, norme, procédure, fiche technique…) — l'IA enrichira automatiquement les sections du module qui peuvent en bénéficier.</div>
+    <div id="idxEnrichDropZone" style="border:2px dashed #d1d5db;border-radius:12px;padding:1.6rem;text-align:center;cursor:pointer;margin-bottom:.9rem;transition:border-color .2s;" onclick="document.getElementById('idxEnrichFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='#7c3aed';" ondragleave="this.style.borderColor='#d1d5db';" ondrop="handleIdxEnrichDrop(event)">
+      <input type="file" id="idxEnrichFileInput" accept=".txt,.md,.pdf" multiple style="display:none" onchange="handleIdxEnrichFiles(this.files)">
+      <div style="font-size:1.6rem;margin-bottom:.3rem;">📄</div>
+      <div style="font-size:.83rem;color:#374151;font-weight:600;">Glisser des fichiers ici ou cliquer pour parcourir</div>
+      <div style="font-size:.72rem;color:#9ca3af;margin-top:.2rem;">PDF, TXT, MD — plusieurs fichiers acceptés</div>
+    </div>
+    <div id="idxEnrichFileList" style="margin-bottom:.9rem;"></div>
+    <div style="display:flex;gap:.5rem;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeIdxEnrichPanel()">Annuler</button>
+      <button class="btn btn-primary" id="idxEnrichLaunchBtn" onclick="launchIdxEnrich()" disabled style="background:#4c1d95;">🚀 Enrichir le module</button>
+    </div>
+    <div id="idxEnrichProgress" style="display:none;margin-top:.9rem;font-size:.8rem;color:#6b7280;"></div>
+  </div>
+</div>
+
+<script>
+let _idxEnrichDocs=[],_idxEnrichModIdx=null;
+
+function openIdxEnrichPanel(i){
+  _idxEnrichModIdx=i;_idxEnrichDocs=[];
+  document.getElementById('idxEnrichFileList').innerHTML='';
+  document.getElementById('idxEnrichLaunchBtn').disabled=true;
+  document.getElementById('idxEnrichProgress').style.display='none';
+  document.getElementById('idxEnrichProgress').innerHTML='';
+  document.getElementById('idxEnrichFileInput').value='';
+  document.getElementById('idxEnrichPanel').style.display='flex';
+}
+function closeIdxEnrichPanel(){document.getElementById('idxEnrichPanel').style.display='none';}
+
+async function _idxExtractPDF(file){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let txt='';
+  for(let p=1;p<=Math.min(pdf.numPages,40);p++){
+    const pg=await pdf.getPage(p);
+    const ct=await pg.getTextContent();
+    txt+=ct.items.map(it=>it.str).join(' ')+'\n';
+  }
+  return txt.trim().slice(0,9000);
+}
+
+async function handleIdxEnrichFiles(files){
+  for(const f of Array.from(files)){
+    try{
+      let txt='';
+      if(f.name.toLowerCase().endsWith('.pdf'))txt=await _idxExtractPDF(f);
+      else txt=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsText(f,'UTF-8');});
+      _idxEnrichDocs.push({name:f.name,content:txt.slice(0,8000)});
+    }catch(e){alert('Erreur lecture: '+f.name);}
+  }
+  _renderIdxEnrichList();
+}
+function handleIdxEnrichDrop(e){e.preventDefault();document.getElementById('idxEnrichDropZone').style.borderColor='#d1d5db';handleIdxEnrichFiles(e.dataTransfer.files);}
+function _renderIdxEnrichList(){
+  document.getElementById('idxEnrichFileList').innerHTML=_idxEnrichDocs.length
+    ?`<div style="display:flex;flex-direction:column;gap:.3rem;">${_idxEnrichDocs.map((d,i)=>`<div style="display:flex;align-items:center;gap:.5rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:.4rem .7rem;font-size:.78rem;"><span>📄 ${_escH(d.name)} <span style="color:#9ca3af;">(${Math.round(d.content.length/1000)}k)</span></span><button onclick="_idxEnrichDocs.splice(${i},1);_renderIdxEnrichList()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#dc2626;">✕</button></div>`).join('')}</div>`
+    :'';
+  document.getElementById('idxEnrichLaunchBtn').disabled=!_idxEnrichDocs.length;
+}
+
+async function launchIdxEnrich(){
+  const i=_idxEnrichModIdx;const key=getKey();
+  if(i==null||!key){alert('Clé API requise.');return;}
+  if(!_idxEnrichDocs.length){alert('Ajoutez au moins un document.');return;}
+  const btn=document.getElementById('idxEnrichLaunchBtn');btn.disabled=true;btn.textContent='⏳ En cours…';
+  const prog=document.getElementById('idxEnrichProgress');prog.style.display='block';
+  prog.innerHTML='🔍 Analyse du document et enrichissement des sections…';
+  const mods=getCustomModules();const m=mods[i];if(!m){btn.disabled=false;btn.textContent='🚀 Enrichir le module';return;}
+  const docCtx=_idxEnrichDocs.map(d=>`=== ${d.name} ===\n${d.content}`).join('\n\n');
+  const secsSummary=(m.sections||[]).map((s,idx)=>`[${idx}] ${s.titre}: ${_normContent(s.contenu).slice(0,200)}`).join('\n');
+  const SYS='Tu es formateur expert en génie industriel. On ajoute un nouveau document de référence à un module existant. Identifie les sections qui peuvent être enrichies avec les informations du document. Ne modifie que ce qui est amélioré par le document. Renvoie uniquement du JSON valide.';
+  const prompt=`Module: "${m.titre}" — domaine: ${m.secteur||''} — public: ${m.niv||''}\n\nSections existantes :\n${secsSummary}\n\n--- NOUVEAU DOCUMENT ---\n${docCtx.slice(0,9000)}\n--- FIN DOCUMENT ---\n\nEnrichis les sections (max 5) qui bénéficient directement du document. Pour chaque section enrichie, renvoie les champs améliorés uniquement.\nJSON:\n{"sections":[{"idx":0,"contenu":"contenu enrichi et complété","points_cles":["..."],"definitions":[{"terme":"","def":""}],"exemple":"..."}]}`;
+  try{
+    const raw=await _geminiRaw(key,prompt,2000,0.4,SYS);
+    const cleaned=raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+    const r=JSON.parse(cleaned);
+    if(!r||!Array.isArray(r.sections)||!r.sections.length){prog.innerHTML='⚠️ Aucun enrichissement trouvé pour ce document.';btn.disabled=false;btn.textContent='🚀 Enrichir le module';return;}
+    let count=0;
+    r.sections.forEach(patch=>{
+      const si=patch.idx;if(si==null||si<0||si>=(m.sections||[]).length)return;
+      const{idx:_,...fields}=patch;
+      mods[i].sections[si]={...mods[i].sections[si],...fields};count++;
+    });
+    mods[i].docs=mods[i].docs||[];
+    _idxEnrichDocs.forEach(d=>mods[i].docs.push({name:d.name,added:Date.now()}));
+    saveCustomModules(mods);
+    closeIdxEnrichPanel();
+    goCustomModule(i);
+    // Show success feedback briefly
+    setTimeout(()=>{
+      const el=document.querySelector('#m-custom .ccard:last-child .btn-row');
+      if(el){const fb=document.createElement('div');fb.style.cssText='font-size:.78rem;color:#059669;font-weight:700;margin-top:.4rem;';fb.textContent=`✅ ${count} section${count>1?'s':''} enrichie${count>1?'s':''} avec succès !`;el.parentElement.appendChild(fb);setTimeout(()=>fb.remove(),4000);}
+    },300);
+  }catch(e){prog.innerHTML=`❌ Erreur : ${_escH(e.message)}`;}
+  btn.disabled=false;btn.textContent='🚀 Enrichir le module';
+}
+</script>
 
 </body>
 </html>

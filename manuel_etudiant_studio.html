@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manuel Étudiant – Green Lab Studio – Générateur Pédagogique IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0d1b2a;--blue:#1a3a6e;--accent:#f59e0b;--orange:#ea580c;--green:#059669;--red:#dc2626;--purple:#7c3aed;--teal:#0891b2;--gray50:#f8fafc;--gray100:#f1f5f9;--gray200:#e2e8f0;--gray400:#94a3b8;--gray600:#475569;--gray800:#1e293b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--gray100);color:var(--gray800);line-height:1.7;}
+@media print{.no-print{display:none!important;}body{background:#fff;}.card,.tip,.warning,.step-block{box-shadow:none!important;border:1px solid #ddd!important;}}
+
+/* COVER */
+.cover{background:linear-gradient(135deg,#0d1b2a 0%,#1a3a6e 50%,#1e3a8a 100%);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:3rem 2rem;position:relative;overflow:hidden;}
+.cover-orb1{position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.14),transparent 70%);top:-120px;right:-100px;}
+.cover-orb2{position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.12),transparent 70%);bottom:-80px;left:-40px;}
+.cover-orb3{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(8,145,178,.1),transparent 70%);top:40%;left:5%;}
+.cover-badge{background:linear-gradient(135deg,var(--accent),var(--orange));display:inline-block;padding:.42rem 1.3rem;border-radius:20px;font-size:.8rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:2rem;}
+.cover h1{font-size:3.2rem;font-weight:900;line-height:1.1;margin-bottom:.5rem;font-family:'Plus Jakarta Sans',sans-serif;}
+.cover h1 em{background:linear-gradient(90deg,var(--accent),#fbbf24,var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-style:normal;}
+.cover-product{font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem;letter-spacing:.3px;}
+.cover-sub{font-size:1rem;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto 2.5rem;line-height:1.75;}
+.cover-chips{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:2rem;}
+.cover-chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:.3rem .9rem;font-size:.8rem;}
+.cover-chip.gold{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fbbf24;}
+.cover-chip.purple{background:rgba(124,58,237,.18);border-color:rgba(124,58,237,.35);color:#c4b5fd;}
+.cover-chip.green{background:rgba(5,150,105,.18);border-color:rgba(5,150,105,.35);color:#6ee7b7;}
+.cover-meta{display:flex;gap:2rem;justify-content:center;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.1);padding-top:1.5rem;}
+.cover-meta div{font-size:.78rem;color:rgba(255,255,255,.4);}
+.cover-meta strong{display:block;color:#fff;font-size:.92rem;margin-bottom:.2rem;}
+
+/* TOC */
+.toc{background:#fff;padding:2.5rem;max-width:860px;margin:2rem auto;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);}
+.toc h2{font-size:1.15rem;font-weight:800;margin-bottom:1.2rem;color:var(--navy);}
+.toc-list{list-style:none;}
+.toc-section a{display:flex;align-items:center;gap:.7rem;color:var(--gray600);text-decoration:none;padding:.38rem .5rem;border-radius:8px;font-size:.87rem;transition:background .12s;}
+.toc-section a:hover{background:var(--gray50);color:var(--navy);}
+.toc-num{min-width:26px;height:26px;border-radius:7px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;}
+.toc-num.gold{background:linear-gradient(135deg,var(--accent),var(--orange));}
+.toc-num.purple{background:var(--purple);}
+.toc-num.green{background:var(--green);}
+.toc-num.teal{background:var(--teal);}
+.toc-num.red{background:var(--red);}
+.toc-section.sub a{padding-left:2.5rem;font-size:.81rem;color:var(--gray400);}
+
+/* PAGE */
+.page{max-width:860px;margin:0 auto;padding:2rem 1.2rem;}
+.section-header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:14px;padding:1.6rem 2rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.2rem;}
+.section-header .sh-icon{width:52px;height:52px;background:rgba(255,255,255,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex-shrink:0;}
+.section-header h2{font-size:1.25rem;font-weight:800;margin-bottom:.2rem;font-family:'Plus Jakarta Sans',sans-serif;}
+.section-header p{font-size:.83rem;color:rgba(255,255,255,.6);}
+.sn{font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.4);margin-bottom:.3rem;}
+.section-header.gold{background:linear-gradient(135deg,#92400e,var(--orange),var(--accent));}
+.section-header.purple{background:linear-gradient(135deg,#3b0764,#7c3aed,#a78bfa);}
+.section-header.green{background:linear-gradient(135deg,#064e3b,#059669,#34d399);}
+.section-header.teal{background:linear-gradient(135deg,#0c4a6e,#0891b2,#38bdf8);}
+.section-header.red{background:linear-gradient(135deg,#7f1d1d,#dc2626,#f87171);}
+
+/* CARDS */
+.card{background:#fff;border-radius:12px;padding:1.4rem;margin-bottom:1.1rem;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid var(--gray200);}
+.card h3{font-size:.98rem;font-weight:800;margin-bottom:.7rem;color:var(--navy);}
+.card h4{font-size:.88rem;font-weight:700;color:var(--navy);margin:.8rem 0 .35rem;}
+.card p,.card li{font-size:.87rem;color:var(--gray600);}
+.card ul,.card ol{padding-left:1.2rem;margin:.4rem 0;}
+.card li{margin-bottom:.22rem;}
+
+/* STEPS */
+.steps{margin:1rem 0;}
+.step-block{display:flex;gap:.9rem;margin-bottom:.9rem;background:#fff;border-radius:12px;padding:.9rem 1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid var(--gray200);}
+.step-num{min-width:34px;height:34px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.85rem;flex-shrink:0;}
+.step-num.gold{background:linear-gradient(135deg,var(--accent),var(--orange));}
+.step-num.purple{background:var(--purple);}
+.step-num.green{background:var(--green);}
+.step-num.teal{background:var(--teal);}
+.step-num.red{background:var(--red);}
+.step-content h4{font-size:.87rem;font-weight:800;color:var(--navy);margin-bottom:.25rem;}
+.step-content p{font-size:.83rem;color:var(--gray600);}
+.step-content code{background:var(--gray100);border:1px solid var(--gray200);border-radius:5px;padding:.1rem .4rem;font-size:.78rem;font-family:monospace;color:var(--gray800);}
+
+/* ALERTS */
+.tip{background:#eff6ff;border-left:4px solid #3b82f6;border-radius:0 10px 10px 0;padding:.85rem 1rem;margin:1rem 0;font-size:.84rem;color:#1e40af;}
+.tip strong{display:block;margin-bottom:.15rem;}
+.warning{background:#fffbeb;border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:.85rem 1rem;margin:1rem 0;font-size:.84rem;color:#92400e;}
+.warning strong{display:block;margin-bottom:.15rem;}
+.success{background:#ecfdf5;border-left:4px solid var(--green);border-radius:0 10px 10px 0;padding:.85rem 1rem;margin:1rem 0;font-size:.84rem;color:#065f46;}
+.success strong{display:block;margin-bottom:.15rem;}
+.danger{background:#fef2f2;border-left:4px solid var(--red);border-radius:0 10px 10px 0;padding:.85rem 1rem;margin:1rem 0;font-size:.84rem;color:#991b1b;}
+.danger strong{display:block;margin-bottom:.15rem;}
+.purple-box{background:#f5f3ff;border-left:4px solid var(--purple);border-radius:0 10px 10px 0;padding:.85rem 1rem;margin:1rem 0;font-size:.84rem;color:#5b21b6;}
+.purple-box strong{display:block;margin-bottom:.15rem;}
+
+/* MODE CARDS */
+.mode-compare{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0;}
+.mode-box{border-radius:14px;padding:1.3rem;color:#fff;}
+.mode-box.pro{background:linear-gradient(135deg,#0d1b2a,#1a3a6e);}
+.mode-box.acad{background:linear-gradient(135deg,#1e1b4b,#3730a3);}
+.mode-box h3{font-size:.95rem;font-weight:900;margin-bottom:.5rem;font-family:'Plus Jakarta Sans',sans-serif;}
+.mode-box p{font-size:.8rem;opacity:.75;margin-bottom:.6rem;line-height:1.6;}
+.mode-tags{display:flex;flex-wrap:wrap;gap:.3rem;}
+.mode-tag{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:.15rem .55rem;font-size:.68rem;font-weight:700;}
+
+/* UI MOCK */
+.ui-mock{background:var(--navy);border-radius:14px;padding:1.2rem 1.5rem;margin:1rem 0;font-family:monospace;}
+.ui-mock-bar{display:flex;gap:.35rem;margin-bottom:.9rem;}
+.ui-mock-dot{width:10px;height:10px;border-radius:50%;}
+.ui-mock-dot.r{background:#ef4444;}.ui-mock-dot.y{background:#f59e0b;}.ui-mock-dot.g{background:#22c55e;}
+.ui-chat-msg{border-radius:12px;padding:.6rem .9rem;margin-bottom:.5rem;font-size:.8rem;line-height:1.6;}
+.ui-chat-user{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);text-align:right;margin-left:20%;}
+.ui-chat-ai{background:rgba(124,58,237,.2);border:1px solid rgba(124,58,237,.3);color:rgba(255,255,255,.85);margin-right:20%;}
+.ui-chat-ai-label{font-size:.65rem;font-weight:800;color:#a78bfa;letter-spacing:.3px;margin-bottom:.2rem;text-transform:uppercase;}
+
+/* FEATURE GRID */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0;}
+.feat-card{background:#fff;border-radius:12px;padding:1rem;border:1.5px solid var(--gray200);text-align:center;}
+.feat-card.new{border-color:#fbbf24;background:linear-gradient(135deg,#fffbeb,#fff);}
+.feat-ico{font-size:1.8rem;margin-bottom:.4rem;}
+.feat-title{font-size:.82rem;font-weight:800;color:var(--navy);margin-bottom:.25rem;}
+.feat-desc{font-size:.75rem;color:var(--gray600);line-height:1.5;}
+.feat-new-badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;font-size:.58rem;font-weight:800;padding:.1rem .4rem;border-radius:4px;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.4px;}
+
+/* TABS MOCK */
+.tab-mock{display:flex;gap:.15rem;border-bottom:2px solid var(--gray200);margin-bottom:.8rem;}
+.tab-mock-btn{padding:.5rem 1rem;border-radius:7px 7px 0 0;font-size:.78rem;font-weight:700;border-bottom:2.5px solid transparent;margin-bottom:-2px;}
+.tab-mock-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-mock-btn.inactive{color:var(--gray400);}
+
+/* SCORE RING MOCK */
+.score-display{display:flex;align-items:center;gap:1.2rem;background:var(--gray50);border-radius:12px;padding:1rem 1.2rem;border:1.5px solid var(--gray200);margin:1rem 0;}
+.score-ring{width:64px;height:64px;border-radius:50%;background:conic-gradient(#059669 0% 85%, #e2e8f0 85% 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
+.score-ring-inner{width:46px;height:46px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:900;color:#059669;}
+.score-info p{font-size:.83rem;color:var(--gray600);}
+.score-info strong{color:var(--navy);font-size:.9rem;}
+
+/* NEW FEATURE HIGHLIGHT */
+.new-feature-banner{background:linear-gradient(135deg,#0d1b2a,#1a3a6e);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1rem;color:#fff;display:flex;align-items:center;gap:.8rem;}
+.new-feature-banner .nfb-badge{background:linear-gradient(135deg,var(--accent),var(--orange));border-radius:6px;padding:.15rem .55rem;font-size:.65rem;font-weight:800;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+.new-feature-banner p{font-size:.83rem;color:rgba(255,255,255,.8);margin:0;}
+
+/* MISC */
+table{width:100%;border-collapse:collapse;font-size:.83rem;margin:1rem 0;}
+th{background:var(--navy);color:#fff;padding:.55rem .85rem;text-align:left;font-weight:700;}
+td{padding:.5rem .85rem;border-bottom:1px solid var(--gray200);}
+tr:nth-child(even) td{background:var(--gray50);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0;}
+@media(max-width:600px){.grid2,.mode-compare,.feat-grid{grid-template-columns:1fr;}.cover h1{font-size:2.2rem;}.feat-grid{grid-template-columns:1fr 1fr;}}
+.divider{border:none;border-top:2px solid var(--gray200);margin:2.5rem 0;}
+.key{background:var(--gray800);color:#fff;border-radius:5px;padding:.1rem .4rem;font-size:.73rem;font-family:monospace;font-weight:700;}
+.mock-btn{display:inline-block;padding:.28rem .75rem;border-radius:7px;font-size:.73rem;font-weight:700;margin:.2rem;}
+.mock-btn.primary{background:var(--navy);color:#fff;}.mock-btn.gold{background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;}
+.mock-btn.ghost{background:#fff;border:1.5px solid var(--gray200);color:var(--gray600);}
+.mock-btn.purple{background:var(--purple);color:#fff;}
+.mock-btn.green{background:var(--green);color:#fff;}
+.mock-btn.orange{background:#f59e0b;color:#fff;}
+.badge-pill{display:inline-block;padding:.15rem .6rem;border-radius:20px;font-size:.72rem;font-weight:800;}
+.badge-pro{background:rgba(245,158,11,.12);color:#b45309;}
+.badge-acad{background:rgba(124,58,237,.1);color:#5b21b6;}
+.print-btn{position:fixed;bottom:1.5rem;right:1.5rem;background:linear-gradient(135deg,var(--accent),var(--orange));color:#fff;border:none;border-radius:50px;padding:.65rem 1.3rem;font-size:.83rem;font-weight:800;cursor:pointer;z-index:99;box-shadow:0 4px 18px rgba(245,158,11,.4);}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px;}
+
+/* REVISION PLAN MOCK */
+.revplan-mock{display:flex;flex-direction:column;gap:.4rem;margin:1rem 0;}
+.revplan-day-mock{background:#fff;border:1.5px solid var(--gray200);border-radius:10px;padding:.6rem .9rem;}
+.revplan-day-mock-hdr{display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem;}
+.revplan-day-mock-num{background:var(--navy);color:#fff;border-radius:7px;padding:.1rem .5rem;font-size:.67rem;font-weight:800;}
+.revplan-day-mock-title{font-size:.8rem;font-weight:700;color:var(--navy);}
+.revplan-task-mock{font-size:.76rem;color:var(--gray600);padding:.15rem 0;display:flex;align-items:center;gap:.3rem;}
+.revplan-task-mock::before{content:'→';color:var(--gray400);font-size:.7rem;}
+
+</style>
+</head>
+<body>
+<button class="print-btn no-print" onclick="window.print()">🖨️ Imprimer / PDF</button>
+
+<!-- ═══════════════════ COVER ═══════════════════ -->
+<div class="cover">
+  <div class="cover-orb1"></div><div class="cover-orb2"></div><div class="cover-orb3"></div>
+  <div style="position:relative;z-index:1;width:100%;max-width:680px;">
+    <div class="cover-badge">📘 Manuel Étudiant · Édition 2026</div>
+    <h1>Guide complet<br><em>Green Lab Studio</em></h1>
+    <p class="cover-product">Générateur Pédagogique par Intelligence Artificielle</p>
+    <p class="cover-sub">De la première connexion à l'export PDF — tout ce qu'il faut savoir pour créer, explorer et maîtriser vos modules avec l'assistant IA, incluant toutes les nouvelles fonctionnalités d'apprentissage.</p>
+    <div class="cover-chips">
+      <span class="cover-chip gold">💼 Formation Pro</span>
+      <span class="cover-chip purple">🎓 Cours Académique</span>
+      <span class="cover-chip">💬 Assistant IA</span>
+      <span class="cover-chip">📚 Bibliothèque</span>
+      <span class="cover-chip">🎯 Quiz interactif</span>
+      <span class="cover-chip">🃏 Flashcards</span>
+      <span class="cover-chip green">🧪 Micro-quiz section</span>
+      <span class="cover-chip green">🗓️ Plan de révision</span>
+      <span class="cover-chip green">🎯 Rejouer ses erreurs</span>
+      <span class="cover-chip">🖼️ Images auto</span>
+      <span class="cover-chip">📺 Vidéos YouTube</span>
+      <span class="cover-chip">📄 Export PDF</span>
+      <span class="cover-chip">🏅 Attestation</span>
+    </div>
+    <div class="cover-meta">
+      <div><strong>Outil</strong>Green Lab Studio</div>
+      <div><strong>IA</strong>Groq · OpenAI · Anthropic · Google</div>
+      <div><strong>Version</strong>2026 · Mise à jour août</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ TOC ═══════════════════ -->
+<div class="toc">
+  <h2>📋 Table des matières</h2>
+  <ul class="toc-list">
+    <li class="toc-section"><a href="#s1"><span class="toc-num">1</span> Qu'est-ce que Green Lab Studio ?</a></li>
+    <li class="toc-section sub"><a href="#s1a">→ L'interface en un coup d'œil</a></li>
+    <li class="toc-section sub"><a href="#s1b">→ Formation Pro vs Cours Académique</a></li>
+    <li class="toc-section"><a href="#s2"><span class="toc-num gold">2</span> Première connexion — Clé API (tous fournisseurs)</a></li>
+    <li class="toc-section sub"><a href="#s2a">→ Choisir votre fournisseur IA</a></li>
+    <li class="toc-section sub"><a href="#s2b">→ Saisir la clé dans l'application</a></li>
+    <li class="toc-section"><a href="#s3"><span class="toc-num purple">3</span> Créer un module avec l'Assistant IA</a></li>
+    <li class="toc-section sub"><a href="#s3a">→ Démarrer une conversation</a></li>
+    <li class="toc-section sub"><a href="#s3b">→ Exemples de commandes efficaces</a></li>
+    <li class="toc-section sub"><a href="#s3c">→ Insérer des documents sources</a></li>
+    <li class="toc-section sub"><a href="#s3d">→ Comprendre la génération en direct</a></li>
+    <li class="toc-section"><a href="#s4"><span class="toc-num green">4</span> Explorer un module généré</a></li>
+    <li class="toc-section sub"><a href="#s4a">→ Les sections de cours</a></li>
+    <li class="toc-section sub"><a href="#s4b">→ Exercices et mises en situation</a></li>
+    <li class="toc-section sub"><a href="#s4c">→ Le quiz d'évaluation</a></li>
+    <li class="toc-section sub"><a href="#s4d">→ 🆕 Micro-quiz par section</a></li>
+    <li class="toc-section sub"><a href="#s4e">→ 🆕 Plan de révision personnalisé</a></li>
+    <li class="toc-section sub"><a href="#s4f">→ 🆕 Images et vidéos YouTube</a></li>
+    <li class="toc-section sub"><a href="#s4g">→ 🆕 Régénérer un contenu manquant</a></li>
+    <li class="toc-section sub"><a href="#s4h">→ Flashcards et mémorisation</a></li>
+    <li class="toc-section sub"><a href="#s4i">→ Attestation et export PDF</a></li>
+    <li class="toc-section"><a href="#s5"><span class="toc-num teal">5</span> La Bibliothèque — gérer vos modules</a></li>
+    <li class="toc-section"><a href="#s6"><span class="toc-num">6</span> Parcours d'apprentissage recommandé</a></li>
+    <li class="toc-section"><a href="#s7"><span class="toc-num">7</span> FAQ — Questions fréquentes</a></li>
+  </ul>
+</div>
+
+<!-- ═══════════════════ SECTION 1 ═══════════════════ -->
+<div class="page" id="s1">
+  <div class="section-header">
+    <div class="sh-icon">🧪</div>
+    <div><div class="sn">Section 1</div><h2>Qu'est-ce que Green Lab Studio ?</h2><p>Un générateur de modules pédagogiques complets, propulsé par l'IA</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Présentation générale</h3>
+    <p>Green Lab Studio est un outil qui permet de créer automatiquement des <strong>modules pédagogiques complets</strong> à partir d'une simple description. En quelques secondes, l'IA génère pour vous :</p>
+    <ul style="margin-top:.6rem;">
+      <li>Un cours théorique structuré avec sections progressives</li>
+      <li>Des exercices pratiques et mises en situation réelles</li>
+      <li>Un quiz d'évaluation avec feedback automatique</li>
+      <li>Des flashcards pour la mémorisation</li>
+      <li>Une check-list terrain et un mémo expert</li>
+      <li>Un cas industriel ou terrain ancré dans votre domaine</li>
+      <li>Un plan de révision jour par jour adapté à votre rythme</li>
+      <li>Des ressources vidéo YouTube ciblées sur le module</li>
+    </ul>
+    <p style="margin-top:.7rem;">Tout cela sans avoir à rédiger une seule ligne — vous décrivez, l'IA construit.</p>
+  </div>
+
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-ico">💬</div>
+      <div class="feat-title">Assistant IA</div>
+      <div class="feat-desc">Décrivez votre module en langage naturel, l'IA génère tout.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico">⚡</div>
+      <div class="feat-title">Génération parallèle</div>
+      <div class="feat-desc">Toutes les sections sont rédigées en simultané pour un gain de temps maximal.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico">🎯</div>
+      <div class="feat-title">Quiz + Score</div>
+      <div class="feat-desc">Quiz adaptatif avec anneau de score animé et feedback IA personnalisé.</div>
+    </div>
+    <div class="feat-card new">
+      <div class="feat-new-badge">Nouveau</div>
+      <div class="feat-ico">🧪</div>
+      <div class="feat-title">Micro-quiz section</div>
+      <div class="feat-desc">Testez votre compréhension à la fin de chaque section, feedback immédiat.</div>
+    </div>
+    <div class="feat-card new">
+      <div class="feat-new-badge">Nouveau</div>
+      <div class="feat-ico">🗓️</div>
+      <div class="feat-title">Plan de révision</div>
+      <div class="feat-desc">Plan jour par jour adapté : 3, 7, 14 ou 30 jours selon votre rythme.</div>
+    </div>
+    <div class="feat-card new">
+      <div class="feat-new-badge">Nouveau</div>
+      <div class="feat-ico">🎯</div>
+      <div class="feat-title">Revoir ses erreurs</div>
+      <div class="feat-desc">Après le quiz, relancez uniquement les questions ratées pour cibler vos lacunes.</div>
+    </div>
+    <div class="feat-card new">
+      <div class="feat-new-badge">Nouveau</div>
+      <div class="feat-ico">📺</div>
+      <div class="feat-title">Vidéos YouTube</div>
+      <div class="feat-desc">Liens de recherche YouTube auto-générés pour chaque aspect du module.</div>
+    </div>
+    <div class="feat-card new">
+      <div class="feat-new-badge">Nouveau</div>
+      <div class="feat-ico">🖼️</div>
+      <div class="feat-title">Images auto</div>
+      <div class="feat-desc">Photos professionnelles ajoutées en 1 clic, sans clé API, illimitées.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico">🃏</div>
+      <div class="feat-title">Flashcards</div>
+      <div class="feat-desc">Révision par carte retournable, terme ↔ définition.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico">📄</div>
+      <div class="feat-title">Export PDF</div>
+      <div class="feat-desc">Module complet exportable en PDF propre et imprimable.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico">🏅</div>
+      <div class="feat-title">Attestation</div>
+      <div class="feat-desc">Certificat de formation généré automatiquement après validation.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-ico">📝</div>
+      <div class="feat-title">Notes personnelles</div>
+      <div class="feat-desc">Prenez des notes sur chaque section, sauvegardées avec le module.</div>
+    </div>
+  </div>
+
+  <hr class="divider" id="s1a">
+  <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">1.1 — L'interface en un coup d'œil</h3>
+
+  <div class="card">
+    <h3>La sidebar (barre latérale gauche)</h3>
+    <p>La barre latérale est toujours visible. Elle contient :</p>
+    <ul style="margin-top:.5rem;">
+      <li><strong>🏠 Accueil</strong> — tableau de bord, statistiques, modules récents</li>
+      <li><strong>💬 Assistant IA</strong> — interface de chat pour créer et modifier des modules</li>
+      <li><strong>📚 Bibliothèque</strong> — tous vos modules sauvegardés, recherche, filtres</li>
+      <li><strong>⚙️ Paramètres</strong> — configuration du modèle IA, nom de la plateforme, sections affichées</li>
+    </ul>
+    <p style="margin-top:.7rem;">En haut de la sidebar se trouvent le <strong>champ de clé API</strong> (compatible Groq, OpenAI, Anthropic ou Google) et l'indicateur de mode actif (Pro ou Académique).</p>
+  </div>
+
+  <hr class="divider" id="s1b">
+  <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:1rem;">1.2 — Formation Pro vs Cours Académique</h3>
+
+  <div class="mode-compare">
+    <div class="mode-box pro">
+      <h3>💼 Formation Professionnelle</h3>
+      <p>Pour les formations métier, l'apprentissage par compétences et les environnements industriels ou techniques.</p>
+      <div class="mode-tags">
+        <span class="mode-tag">Procédures terrain</span>
+        <span class="mode-tag">Mises en situation</span>
+        <span class="mode-tag">Check-list</span>
+        <span class="mode-tag">Mémo expert</span>
+        <span class="mode-tag">Cas réel</span>
+        <span class="mode-tag">KPIs métier</span>
+      </div>
+    </div>
+    <div class="mode-box acad">
+      <h3>🎓 Cours Académique</h3>
+      <p>Pour l'enseignement supérieur : IUT, BUT, Licence Pro, École d'ingénieurs, Master.</p>
+      <div class="mode-tags">
+        <span class="mode-tag">Cours théoriques</span>
+        <span class="mode-tag">Définitions formelles</span>
+        <span class="mode-tag">Exercices TD/TP</span>
+        <span class="mode-tag">Fiche de révision</span>
+        <span class="mode-tag">Cas industriel</span>
+        <span class="mode-tag">Formules clés</span>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Contenu généré</th><th>Formation Pro</th><th>Cours Académique</th></tr>
+    <tr><td>Sections de cours</td><td>✅ Procédures + théorie terrain</td><td>✅ Cours rigoureux + démonstrations</td></tr>
+    <tr><td>Exercices</td><td>✅ Mises en situation réelles</td><td>✅ TD/TP avec corrigés</td></tr>
+    <tr><td>Cas industrie / terrain</td><td>✅ Entreprise fictive réaliste</td><td>✅ Contexte industriel</td></tr>
+    <tr><td>Check-list</td><td>✅ Avant / Pendant / Après</td><td>—</td></tr>
+    <tr><td>Fiche de révision</td><td>—</td><td>✅ Notions + formules + pièges</td></tr>
+    <tr><td>Mémo terrain</td><td>✅ Réflexes expert</td><td>—</td></tr>
+    <tr><td>Quiz QCM</td><td>✅ 5 à 20 questions</td><td>✅ 5 à 20 questions</td></tr>
+    <tr><td>Micro-quiz par section</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Plan de révision</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Vidéos YouTube</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Images auto</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Flashcards</td><td>✅</td><td>✅</td></tr>
+    <tr><td>Attestation</td><td>✅</td><td>—</td></tr>
+  </table>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════ SECTION 2 ═══════════════════ -->
+<div class="page" id="s2">
+  <div class="section-header gold">
+    <div class="sh-icon">🔑</div>
+    <div><div class="sn">Section 2</div><h2>Première connexion — Clé API (tous fournisseurs)</h2><p>Green Lab Studio accepte les clés Groq, OpenAI, Anthropic et Google — utilisez celle que vous avez déjà</p></div>
+  </div>
+
+  <div class="warning">
+    <strong>⚠️ Indispensable avant de commencer</strong>
+    Green Lab Studio nécessite une clé API pour fonctionner. Sans elle, aucune génération n'est possible. La procédure prend moins de 2 minutes, et Groq propose une clé <strong>entièrement gratuite</strong>.
+  </div>
+
+  <div id="s2a">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.2rem 0 .8rem;">2.1 — Choisir votre fournisseur IA</h3>
+    <p style="margin-bottom:.9rem;">L'application détecte automatiquement votre fournisseur dès que vous collez la clé — aucune configuration manuelle nécessaire. Choisissez le fournisseur dont vous avez déjà un compte :</p>
+
+    <div class="grid2" style="gap:.8rem;margin-bottom:1rem;">
+      <div class="card" style="margin:0;border-left:4px solid #f59e0b;">
+        <h3 style="color:#b45309;">⚡ Groq · Llama 3.3 70B</h3>
+        <p style="font-size:.85rem;">Gratuit, ultra-rapide, idéal pour démarrer.</p>
+        <ul style="font-size:.84rem;margin-top:.4rem;">
+          <li>Clé commence par <code>gsk_</code></li>
+          <li>Quota gratuit : 6 000 tokens/min</li>
+          <li>Inscription : <code>console.groq.com</code></li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;border-left:4px solid #10b981;">
+        <h3 style="color:#065f46;">🟢 OpenAI · GPT-4o mini</h3>
+        <p style="font-size:.85rem;">Fiable et largement utilisé.</p>
+        <ul style="font-size:.84rem;margin-top:.4rem;">
+          <li>Clé commence par <code>sk-</code></li>
+          <li>Accès payant (crédit de départ offert)</li>
+          <li>Inscription : <code>platform.openai.com</code></li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;border-left:4px solid #7c3aed;">
+        <h3 style="color:#5b21b6;">🟣 Anthropic · Claude Haiku</h3>
+        <p style="font-size:.85rem;">Raisonnement précis et fiable.</p>
+        <ul style="font-size:.84rem;margin-top:.4rem;">
+          <li>Clé commence par <code>sk-ant-</code></li>
+          <li>Accès payant</li>
+          <li>Inscription : <code>console.anthropic.com</code></li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;border-left:4px solid #3b82f6;">
+        <h3 style="color:#1d4ed8;">🔵 Google · Gemini 2.0 Flash</h3>
+        <p style="font-size:.85rem;">Multimodal, rapide, avec quota gratuit généreux.</p>
+        <ul style="font-size:.84rem;margin-top:.4rem;">
+          <li>Clé commence par <code>AIza</code></li>
+          <li>Quota gratuit disponible</li>
+          <li>Inscription : <code>aistudio.google.com</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-block">
+        <div class="step-num gold">1</div>
+        <div class="step-content">
+          <h4>Créez un compte chez votre fournisseur</h4>
+          <p>Allez sur le site correspondant (voir tableau ci-dessus). Aucune carte bancaire requise pour Groq et Google (quota gratuit). Inscrivez-vous avec votre email ou via Google/GitHub.</p>
+        </div>
+      </div>
+      <div class="step-block">
+        <div class="step-num gold">2</div>
+        <div class="step-content">
+          <h4>Créez une clé API</h4>
+          <p>Dans votre tableau de bord, recherchez la section <strong>API Keys</strong> (ou "Clés API"), puis cliquez sur <strong>Create</strong>. Donnez-lui un nom (ex : "GreenLab").</p>
+        </div>
+      </div>
+      <div class="step-block">
+        <div class="step-num gold">3</div>
+        <div class="step-content">
+          <h4>Copiez la clé immédiatement</h4>
+          <p>La clé n'est affichée qu'une seule fois. Copiez-la dès sa création — elle ne sera plus lisible après fermeture de la fenêtre.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="s2b">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.2rem 0 .8rem;">2.2 — Saisir la clé dans l'application</h3>
+    <div class="steps">
+      <div class="step-block">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h4>Revenez sur Green Lab Studio</h4>
+          <p>L'onglet de l'application est resté ouvert. Pas besoin de le recharger.</p>
+        </div>
+      </div>
+      <div class="step-block">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h4>Collez la clé dans le champ en haut de la sidebar</h4>
+          <p>Le champ affiche le placeholder <code>gsk_… / sk-… / sk-ant-… / AIza…</code>. Collez votre clé avec <span class="key">Ctrl+V</span> (ou <span class="key">⌘V</span> sur Mac). Elle est masquée par défaut pour la sécurité.</p>
+        </div>
+      </div>
+      <div class="step-block">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h4>Un badge de confirmation apparaît</h4>
+          <p>L'application reconnaît automatiquement le fournisseur (⚡ Groq, 🟢 OpenAI, 🟣 Anthropic ou 🔵 Google) et affiche un badge coloré sous le champ. La clé est sauvegardée localement dans votre navigateur.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="danger">
+    <strong>🔒 Ne partagez jamais votre clé API</strong>
+    Votre clé est personnelle. Ne la publiez pas, ne la mettez pas dans un email. Elle permet de faire des appels API à votre nom et à votre quota.
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════ SECTION 3 ═══════════════════ -->
+<div class="page" id="s3">
+  <div class="section-header purple">
+    <div class="sh-icon">💬</div>
+    <div><div class="sn">Section 3</div><h2>Créer un module avec l'Assistant IA</h2><p>L'interface de chat est le cœur de Green Lab Studio — tout commence ici</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Comment fonctionne l'Assistant ?</h3>
+    <p>L'Assistant IA est une interface de chat qui comprend vos demandes en langage naturel. Vous lui décrivez le module que vous voulez — domaine, compétence, niveau — et il prépare une fiche récapitulative avant de lancer la génération complète.</p>
+    <p style="margin-top:.5rem;">Pas besoin de remplir un formulaire : <strong>parlez à l'IA comme à un collègue.</strong></p>
+  </div>
+
+  <div id="s3a">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.2rem 0 .8rem;">3.1 — Démarrer une conversation</h3>
+    <div class="steps">
+      <div class="step-block">
+        <div class="step-num purple">1</div>
+        <div class="step-content">
+          <h4>Cliquez sur "💬 Assistant IA" dans la sidebar</h4>
+          <p>Ou cliquez sur l'une des deux cartes de mode (💼 Formation Pro / 🎓 Cours Académique) sur l'écran d'accueil.</p>
+        </div>
+      </div>
+      <div class="step-block">
+        <div class="step-num purple">2</div>
+        <div class="step-content">
+          <h4>Décrivez votre module</h4>
+          <p>Tapez votre demande dans le champ en bas du chat et appuyez sur <span class="key">Entrée</span>. Plus vous êtes précis, meilleur sera le résultat.</p>
+        </div>
+      </div>
+      <div class="step-block">
+        <div class="step-num purple">3</div>
+        <div class="step-content">
+          <h4>Validez la fiche de synthèse</h4>
+          <p>L'IA vous présente un récapitulatif (titre, domaine, public, durée, niveau). Cliquez sur <span class="mock-btn gold">⚡ Générer ce module</span> pour lancer la génération complète.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui-mock">
+    <div class="ui-mock-bar"><div class="ui-mock-dot r"></div><div class="ui-mock-dot y"></div><div class="ui-mock-dot g"></div></div>
+    <div class="ui-chat-ai">
+      <div class="ui-chat-ai-label">🤖 Green Lab Studio</div>
+      Bonjour ! Je suis prêt à créer votre module de <strong>Formation Professionnelle</strong>. Quel domaine métier souhaitez-vous couvrir ?
+    </div>
+    <div class="ui-chat-user">Crée-moi un module sur la lecture de schéma électrique pour des techniciens débutants en électricité industrielle</div>
+    <div class="ui-chat-ai">
+      <div class="ui-chat-ai-label">🤖 Green Lab Studio</div>
+      Parfait ! Voici ce que je vais générer :<br><br>
+      📌 <strong>Lecture de schéma électrique</strong><br>
+      💼 Domaine : Électricité industrielle · 👥 Public : Technicien débutant<br>
+      📊 Niveau : Débutant · ⏱️ 2 heures<br><br>
+      <span style="background:rgba(245,158,11,.3);border-radius:6px;padding:.15rem .5rem;font-size:.76rem;font-weight:800;">⚡ Générer ce module →</span>
+    </div>
+  </div>
+
+  <div id="s3b">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">3.2 — Exemples de commandes efficaces</h3>
+    <div class="card">
+      <h3>🏭 Formation Professionnelle — exemples</h3>
+      <ul>
+        <li>"Module sur la maintenance préventive d'une pompe hydraulique, niveau intermédiaire, 3h"</li>
+        <li>"Crée un cours sur le câblage d'armoire industrielle pour des apprentis électriciens débutants"</li>
+        <li>"Formation au diagnostic de panne sur automate Siemens S7, techniciens confirmés"</li>
+        <li>"Module soudure TIG sur acier inoxydable, formation 2 jours, niveau débutant"</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🎓 Cours Académique — exemples</h3>
+      <ul>
+        <li>"Cours sur la transformée de Laplace pour des étudiants de BUT2 en automatique"</li>
+        <li>"Module sur les machines asynchrones triphasées, Licence Pro électrotechnique"</li>
+        <li>"Cours sur les systèmes de régulation PID pour Master Ingénierie M1"</li>
+        <li>"Chapitre résistance des matériaux — flexion simple, Ingénieur 1ère année"</li>
+      </ul>
+    </div>
+    <div class="tip">
+      <strong>💡 Plus de détails = meilleur résultat</strong>
+      Mentionnez le domaine exact, le niveau du public, la durée souhaitée, les outils ou normes si pertinent.
+    </div>
+  </div>
+
+  <div id="s3c">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">3.3 — Insérer des documents sources</h3>
+    <div class="new-feature-banner">
+      <span class="nfb-badge">Fonctionnalité clé</span>
+      <p>Glissez-déposez vos propres documents (PDF, Word, TXT) dans le chat. L'IA lit <strong>l'intégralité du document</strong> — début ET fin — et en extrait les informations les plus importantes pour enrichir le module généré.</p>
+    </div>
+    <div class="card">
+      <h3>Comment insérer un document</h3>
+      <ul>
+        <li>Cliquez sur l'icône 📎 en bas du chat, ou glissez-déposez le fichier dans la zone de chat</li>
+        <li>Un toast "📄 Lecture complète de fichier.pdf…" confirme que le document est en cours d'analyse</li>
+        <li>Vous pouvez insérer <strong>plusieurs documents</strong> — ils sont tous pris en compte</li>
+        <li>L'IA extrait les notions clés, données numériques et procédures même si elles sont à la fin du document</li>
+      </ul>
+    </div>
+    <div class="tip">
+      <strong>💡 Cas d'usage typiques</strong>
+      Chargez un cours existant, un manuel technique, une fiche de poste ou un rapport d'audit — l'IA construit le module à partir de votre contenu réel, pas d'un contenu générique.
+    </div>
+  </div>
+
+  <div id="s3d">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">3.4 — Comprendre la génération en direct</h3>
+    <div class="card">
+      <h3>L'écran de génération</h3>
+      <p>Une fois lancée, la génération affiche un écran dédié avec :</p>
+      <ul style="margin-top:.5rem;">
+        <li>Une <strong>barre de progression</strong> qui avance au fil des étapes</li>
+        <li>Des <strong>étapes numérotées</strong> (plan → sections → cas terrain → quiz → mémo) avec statut en temps réel</li>
+        <li>Une liste live des sections rédigées : chaque titre apparaît au fur et à mesure, avec un ✓ vert</li>
+      </ul>
+      <p style="margin-top:.6rem;">La génération parallèle rédige toutes les sections <strong>en même temps</strong> — beaucoup plus rapide qu'une rédaction séquentielle.</p>
+    </div>
+    <div class="warning">
+      <strong>⚠️ Ne fermez pas l'onglet pendant la génération</strong>
+      Si vous fermez ou rechargez la page avant la fin, la génération est perdue. Attendez que le module s'ouvre automatiquement.
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════ SECTION 4 ═══════════════════ -->
+<div class="page" id="s4">
+  <div class="section-header green">
+    <div class="sh-icon">📖</div>
+    <div><div class="sn">Section 4</div><h2>Explorer un module généré</h2><p>Tout ce que contient un module et comment l'utiliser efficacement</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Structure d'un module</h3>
+    <p>Une fois généré, le module s'ouvre dans le <strong>visualiseur</strong>. En haut, des boutons d'action sont disponibles, suivis d'un bandeau coloré (adapté à votre domaine) avec le titre, le domaine et les métadonnées.</p>
+    <p style="margin-top:.5rem;">Les contenus sont organisés en <strong>cartes empilées</strong> : objectifs, sections de cours, cas terrain, exercices, quiz, et les nouvelles cartes (plan de révision, vidéos YouTube).</p>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.8rem;">
+      <span class="mock-btn ghost">← Bibliothèque</span>
+      <span class="mock-btn ghost">🃏 Flashcards</span>
+      <span class="mock-btn ghost">🏅 Attestation</span>
+      <span class="mock-btn ghost">🖼️ Images</span>
+      <span class="mock-btn ghost">📋 Dupliquer</span>
+      <span class="mock-btn ghost">📄 Exporter PDF</span>
+    </div>
+  </div>
+
+  <div id="s4a">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.2rem 0 .8rem;">4.1 — Les sections de cours</h3>
+    <div class="card">
+      <h3>Contenu d'une section</h3>
+      <p>Chaque section est un accordéon cliquable (cliquez sur l'en-tête coloré pour l'ouvrir). À l'intérieur :</p>
+      <ul style="margin-top:.5rem;">
+        <li><strong>Le contenu principal</strong> — cours rédigé avec étapes progressives</li>
+        <li><strong>Les points de vigilance</strong> (Pro) — risques et seuils critiques</li>
+        <li><strong>Le réflexe pro</strong> — le savoir implicite de l'expert</li>
+        <li><strong>Les définitions</strong> (Acad) — glossaire intégré dans la section</li>
+        <li><strong>Les exemples</strong> (Acad) — applications concrètes de la théorie</li>
+        <li><strong>Un schéma IA</strong> — diagramme de flux généré à la demande</li>
+        <li><strong>Une image illustrative</strong> — photo ajoutée via le bouton "🖼️ Images"</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Barre de progression de lecture</h3>
+      <p>En haut de la carte "Sections", une barre verte indique combien de sections vous avez lues. Cliquez sur la <strong>pastille colorée</strong> à gauche de chaque titre de section pour la marquer comme lue — elle passe en vert.</p>
+    </div>
+    <div class="card">
+      <h3>Prendre des notes sur une section</h3>
+      <p>Dans chaque section ouverte, un bouton <span class="mock-btn ghost">+ Note</span> ouvre un champ texte personnel. Vos notes sont sauvegardées avec le module et affichées à chaque réouverture, sur fond jaune pour les repérer facilement.</p>
+    </div>
+  </div>
+
+  <div id="s4b">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.2 — Exercices et mises en situation</h3>
+    <div class="grid2">
+      <div class="card" style="margin:0;">
+        <h3>💼 Formation Pro</h3>
+        <ul style="margin-top:.4rem;">
+          <li><strong>Mises en situation terrain</strong> progressives (débutant → expert) avec contexte, consigne, indices et correction</li>
+          <li><strong>Cas terrain</strong> avec entreprise fictive, données chiffrées, problème et contraintes réelles</li>
+          <li><strong>Check-list</strong> Avant / Pendant / Après l'intervention</li>
+          <li><strong>Mémo terrain</strong> avec règles fondamentales et règle d'or</li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;">
+        <h3>🎓 Cours Académique</h3>
+        <ul style="margin-top:.4rem;">
+          <li><strong>Exercices TD/TP</strong> à 3 niveaux (débutant, intermédiaire, avancé) avec énoncé et corrigé complet</li>
+          <li><strong>Cas industriel</strong> avec données numériques réalistes</li>
+          <li><strong>Fiche de révision</strong> : notions, formules, méthode, pièges classiques</li>
+          <li><strong>Formules clés</strong> formatées en bloc monospace</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="s4c">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.3 — Le quiz d'évaluation</h3>
+    <div class="card">
+      <h3>Accéder au quiz</h3>
+      <p>Faites défiler jusqu'à la carte bleu "<strong>❓ Quiz de compréhension</strong>". Le quiz contient entre 5 et 20 questions QCM (configurable dans les Paramètres). Les questions mélangent 4 types : connaissance factuelle, compréhension du principe, situationnel et diagnostic.</p>
+    </div>
+    <div class="steps">
+      <div class="step-block">
+        <div class="step-num green">1</div>
+        <div class="step-content"><h4>Sélectionnez une réponse par question</h4><p>Cliquez sur la ligne de la réponse. Elle se colore en doré (Pro) ou violet (Académique).</p></div>
+      </div>
+      <div class="step-block">
+        <div class="step-num green">2</div>
+        <div class="step-content"><h4>Cliquez sur "✓ Soumettre l'évaluation"</h4><p>L'anneau de score s'anime, affichant votre pourcentage. Bonnes réponses en vert, erreurs en rouge avec explication.</p></div>
+      </div>
+      <div class="step-block">
+        <div class="step-num green">3</div>
+        <div class="step-content"><h4>Consultez les boutons d'action</h4><p>Trois options après résultat : <span class="mock-btn ghost">🔄 Recommencer</span> <span class="mock-btn orange">🎯 Revoir mes erreurs</span> <span class="mock-btn gold">📚 Remédiation IA</span></p></div>
+      </div>
+    </div>
+
+    <div class="score-display">
+      <div class="score-ring"><div class="score-ring-inner">85%</div></div>
+      <div class="score-info">
+        <strong>✅ Module validé — excellente maîtrise !</strong>
+        <p>17 / 20 bonnes réponses — Minimum requis : 70%</p>
+        <p style="margin-top:.2rem;font-size:.78rem;color:var(--gray400);">Score sauvegardé automatiquement dans la bibliothèque.</p>
+      </div>
+    </div>
+
+    <div class="new-feature-banner" style="margin-top:1rem;">
+      <span class="nfb-badge">Nouveau</span>
+      <p><strong>🎯 Revoir mes erreurs</strong> — Après un quiz raté, ce bouton lance une session ciblée sur les seules questions que vous avez manquées. Chaque correction donne un feedback avec l'explication de l'erreur. Si vous corrigez tout, une animation de célébration se déclenche.</p>
+    </div>
+
+    <div class="success">
+      <strong>🎉 Score ≥ 80% — Confettis !</strong>
+      Si vous obtenez 80% ou plus, l'application déclenche une animation de célébration. Votre score est enregistré automatiquement sur la carte du module dans la bibliothèque.
+    </div>
+  </div>
+
+  <div id="s4d">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.4 — 🆕 Micro-quiz par section</h3>
+
+    <div class="new-feature-banner">
+      <span class="nfb-badge">Nouveau</span>
+      <p>Chaque section de cours possède désormais un bouton <strong>🧪 Tester</strong> dans son contenu étendu. Il affiche une question du QCM du module directement dans la section, avec feedback immédiat.</p>
+    </div>
+
+    <div class="card">
+      <h3>Comment utiliser le micro-quiz</h3>
+      <div class="steps">
+        <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+          <div class="step-num teal">1</div>
+          <div class="step-content"><h4>Ouvrez une section de cours</h4><p>Cliquez sur l'en-tête coloré d'une section pour l'ouvrir et lire son contenu.</p></div>
+        </div>
+        <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+          <div class="step-num teal">2</div>
+          <div class="step-content"><h4>Cliquez sur "🧪 Tester" en bas de la section</h4><p>Ce bouton apparaît à côté de "+ Note" et "🔄 Régénérer", dans la barre d'actions de la section ouverte.</p></div>
+        </div>
+        <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+          <div class="step-num teal">3</div>
+          <div class="step-content"><h4>Répondez à la question</h4><p>Une question QCM liée à la section s'affiche sur fond jaune. Cliquez sur votre réponse — la bonne réponse s'affiche en vert, les mauvaises en rouge, et l'explication apparaît automatiquement.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>💡 Pourquoi c'est important</strong>
+      Des études en sciences cognitives montrent que tester sa compréhension <em>pendant</em> la lecture (et pas seulement après) augmente la mémorisation de 40%. C'est le principe du <strong>test effect</strong> ou "retrieval practice".
+    </div>
+  </div>
+
+  <div id="s4e">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.5 — 🆕 Plan de révision personnalisé</h3>
+
+    <div class="new-feature-banner">
+      <span class="nfb-badge">Nouveau</span>
+      <p>Chaque module dispose d'une carte <strong>🗓️ Plan de révision personnalisé</strong> qui répartit automatiquement l'apprentissage sur la durée de votre choix.</p>
+    </div>
+
+    <div class="card">
+      <h3>Choisir votre durée d'apprentissage</h3>
+      <p>En bas du module, la carte "Plan de révision" propose quatre durées :</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0;">
+        <span class="mock-btn primary">3 jours</span>
+        <span class="mock-btn primary">7 jours</span>
+        <span class="mock-btn primary">14 jours</span>
+        <span class="mock-btn ghost">30 jours</span>
+      </div>
+      <p>Cliquez sur une durée — le plan se génère instantanément, sans IA, directement depuis le contenu du module.</p>
+    </div>
+
+    <!-- Maquette plan de révision -->
+    <div class="revplan-mock">
+      <div class="revplan-day-mock">
+        <div class="revplan-day-mock-hdr">
+          <span class="revplan-day-mock-num" style="background:#3b82f6;">J1</span>
+          <span class="revplan-day-mock-title">Introduction & premiers concepts</span>
+        </div>
+        <div class="revplan-task-mock">📖 Lecture des objectifs et introduction</div>
+        <div class="revplan-task-mock">📚 Section 1 : Lire les schémas électriques</div>
+      </div>
+      <div class="revplan-day-mock">
+        <div class="revplan-day-mock-hdr">
+          <span class="revplan-day-mock-num" style="background:#8b5cf6;">J2</span>
+          <span class="revplan-day-mock-title">Approfondissement des notions</span>
+        </div>
+        <div class="revplan-task-mock">📚 Section 2 : Symboles normalisés</div>
+        <div class="revplan-task-mock">📚 Section 3 : Lecture de circuits de puissance</div>
+        <div class="revplan-task-mock">🧪 Question bilan : "Que représente le symbole…"</div>
+      </div>
+      <div class="revplan-day-mock">
+        <div class="revplan-day-mock-hdr">
+          <span class="revplan-day-mock-num" style="background:#dc2626;">J7</span>
+          <span class="revplan-day-mock-title">Révision finale & évaluation</span>
+        </div>
+        <div class="revplan-task-mock">🔄 Révision rapide des points clés</div>
+        <div class="revplan-task-mock">❓ Quiz complet : 10 questions</div>
+        <div class="revplan-task-mock">🃏 Flashcards de mémorisation</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>💡 Principe du spacing effect</strong>
+      Espacer l'apprentissage dans le temps (plutôt que de tout apprendre d'un coup) est la méthode la plus efficace pour mémoriser durablement. Le plan de révision applique automatiquement ce principe.
+    </div>
+  </div>
+
+  <div id="s4f">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.6 — 🆕 Images et vidéos YouTube</h3>
+
+    <div class="grid2">
+      <div class="card" style="margin:0;">
+        <h3>🖼️ Images automatiques</h3>
+        <p>Le bouton <span class="mock-btn ghost">🖼️ Illustrer</span> en haut du module ajoute une image générée par IA à chaque section, adaptée au contenu.</p>
+        <ul style="margin-top:.5rem;">
+          <li>Aucune clé API requise — 100% gratuit et illimité</li>
+          <li>Images générées par <strong>Pollinations AI</strong> (modèle Flux), contextualisées par mots-clés</li>
+          <li>Chaque section reçoit une image unique et reproductible (graine fixe)</li>
+          <li>Bouton <span class="mock-btn ghost">🔄 Réillustrer</span> pour régénérer toutes les images</li>
+          <li>Bouton "🗑️ Retirer image" pour supprimer une image individuelle</li>
+        </ul>
+      </div>
+      <div class="card" style="margin:0;">
+        <h3>📺 Vidéos YouTube</h3>
+        <p>La carte "📺 Ressources vidéo" affiche <strong>5 liens de recherche YouTube</strong> générés automatiquement à partir du contenu du module.</p>
+        <ul style="margin-top:.5rem;">
+          <li>Recherche globale sur le titre du module</li>
+          <li>Recherche par domaine/secteur</li>
+          <li>Une recherche par section (les 3 premières)</li>
+          <li>Cliquez pour ouvrir YouTube dans un nouvel onglet</li>
+        </ul>
+        <p style="margin-top:.5rem;font-size:.82rem;color:var(--gray600);">Vous pouvez désactiver cette carte dans <strong>Paramètres → Sections affichées → 📺 Vidéos YouTube</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="s4g">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.7 — 🆕 Régénérer un contenu manquant</h3>
+
+    <div class="new-feature-banner">
+      <span class="nfb-badge">Nouveau</span>
+      <p>Si un module n'a pas de cas terrain, de mises en situation ou d'exercices, des boutons de régénération permettent de les créer à la demande, sans régénérer tout le module.</p>
+    </div>
+
+    <div class="card">
+      <h3>Boutons de régénération disponibles</h3>
+      <table style="margin-top:.5rem;">
+        <tr><th>Bouton</th><th>Ce qu'il génère</th><th>Disponible dans</th></tr>
+        <tr><td><span class="mock-btn gold">🔄 Générer le cas</span></td><td>Cas terrain (Pro) ou industriel (Acad) complet avec entreprise, données, problème</td><td>Tout module</td></tr>
+        <tr><td><span class="mock-btn ghost">🔄 Générer les mises en situation</span></td><td>3 scénarios progressifs débutant → expert avec contexte, consigne et corrigé</td><td>Formation Pro</td></tr>
+        <tr><td><span class="mock-btn purple">🔄 Générer les exercices TD/TP</span></td><td>3 exercices progressifs avec énoncé, questions et correction détaillée</td><td>Cours Académique</td></tr>
+      </table>
+      <p style="margin-top:.6rem;font-size:.83rem;color:var(--gray600);">Ces boutons apparaissent automatiquement à la place de la section vide — ils disparaissent une fois le contenu généré.</p>
+    </div>
+  </div>
+
+  <div id="s4h">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.8 — Flashcards et mémorisation</h3>
+    <div class="card">
+      <h3>L'interface Flashcards</h3>
+      <p>Le bouton <span class="mock-btn ghost">🃏 Flashcards</span> en haut du module ouvre une session de révision par cartes retournables :</p>
+      <ul style="margin-top:.5rem;">
+        <li><strong>Face recto</strong> — le terme technique (fond sombre)</li>
+        <li><strong>Face verso</strong> — la définition complète (fond blanc)</li>
+        <li>Cliquez sur la carte pour la <strong>retourner</strong> (animation 3D)</li>
+        <li>Naviguez avec les boutons ← → ou les touches clavier</li>
+        <li>Le compteur indique votre position (ex : 4 / 12)</li>
+      </ul>
+    </div>
+    <div class="tip">
+      <strong>💡 Idéal pour la révision la veille d'un examen</strong>
+      Parcourez les flashcards sans regarder les réponses, retournez uniquement celles sur lesquelles vous hésitez. Répétez jusqu'à maîtriser le deck complet.
+    </div>
+  </div>
+
+  <div id="s4i">
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.5rem 0 .8rem;">4.9 — Attestation et export PDF</h3>
+    <div class="card">
+      <h3>📄 Exporter votre module en PDF</h3>
+      <p>Le bouton <span class="mock-btn ghost">📄 Exporter PDF</span> génère une version imprimable complète du module (sections, étapes, quiz avec corrigés, formules). La boîte d'impression s'ouvre automatiquement — choisissez <strong>"Enregistrer en PDF"</strong>.</p>
+    </div>
+    <div class="card">
+      <h3>🏅 Attestation (Formation Pro uniquement)</h3>
+      <p>Le bouton <span class="mock-btn ghost">🏅 Attestation</span> génère un certificat avec le nom de la plateforme, le titre du module, la date et le score. Configurez votre nom et celui du formateur dans <strong>⚙️ Paramètres → Identité</strong>.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════ SECTION 5 ═══════════════════ -->
+<div class="page" id="s5">
+  <div class="section-header teal">
+    <div class="sh-icon">📚</div>
+    <div><div class="sn">Section 5</div><h2>La Bibliothèque</h2><p>Gérez, recherchez et filtrez tous vos modules générés</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Accéder à la bibliothèque</h3>
+    <p>Cliquez sur <strong>📚 Bibliothèque</strong> dans la sidebar. Tous vos modules y sont listés sous forme de cartes, avec une teinte de couleur spécifique à leur domaine et un badge de score si le quiz a été passé.</p>
+  </div>
+
+  <div class="card">
+    <h3>Recherche et filtres</h3>
+    <ul style="margin-top:.5rem;">
+      <li><strong>🔍 Recherche textuelle</strong> — filtre par titre, domaine ou description en temps réel</li>
+      <li><strong>Filtre de mode</strong> — Pro uniquement, Académique uniquement, ou tous</li>
+      <li><strong>Filtre rapide</strong> — ⭐ Favoris / ✅ Évalués (avec score de quiz)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Actions sur une carte de module</h3>
+    <table>
+      <tr><th>Action</th><th>Description</th></tr>
+      <tr><td>Cliquer sur la carte</td><td>Ouvre le module dans le visualiseur</td></tr>
+      <tr><td><span class="mock-btn ghost">📋 Dupliquer</span></td><td>Crée une copie du module</td></tr>
+      <tr><td>☆ / ⭐</td><td>Ajoute/retire des favoris</td></tr>
+      <tr><td><span class="mock-btn ghost">🗑️</span></td><td>Supprime le module (confirmation demandée)</td></tr>
+    </table>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="margin:0;">
+      <h3>⬆️ Exporter</h3>
+      <p>Télécharge l'ensemble de vos modules dans un fichier <code>.json</code>. Utile pour sauvegarder ou transférer vos modules sur un autre appareil.</p>
+    </div>
+    <div class="card" style="margin:0;">
+      <h3>⬇️ Importer</h3>
+      <p>Charge un fichier <code>.json</code> exporté précédemment. Les modules importés s'ajoutent à ceux existants sans les écraser.</p>
+    </div>
+  </div>
+
+  <div class="warning">
+    <strong>⚠️ Stockage local</strong>
+    Vos modules sont sauvegardés dans le localStorage de votre navigateur. Si vous videz le cache ou utilisez un autre navigateur, ils ne seront pas disponibles. <strong>Exportez régulièrement</strong> pour sécuriser vos modules.
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════ SECTION 6 ═══════════════════ -->
+<div class="page" id="s6">
+  <div class="section-header">
+    <div class="sh-icon">⭐</div>
+    <div><div class="sn">Section 6</div><h2>Parcours d'apprentissage recommandé</h2><p>La méthode optimale pour tirer le maximum de chaque module</p></div>
+  </div>
+
+  <div class="card">
+    <h3>Parcours complet — du module à la maîtrise</h3>
+    <div class="steps">
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">1</div>
+        <div class="step-content"><h4>Créez le module via l'Assistant IA</h4><p>Décrivez précisément votre sujet, ajoutez vos documents sources si vous en avez.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">2</div>
+        <div class="step-content"><h4>Choisissez votre plan de révision</h4><p>Sélectionnez 7 jours (recommandé) ou la durée qui correspond à votre emploi du temps. Le plan vous dira quoi faire chaque jour.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">3</div>
+        <div class="step-content"><h4>Lisez les sections en utilisant "🧪 Tester"</h4><p>Après chaque section, cliquez sur "Tester" pour valider votre compréhension avant de passer à la suivante. Marquez les sections lues avec la pastille verte.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">4</div>
+        <div class="step-content"><h4>Prenez des notes sur les points clés</h4><p>Utilisez le bouton "+ Note" sur les sections complexes. Vos notes restent disponibles à chaque réouverture du module.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">5</div>
+        <div class="step-content"><h4>Faites les exercices et le cas terrain</h4><p>Appliquez les notions vues en cours sur des situations concrètes. Pour les cours académiques, faites les TD/TP en regardant le corrigé seulement après avoir essayé.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">6</div>
+        <div class="step-content"><h4>Révisez avec les Flashcards</h4><p>Passez les flashcards en revue les termes clés. Idéal la veille de l'évaluation.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">7</div>
+        <div class="step-content"><h4>Passez le Quiz complet</h4><p>Visez ≥ 70% pour valider. Si vous ratez des questions, utilisez <span class="mock-btn orange">🎯 Revoir mes erreurs</span> pour cibler exactement vos lacunes.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">8</div>
+        <div class="step-content"><h4>Explorez les vidéos YouTube recommandées</h4><p>Pour aller plus loin, cliquez sur les liens YouTube générés par le module pour trouver des ressources complémentaires adaptées.</p></div>
+      </div>
+      <div class="step-block" style="box-shadow:none;background:var(--gray50);">
+        <div class="step-num gold">9</div>
+        <div class="step-content"><h4>Exportez ou obtenez l'attestation</h4><p>PDF pour garder une trace du cours, attestation pour les formations Pro certifiantes.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Paramètres avancés utiles</h3>
+    <table>
+      <tr><th>Paramètre</th><th>Où le trouver</th><th>À quoi ça sert</th></tr>
+      <tr><td>Modèle IA</td><td>Paramètres → IA</td><td>Choisir le modèle Llama (vitesse vs qualité)</td></tr>
+      <tr><td>Nombre de sections</td><td>Paramètres → Pédagogie</td><td>De 4 à 12 sections par module</td></tr>
+      <tr><td>Nombre de questions quiz</td><td>Paramètres → Pédagogie</td><td>De 5 à 20 questions</td></tr>
+      <tr><td>Score minimum</td><td>Paramètres → Pédagogie</td><td>Seuil de validation (50% à 80%)</td></tr>
+      <tr><td>Sections affichées</td><td>Paramètres → Sections</td><td>Afficher/masquer : images, vidéos, roadmap, KPIs…</td></tr>
+      <tr><td>Nom du formateur</td><td>Paramètres → Identité</td><td>Apparaît sur l'attestation</td></tr>
+    </table>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ═══════════════════ SECTION 7 ═══════════════════ -->
+<div class="page" id="s7">
+  <div class="section-header">
+    <div class="sh-icon">❓</div>
+    <div><div class="sn">Section 7</div><h2>FAQ — Questions fréquentes</h2><p>Les réponses aux questions les plus courantes</p></div>
+  </div>
+
+  <div class="card">
+    <h3>La génération est bloquée / ne démarre pas</h3>
+    <div class="danger"><strong>Cause la plus fréquente : clé API absente ou non reconnue.</strong>
+    Vérifiez que votre clé est bien saisie et que le badge fournisseur (⚡ Groq / 🟢 OpenAI / 🟣 Anthropic / 🔵 Google) apparaît sous le champ. Si le champ est vide ou que la clé n'est pas reconnue, aucune génération n'est possible.</div>
+    <p>Autres causes :</p>
+    <ul>
+      <li>Quota gratuit atteint (Groq : 6 000 tokens/min, Google : variable) → attendez 1 minute</li>
+      <li>Connexion internet instable → vérifiez votre réseau</li>
+      <li>Le modèle sélectionné est indisponible → changez de fournisseur ou de modèle dans Paramètres</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Mes modules ont disparu</h3>
+    <p>Les modules sont dans le <strong>localStorage de votre navigateur</strong>. Ils disparaissent si vous videz le cache, changez de navigateur, ou ouvrez en navigation privée.</p>
+    <div class="success"><strong>Bonne pratique : exportez régulièrement.</strong> ⬆️ Exporter crée un fichier <code>.json</code> ré-importable à tout moment.</div>
+  </div>
+
+  <div class="card">
+    <h3>Le bouton "🖼️ Illustrer" ne fonctionne pas</h3>
+    <p>Les images sont générées par <strong>Pollinations AI</strong> (aucune clé requise). Si elles ne s'affichent pas, vérifiez votre connexion internet. En cas d'erreur de chargement, une image de secours SVG s'affiche automatiquement. Utilisez le bouton <span class="mock-btn ghost">🔄 Réillustrer</span> pour forcer une nouvelle tentative sur toutes les sections.</p>
+  </div>
+
+  <div class="card">
+    <h3>Les vidéos YouTube ne correspondent pas bien au module</h3>
+    <p>Les liens YouTube sont des <strong>recherches automatiques</strong> basées sur le titre et les sections — ils ouvrent des résultats de recherche, pas des vidéos sélectionnées manuellement. Si les résultats ne sont pas pertinents, affinez la recherche directement dans YouTube en ajoutant des mots-clés spécifiques à votre domaine.</p>
+  </div>
+
+  <div class="card">
+    <h3>Je vois le plan de révision mais pas la carte vidéos</h3>
+    <p>Allez dans <strong>⚙️ Paramètres → Sections affichées</strong> et vérifiez que "📺 Vidéos YouTube" est activé. Vous pouvez activer/désactiver chaque section indépendamment depuis cet écran.</p>
+  </div>
+
+  <div class="card">
+    <h3>Le micro-quiz affiche toujours la même question</h3>
+    <p>Le micro-quiz choisit une question de façon cyclique en fonction du numéro de la section. Si votre module a peu de questions QCM, certaines sections peuvent afficher la même question. Utilisez <span class="mock-btn ghost">🔄 Nouveau quiz</span> pour régénérer un quiz plus varié.</p>
+  </div>
+
+  <div class="card">
+    <h3>Le quiz ne correspond pas bien au cours</h3>
+    <p>Utilisez le bouton <span class="mock-btn ghost">🔄 Nouveau quiz</span> dans la carte Quiz pour en régénérer un nouveau à partir du même contenu. Chaque génération produit des questions différentes.</p>
+  </div>
+
+  <div class="card">
+    <h3>Le cas terrain / industriel est vide</h3>
+    <p>Si la génération initiale n'a pas produit de cas, un bouton <span class="mock-btn gold">🔄 Générer le cas</span> apparaît dans la section correspondante. Cliquez dessus pour le générer à la demande — cela ne régénère que cette partie du module.</p>
+  </div>
+
+  <div class="card">
+    <h3>Combien de modules puis-je créer ?</h3>
+    <p>Il n'y a pas de limite dans Green Lab Studio. La seule contrainte est le quota de votre fournisseur IA :</p>
+    <ul style="margin-top:.4rem;">
+      <li><strong>Groq (gratuit)</strong> — 6 000 tokens/min, se réinitialise chaque minute</li>
+      <li><strong>Google Gemini (gratuit)</strong> — quota généreux, variable selon le modèle</li>
+      <li><strong>OpenAI / Anthropic</strong> — accès payant, quota selon votre crédit</li>
+    </ul>
+    <p style="margin-top:.5rem;">En pratique, avec Groq ou Google, vous pouvez générer plusieurs modules par heure sans frais.</p>
+  </div>
+
+  <div class="card">
+    <h3>Le contenu généré n'est pas assez spécialisé</h3>
+    <p>Soyez plus précis dans votre description :</p>
+    <ul>
+      <li>❌ "maintenance" → ✅ "maintenance préventive de compresseur à vis en industrie alimentaire"</li>
+      <li>❌ "automatisme" → ✅ "programmation d'un automate Siemens S7-1500 en Ladder"</li>
+    </ul>
+    <p style="margin-top:.5rem;">Vous pouvez aussi insérer un document source (cours existant, manuel technique) pour ancrer la génération dans votre contenu réel.</p>
+  </div>
+
+  <hr class="divider">
+  <div class="success" style="text-align:center;padding:1.5rem;">
+    <strong style="font-size:1rem;display:block;margin-bottom:.4rem;">🚀 Vous êtes prêt à utiliser Green Lab Studio !</strong>
+    Commencez par obtenir votre clé API (Groq gratuit recommandé), puis laissez l'assistant IA créer votre premier module — et explorez votre plan de révision pour un apprentissage structuré.
+  </div>
+  <p style="text-align:center;font-size:.78rem;color:var(--gray400);margin-top:1.5rem;">
+    Green Lab Studio · Générateur Pédagogique IA · Édition août 2026
+  </p>
+</div>
+
+</body>
+</html>

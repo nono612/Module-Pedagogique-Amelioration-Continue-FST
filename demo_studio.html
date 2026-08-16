@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Démo — Green Lab Studio · Générateur Pédagogique IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#0d1b2a;color:#fff;overflow:hidden;height:100vh;}
+.deck{position:relative;width:100vw;height:100vh;overflow:hidden;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4.5rem 3.5rem 4rem;opacity:0;transform:translateX(60px);transition:opacity .35s,transform .35s;pointer-events:none;}
+.slide.active{opacity:1;transform:none;pointer-events:all;}
+.slide.exit{opacity:0;transform:translateX(-60px);}
+/* bg themes */
+.bg-hero{background:linear-gradient(135deg,#0d1b2a,#162f55);}
+.bg-studio{background:linear-gradient(135deg,#0d1b2a,#1a0a2e);}
+.bg-api{background:linear-gradient(160deg,#0d1b2a,#0c2a1a);}
+.bg-gen{background:linear-gradient(160deg,#0d1b2a,#1a1a0a);}
+.bg-mod{background:linear-gradient(160deg,#0d1b2a,#0a1a2a);}
+.bg-feat{background:linear-gradient(160deg,#0d1b2a,#1a0a1a);}
+.bg-lib{background:linear-gradient(160deg,#0d1b2a,#0a2a1a);}
+.bg-end{background:linear-gradient(135deg,#0d1b2a,#1e1065);}
+/* chrome */
+.topbar{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(13,27,42,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;padding:0 1.8rem;z-index:100;}
+.topbar-brand{font-size:.78rem;font-weight:900;color:#f59e0b;letter-spacing:.5px;}
+.topbar-title{font-size:.62rem;font-weight:700;color:rgba(255,255,255,.35);letter-spacing:.4px;}
+.slide-ctr{font-size:.72rem;font-weight:800;color:rgba(255,255,255,.3);}
+.pbar{position:fixed;top:50px;left:0;right:0;height:2px;background:rgba(255,255,255,.05);z-index:99;}
+.pbar-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#7c3aed);transition:width .35s;}
+.navctrl{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1rem;z-index:100;background:rgba(13,27,42,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.5rem 1rem;}
+.nbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);color:#fff;border-radius:8px;padding:.38rem 1rem;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+.nbtn:hover{background:rgba(255,255,255,.15);}
+.nbtn:disabled{opacity:.2;cursor:not-allowed;}
+.sect-label{font-size:.68rem;font-weight:700;color:rgba(255,255,255,.7);min-width:220px;text-align:center;letter-spacing:.2px;}
+.slide-num{font-size:.6rem;color:rgba(255,255,255,.3);font-weight:600;}
+/* layout */
+.row{display:flex;gap:1.2rem;width:100%;max-width:1020px;align-items:flex-start;}
+.col{flex:1;display:flex;flex-direction:column;gap:.8rem;}
+.box{width:100%;max-width:1020px;}
+/* cards */
+.wc{background:#fff;border-radius:14px;padding:1.1rem 1.3rem;color:#1e293b;box-shadow:0 6px 30px rgba(0,0,0,.28);}
+.wc-title{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#94a3b8;margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem;}
+.wc-title::after{content:'';flex:1;height:1px;background:#e2e8f0;}
+.dc{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:14px;padding:1.1rem 1.3rem;}
+/* tags */
+.stag{display:inline-flex;align-items:center;gap:.3rem;border-radius:20px;padding:.28rem .8rem;font-size:.65rem;font-weight:800;margin-bottom:.4rem;letter-spacing:.3px;}
+.st-blue{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);}
+.st-green{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);}
+.st-amber{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
+.st-purple{background:rgba(139,92,246,.15);color:#a78bfa;border:1px solid rgba(139,92,246,.3);}
+.st-teal{background:rgba(20,184,166,.15);color:#2dd4bf;border:1px solid rgba(20,184,166,.3);}
+.st-pink{background:rgba(236,72,153,.15);color:#f472b6;border:1px solid rgba(236,72,153,.3);}
+.st-orange{background:rgba(249,115,22,.15);color:#fb923c;border:1px solid rgba(249,115,22,.3);}
+/* headings */
+.sh1{font-size:2.6rem;font-weight:900;line-height:1.15;text-align:center;margin-bottom:.7rem;}
+.sh2{font-size:1.55rem;font-weight:900;margin-bottom:.35rem;}
+.sh3{font-size:1.05rem;font-weight:800;margin-bottom:.25rem;}
+.hl{color:#f59e0b;}
+.hlp{color:#a78bfa;}
+.hlt{color:#2dd4bf;}
+.sub{font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.65;max-width:600px;text-align:center;margin-bottom:1.3rem;}
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:.25rem;border-radius:20px;padding:.22rem .65rem;font-size:.68rem;font-weight:700;}
+.p-green{background:#f0fdf4;color:#166534;}
+.p-amber{background:#fff7ed;color:#c2410c;}
+.p-purple{background:#f5f3ff;color:#6d28d9;}
+.p-blue{background:#eff6ff;color:#1d4ed8;}
+/* stat boxes */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;max-width:700px;}
+.sbox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:13px;padding:.9rem;text-align:center;}
+.snum{font-size:1.7rem;font-weight:900;color:#f59e0b;}
+.slbl{font-size:.63rem;color:rgba(255,255,255,.45);margin-top:.15rem;}
+/* btn mock */
+.bm{display:inline-flex;align-items:center;gap:.3rem;border-radius:8px;padding:.38rem .9rem;font-size:.68rem;font-weight:700;border:none;cursor:default;}
+.bm-p{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;}
+.bm-g{background:linear-gradient(135deg,#059669,#047857);color:#fff;}
+.bm-a{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.bm-v{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;}
+.bm-t{background:linear-gradient(135deg,#0d9488,#0f766e);color:#fff;}
+.bm-gh{background:transparent;border:1px solid #e2e8f0;color:#64748b;}
+/* AI box */
+.ai{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:11px;padding:.85rem 1rem;font-size:.71rem;color:#3730a3;line-height:1.6;}
+.ai-hd{font-weight:800;color:#4f46e5;margin-bottom:.4rem;}
+/* quiz */
+.qq{background:#fff;border-radius:11px;padding:.85rem 1rem;margin-bottom:.5rem;border:1.5px solid #e2e8f0;}
+.qq .qt{font-size:.77rem;font-weight:700;color:#1e293b;margin-bottom:.5rem;}
+.qopt{display:flex;align-items:center;gap:.4rem;font-size:.67rem;padding:.25rem .4rem;border-radius:5px;margin-bottom:.2rem;}
+.qopt.ok{background:#f0fdf4;color:#166534;font-weight:700;}
+.qopt.sel{background:#eff6ff;color:#1d4ed8;}
+.qr{width:11px;height:11px;border-radius:50%;border:2px solid #cbd5e1;flex-shrink:0;}
+.qr.f{background:#2563eb;border-color:#2563eb;}
+.qr.ok{background:#16a34a;border-color:#16a34a;}
+/* cert */
+.cert{background:linear-gradient(135deg,#0d1b2a,#162f55);border-radius:14px;padding:1.3rem 1.8rem;border:2px solid rgba(245,158,11,.35);box-shadow:0 0 40px rgba(245,158,11,.12);text-align:center;}
+/* tgrid */
+.tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;}
+.tcard{border-radius:10px;padding:.7rem .8rem;text-align:center;font-size:.7rem;}
+.tcard .ico{font-size:1.4rem;margin-bottom:.35rem;}
+.tcard b{display:block;font-weight:800;margin-bottom:.2rem;}
+/* key */
+.key{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:.08rem .38rem;font-size:.68rem;font-weight:700;font-family:monospace;}
+/* provider cards */
+.prov{border-radius:12px;padding:.8rem 1rem;border:1.5px solid;font-size:.68rem;}
+.prov-groq{background:rgba(20,184,166,.08);border-color:rgba(20,184,166,.3);color:#ccfbf1;}
+.prov-openai{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.3);color:#d1fae5;}
+.prov-anthropic{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.3);color:#fef3c7;}
+.prov-google{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3);color:#dbeafe;}
+.prov-name{font-weight:900;font-size:.78rem;margin-bottom:.2rem;}
+.prov-key{font-family:monospace;background:rgba(255,255,255,.07);border-radius:5px;padding:.1rem .35rem;font-size:.6rem;margin:.2rem 0 .3rem;}
+/* chat mock */
+.chat{display:flex;flex-direction:column;gap:.45rem;}
+.cmsg{border-radius:10px;padding:.45rem .7rem;font-size:.65rem;line-height:1.55;max-width:88%;}
+.cmsg.user{background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;align-self:flex-end;margin-left:auto;}
+.cmsg.ai{background:#fff;border:1.5px solid #e2e8f0;color:#1e293b;align-self:flex-start;}
+/* gen progress */
+.genprog{background:#f8fafc;border-radius:10px;border:1.5px solid #e2e8f0;padding:.65rem .9rem;font-size:.65rem;color:#374151;}
+.genprog-row{display:flex;align-items:center;gap:.5rem;padding:.2rem 0;}
+.gpbar{flex:1;background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden;}
+.gpfill{height:100%;border-radius:4px;background:linear-gradient(90deg,#059669,#34d399);}
+.gpfill.pending{background:#e2e8f0;}
+.gpfill.loading{background:linear-gradient(90deg,#f59e0b,#fbbf24);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.tick{font-size:.75rem;}
+/* revplan */
+.rpday{background:#fff;border-radius:9px;padding:.5rem .75rem;border:1.5px solid #e2e8f0;margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem;font-size:.62rem;color:#374151;}
+.rpnum{background:#0d1b2a;color:#fff;border-radius:6px;padding:.08rem .4rem;font-size:.58rem;font-weight:800;flex-shrink:0;}
+/* flashcard */
+.fc{background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1.5px solid #bfdbfe;border-radius:12px;padding:.9rem 1.1rem;font-size:.7rem;color:#1e40af;}
+.fc-q{font-weight:800;margin-bottom:.4rem;font-size:.75rem;}
+.fc-a{background:#fff;border-radius:8px;padding:.45rem .65rem;color:#1d4ed8;font-style:italic;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.8rem;">
+    <span class="topbar-brand">🧪 GREEN LAB STUDIO</span>
+    <span class="topbar-title">GÉNÉRATEUR PÉDAGOGIQUE PAR INTELLIGENCE ARTIFICIELLE</span>
+  </div>
+  <span class="slide-ctr" id="sc">1 / 16</span>
+</div>
+<div class="pbar"><div class="pbar-fill" id="pf" style="width:6.25%"></div></div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ S1 COUVERTURE ═══ -->
+<div class="slide bg-hero active" id="s1">
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">
+    <div style="position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(245,158,11,.1),transparent 70%);top:-120px;right:-100px;"></div>
+    <div style="position:absolute;width:350px;height:350px;background:radial-gradient(circle,rgba(124,58,237,.1),transparent 70%);bottom:-80px;left:-60px;"></div>
+    <div style="position:absolute;width:200px;height:200px;background:radial-gradient(circle,rgba(20,184,166,.08),transparent 70%);top:40%;left:5%;"></div>
+  </div>
+  <div style="text-align:center;position:relative;z-index:1;">
+    <div style="font-size:4rem;margin-bottom:.8rem;">🧪</div>
+    <div class="stag st-amber" style="margin:0 auto .7rem;">Présentation &amp; Démonstration</div>
+    <h1 class="sh1">Green Lab <span class="hl">Studio</span></h1>
+    <p style="font-size:1rem;color:rgba(255,255,255,.5);margin-bottom:1.5rem;">Générez des modules pédagogiques complets en quelques secondes — cours, exercices, quiz, flashcards, plan de révision — grâce à l'IA.</p>
+    <div class="stats" style="margin:0 auto;grid-template-columns:repeat(5,1fr);">
+      <div class="sbox"><div class="snum">IA</div><div class="slbl">4 fournisseurs</div></div>
+      <div class="sbox"><div class="snum">∞</div><div class="slbl">Modules créés</div></div>
+      <div class="sbox"><div class="snum">🎯</div><div class="slbl">Quiz adaptatif</div></div>
+      <div class="sbox"><div class="snum">🃏</div><div class="slbl">Flashcards auto</div></div>
+      <div class="sbox"><div class="snum">100%</div><div class="slbl">Web · Sans install.</div></div>
+    </div>
+    <div style="margin-top:1.3rem;font-size:.68rem;color:rgba(255,255,255,.22);">← → ou Espace pour naviguer</div>
+  </div>
+</div>
+
+<!-- ═══ S2 QU'EST-CE QUE GREEN LAB STUDIO ═══ -->
+<div class="slide bg-studio" id="s2">
+  <div class="stag st-purple" style="margin-bottom:.35rem;">Vue d'ensemble</div>
+  <h2 class="sh2">Qu'est-ce que <span class="hlp">Green Lab Studio</span> ?</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Un générateur de modules pédagogiques : décrivez votre sujet, l'IA crée en quelques secondes un cours structuré complet avec tout le matériel pédagogique.</p>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🧪 Ce que génère l'IA automatiquement</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.67rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #10b981;">📖 <strong>Sections de cours</strong> — contenu théorique structuré, étapes, formules, exemples</div>
+          <div style="background:#eff6ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #3b82f6;">💪 <strong>Exercices pratiques</strong> — mises en situation industrielle avec corrigés IA</div>
+          <div style="background:#fef9ee;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #f59e0b;">🎯 <strong>Quiz d'évaluation</strong> — QCM avec score et feedback IA personnalisé</div>
+          <div style="background:#f5f3ff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #7c3aed;">🃏 <strong>Flashcards</strong> — cartes question/réponse pour mémoriser les concepts clés</div>
+          <div style="background:#ecfeff;border-radius:7px;padding:.38rem .6rem;border-left:3px solid #0891b2;">🗓️ <strong>Plan de révision</strong> — programme personnalisé sur plusieurs jours</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.5px;">2 modes disponibles</div>
+        <div style="background:rgba(245,158,11,.1);border:1.5px solid rgba(245,158,11,.25);border-radius:10px;padding:.7rem .9rem;margin-bottom:.5rem;">
+          <div style="font-weight:900;color:#fbbf24;font-size:.78rem;margin-bottom:.3rem;">💼 Formation Pro</div>
+          <div style="font-size:.63rem;color:rgba(255,255,255,.5);">Pour formateurs — attestation certifiante, paramètres avancés, export complet</div>
+        </div>
+        <div style="background:rgba(124,58,237,.1);border:1.5px solid rgba(124,58,237,.25);border-radius:10px;padding:.7rem .9rem;">
+          <div style="font-weight:900;color:#c084fc;font-size:.78rem;margin-bottom:.3rem;">🎓 Cours Académique</div>
+          <div style="font-size:.63rem;color:rgba(255,255,255,.5);">Pour enseignants et étudiants — rapide, sans compte, partage simplifié</div>
+        </div>
+      </div>
+      <div class="dc" style="padding:.7rem 1rem;">
+        <div style="font-size:.62rem;color:rgba(255,255,255,.4);text-align:center;">✅ Zéro installation · 100% navigateur · Fonctionne hors ligne après chargement</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S3 CHOISIR SON FOURNISSEUR IA ═══ -->
+<div class="slide bg-api" id="s3">
+  <div class="stag st-green" style="margin-bottom:.35rem;">Étape 1 — Clé API</div>
+  <h2 class="sh2">Choisir votre <span style="color:#34d399;">fournisseur IA</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Green Lab Studio fonctionne avec 4 fournisseurs d'IA. La clé est détectée automatiquement selon son format — aucune configuration supplémentaire.</p>
+  <div class="row">
+    <div class="prov prov-groq">
+      <div class="prov-name">⚡ Groq</div>
+      <div class="prov-key">gsk_xxxxxxxxxxxx</div>
+      <div>Recommandé · Gratuit · Ultra-rapide (LLaMA 3.3)</div>
+      <div style="margin-top:.3rem;"><span style="background:rgba(20,184,166,.2);border-radius:20px;padding:.1rem .5rem;font-size:.58rem;font-weight:800;">🏆 Meilleur rapport qualité/vitesse</span></div>
+    </div>
+    <div class="prov prov-openai">
+      <div class="prov-name">🤖 OpenAI</div>
+      <div class="prov-key">sk-xxxxxxxxxxxx</div>
+      <div>Payant · GPT-4o · Excellent pour contenu technique</div>
+      <div style="margin-top:.3rem;"><span style="background:rgba(16,185,129,.2);border-radius:20px;padding:.1rem .5rem;font-size:.58rem;font-weight:800;">💎 Qualité premium</span></div>
+    </div>
+    <div class="prov prov-anthropic">
+      <div class="prov-name">🧠 Anthropic</div>
+      <div class="prov-key">sk-ant-xxxxxxxxxxxx</div>
+      <div>Payant · Claude 3.5 · Raisonnement avancé</div>
+      <div style="margin-top:.3rem;"><span style="background:rgba(245,158,11,.2);border-radius:20px;padding:.1rem .5rem;font-size:.58rem;font-weight:800;">🎯 Idéal pour le détail</span></div>
+    </div>
+    <div class="prov prov-google">
+      <div class="prov-name">✨ Google AI</div>
+      <div class="prov-key">AIzaxxxxxxxxxxxx</div>
+      <div>Gratuit · Gemini 1.5 Flash · Multimodal</div>
+      <div style="margin-top:.3rem;"><span style="background:rgba(59,130,246,.2);border-radius:20px;padding:.1rem .5rem;font-size:.58rem;font-weight:800;">🆓 Gratuit avec quota</span></div>
+    </div>
+  </div>
+  <div style="margin-top:.8rem;background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.2);border-radius:10px;padding:.6rem 1rem;font-size:.67rem;color:#ccfbf1;max-width:800px;text-align:center;">
+    💡 <strong>Pour débuter :</strong> créez un compte gratuit sur <strong>console.groq.com</strong> → API Keys → Create API Key → copiez la clé commençant par <code style="background:rgba(255,255,255,.1);border-radius:4px;padding:.05rem .3rem;">gsk_</code>
+  </div>
+</div>
+
+<!-- ═══ S4 SAISIR LA CLÉ ═══ -->
+<div class="slide bg-api" id="s4">
+  <div class="stag st-green" style="margin-bottom:.35rem;">Étape 1b — Configuration</div>
+  <h2 class="sh2">Saisir la clé dans <span style="color:#34d399;">l'application</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">La clé est mémorisée dans votre navigateur. Vous n'avez à la saisir qu'une seule fois par appareil.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🔑 Comment configurer</div>
+        <div style="display:flex;flex-direction:column;gap:.38rem;font-size:.67rem;color:#374151;">
+          <div style="display:flex;gap:.6rem;align-items:flex-start;background:#f8fafc;border-radius:8px;padding:.45rem .65rem;">
+            <div style="background:#0d1b2a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;">1</div>
+            <div>Ouvrez <strong>Green Lab Studio</strong> dans votre navigateur</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start;background:#f8fafc;border-radius:8px;padding:.45rem .65rem;">
+            <div style="background:#0d1b2a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;">2</div>
+            <div>Cliquez sur <span style="background:#0d1b2a;color:#f59e0b;border-radius:5px;padding:.05rem .35rem;font-size:.6rem;font-weight:800;">🔑 Clé API</span> dans la barre d'outils</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start;background:#f8fafc;border-radius:8px;padding:.45rem .65rem;">
+            <div style="background:#0d1b2a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;">3</div>
+            <div>Collez votre clé — l'IA est automatiquement détectée (Groq / OpenAI / Anthropic / Google)</div>
+          </div>
+          <div style="display:flex;gap:.6rem;align-items:flex-start;background:#ecfdf5;border-radius:8px;padding:.45rem .65rem;border-left:3px solid #10b981;">
+            <div style="font-size:.85rem;flex-shrink:0;">✅</div>
+            <div><strong>Mémorisée automatiquement</strong> — retrouvée à chaque visite</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Mockup toolbar -->
+    <div style="background:#0d1b2a;border-radius:14px;padding:.8rem 1rem;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.4);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.07);">
+        <div style="font-weight:900;color:#f59e0b;font-size:.78rem;">🧪 Green Lab Studio</div>
+        <div style="display:flex;gap:.3rem;">
+          <span style="background:rgba(245,158,11,.15);color:#fbbf24;border-radius:6px;padding:.15rem .45rem;font-size:.55rem;font-weight:800;">🔑 Clé API</span>
+          <span style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border-radius:6px;padding:.15rem .45rem;font-size:.55rem;font-weight:800;">⚙️ Paramètres</span>
+          <span style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border-radius:6px;padding:.15rem .45rem;font-size:.55rem;font-weight:800;">📚 Bibliothèque</span>
+        </div>
+      </div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:.7rem .9rem;">
+        <div style="font-size:.6rem;font-weight:800;color:#fbbf24;margin-bottom:.4rem;">🔑 Votre clé API</div>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:.38rem .6rem;font-family:monospace;font-size:.62rem;color:#ccfbf1;margin-bottom:.4rem;">gsk_•••••••••••••••••••••</div>
+        <div style="display:flex;gap:.4rem;align-items:center;font-size:.58rem;color:rgba(255,255,255,.4);">
+          <span style="background:rgba(20,184,166,.2);color:#2dd4bf;border-radius:4px;padding:.05rem .35rem;font-weight:800;">⚡ Groq détecté</span>
+          <span>LLaMA 3.3 70B · Ultra-rapide</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S5 CRÉER UN MODULE - ASSISTANT ═══ -->
+<div class="slide bg-gen" id="s5">
+  <div class="stag st-amber" style="margin-bottom:.35rem;">Étape 2 — Création</div>
+  <h2 class="sh2">L'Assistant IA — <span class="hl">Créer un module</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Décrivez votre sujet dans le chat, l'IA génère l'intégralité du module en parallèle. Aucune compétence technique requise.</p>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">💬 Conversation avec l'Assistant</div>
+        <div class="chat">
+          <div class="cmsg user">Crée-moi un module sur la méthode SMED pour des techniciens de maintenance automobile, niveau intermédiaire, avec 6 sections.</div>
+          <div class="cmsg ai">
+            <div style="font-weight:800;font-size:.67rem;color:#4f46e5;margin-bottom:.3rem;">🧪 Green Lab Studio</div>
+            Parfait ! Je vais créer un module <strong>SMED – Changement Rapide d'Outil</strong> adapté à la maintenance automobile avec 6 sections, exercices pratiques et quiz de 10 questions. Lancement de la génération…
+          </div>
+          <div class="cmsg user">Ajoute une section sur les convertisseurs de temps interne/externe avec des exemples concrets.</div>
+          <div class="cmsg ai">Section ajoutée ✅ Le module est en cours de génération avec cette section supplémentaire sur la conversion des opérations internes/externes.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">Exemples de commandes</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.38rem .55rem;border-left:2px solid rgba(245,158,11,.4);">"Crée un module sur <strong style="color:#fbbf24;">le cycle PDCA</strong> pour des étudiants en génie industriel"</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.38rem .55rem;border-left:2px solid rgba(124,58,237,.4);">"Module <strong style="color:#c084fc;">Lean Manufacturing</strong> niveau avancé, 8 sections, secteur agroalimentaire"</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.38rem .55rem;border-left:2px solid rgba(20,184,166,.4);">"<strong style="color:#2dd4bf;">AMDEC / FMEA</strong> avec exemples automobiles et calcul de l'IPR"</div>
+          <div style="background:rgba(255,255,255,.04);border-radius:7px;padding:.38rem .55rem;border-left:2px solid rgba(59,130,246,.4);">"Cours sur <strong style="color:#60a5fa;">la TPM</strong> — inclure des exercices sur l'OEE et les 6 grandes pertes"</div>
+        </div>
+      </div>
+      <div class="dc" style="padding:.65rem .9rem;">
+        <div style="font-size:.62rem;color:rgba(255,255,255,.5);">📎 <strong style="color:rgba(255,255,255,.7);">Insérer un document source</strong> — collez votre cours existant pour que l'IA l'enrichisse et le structure automatiquement</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S6 GÉNÉRATION EN DIRECT ═══ -->
+<div class="slide bg-gen" id="s6">
+  <div class="stag st-amber" style="margin-bottom:.35rem;">Étape 2b — En direct</div>
+  <h2 class="sh2">La génération <span class="hl">en parallèle</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Toutes les sections sont rédigées simultanément par l'IA — 10 fois plus rapide qu'une génération séquentielle. Le module s'ouvre automatiquement à la fin.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">⚡ Progression en temps réel</div>
+        <div class="genprog">
+          <div class="genprog-row"><span class="tick">✅</span><div style="flex:1;font-size:.63rem;font-weight:700;">Introduction &amp; objectifs</div><div class="gpbar"><div class="gpfill" style="width:100%"></div></div><span style="font-size:.58rem;color:#059669;font-weight:800;flex-shrink:0;">OK</span></div>
+          <div class="genprog-row"><span class="tick">✅</span><div style="flex:1;font-size:.63rem;font-weight:700;">Concepts théoriques</div><div class="gpbar"><div class="gpfill" style="width:100%"></div></div><span style="font-size:.58rem;color:#059669;font-weight:800;flex-shrink:0;">OK</span></div>
+          <div class="genprog-row"><span class="tick" style="animation:pulse 1s infinite;display:inline-block;">⏳</span><div style="flex:1;font-size:.63rem;font-weight:700;">Exercices pratiques</div><div class="gpbar"><div class="gpfill loading" style="width:65%"></div></div><span style="font-size:.58rem;color:#f59e0b;font-weight:800;flex-shrink:0;">65%</span></div>
+          <div class="genprog-row"><span class="tick">⏳</span><div style="flex:1;font-size:.63rem;font-weight:700;">Quiz d'évaluation (10 QCM)</div><div class="gpbar"><div class="gpfill loading" style="width:40%"></div></div><span style="font-size:.58rem;color:#f59e0b;font-weight:800;flex-shrink:0;">40%</span></div>
+          <div class="genprog-row"><span class="tick" style="opacity:.4">⬜</span><div style="flex:1;font-size:.63rem;color:#94a3b8;">Flashcards (20 cartes)</div><div class="gpbar"><div class="gpfill pending" style="width:0%"></div></div><span style="font-size:.58rem;color:#94a3b8;font-weight:800;flex-shrink:0;">—</span></div>
+          <div class="genprog-row"><span class="tick" style="opacity:.4">⬜</span><div style="flex:1;font-size:.63rem;color:#94a3b8;">Plan de révision 7 jours</div><div class="gpbar"><div class="gpfill pending" style="width:0%"></div></div><span style="font-size:.58rem;color:#94a3b8;font-weight:800;flex-shrink:0;">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">Ce qui est généré</div>
+        <div class="tgrid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="tcard" style="background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.15);">
+            <div class="ico">📖</div><b style="color:#2dd4bf;">Cours</b><div style="font-size:.6rem;color:rgba(255,255,255,.4);">4 à 12 sections</div>
+          </div>
+          <div class="tcard" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.15);">
+            <div class="ico">💪</div><b style="color:#fbbf24;">Exercices</b><div style="font-size:.6rem;color:rgba(255,255,255,.4);">Mis en situation</div>
+          </div>
+          <div class="tcard" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15);">
+            <div class="ico">🎯</div><b style="color:#60a5fa;">Quiz QCM</b><div style="font-size:.6rem;color:rgba(255,255,255,.4);">5 à 20 questions</div>
+          </div>
+          <div class="tcard" style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);">
+            <div class="ico">🃏</div><b style="color:#c084fc;">Flashcards</b><div style="font-size:.6rem;color:rgba(255,255,255,.4);">Mémorisation</div>
+          </div>
+          <div class="tcard" style="background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.15);">
+            <div class="ico">🗓️</div><b style="color:#f472b6;">Révision</b><div style="font-size:.6rem;color:rgba(255,255,255,.4);">Plan 7 jours</div>
+          </div>
+          <div class="tcard" style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.15);">
+            <div class="ico">📺</div><b style="color:#fb923c;">YouTube</b><div style="font-size:.6rem;color:rgba(255,255,255,.4);">Vidéos liées</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S7 EXPLORER UN MODULE ═══ -->
+<div class="slide bg-mod" id="s7">
+  <div class="stag st-blue" style="margin-bottom:.35rem;">Étape 3 — Lecture</div>
+  <h2 class="sh2">Explorer un module <span style="color:#60a5fa;">généré</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Chaque module s'ouvre avec une interface complète : sections de cours navigables, outils d'apprentissage, évaluation et export.</p>
+  <div class="row">
+    <div style="background:#fff;border-radius:16px;padding:1rem 1.2rem;color:#1e293b;box-shadow:0 8px 40px rgba(0,0,0,.35);max-width:480px;width:100%;">
+      <div style="background:linear-gradient(135deg,#0d1b2a,#162f55);border-radius:10px;padding:.55rem .9rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem;">
+        <div style="font-weight:900;color:#f59e0b;font-size:.72rem;">🧪 Green Lab Studio</div>
+        <div style="display:flex;gap:.3rem;">
+          <span class="bm bm-v" style="padding:.2rem .55rem;font-size:.6rem;">📚 Bibliothèque</span>
+          <span class="bm bm-t" style="padding:.2rem .55rem;font-size:.6rem;">⚙️</span>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:9px;padding:.6rem .85rem;margin-bottom:.55rem;color:#fff;">
+        <div style="font-size:.58rem;opacity:.6;font-weight:700;text-transform:uppercase;">Module généré</div>
+        <div style="font-weight:900;font-size:.82rem;">SMED — Changement Rapide d'Outil</div>
+        <div style="font-size:.6rem;opacity:.65;margin-top:.2rem;">6 sections · Niveau intermédiaire · Maintenance automobile</div>
+      </div>
+      <div style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.55rem;">
+        <span class="bm bm-p" style="padding:.22rem .55rem;font-size:.58rem;">📖 Cours</span>
+        <span class="bm bm-a" style="padding:.22rem .55rem;font-size:.58rem;">🎯 Quiz</span>
+        <span class="bm bm-v" style="padding:.22rem .55rem;font-size:.58rem;">🃏 Flashcards</span>
+        <span class="bm bm-g" style="padding:.22rem .55rem;font-size:.58rem;">🗓️ Révision</span>
+        <span class="bm bm-t" style="padding:.22rem .55rem;font-size:.58rem;">📺 Vidéos</span>
+        <span class="bm bm-gh" style="padding:.22rem .55rem;font-size:.58rem;">📄 Export PDF</span>
+        <span class="bm bm-a" style="padding:.22rem .55rem;font-size:.58rem;">🏅 Attestation</span>
+      </div>
+      <div style="font-size:.6rem;font-weight:800;color:#64748b;text-transform:uppercase;margin-bottom:.3rem;">Navigation sections</div>
+      <div style="display:flex;flex-direction:column;gap:.22rem;">
+        <div style="background:linear-gradient(90deg,#eff6ff,#dbeafe);border-radius:7px;padding:.3rem .6rem;font-size:.6rem;font-weight:700;color:#1d4ed8;border-left:3px solid #3b82f6;">① Introduction &amp; concepts SMED</div>
+        <div style="background:#f8fafc;border-radius:7px;padding:.3rem .6rem;font-size:.6rem;color:#374151;border-left:3px solid #e2e8f0;">② Opérations internes vs externes</div>
+        <div style="background:#f8fafc;border-radius:7px;padding:.3rem .6rem;font-size:.6rem;color:#374151;border-left:3px solid #e2e8f0;">③ Conversion et optimisation</div>
+        <div style="background:#f8fafc;border-radius:7px;padding:.3rem .6rem;font-size:.6rem;color:#374151;border-left:3px solid #e2e8f0;opacity:.6;">+ 3 sections…</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">Chaque section contient</div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.64rem;color:rgba(255,255,255,.55);">
+          <div>📝 Contenu théorique structuré avec formules et étapes</div>
+          <div>💪 Exercice mis en situation avec corrigé IA interactif</div>
+          <div>🧪 <strong style="color:#2dd4bf;">Micro-quiz</strong> de 3 questions pour valider la section</div>
+          <div>📺 Vidéo YouTube recommandée pour approfondir</div>
+          <div>🤖 Tuteur IA — posez vos questions sur la section</div>
+          <div>🔄 Simplifier ou approfondir le contenu à la demande</div>
+        </div>
+      </div>
+      <div class="dc" style="padding:.65rem .9rem;">
+        <div style="font-size:.62rem;color:rgba(255,255,255,.4);">🔄 <strong style="color:rgba(255,255,255,.6);">Contenu manquant ?</strong> Un bouton "Régénérer" relance l'IA section par section si une partie est vide ou insuffisante.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S8 QUIZ D'ÉVALUATION ═══ -->
+<div class="slide bg-mod" id="s8">
+  <div class="stag st-blue" style="margin-bottom:.35rem;">Fonctionnalité — Évaluation</div>
+  <h2 class="sh2">Quiz d'évaluation <span style="color:#60a5fa;">par IA</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">QCM généré à partir du contenu du module. L'IA note les réponses, donne un score détaillé et un feedback personnalisé.</p>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🎯 Quiz — Module SMED</div>
+        <div class="qq">
+          <div class="qt">1. Quelle est la définition d'une opération interne en SMED ?</div>
+          <div class="qopt ok"><div class="qr ok"></div>Une opération réalisée machine arrêtée</div>
+          <div class="qopt"><div class="qr"></div>Une opération réalisée en dehors de l'atelier</div>
+          <div class="qopt"><div class="qr"></div>Une opération de maintenance préventive</div>
+        </div>
+        <div class="qq">
+          <div class="qt">2. L'objectif principal du SMED est de réduire...</div>
+          <div class="qopt sel"><div class="qr f"></div>Le temps de changement d'outil en dessous de 10 minutes</div>
+          <div class="qopt"><div class="qr"></div>La consommation d'énergie pendant le changement</div>
+          <div class="qopt"><div class="qr"></div>Le nombre d'opérateurs nécessaires</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📊 Résultat &amp; Feedback IA</div>
+        <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem;">
+          <div style="font-size:2.2rem;font-weight:900;color:#059669;">8/10</div>
+          <div>
+            <div style="font-size:.72rem;font-weight:800;color:#059669;">✅ Module validé</div>
+            <div style="font-size:.62rem;color:#64748b;">Score : 80% · Seuil requis : 60%</div>
+          </div>
+          <div style="margin-left:auto;background:linear-gradient(135deg,#059669,#047857);color:#fff;border-radius:10px;padding:.4rem .8rem;text-align:center;font-size:.62rem;font-weight:800;">🏅 Attestation<br>disponible</div>
+        </div>
+        <div class="ai">
+          <div class="ai-hd">🤖 Feedback IA personnalisé</div>
+          Excellente maîtrise des concepts SMED. Points forts : identification interne/externe et calcul du gain de temps. À retravailler : la standardisation des opérations externes (Q4). Consultez la section 3 pour consolider ce point.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S9 MICRO-QUIZ PAR SECTION ═══ -->
+<div class="slide bg-feat" id="s9">
+  <div class="stag st-pink" style="margin-bottom:.35rem;">🆕 Nouvelle fonctionnalité</div>
+  <h2 class="sh2">Micro-quiz <span style="color:#f472b6;">par section</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Chaque section de cours contient un mini-quiz de 3 questions pour valider la compréhension immédiatement avant de passer à la suite.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🧪 Micro-quiz — Section 2 : Opérations internes</div>
+        <div class="qq" style="margin-bottom:.4rem;">
+          <div class="qt">Qu'est-ce qu'une "conversion" en SMED ?</div>
+          <div class="qopt ok"><div class="qr ok"></div>Transformer une op. interne en op. externe ✓</div>
+          <div class="qopt"><div class="qr"></div>Réduire le nombre d'opérations</div>
+          <div class="qopt"><div class="qr"></div>Former les opérateurs à la méthode</div>
+        </div>
+        <div style="background:#f0fdf4;border-radius:9px;padding:.55rem .8rem;display:flex;align-items:center;gap:.6rem;">
+          <div style="font-size:1.3rem;">✅</div>
+          <div style="font-size:.65rem;color:#166534;"><strong>Bonne réponse !</strong> La conversion est l'action clé du SMED : chaque opération interne convertie en externe réduit directement le temps d'arrêt machine.</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">Avantages pédagogiques</div>
+        <div style="display:flex;flex-direction:column;gap:.35rem;">
+          <div style="background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);border-radius:9px;padding:.5rem .75rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+            <strong style="color:#f472b6;">🎯 Validation immédiate</strong><br>L'étudiant sait s'il a compris avant d'avancer
+          </div>
+          <div style="background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);border-radius:9px;padding:.5rem .75rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+            <strong style="color:#f472b6;">🔄 Feedback contextualisé</strong><br>Explication liée directement au contenu de la section
+          </div>
+          <div style="background:rgba(236,72,153,.08);border:1px solid rgba(236,72,153,.2);border-radius:9px;padding:.5rem .75rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+            <strong style="color:#f472b6;">📊 Progression visible</strong><br>Suivi section par section, pas seulement global
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S10 PLAN DE RÉVISION ═══ -->
+<div class="slide bg-feat" id="s10">
+  <div class="stag st-pink" style="margin-bottom:.35rem;">🆕 Nouvelle fonctionnalité</div>
+  <h2 class="sh2">Plan de révision <span style="color:#f472b6;">personnalisé</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">L'IA génère un programme de révision sur 7 jours adapté au contenu du module — avec des tâches précises pour chaque jour.</p>
+  <div class="row">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🗓️ Plan de révision — Module SMED (7 jours)</div>
+        <div class="rpday"><span class="rpnum">J1</span><div><strong style="font-size:.65rem;">Lecture sections 1 &amp; 2</strong> — Introduction et opérations internes/externes</div></div>
+        <div class="rpday"><span class="rpnum">J2</span><div><strong style="font-size:.65rem;">Exercice pratique + micro-quiz</strong> — Identifier et convertir les opérations</div></div>
+        <div class="rpday"><span class="rpnum">J3</span><div><strong style="font-size:.65rem;">Sections 3 &amp; 4</strong> — Optimisation et standardisation</div></div>
+        <div class="rpday"><span class="rpnum">J4</span><div><strong style="font-size:.65rem;">Flashcards — Mémorisation</strong> — 20 cartes en mode entraînement</div></div>
+        <div class="rpday"><span class="rpnum">J5</span><div><strong style="font-size:.65rem;">Sections 5 &amp; 6</strong> — Application industrielle + cas réels</div></div>
+        <div class="rpday"><span class="rpnum">J6</span><div><strong style="font-size:.65rem;">Révision ciblée</strong> — Revoir ses erreurs aux micro-quiz</div></div>
+        <div class="rpday"><span class="rpnum">J7</span><div><strong style="font-size:.65rem;">Quiz final complet</strong> — Viser ≥ 70% pour l'attestation</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">🎯 Rejouer ses erreurs</div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.7rem .9rem;font-size:.64rem;color:rgba(255,255,255,.55);margin-bottom:.5rem;">
+          L'outil mémorise chaque question ratée dans les micro-quiz et le quiz final. Un bouton <span style="background:rgba(245,158,11,.2);color:#fbbf24;border-radius:5px;padding:.05rem .35rem;font-size:.58rem;font-weight:800;">🎯 Rejouer mes erreurs</span> relance uniquement les questions difficiles pour un entraînement ciblé.
+        </div>
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.5px;">📊 Suivi de progression</div>
+        <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.55rem .9rem;font-size:.62rem;color:rgba(255,255,255,.4);">
+          Score par jour · Nombre de flashcards maîtrisées · Temps passé par section
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S11 FLASHCARDS ═══ -->
+<div class="slide bg-mod" id="s11">
+  <div class="stag st-purple" style="margin-bottom:.35rem;">Fonctionnalité — Mémorisation</div>
+  <h2 class="sh2">Flashcards <span class="hlp">automatiques</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">20 cartes question/réponse générées à partir du module. Mode entraînement avec retournement des cartes et suivi des concepts maîtrisés.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="fc">
+        <div class="fc-q">❓ Qu'est-ce que le temps de changement de série (TCS) ?</div>
+        <div class="fc-a">Le temps écoulé entre la dernière pièce bonne du lot précédent et la première pièce bonne du nouveau lot, machine en production.</div>
+      </div>
+      <div class="fc" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#bbf7d0;color:#166534;margin-top:.5rem;">
+        <div class="fc-q" style="color:#166534;">❓ Quel est le résultat visé par la méthode SMED ?</div>
+        <div class="fc-a" style="background:rgba(255,255,255,.6);color:#15803d;">Réduire le TCS en dessous de 10 minutes (Single Minute = moins de 10 min) pour augmenter la flexibilité de production.</div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🃏 Entraînement — Progression</div>
+        <div style="font-size:.65rem;color:#374151;margin-bottom:.6rem;">Module SMED · Session 2</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;">
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.63rem;color:#374151;">
+            <div style="background:#f0fdf4;border-radius:6px;padding:.28rem .5rem;font-weight:800;color:#059669;min-width:32px;text-align:center;">12</div>
+            <div>Cartes <strong>maîtrisées</strong></div>
+            <div style="flex:1;background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:60%;height:100%;background:#059669;border-radius:4px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.63rem;color:#374151;">
+            <div style="background:#fef9ee;border-radius:6px;padding:.28rem .5rem;font-weight:800;color:#d97706;min-width:32px;text-align:center;">5</div>
+            <div>Cartes <strong>à revoir</strong></div>
+            <div style="flex:1;background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:25%;height:100%;background:#f59e0b;border-radius:4px;"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:.6rem;font-size:.63rem;color:#374151;">
+            <div style="background:#f8fafc;border-radius:6px;padding:.28rem .5rem;font-weight:800;color:#94a3b8;min-width:32px;text-align:center;">3</div>
+            <div>Cartes <strong>non vues</strong></div>
+            <div style="flex:1;background:#e2e8f0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:15%;height:100%;background:#94a3b8;border-radius:4px;"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:.7rem;display:flex;gap:.4rem;">
+          <span class="bm bm-v" style="font-size:.62rem;padding:.28rem .6rem;">🃏 Continuer</span>
+          <span class="bm bm-gh" style="font-size:.62rem;padding:.28rem .6rem;">🎯 Revoir mes erreurs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S12 BIBLIOTHÈQUE ═══ -->
+<div class="slide bg-lib" id="s12">
+  <div class="stag st-teal" style="margin-bottom:.35rem;">Gestion — Bibliothèque</div>
+  <h2 class="sh2">La <span class="hlt">Bibliothèque</span> de modules</h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Tous vos modules générés sont sauvegardés localement. Importez, exportez, dupliquez et partagez vos modules entre appareils.</p>
+  <div class="row">
+    <div class="wc box">
+      <div class="wc-title">📚 Mes modules — 4 modules enregistrés</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;">
+        <div style="background:#f8fafc;border-radius:10px;padding:.7rem .85rem;border:1.5px solid #e2e8f0;">
+          <div style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);border-radius:7px;padding:.3rem;text-align:center;color:#fff;font-size:.6rem;font-weight:800;margin-bottom:.4rem;">SMED</div>
+          <div style="font-size:.63rem;font-weight:800;color:#1e293b;margin-bottom:.15rem;">Changement Rapide</div>
+          <div style="font-size:.57rem;color:#64748b;margin-bottom:.3rem;">6 sections · Quiz 8/10</div>
+          <div style="display:flex;gap:.2rem;"><span class="bm bm-p" style="font-size:.55rem;padding:.15rem .4rem;">📖 Ouvrir</span><span class="bm bm-gh" style="font-size:.55rem;padding:.15rem .4rem;">📄 PDF</span></div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:.7rem .85rem;border:1.5px solid #e2e8f0;">
+          <div style="background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:7px;padding:.3rem;text-align:center;color:#fff;font-size:.6rem;font-weight:800;margin-bottom:.4rem;">PDCA</div>
+          <div style="font-size:.63rem;font-weight:800;color:#1e293b;margin-bottom:.15rem;">Cycle Amélioration</div>
+          <div style="font-size:.57rem;color:#64748b;margin-bottom:.3rem;">8 sections · Quiz 9/10</div>
+          <div style="display:flex;gap:.2rem;"><span class="bm bm-p" style="font-size:.55rem;padding:.15rem .4rem;">📖 Ouvrir</span><span class="bm bm-gh" style="font-size:.55rem;padding:.15rem .4rem;">📄 PDF</span></div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:.7rem .85rem;border:1.5px solid #e2e8f0;">
+          <div style="background:linear-gradient(135deg,#059669,#10b981);border-radius:7px;padding:.3rem;text-align:center;color:#fff;font-size:.6rem;font-weight:800;margin-bottom:.4rem;">5S</div>
+          <div style="font-size:.63rem;font-weight:800;color:#1e293b;margin-bottom:.15rem;">Organisation Atelier</div>
+          <div style="font-size:.57rem;color:#64748b;margin-bottom:.3rem;">5 sections · En cours</div>
+          <div style="display:flex;gap:.2rem;"><span class="bm bm-p" style="font-size:.55rem;padding:.15rem .4rem;">📖 Ouvrir</span><span class="bm bm-gh" style="font-size:.55rem;padding:.15rem .4rem;">📄 PDF</span></div>
+        </div>
+        <div style="background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(234,88,12,.05));border-radius:10px;padding:.7rem .85rem;border:1.5px dashed rgba(245,158,11,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+          <div style="font-size:1.5rem;margin-bottom:.3rem;">➕</div>
+          <div style="font-size:.63rem;font-weight:700;color:#f59e0b;">Nouveau module</div>
+          <div style="font-size:.55rem;color:rgba(255,255,255,.3);margin-top:.15rem;">Créer avec l'IA</div>
+        </div>
+      </div>
+      <div style="margin-top:.7rem;display:flex;gap:.5rem;align-items:center;">
+        <span class="bm bm-g" style="font-size:.63rem;padding:.28rem .65rem;">⬆️ Exporter tout (.json)</span>
+        <span class="bm bm-gh" style="font-size:.63rem;padding:.28rem .65rem;">⬇️ Importer</span>
+        <span style="font-size:.6rem;color:rgba(255,255,255,.3);margin-left:auto;">💡 Partagez vos modules en envoyant le fichier .json</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S13 EXPORT PDF & ATTESTATION ═══ -->
+<div class="slide bg-lib" id="s13">
+  <div class="stag st-teal" style="margin-bottom:.35rem;">Export &amp; Certification</div>
+  <h2 class="sh2">PDF &amp; <span class="hlt">Attestation</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Exportez n'importe quel module en PDF complet — cours, exercices, quiz corrigés, formules — ou générez une attestation officielle pour les formations Pro.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📄 Export PDF</div>
+        <div style="font-size:.67rem;color:#374151;margin-bottom:.5rem;">Le PDF généré contient :</div>
+        <div style="display:flex;flex-direction:column;gap:.22rem;font-size:.64rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:6px;padding:.28rem .55rem;border-left:2px solid #10b981;">📖 Toutes les sections de cours complètes</div>
+          <div style="background:#eff6ff;border-radius:6px;padding:.28rem .55rem;border-left:2px solid #3b82f6;">💪 Tous les exercices avec leurs corrigés</div>
+          <div style="background:#fef9ee;border-radius:6px;padding:.28rem .55rem;border-left:2px solid #f59e0b;">🎯 Le quiz complet avec les bonnes réponses</div>
+          <div style="background:#f5f3ff;border-radius:6px;padding:.28rem .55rem;border-left:2px solid #7c3aed;">🃏 Les 20 flashcards question/réponse</div>
+        </div>
+        <div style="margin-top:.6rem;"><span class="bm bm-gh" style="font-size:.65rem;padding:.3rem .7rem;">📄 Exporter PDF</span></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="cert">
+        <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem;">ATTESTATION DE FORMATION</div>
+        <div style="font-size:1.1rem;font-weight:900;color:#f59e0b;margin-bottom:.2rem;">Green Lab Studio</div>
+        <div style="font-size:.68rem;color:rgba(255,255,255,.55);margin-bottom:.7rem;">Généré par Intelligence Artificielle</div>
+        <div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.55rem .8rem;margin-bottom:.6rem;">
+          <div style="font-size:.72rem;font-weight:800;color:#fff;margin-bottom:.2rem;">Module : SMED — Changement Rapide</div>
+          <div style="font-size:.62rem;color:rgba(255,255,255,.45);">Apprenant : Youssef Tahir · Score : 8/10 (80%)</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:.6rem;color:rgba(255,255,255,.35);">Formateur : Prof. Hassan Alami<br>Date : Août 2026</div>
+          <div style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.3);border-radius:7px;padding:.3rem .6rem;font-size:.62rem;color:#fbbf24;font-weight:800;">🏅 Validé</div>
+        </div>
+      </div>
+      <div class="dc" style="padding:.6rem .9rem;">
+        <div style="font-size:.6rem;color:rgba(255,255,255,.4);">⚙️ <strong style="color:rgba(255,255,255,.55);">Paramètres → Identité</strong> pour configurer votre nom et celui du formateur sur l'attestation.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S14 PARAMÈTRES AVANCÉS ═══ -->
+<div class="slide bg-studio" id="s14">
+  <div class="stag st-purple" style="margin-bottom:.35rem;">Configuration</div>
+  <h2 class="sh2">Paramètres <span class="hlp">avancés</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Personnalisez entièrement la génération : nombre de sections, questions quiz, seuil de validation, éléments affichés et identité.</p>
+  <div class="row">
+    <div class="wc box">
+      <div class="wc-title">⚙️ Paramètres disponibles</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;font-size:.65rem;">
+        <div style="background:#f0f9ff;border-radius:9px;padding:.65rem .85rem;border:1.5px solid #bae6fd;">
+          <div style="font-weight:800;color:#0369a1;margin-bottom:.3rem;">🤖 Modèle IA</div>
+          <div style="color:#0c4a6e;">Choisir le modèle : vitesse (LLaMA 3.1 8B) vs qualité (LLaMA 3.3 70B)</div>
+        </div>
+        <div style="background:#f5f3ff;border-radius:9px;padding:.65rem .85rem;border:1.5px solid #ddd6fe;">
+          <div style="font-weight:800;color:#6d28d9;margin-bottom:.3rem;">📖 Sections</div>
+          <div style="color:#4c1d95;">De 4 à 12 sections par module — ajustez selon le niveau de détail souhaité</div>
+        </div>
+        <div style="background:#fef9ee;border-radius:9px;padding:.65rem .85rem;border:1.5px solid #fde68a;">
+          <div style="font-weight:800;color:#b45309;margin-bottom:.3rem;">🎯 Quiz</div>
+          <div style="color:#92400e;">De 5 à 20 questions · Seuil de validation de 50% à 80%</div>
+        </div>
+        <div style="background:#ecfdf5;border-radius:9px;padding:.65rem .85rem;border:1.5px solid #a7f3d0;">
+          <div style="font-weight:800;color:#065f46;margin-bottom:.3rem;">🧩 Sections affichées</div>
+          <div style="color:#064e3b;">Afficher/masquer : roadmap, KPIs, quiz, flashcards, vidéos, plan de révision</div>
+        </div>
+        <div style="background:#fff0f6;border-radius:9px;padding:.65rem .85rem;border:1.5px solid #fbcfe8;">
+          <div style="font-weight:800;color:#9d174d;margin-bottom:.3rem;">👤 Identité</div>
+          <div style="color:#831843;">Nom du formateur et de l'organisme — apparaît sur les attestations</div>
+        </div>
+        <div style="background:#eff6ff;border-radius:9px;padding:.65rem .85rem;border:1.5px solid #bfdbfe;">
+          <div style="font-weight:800;color:#1e40af;margin-bottom:.3rem;">🌐 Langue</div>
+          <div style="color:#1e3a8a;">Générer les modules en français, anglais, arabe ou espagnol</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S15 TUTEUR IA ═══ -->
+<div class="slide bg-gen" id="s15">
+  <div class="stag st-amber" style="margin-bottom:.35rem;">🆕 Fonctionnalité IA avancée</div>
+  <h2 class="sh2">Le Tuteur IA — <span class="hl">Posez vos questions</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:600px;">Chaque section dispose d'un tuteur IA contextuel. Il connaît le contenu du module et répond avec son raisonnement visible — comme Claude Thinking.</p>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🤖 Tuteur IA — Section SMED</div>
+        <div class="chat" style="max-height:260px;overflow-y:auto;">
+          <div class="cmsg user">Je ne comprends pas pourquoi convertir une opération interne en externe réduit le temps de changement ?</div>
+          <div style="background:#f1f5f9;border:1.5px dashed #94a3b8;border-radius:10px;padding:.5rem .7rem;font-size:.63rem;color:#475569;font-style:italic;margin:.2rem 0;">
+            <div style="font-weight:800;color:#64748b;margin-bottom:.2rem;display:flex;align-items:center;gap:.3rem;"><span>▶</span> 🧠 Raisonnement</div>
+            L'étudiant confond le temps de changement total avec le temps d'arrêt machine. Je dois clarifier que les opérations externes se font machine en marche...
+          </div>
+          <div class="cmsg ai">
+            <div style="font-weight:800;font-size:.65rem;color:#4f46e5;margin-bottom:.25rem;">🤖 Tuteur IA</div>
+            Excellente question ! Le secret est là : une opération <strong>interne</strong> oblige à arrêter la machine pour l'exécuter. Une opération <strong>externe</strong> se fait pendant que la machine tourne encore (ou démarre déjà). En la convertissant, la machine ne s'arrête plus pour cette opération — donc le temps d'arrêt diminue directement. 🎯
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.6);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.5px;">Autres fonctions IA par section</div>
+        <div style="display:flex;flex-direction:column;gap:.3rem;">
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:.5rem .75rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+            <strong style="color:#fbbf24;">🔽 Simplifier</strong> — Réécrit le contenu de la section en langage plus simple pour les débutants
+          </div>
+          <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:9px;padding:.5rem .75rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+            <strong style="color:#60a5fa;">🔼 Approfondir</strong> — Ajoute des détails techniques avancés pour les experts
+          </div>
+          <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:9px;padding:.5rem .75rem;font-size:.64rem;color:rgba(255,255,255,.6);">
+            <strong style="color:#c084fc;">✏️ Correction libre</strong> — Posez une question ouverte, l'IA note votre réponse et donne un feedback détaillé
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S15b ASSISTANT IA CO-PILOT ═══ -->
+<div class="slide bg-feat" id="s15b">
+  <div class="stag st-purple">🤖 Nouveau · Assistant IA co-pilote</div>
+  <h2 class="sh2">Un assistant <span class="hl">ancré sur votre module</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:640px;">Panneau latéral dédié à chaque module — l'assistant connaît tout son contenu et peut appliquer ses suggestions en un clic.</p>
+  <div class="row" style="align-items:flex-start;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">🤖 Assistant — Module SMED</div>
+        <div class="chat" style="max-height:255px;overflow-y:auto;">
+          <div class="cmsg user">Ce module est-il complet pour un débutant ?</div>
+          <div class="cmsg ai">
+            <div style="font-weight:800;font-size:.63rem;color:#7c3aed;margin-bottom:.2rem;">🤖 Assistant IA</div>
+            Le module couvre bien les fondamentaux. Je suggère d'ajouter une section sur la <strong>fiche de setup</strong>, souvent manquante pour les opérateurs terrain.
+            <div style="margin:.35rem 0;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:7px;padding:.35rem .6rem;">
+              <div style="font-size:.6rem;font-weight:800;color:#1e40af;margin-bottom:.2rem;">➕ Nouvelle section proposée</div>
+              <button style="font-size:.63rem;background:#1e40af;color:#fff;border:none;border-radius:5px;padding:.18rem .5rem;cursor:default;">➕ Ajouter la section</button>
+            </div>
+          </div>
+          <div class="cmsg user">Reformule la section 2 pour des opérateurs terrain</div>
+          <div class="cmsg ai">
+            <div style="font-weight:800;font-size:.63rem;color:#7c3aed;margin-bottom:.2rem;">🤖 Assistant IA</div>
+            Voici une version simplifiée avec vocabulaire atelier…
+            <div style="margin:.35rem 0;background:#f0fdf4;border:1.5px solid #86efac;border-radius:7px;padding:.35rem .6rem;">
+              <div style="font-size:.6rem;font-weight:800;color:#15803d;margin-bottom:.2rem;">📝 Proposition — Section 2</div>
+              <button style="font-size:.63rem;background:#15803d;color:#fff;border:none;border-radius:5px;padding:.18rem .5rem;cursor:default;">✅ Appliquer à la section 2</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.68rem;font-weight:800;color:rgba(255,255,255,.55);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">Ce que l'assistant peut faire</div>
+        <div style="display:flex;flex-direction:column;gap:.32rem;">
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:.45rem .7rem;font-size:.63rem;color:rgba(255,255,255,.7);"><strong style="color:#fbbf24;">🔍 Audit pédagogique</strong> — Identifie lacunes, sections faibles et points à renforcer</div>
+          <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:9px;padding:.45rem .7rem;font-size:.63rem;color:rgba(255,255,255,.7);"><strong style="color:#c084fc;">✏️ Reformulation ciblée</strong> — Adapte une section à un public différent (débutant, expert, opérateur)</div>
+          <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:9px;padding:.45rem .7rem;font-size:.63rem;color:rgba(255,255,255,.7);"><strong style="color:#60a5fa;">➕ Section à la demande</strong> — Propose et insère une section manquante en 1 clic</div>
+          <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:9px;padding:.45rem .7rem;font-size:.63rem;color:rgba(255,255,255,.7);"><strong style="color:#34d399;">💾 Mémoire persistante</strong> — L'historique de conversation est sauvegardé avec le module</div>
+        </div>
+        <div style="margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:.45rem .7rem;font-size:.62rem;color:rgba(255,255,255,.45);">
+          <strong style="color:rgba(255,255,255,.6);">Accès :</strong> Bouton <strong style="color:#a78bfa;">🤖 Assistant</strong> dans la barre du module → panneau latéral coulissant
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S15c ENRICHIR PAR DOCUMENTS ═══ -->
+<div class="slide bg-mod" id="s15c">
+  <div class="stag st-amber">📎 Nouveau · Enrichissement documentaire</div>
+  <h2 class="sh2">Enrichir un module avec <span class="hl">vos documents</span></h2>
+  <p style="font-size:.8rem;color:rgba(255,255,255,.45);margin-bottom:1rem;max-width:640px;">Importez une norme ISO, une procédure interne ou une fiche technique — l'IA enrichit automatiquement les sections qui en bénéficient.</p>
+  <div class="row" style="align-items:flex-start;">
+    <div class="col">
+      <div class="wc">
+        <div class="wc-title">📎 Enrichissement en cours</div>
+        <div style="border:2px dashed #d1d5db;border-radius:10px;padding:.85rem;text-align:center;margin-bottom:.65rem;">
+          <div style="font-size:1.3rem;margin-bottom:.2rem;">📄</div>
+          <div style="font-size:.68rem;font-weight:700;color:#374151;">ISO_9001_2015.pdf</div>
+          <div style="font-size:.6rem;color:#9ca3af;margin-top:.1rem;">68k · 40 pages analysées</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.28rem;font-size:.66rem;color:#374151;">
+          <div style="background:#f0fdf4;border-radius:7px;padding:.33rem .6rem;border-left:3px solid #10b981;">✅ Section 1 — 3 définitions normatives ajoutées</div>
+          <div style="background:#f0fdf4;border-radius:7px;padding:.33rem .6rem;border-left:3px solid #10b981;">✅ Section 3 — données chiffrées mises à jour</div>
+          <div style="background:#f0fdf4;border-radius:7px;padding:.33rem .6rem;border-left:3px solid #10b981;">✅ Section 5 — références ISO 9001 intégrées</div>
+          <div style="background:#f8fafc;border-radius:7px;padding:.33rem .6rem;border-left:3px solid #e2e8f0;color:#9ca3af;">Sections 2, 4 — non concernées par ce document</div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="dc">
+        <div style="font-size:.68rem;font-weight:800;color:rgba(255,255,255,.55);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.5px;">Comment ça marche</div>
+        <div style="display:flex;flex-direction:column;gap:.35rem;">
+          <div style="display:flex;gap:.5rem;align-items:flex-start;font-size:.63rem;color:rgba(255,255,255,.7);">
+            <span style="background:#f59e0b;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#000;flex-shrink:0;">1</span>
+            Bouton <strong style="color:#fbbf24;">📎 Enrichir</strong> dans la barre du module ouvert
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:flex-start;font-size:.63rem;color:rgba(255,255,255,.7);">
+            <span style="background:#f59e0b;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#000;flex-shrink:0;">2</span>
+            Déposez PDF, TXT ou MD (plusieurs fichiers acceptés, extraction auto du PDF)
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:flex-start;font-size:.63rem;color:rgba(255,255,255,.7);">
+            <span style="background:#f59e0b;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#000;flex-shrink:0;">3</span>
+            L'IA identifie les sections concernées et enrichit <strong>uniquement celles-là</strong> (max 5)
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:flex-start;font-size:.63rem;color:rgba(255,255,255,.7);">
+            <span style="background:#f59e0b;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:800;color:#000;flex-shrink:0;">4</span>
+            Module mis à jour instantanément — sources documentaires mémorisées
+          </div>
+        </div>
+        <div style="margin-top:.65rem;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:9px;padding:.45rem .7rem;font-size:.62rem;color:rgba(255,255,255,.55);">
+          <strong style="color:#fbbf24;">Formats :</strong> PDF jusqu'à 40 pages · TXT · MD — compatible tous fournisseurs IA (Groq, OpenAI, Anthropic, Google)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ S16 CONCLUSION ═══ -->
+<div class="slide bg-end" id="s16">
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;">
+    <div style="position:absolute;width:450px;height:450px;background:radial-gradient(circle,rgba(124,58,237,.12),transparent 70%);top:-100px;right:-80px;"></div>
+    <div style="position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(245,158,11,.1),transparent 70%);bottom:-60px;left:-40px;"></div>
+  </div>
+  <div style="text-align:center;position:relative;z-index:1;max-width:800px;">
+    <div class="stag st-purple" style="margin:0 auto .8rem;">Green Lab Studio · Récapitulatif</div>
+    <h1 class="sh1" style="font-size:2.2rem;">Créez vos modules en <span class="hl">secondes</span>,<br>pas en heures.</h1>
+    <p style="font-size:.82rem;color:rgba(255,255,255,.45);margin-bottom:1.5rem;">De la description à l'attestation — un générateur IA complet pour tout formateur.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin:0 auto 1.5rem;max-width:700px;">
+      <div class="sbox"><div class="snum" style="font-size:1.3rem;">⚡</div><div class="slbl">Génération en<br>quelques secondes</div></div>
+      <div class="sbox"><div class="snum" style="font-size:1.3rem;">4</div><div class="slbl">Fournisseurs IA<br>compatibles</div></div>
+      <div class="sbox"><div class="snum" style="font-size:1.3rem;">∞</div><div class="slbl">Modules créés<br>et sauvegardés</div></div>
+      <div class="sbox"><div class="snum" style="font-size:1.3rem;">🏅</div><div class="slbl">Attestation<br>certifiante</div></div>
+    </div>
+    <div style="background:rgba(245,158,11,.08);border:1.5px solid rgba(245,158,11,.2);border-radius:14px;padding:1rem 1.5rem;display:inline-block;">
+      <div style="font-size:.7rem;font-weight:800;color:#fbbf24;margin-bottom:.3rem;">🚀 Pour commencer dès aujourd'hui</div>
+      <div style="font-size:.65rem;color:rgba(255,255,255,.5);">1. Créez un compte Groq gratuit → <strong style="color:#2dd4bf;">console.groq.com</strong><br>2. Copiez votre clé API <code style="background:rgba(255,255,255,.1);border-radius:3px;padding:.02rem .25rem;">gsk_...</code><br>3. Ouvrez Green Lab Studio et créez votre premier module !</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<div class="navctrl">
+  <button class="nbtn" id="pb" onclick="prev()" disabled>← Préc.</button>
+  <span class="slide-num" id="sc2">1 / 16</span>
+  <div class="sect-label" id="sect-label"></div>
+  <button class="nbtn" id="nb" onclick="next()">Suiv. →</button>
+</div>
+
+<script>
+const TOTAL=18;let cur=0;
+function go(n){if(n<0||n>=TOTAL)return;const ss=document.querySelectorAll('.slide');ss[cur].classList.remove('active');ss[cur].classList.add('exit');setTimeout(()=>ss[cur].classList.remove('exit'),380);cur=n;ss[cur].classList.add('active');upd();}
+function next(){go(cur+1);}function prev(){go(cur-1);}
+function upd(){const ss=document.querySelectorAll('.slide');const tag=ss[cur].querySelector('.stag');document.getElementById('sect-label').textContent=tag?tag.textContent.trim():'';document.getElementById('pb').disabled=cur===0;document.getElementById('nb').disabled=cur===TOTAL-1;document.getElementById('sc').textContent=(cur+1)+' / '+TOTAL;document.getElementById('sc2').textContent=(cur+1)+' / '+TOTAL;document.getElementById('pf').style.width=((cur+1)/TOTAL*100)+'%';}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')next();if(e.key==='ArrowLeft')prev();});
+upd();
+</script>
+</body>
+</html>
