@@ -2273,8 +2273,9 @@ function renderViewer(m){
     </div>
   </div>`:'';
 
-  // ── Roadmap ──
-  const roadmapHtml=_cfg.showRoadmap?_renderRoadmap(m.etapes||[],mc,mcd):'';
+  // ── Roadmap (suppressed when frise hero covers it) ──
+  const _etps=m.etapes||[];
+  const roadmapHtml=(_cfg.showRoadmap&&!_etps.length)?_renderRoadmap(_etps,mc,mcd):'';
 
   // ── Formules grid (dark navy) ──
   const formHtml=_cfg.showFormules&&(m.formules||[]).length?`<div class="ccard">
@@ -2491,7 +2492,55 @@ function renderViewer(m){
     </div>`;
   }
 
-  const score=m.scores?.quiz!=null?`<span class="mod-header-badge">Score: ${m.scores.quiz}%</span>`:'';
+  // ── Hero ──
+  const _icone=m.icone||(p?'🏭':'🎓');
+  const _accroche=m.accroche||m.desc||m.description||'';
+  const _niv=m.niveau||m.niv||'';
+  const _dur=m.duree||m.dur||'';
+  const _lang=m.lang||'';
+  const _scoreVal=m.scores?.quiz!=null?m.scores.quiz+'%':'';
+
+  const _friseHtml=_etps.length?`<div style="overflow-x:auto;padding:.5rem 0 .4rem;margin-top:1.1rem;-webkit-overflow-scrolling:touch;">
+    <div style="display:flex;align-items:flex-start;min-width:max-content;padding:.1rem .3rem;">
+      ${_etps.map((e,i)=>{
+        const isFirst=i===0;
+        const isLast=i===_etps.length-1;
+        return`<div style="display:flex;align-items:flex-start;gap:0;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:.28rem;width:82px;">
+            <div style="width:34px;height:34px;border-radius:50%;background:${isFirst?mc:'transparent'};border:2.5px solid ${isFirst?mc:bd};color:${isFirst?'#fff':mcd};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.71rem;flex-shrink:0;transition:background .2s;">${_e(e.id||String(i+1))}</div>
+            <div style="font-size:.59rem;font-weight:700;text-align:center;color:#1e293b;line-height:1.3;max-width:74px;">${_e(e.titre||'')}</div>
+            ${e.outil?`<div style="font-size:.53rem;color:#9ca3af;text-align:center;max-width:74px;">${_e(e.outil)}</div>`:''}
+          </div>
+          ${!isLast?`<div style="margin-top:16px;flex-shrink:0;display:flex;align-items:center;">
+            <div style="width:22px;height:2px;background:${bd};"></div>
+            <div style="width:0;height:0;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:6px solid ${mc};opacity:.55;"></div>
+          </div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`:'';
+
+  const _heroHtml=`<div style="background:${bg};border:1.5px solid ${bd};border-radius:18px;padding:1.5rem 1.8rem 1.35rem;margin-bottom:1rem;box-shadow:0 4px 20px ${mc}14;">
+    <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:.85rem;">
+      <div style="font-size:2.75rem;line-height:1;flex-shrink:0;">${_icone}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.59rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${mc};margin-bottom:.2rem;">${p?'Formation Professionnelle':'Cours Ingénieur'}</div>
+        <h2 style="font-size:1.38rem;font-weight:900;color:${mcd};line-height:1.2;margin:0 0 .3rem;font-family:'Plus Jakarta Sans',sans-serif;">${_e(m.titre)}</h2>
+        ${_accroche?`<p style="font-size:.83rem;color:#374151;line-height:1.65;font-style:italic;margin:0;">${_e(_accroche)}</p>`:''}
+      </div>
+    </div>
+    <div style="display:flex;gap:.32rem;flex-wrap:wrap;align-items:center;">
+      <span style="background:${mc};color:#fff;border-radius:6px;padding:.14rem .58rem;font-size:.66rem;font-weight:900;letter-spacing:.3px;">${p?'PRO':'ACADÉMIQUE'}</span>
+      ${m.secteur||m.dom?`<span style="background:#fff;color:${mcd};border:1.5px solid ${bd};border-radius:6px;padding:.14rem .52rem;font-size:.66rem;font-weight:700;">${_e(m.secteur||m.dom)}</span>`:''}
+      ${_niv?`<span style="background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.66rem;font-weight:600;text-transform:capitalize;">${_e(_niv)}</span>`:''}
+      ${_dur?`<span style="background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.66rem;font-weight:600;">⏱️ ${_e(_dur)}</span>`:''}
+      ${_lang?`<span style="background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.66rem;">🌐 ${_e(_lang)}</span>`:''}
+      ${m.pub?`<span style="background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.66rem;">👥 ${_e(m.pub)}</span>`:''}
+      ${_scoreVal?`<span style="background:#fff;color:${mcd};border:1.5px solid ${bd};border-radius:6px;padding:.14rem .48rem;font-size:.66rem;font-weight:800;">📊 ${_scoreVal}</span>`:''}
+      ${m.prerequis?`<span style="background:#fff;color:#6b7280;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.63rem;">📚 ${_e(m.prerequis)}</span>`:''}
+    </div>
+    ${_friseHtml}
+  </div>`;
 
   document.getElementById('modContent').innerHTML=`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;gap:.5rem;flex-wrap:wrap;">
@@ -2506,25 +2555,7 @@ function renderViewer(m){
         <button class="btn btn-danger btn-sm" onclick="confirmDel(${m.id})">🗑️</button>
       </div>
     </div>
-    <div class="mod-header">
-      <div class="mod-header-top ${p?'pro':'acad'}"${_da?` style="background:linear-gradient(145deg,#0a1628,${_da}cc);"`:''}>
-        <div class="mod-header-icon">${_e(m.icone||p?'💼':'🎓')}</div>
-        <div class="mod-header-text">
-          <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;opacity:.6;margin-bottom:.15rem;">${p?'Formation Professionnelle':'Cours Ingénieur ⚡'}</div>
-          <h2>${_e(m.titre)}</h2>
-          <p>${_e(m.desc||m.description||'')}</p>
-        </div>
-      </div>
-      <div class="mod-header-steps">
-        <span class="mod-lib-badge badge-${p?'pro':'acad'}">${_e(m.secteur||m.dom)}</span>
-        <span style="font-size:.73rem;color:var(--gray600);">👥 ${_e(m.pub)}</span>
-        <span style="font-size:.73rem;color:var(--gray600);">⏱️ ${_e(m.duree||m.dur)}</span>
-        <span style="font-size:.73rem;color:var(--gray600);">🌐 ${_e(m.lang)}</span>
-        <span style="font-size:.73rem;color:var(--gray600);text-transform:capitalize;">${_e(m.niveau||m.niv)}</span>
-        ${score}
-        ${m.prerequis?`<span style="font-size:.71rem;color:var(--gray400);">📚 Prérequis: ${_e(m.prerequis)}</span>`:''}
-      </div>
-    </div>
+    ${_heroHtml}
     ${renderKPIBoxes(m)}
     ${exercisesCard}
     ${casHtml}
