@@ -670,8 +670,10 @@ p.sec-lead{font-size:.87rem !important;font-weight:500;color:#1e293b;line-height
   .lo-badge,.lo-title,.lo-tagline,.lo-sub,.lo-feats,.lo-cta-wrap,.lo-footer{animation:none!important;opacity:1!important;transform:none!important;}
 }
 /* ── Agent IA panel ── */
-.agent-panel{position:fixed;right:-420px;top:0;bottom:0;width:400px;max-width:93vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.16);z-index:820;display:flex;flex-direction:column;transition:right .3s cubic-bezier(.4,0,.2,1);}
-.agent-panel.open{right:0;}
+.agent-panel{position:fixed;right:0;top:0;bottom:0;width:400px;max-width:93vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.16);z-index:820;display:flex;flex-direction:column;transform:translateX(100%);transition:none;}
+.agent-panel.open{transform:translateX(0);}
+/* Agent overlay — no scrim (non-blocking panel) */
+#agentOverlay{background:transparent!important;}
 .agent-hdr{padding:.8rem 1rem;background:linear-gradient(135deg,#0d1b2a,#1a3a6e);color:#fff;display:flex;align-items:center;gap:.6rem;flex-shrink:0;}
 .agent-msgs{flex:1;overflow-y:auto;padding:.7rem;display:flex;flex-direction:column;gap:.55rem;scroll-behavior:smooth;}
 .amsg-user{background:#f1f5f9;border-radius:12px 12px 4px 12px;padding:.5rem .75rem;font-size:.79rem;color:#374151;align-self:flex-end;max-width:86%;line-height:1.55;}
@@ -684,6 +686,60 @@ p.sec-lead{font-size:.87rem !important;font-weight:500;color:#1e293b;line-height
 .agent-patch{margin:.4rem 0;background:#f0fdf4;border:1.5px solid #86efac;border-radius:9px;padding:.5rem .75rem;}
 .agent-newsec{margin:.4rem 0;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:9px;padding:.5rem .75rem;}
 .agent-apply-btn{font-size:.72rem;font-weight:700;border:none;border-radius:7px;padding:.28rem .7rem;cursor:pointer;margin-top:.3rem;}
+
+/* ═══════════════════════════════════════════════════════
+   APPLE DESIGN — Interactions fluides
+═══════════════════════════════════════════════════════ */
+
+/* Partie E — Typographie (letter-spacing tight sur les titres) */
+:root{
+  --ap-tracking-display:-0.02em;
+  --ap-leading-display:1.08;
+}
+h1,h2,.ap-title-lg{
+  letter-spacing:var(--ap-tracking-display);
+  line-height:var(--ap-leading-display);
+}
+
+/* Partie B — Press feedback pour éléments cliquables non-.btn */
+.mode-card:active{
+  transform:translateY(-2px) scale(0.97)!important;
+  transition:transform 80ms ease-out!important;
+}
+.mod-lib-card:active{
+  transform:translateY(-2px) scale(0.97)!important;
+  transition:transform 80ms ease-out!important;
+}
+.nav-btn:active{
+  transform:scale(0.96);
+  transition:transform 80ms ease-out;
+}
+.dpill:active,.mode-chip:active,.agent-sugg-chip:active,.card-act-btn:active,.ms-btn:active{
+  transform:scale(0.95);
+  transition:transform 80ms ease-out;
+}
+.lo-btn{will-change:transform;}
+
+/* Partie D — Glass sur modal-box */
+.modal-box{
+  background:rgba(255,255,255,.95)!important;
+  backdrop-filter:blur(24px) saturate(160%);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+}
+
+/* Partie F — Reduced motion global */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:150ms!important;
+    scroll-behavior:auto!important;
+  }
+  .mode-card:active,.mod-lib-card:active,.nav-btn:active,
+  .dpill:active,.mode-chip:active,.agent-sugg-chip:active,.card-act-btn:active{
+    transform:none!important;
+  }
+}
 </style>
 </head>
 <body>
@@ -1257,7 +1313,7 @@ function renderNav(){
   const nav=document.getElementById('sbNav');if(!nav)return;
   nav.innerHTML=_NAV_GROUPS.map(g=>
     `<div class="nav-section">${g.section}</div>`+
-    g.items.map(n=>`<button class="nav-btn" onclick="nav('${n.id}')" id="nav-${n.id}"><span class="nav-ico">${n.ico}</span>${n.label}</button>`).join('')
+    g.items.map(n=>`<button class="nav-btn ap-press" onclick="nav('${n.id}')" id="nav-${n.id}"><span class="nav-ico">${n.ico}</span>${n.label}</button>`).join('')
   ).join('');
   document.getElementById('nav-home')?.classList.add('active');
 }
@@ -1365,7 +1421,7 @@ function renderHome(){
   // Cartes de mode — générées depuis _MODES
   const hero=document.getElementById('modeHero');
   if(hero) hero.innerHTML='<div class="mode-hero">'+_MODES.map(m=>
-    `<div class="mode-card ${m.cardCls}" onclick="goCreate('${m.id}')">
+    `<div class="mode-card ap-press ${m.cardCls}" onclick="goCreate('${m.id}')">
       <div class="mode-ico">${m.ico}</div>
       <h2>${m.label}</h2>
       <p>${m.desc}</p>
@@ -3303,7 +3359,7 @@ async function openRem(comp){
   if(!key){alert('Clé API requise.');return;}
   const p=m?.mode==='pro';
   document.getElementById('remTitle').textContent=(p?'🔧':'📖')+' Remédiation : '+comp;
-  document.getElementById('remModal').classList.add('open');
+  _apOpenModal(document.getElementById('remModal'));
   document.getElementById('remBody').innerHTML=`<div style="text-align:center;padding:2rem;"><div class="spinner" style="border-color:var(--gray200);border-top-color:var(--${p?'accent':'purple'});width:28px;height:28px;margin:0 auto 1rem;"></div><div style="font-size:.82rem;color:var(--gray600);">Génération en cours…</div></div>`;
   try{
     const SYS=p?`Tu es formateur expert en "${m.dom}". Remédiation terrain pratique. JSON.`:`Tu es professeur expert en "${m.dom}". Remédiation pédagogique claire. JSON.`;
@@ -3320,7 +3376,7 @@ async function openRem(comp){
           <div class="corr-body">${_e(v.reponse)}</div></div>`).join('')}</div>`:''}`;
   }catch(e){document.getElementById('remBody').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div>`;}
 }
-function closeRem(){document.getElementById('remModal').classList.remove('open');}
+function closeRem(){_apCloseModal(document.getElementById('remModal'));}
 
 /* ══════════════════════════════════════════════
    LIBRARY
@@ -3329,7 +3385,7 @@ function modCard(m){
   const p=m.mode==='pro';const sc=m.scores?.quiz;
   const _da=_domainAccent(m.secteur||m.dom);
   const _topStyle=_da?`style="background:linear-gradient(135deg,#0d1b2a,${_da}cc,#0a1622);background-size:200% 200%;animation:gradientShift 9s ease infinite;"`:'';
-  return`<div class="mod-lib-card ${m.mode||''}" onclick="openMod(${m.id})">
+  return`<div class="mod-lib-card ap-press ${m.mode||''}" onclick="openMod(${m.id})">
     <div class="mod-lib-top ${p?'pro':'acad'}" ${_topStyle}>
       <div><div class="mod-lib-ico">${p?'💼':'🎓'}</div></div>
       <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;">
@@ -3529,7 +3585,7 @@ function openNoteModal(modId,key,title,isAcad){
   _noteCtx={modId,key,isAcad};
   document.getElementById('noteTitle').textContent='📝 Notes — '+title;
   document.getElementById('noteTxt').value=getNote(modId,key);
-  document.getElementById('noteModal').classList.add('open');
+  _apOpenModal(document.getElementById('noteModal'));
   setTimeout(()=>document.getElementById('noteTxt').focus(),100);
 }
 function saveNoteModal(){
@@ -3540,7 +3596,7 @@ function saveNoteModal(){
   if(btn){const has=!!txt;btn.className='note-ico'+(has?' has-note'+(_noteCtx.isAcad?' an':''):'');btn.textContent=has?'📝':'+ Note';}
   closeNoteModal();showToast('Note enregistrée !');
 }
-function closeNoteModal(){document.getElementById('noteModal').classList.remove('open');}
+function closeNoteModal(){_apCloseModal(document.getElementById('noteModal'));}
 
 /* ══════════════════════════════════════════════
    PROGRESSION LECTURE
@@ -3578,7 +3634,7 @@ function openFlashcards(m){
   }
   if(!cards.length){showToast('Aucune carte à générer pour ce module.','err');return;}
   _fcCards=cards.sort(()=>Math.random()-.5);_fcIdx=0;_fcFlipped=false;
-  renderFC();document.getElementById('fcModal').classList.add('open');
+  renderFC();_apOpenModal(document.getElementById('fcModal'));
 }
 function renderFC(){
   const c=_fcCards[_fcIdx];
@@ -3591,9 +3647,9 @@ function renderFC(){
 }
 function flipFC(){_fcFlipped=!_fcFlipped;document.getElementById('fcInner').className='fc-inner'+(_fcFlipped?' flipped':'');}
 function prevFC(){if(_fcIdx>0){_fcIdx--;renderFC();}}
-function nextFC(){if(_fcIdx<_fcCards.length-1){_fcIdx++;renderFC();}else{document.getElementById('fcModal').classList.remove('open');showToast('Flashcards terminées ! 🎉');}}
+function nextFC(){if(_fcIdx<_fcCards.length-1){_fcIdx++;renderFC();}else{_apCloseModal(document.getElementById('fcModal'));showToast('Flashcards terminées ! 🎉');}}
 function shuffleFC(){_fcCards=_fcCards.sort(()=>Math.random()-.5);_fcIdx=0;renderFC();}
-function closeFC(){document.getElementById('fcModal').classList.remove('open');}
+function closeFC(){_apCloseModal(document.getElementById('fcModal'));}
 
 /* ══════════════════════════════════════════════
    TIMER QUIZ
@@ -3707,9 +3763,9 @@ function showAttestation(m){
       ${(m.objectifs||[]).length?`<div style="margin-bottom:1rem;"><div style="font-size:.67rem;font-weight:800;text-transform:uppercase;color:var(--gray400);margin-bottom:.5rem;">Objectifs opérationnels couverts</div>${(m.objectifs||[]).map(o=>`<div style="font-size:.78rem;margin-bottom:.22rem;display:flex;gap:.4rem;align-items:flex-start;"><span style="color:var(--green);margin-top:.1rem;">✓</span><span>${_e(o)}</span></div>`).join('')}</div>`:''}
       ${getCfg().formateur?`<div style="margin-top:1rem;border-top:1px solid var(--gray200);padding-top:.9rem;display:flex;align-items:flex-end;justify-content:space-between;"><div><div style="font-size:.63rem;color:var(--gray400);margin-bottom:.15rem;">${_e(getCfg().formateurTitre)}</div><div style="font-size:.82rem;font-weight:800;color:var(--navy);">${_e(getCfg().formateur)}</div></div><div style="font-size:.72rem;font-weight:800;color:${pass?'var(--green)':'var(--gray400)'};">${pass?'✅ VALIDÉ':'Non validé'}</div></div>`:`<div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;display:flex;align-items:center;justify-content:space-between;"><div style="font-size:.63rem;color:var(--gray400);">Généré par ${_e(getCfg().platformName||'Green Lab Studio')} · IA pédagogique</div><div style="font-size:.72rem;font-weight:800;color:${pass?'var(--green)':'var(--gray400)'};">${pass?'✅ VALIDÉ':'Non validé'}</div></div>`}
     </div>`;
-  document.getElementById('attModal').classList.add('open');
+  _apOpenModal(document.getElementById('attModal'));
 }
-function closeAtt(){document.getElementById('attModal').classList.remove('open');}
+function closeAtt(){_apCloseModal(document.getElementById('attModal'));}
 
 /* ══════════════════════════════════════════════
    MEDIA — IMAGES & SVG
@@ -4667,5 +4723,213 @@ function applyAgentNewSec(jsonStr){
   </div>
 </div>
 
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   APPLE DESIGN — Moteur de spring + animations fluides
+   Partie A : Spring engine (WWDC "Designing Fluid Interfaces")
+═══════════════════════════════════════════════════════════════════ */
+
+const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const SPRING_DEFAULT = { damping: 1.0, response: 0.35 };
+
+function createSpring({ from=0, to=1, damping=1.0, response=0.4, velocity=0, onUpdate, onComplete }) {
+  const stiffness = (2 * Math.PI / response) ** 2;
+  const dampingCoef = 4 * Math.PI * damping / response;
+  let current = from, vel = velocity, rafId = null;
+  const threshold = 0.001;
+
+  function step() {
+    const force = -stiffness * (current - to);
+    const damp = -dampingCoef * vel;
+    vel += (force + damp) * (1 / 60);
+    current += vel * (1 / 60);
+    onUpdate(current);
+    if (Math.abs(vel) < threshold && Math.abs(current - to) < threshold) {
+      onUpdate(to);
+      onComplete && onComplete();
+      return;
+    }
+    rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+
+  return {
+    retarget(newTo, newVel) { to = newTo; if (newVel !== undefined) vel = newVel; },
+    cancel() { if (rafId) cancelAnimationFrame(rafId); },
+    getCurrent: () => current,
+    getVelocity: () => vel,
+  };
+}
+
+/* ── Partie C : Modales avec spring (interruptibles) ── */
+
+function _apSetModal(modalEl, targetOpen) {
+  const to = targetOpen ? 1 : 0;
+
+  if (REDUCE_MOTION) {
+    if (targetOpen) { modalEl.classList.add('open'); modalEl.style.opacity = ''; }
+    else { modalEl.classList.remove('open'); }
+    return;
+  }
+
+  // Spring en cours → rediriger sans repartir de zéro
+  if (modalEl._apSp) {
+    modalEl._apTargetOpen = targetOpen;
+    modalEl._apSp.retarget(to);
+    if (targetOpen) modalEl.classList.add('open');
+    return;
+  }
+
+  modalEl._apTargetOpen = targetOpen;
+
+  if (targetOpen) {
+    modalEl.classList.add('open');
+    modalEl.style.opacity = '0';
+    modalEl.style.transformOrigin = '50% 42%';
+  }
+
+  const from = targetOpen ? 0 : 1;
+  modalEl.style.opacity = from;
+  modalEl.style.transform = `scale(${0.93 + from * 0.07})`;
+
+  modalEl._apSp = createSpring({
+    from, to, ...SPRING_DEFAULT,
+    onUpdate: v => {
+      const c = Math.max(0, Math.min(1, v));
+      modalEl.style.opacity = c;
+      modalEl.style.transform = `scale(${0.93 + c * 0.07})`;
+    },
+    onComplete: () => {
+      const wasOpening = modalEl._apTargetOpen;
+      modalEl._apSp = null;
+      modalEl._apTargetOpen = undefined;
+      modalEl.style.transform = '';
+      modalEl.style.opacity = '';
+      modalEl.style.transformOrigin = '';
+      if (!wasOpening) modalEl.classList.remove('open');
+    }
+  });
+}
+
+function _apOpenModal(el) { _apSetModal(el, true); }
+function _apCloseModal(el) { _apSetModal(el, false); }
+
+/* ── Partie C.3 : Agent panel — slide depuis la droite ── */
+
+function _apSetPanel(panelEl, targetOpen) {
+  const overlay = document.getElementById('agentOverlay');
+  if (REDUCE_MOTION) {
+    panelEl.style.transform = targetOpen ? 'translateX(0)' : 'translateX(100%)';
+    if (overlay) overlay.style.display = targetOpen ? 'block' : 'none';
+    return;
+  }
+
+  if (targetOpen && overlay) overlay.style.display = 'block';
+
+  if (panelEl._apSp) {
+    panelEl._apTargetOpen = targetOpen;
+    panelEl._apSp.retarget(targetOpen ? 0 : 100);
+    return;
+  }
+
+  panelEl._apTargetOpen = targetOpen;
+  const from = targetOpen ? 100 : 0;
+  const to = targetOpen ? 0 : 100;
+
+  panelEl._apSp = createSpring({
+    from, to, ...SPRING_DEFAULT,
+    onUpdate: v => { panelEl.style.transform = `translateX(${Math.max(0, v)}%)`; },
+    onComplete: () => {
+      const wasOpening = panelEl._apTargetOpen;
+      panelEl._apSp = null;
+      panelEl._apTargetOpen = undefined;
+      if (!wasOpening && overlay) overlay.style.display = 'none';
+    }
+  });
+}
+
+/* ── Override toggleAgentPanel avec spring ── */
+function toggleAgentPanel() {
+  _agentOpen = !_agentOpen;
+  const panel = document.getElementById('agentPanel');
+  _apSetPanel(panel, _agentOpen);
+  if (_agentOpen && _cur) {
+    document.getElementById('agentModLabel').textContent = _cur.titre || '';
+    _initAgentWelcome();
+  }
+}
+function openAgentPanel() { if (!_agentOpen) toggleAgentPanel(); }
+
+/* ── Partie C : Enrich panel — bottom sheet avec spring ── */
+
+function openEnrichPanel() {
+  if (!_cur) { showToast('Aucun module ouvert.', 'err'); return; }
+  _enrichDocs = [];
+  document.getElementById('enrichFileList').innerHTML = '';
+  document.getElementById('enrichLaunchBtn').disabled = true;
+  document.getElementById('enrichProgress').style.display = 'none';
+  document.getElementById('enrichProgress').innerHTML = '';
+  document.getElementById('enrichFileInput').value = '';
+  _apSetEnrich(true);
+}
+function closeEnrichPanel() { _apSetEnrich(false); }
+
+function _apSetEnrich(targetOpen) {
+  const el = document.getElementById('enrichPanel');
+  if (!el) return;
+  const inner = el.querySelector(':scope > div');
+
+  if (REDUCE_MOTION) {
+    el.style.display = targetOpen ? 'flex' : 'none';
+    return;
+  }
+
+  if (el._apSp) {
+    el._apTargetOpen = targetOpen;
+    el._apSp.retarget(targetOpen ? 1 : 0);
+    if (targetOpen) el.style.display = 'flex';
+    return;
+  }
+
+  el._apTargetOpen = targetOpen;
+  if (targetOpen) {
+    el.style.display = 'flex';
+    el.style.opacity = '0';
+    if (inner) inner.style.transform = 'translateY(48px)';
+  }
+
+  const from = targetOpen ? 0 : 1;
+  const to = targetOpen ? 1 : 0;
+
+  el._apSp = createSpring({
+    from, to, ...SPRING_DEFAULT,
+    onUpdate: v => {
+      const c = Math.max(0, Math.min(1, v));
+      el.style.opacity = c;
+      if (inner) inner.style.transform = `translateY(${(1 - c) * 48}px)`;
+    },
+    onComplete: () => {
+      const wasOpening = el._apTargetOpen;
+      el._apSp = null;
+      el._apTargetOpen = undefined;
+      el.style.opacity = '';
+      if (inner) inner.style.transform = '';
+      if (!wasOpening) el.style.display = 'none';
+    }
+  });
+}
+
+/* ── Partie B : pointerdown → is-pressing (pour éléments sans :active CSS natif) ── */
+document.addEventListener('pointerdown', e => {
+  const t = e.target.closest('.ap-press');
+  if (t) t.classList.add('is-pressing');
+});
+document.addEventListener('pointerup', () => {
+  document.querySelectorAll('.is-pressing').forEach(el => el.classList.remove('is-pressing'));
+});
+document.addEventListener('pointercancel', () => {
+  document.querySelectorAll('.is-pressing').forEach(el => el.classList.remove('is-pressing'));
+});
+</script>
 </body>
 </html>
