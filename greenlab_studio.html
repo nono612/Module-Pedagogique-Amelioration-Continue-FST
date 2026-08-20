@@ -586,6 +586,11 @@ p.sec-lead{font-size:.87rem !important;font-weight:500;color:#1e293b;line-height
   .abl-bg,.abl-grid,.abl-orb{animation:none!important;}
 }
 
+/* ── Express mode badges ── */
+.express-badge{display:inline-flex;align-items:center;gap:.32rem;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:.3rem .75rem;cursor:pointer;transition:background .15s,border-color .15s;font-size:.78rem;color:rgba(255,255,255,.85);}
+.express-badge:hover{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.45);}
+.express-badge-val{font-weight:800;color:#fff;}
+
 /* ═══════════════════════════════════════════
    LANDING OVERLAY
 ═══════════════════════════════════════════ */
@@ -834,6 +839,17 @@ h1,h2,.ap-title-lg{
 <!-- HOME -->
 <div class="screen active" id="screen-home">
   <div class="ph"><h1>Tableau de bord</h1><p>Choisissez un mode et générez votre module pédagogique complet en quelques minutes.</p></div>
+
+  <!-- ── Express mode ── -->
+  <div id="expressWrap" style="background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(124,58,237,.10));border:1.5px solid rgba(245,158,11,.28);border-radius:20px;padding:1.2rem 1.4rem;margin-bottom:1.4rem;">
+    <div style="font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.7px;color:#f59e0b;margin-bottom:.55rem;">⚡ Génération express — 1 phrase suffit</div>
+    <div style="display:flex;gap:.55rem;align-items:stretch;">
+      <input id="expressInput" type="text" placeholder="Ex : Formation sécurité cariste entrepôt logistique, niveau débutant" style="flex:1;padding:.7rem 1rem;border:1.5px solid rgba(245,158,11,.35);border-radius:12px;font-size:.9rem;font-family:inherit;background:rgba(255,255,255,.06);color:#fff;outline:none;min-width:0;" onkeydown="if(event.key==='Enter')expressGen()" onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='rgba(245,158,11,.35)'">
+      <button onclick="expressGen()" style="background:linear-gradient(135deg,#f59e0b,#ea580c);color:#fff;border:none;border-radius:12px;padding:.7rem 1.4rem;font-size:.87rem;font-weight:900;cursor:pointer;white-space:nowrap;font-family:inherit;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">✨ Générer</button>
+    </div>
+    <div id="expressBadges" style="display:none;margin-top:.9rem;"></div>
+  </div>
+
   <div id="modeHero"></div>
   <div class="stats-row" id="homeStats"></div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;">
@@ -1131,6 +1147,7 @@ h1,h2,.ap-title-lg{
       <h3>🏅 Attestation de formation</h3>
       <div style="display:flex;gap:.5rem;align-items:center;">
         <button class="btn btn-ghost btn-sm" id="attPrint" onclick="window.print()">🖨️ Imprimer</button>
+        <button class="btn btn-ghost btn-sm" id="attDownload" onclick="downloadAttPDF()" style="border-color:#10b981;color:#065f46;">⬇️ Télécharger PDF</button>
         <button class="modal-close" id="attClose" onclick="closeAtt()">✕</button>
       </div>
     </div>
@@ -1417,6 +1434,117 @@ function updateSbMode(){
 /* ══════════════════════════════════════════════
    HOME
 ══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   MODE EXPRESS — 1 phrase → paramètres déduits → startGen
+═══════════════════════════════════════════════════════ */
+let _expressFd=null;
+
+async function expressGen(){
+  const key=getKey();
+  if(!key){showToast('⚠️ Clé API requise','err');return;}
+  const phrase=(document.getElementById('expressInput')?.value||'').trim();
+  if(!phrase){showToast('Décrivez votre formation en une phrase.','err');return;}
+
+  const btn=document.querySelector('#expressWrap button');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Analyse…';}
+  const badgeZone=document.getElementById('expressBadges');
+  if(badgeZone){badgeZone.style.display='none';badgeZone.innerHTML='';}
+
+  const SYS=`Tu es un expert en ingénierie pédagogique. Analyse la phrase de l'utilisateur et déduis les paramètres du module de formation. Réponds UNIQUEMENT en JSON valide, aucun texte avant ou après.`;
+  const USR=`Phrase : "${phrase}"
+
+Déduis les paramètres optimaux pour ce module. JSON :
+{"mode":"pro|acad","dom":"domaine/matière principal","comp":"compétence ou notion précise à former","pub":"public cible (ex: stagiaires débutants, techniciens, étudiants BUT)","niv":"débutant|intermédiaire|expert","dur":"durée estimée (ex: 1 heure, 2 heures, 30 min)","lang":"langue détectée depuis la phrase","nbSections":3,"raisonnement_nbSections":"pourquoi ce nombre (pas le champ default) : sujet simple→3, ordinaire→4-5, dense→6"}
+
+Règles :
+- mode=pro si la phrase mentionne un métier/terrain/entreprise/formation professionnelle ; mode=acad si cours/ingénieur/université/étudiant/BUT/Master ou sujet théorique
+- lang = la langue de la phrase (Français si française, English si anglaise, etc.)
+- nbSections : 3 si sujet simple ou court, 4-5 pour un sujet standard, 6 si complexe ou vaste — NE PAS forcer 5 par défaut`;
+
+  try{
+    const raw=await _callAI(key,SYS,USR,400,0.15,true);
+    let fd;
+    try{fd=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]+\}/);if(m)fd=JSON.parse(m[0]);else throw new Error('Réponse invalide');}
+
+    _expressFd={
+      mode:fd.mode==='acad'?'acad':'pro',
+      dom:fd.dom||phrase,comp:fd.comp||phrase,
+      pub:fd.pub||'apprenant',niv:fd.niv||'intermédiaire',
+      dur:fd.dur||'1 heure',lang:fd.lang||'Français',
+      norm:'',ctx:'',doc:'',
+      _nbSections:fd.nbSections||5
+    };
+
+    /* Afficher les badges éditables */
+    const badges=[
+      {key:'mode',label:'Mode',val:_expressFd.mode==='pro'?'Formation Pro':'Cours Académique',opts:['Formation Pro','Cours Académique']},
+      {key:'dom',label:'Domaine',val:_expressFd.dom,free:true},
+      {key:'comp',label:'Compétence',val:_expressFd.comp,free:true},
+      {key:'niv',label:'Niveau',val:_expressFd.niv,opts:['débutant','intermédiaire','expert']},
+      {key:'dur',label:'Durée',val:_expressFd.dur,opts:['30 min','1 heure','1h30','2 heures','3 heures']},
+      {key:'lang',label:'Langue',val:_expressFd.lang,opts:['Français','English','Español','العربية','Deutsch']},
+      {key:'_nbSections',label:'Sections',val:String(_expressFd._nbSections),opts:['3','4','5','6']},
+    ];
+    badgeZone.style.display='block';
+    badgeZone.innerHTML=`
+      <div style="font-size:.69rem;color:rgba(255,255,255,.5);margin-bottom:.55rem;">Paramètres déduits — cliquez pour modifier :</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.42rem;margin-bottom:.8rem;" id="expressBadgeList">
+        ${badges.map(b=>`<div class="express-badge" data-key="${b.key}" onclick="_editExpressBadge('${b.key}','${b.free?'free':'select'}',${JSON.stringify(b.opts||[])})">
+          <span style="font-size:.61rem;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.45);">${b.label}</span>
+          <span class="express-badge-val" id="ebv-${b.key}">${_e(b.val)}</span>
+          <span style="font-size:.65rem;opacity:.5;">✏️</span>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:.5rem;align-items:center;">
+        <button onclick="_expressLaunch()" style="background:linear-gradient(135deg,#f59e0b,#ea580c);color:#fff;border:none;border-radius:12px;padding:.6rem 1.6rem;font-size:.87rem;font-weight:900;cursor:pointer;font-family:inherit;">✨ Lancer la génération</button>
+        <button onclick="document.getElementById('expressBadges').style.display='none'" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);border-radius:10px;padding:.55rem 1rem;font-size:.8rem;cursor:pointer;font-family:inherit;">Annuler</button>
+      </div>`;
+  }catch(e){showToast('Erreur analyse : '+e.message,'err');}
+  finally{if(btn){btn.disabled=false;btn.textContent='✨ Générer';}}
+}
+
+function _editExpressBadge(key,type,opts){
+  if(!_expressFd)return;
+  if(type==='free'){
+    const cur=_expressFd[key]||'';
+    const val=prompt('Modifier "'+key+'" :',cur);
+    if(val!==null&&val.trim()){_expressFd[key]=val.trim();document.getElementById('ebv-'+key).textContent=val.trim();}
+  }else{
+    const cur=_expressFd[key]||opts[0];
+    const idx=opts.indexOf(cur);
+    const next=opts[(idx+1)%opts.length];
+    _expressFd[key]=key==='_nbSections'?parseInt(next):next;
+    if(key==='mode')_expressFd.mode=next==='Formation Pro'?'pro':'acad';
+    document.getElementById('ebv-'+key).textContent=next;
+  }
+}
+
+function _expressLaunch(){
+  if(!_expressFd){return;}
+  const key=getKey();
+  if(!key){showToast('⚠️ Clé API requise','err');return;}
+  /* Synchronise _mode avec le mode choisi */
+  const fd=_expressFd;
+  _mode=fd.mode==='acad'?'acad':'pro';
+  updateSbMode();
+
+  /* Pré-remplit les champs du formulaire pour que startGen() les lise */
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  set('fDom',fd.dom);set('fComp',fd.comp);set('fPub',fd.pub);
+  set('fNiv',fd.niv);set('fDur',fd.dur);set('fLang',fd.lang);
+  set('fNorm',fd.norm||'');set('fCtx',fd.ctx||'');set('fDoc',fd.doc||'');
+
+  /* Ajuste temporairement le nombre de sections dans la config */
+  const prevNb=getCfg().nbSections;
+  saveCfg('nbSections',fd._nbSections||5);
+
+  /* Lance la génération — même pipeline que le formulaire avancé */
+  startGen().finally(()=>saveCfg('nbSections',prevNb));
+
+  document.getElementById('expressBadges').style.display='none';
+  document.getElementById('expressInput').value='';
+}
+
 function renderHome(){
   // Cartes de mode — générées depuis _MODES
   const hero=document.getElementById('modeHero');
@@ -1803,19 +1931,63 @@ async function _callAIWithHistory(key,msgs,maxTok,temp){
 }
 
 /* ── Content quality verification (background, non-blocking) ── */
+/* ── Détection du type pédagogique d'un module ── */
+function _detectModuleType(m){
+  const secs=m.sections||[];
+  const types=secs.map(s=>s.type||'');
+  const dom=(m.dom||m.titre||'').toLowerCase();
+  if(types.includes('securite')||/epi|sécurité|habilitation|caces|risque/.test(dom))return'regulatory';
+  if(types.includes('procedure')||/8d|pdca|amdec|5s|kaizen|processus|procédure/.test(dom))return'procedural';
+  if(/ishikawa|5 pourquoi|diagnostic|analyse|root cause|pareto/.test(dom))return'analytical';
+  if(types.includes('demonstration')||types.includes('application'))return'analytical';
+  return'factual';
+}
+
+/* ── Score de charge cognitive d'une section (0-10) ── */
+function _cognitiveLoadScore(section){
+  const text=section.contenu||'';
+  const boldCount=(text.match(/\*\*[^*]+\*\*/g)||[]).length;
+  const paraCount=(text.split(/\n\n+/)).filter(p=>p.trim().length>20).length;
+  const etapesN=(section.etapes||[]).length;
+  const formulasN=(text.match(/[A-Z]\s*=\s*[A-Z0-9]/g)||[]).length;
+  const conceptsPerPara=boldCount/Math.max(paraCount,1);
+  let score=0;
+  if(paraCount>10)score+=2;else if(paraCount>7)score+=1;
+  if(conceptsPerPara>3)score+=3;else if(conceptsPerPara>2)score+=2;else if(conceptsPerPara>1.5)score+=1;
+  if(etapesN>6)score+=2;else if(etapesN>4)score+=1;
+  if(formulasN>4)score+=2;else if(formulasN>2)score+=1;
+  const level=score<=3?'faible':score<=6?'moyen':'élevé';
+  return{score,level,paraCount,boldCount,etapesN};
+}
+
+/* ── Vérification factuelle + signal charge cognitive ── */
 async function verifierContenu(key,ctxPlan,contenuJSON){
-  const SYS='Tu es relecteur technique expert. On te donne un contenu pédagogique et son contexte de plan. Vérifie la cohérence factuelle (valeurs, définitions, cohérence avec le plan). Si tout est correct réponds {"ok":true}. Sinon réponds {"ok":false,"correction":{champs corrigés uniquement}}.';
+  const clInfo=_cognitiveLoadScore(contenuJSON);
+  const clHint=clInfo.level==='élevé'
+    ?` Attention : charge cognitive ÉLEVÉE détectée (${clInfo.boldCount} concepts en gras, ${clInfo.paraCount} paragraphes). Si la correction est possible, suggère de scinder en deux blocs ou d'ajouter un exemple ancré avant le 4e paragraphe.`:'';
+  const SYS=`Tu es relecteur pédagogique expert. Vérifie la cohérence factuelle (valeurs, définitions, cohérence avec le plan).${clHint} Réponds uniquement : {"ok":true} si tout est correct, ou {"ok":false,"correction":{champs corrigés uniquement}} sinon.`;
   const payload={contenu:contenuJSON.contenu};
   if(contenuJSON.donnees_cles!==undefined)payload.donnees_cles=contenuJSON.donnees_cles;
   if(contenuJSON.points_cles!==undefined)payload.points_cles=contenuJSON.points_cles;
-  const r=await gemini(key,SYS,`Contexte plan :\n${ctxPlan}\n\nContenu :\n${JSON.stringify(payload)}`,800);
-  if(r&&r.ok===false&&r.correction&&typeof r.correction==='object')return{...contenuJSON,...r.correction};
-  return contenuJSON;
+  const r=await gemini(key,SYS,`Contexte plan :\n${ctxPlan}\n\nContenu :\n${JSON.stringify(payload)}`,900);
+  const corrected=(r&&r.ok===false&&r.correction&&typeof r.correction==='object')?{...contenuJSON,...r.correction}:contenuJSON;
+  return{...corrected,_cl:clInfo};
 }
+
+/* ── Validation et enrichissement qualitatif du quiz ── */
 async function validerQuiz(key,quizArray){
   if(!quizArray||!quizArray.length)return quizArray;
-  const SYS='Pour chaque question QCM, vérifie que le champ "correct" est bien l\'index (0-based) de la bonne réponse dans "opts". Corrige les erreurs d\'index. Renvoie uniquement {"quiz":[...]} avec la même structure.';
-  const r=await gemini(key,SYS,JSON.stringify({quiz:quizArray}),1500);
+  const types=(quizArray||[]).map(q=>q.type||'qcm');
+  const hasNonQcm=types.some(t=>t!=='qcm');
+  const SYS=`Tu es expert en ingénierie pédagogique et évaluation par récupération active.
+TÂCHE 1 — Corrige les index : vérifie que "correct" est bien l'index 0-based de la bonne réponse dans "opts".
+TÂCHE 2 — Qualité des distracteurs : pour chaque question QCM, les 3 mauvaises réponses doivent correspondre à des erreurs réelles (confusion de valeur, mauvaise formule, bonne réponse hors-contexte). Si un distracteur est trop générique ou clairement faux, corrige-le.
+TÂCHE 3 — Si TOUTES les questions sont de type "qcm", ajoute 2 questions supplémentaires de types différents :
+  - 1 question de type "completion" : {"type":"completion","q":"Complétez : [formule ou définition avec ___]","answer":"le terme manquant","indice":"premier mot si complexe"}
+  - 1 question de type "sequencing" si le contenu est procédural : {"type":"sequencing","q":"Remettez ces étapes dans le bon ordre :","steps":["Étape A","Étape B","Étape C","Étape D"],"correct_order":[0,2,1,3],"explication":"pourquoi cet ordre"}
+    OU 1 question "scenario" si le contenu est factuel/réglementaire : {"type":"scenario","q":"Dans ce contexte : [situation concrète], quelle est la décision correcte ?","opts":["Option A","Option B","Option C"],"correct":0,"explication":"justification"}
+Renvoie uniquement {"quiz":[...]} avec la même structure plus les questions ajoutées.`;
+  const r=await gemini(key,SYS,JSON.stringify({quiz:quizArray}),2200);
   return(r&&Array.isArray(r.quiz))?r.quiz:quizArray;
 }
 function _flashSecCheck(secIdx,modId){
@@ -1832,6 +2004,88 @@ function _flashSecCheck(secIdx,modId){
     setTimeout(()=>{badge.style.opacity='0';setTimeout(()=>badge.remove(),1000);},2000);
   }catch(_){}
 }
+/* ── Rendu interactif du mini_check formatif en section ── */
+function _renderMiniCheck(mc,modId,secIdx){
+  if(!mc||!mc.q)return'';
+  const id=`mc-${modId}-${secIdx}`;
+  if(mc.type==='completion'){
+    return`<div class="mq-card" id="${id}" style="margin-top:.65rem;border-color:#a78bfa;background:linear-gradient(135deg,#faf5ff,#f5f3ff);">
+      <div class="mq-q" style="color:#4c1d95;">🧩 Vérification rapide — ${_e(mc.q)}</div>
+      <div style="display:flex;gap:.4rem;align-items:center;margin-top:.35rem;">
+        <input id="${id}-inp" type="text" placeholder="${mc.indice?'Indice : '+mc.indice:'Votre réponse…'}" style="flex:1;padding:.38rem .6rem;border:1.5px solid #d8b4fe;border-radius:7px;font-size:.77rem;font-family:inherit;outline:none;" onkeydown="if(event.key==='Enter')_checkCompletion('${id}','${(mc.answer||'').replace(/'/g,"\\'")}')">
+        <button onclick="_checkCompletion('${id}','${(mc.answer||'').replace(/'/g,"\\'")}' )" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:.38rem .8rem;font-size:.74rem;font-weight:800;cursor:pointer;">Vérifier</button>
+      </div>
+      <div id="${id}-fb" style="font-size:.72rem;margin-top:.3rem;display:none;"></div>
+    </div>`;
+  }
+  if(mc.type==='sequencing'&&Array.isArray(mc.steps)){
+    const shuffled=[...mc.steps].map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+    return`<div class="mq-card" id="${id}" style="margin-top:.65rem;border-color:#a78bfa;background:linear-gradient(135deg,#faf5ff,#f5f3ff);">
+      <div class="mq-q" style="color:#4c1d95;">📋 Remettez dans l'ordre correct :</div>
+      <div id="${id}-list" style="display:flex;flex-direction:column;gap:.25rem;margin:.4rem 0;">${shuffled.map((o,pos)=>`<div style="background:#fff;border:1.5px solid #d8b4fe;border-radius:7px;padding:.32rem .65rem;font-size:.75rem;display:flex;align-items:center;gap:.5rem;cursor:grab;user-select:none;" draggable="true" data-orig="${o.i}" data-pos="${pos}"><span style="color:#a78bfa;font-weight:800;">${pos+1}</span> ${_e(o.t)}</div>`).join('')}</div>
+      <button onclick="_checkSequencing('${id}',${JSON.stringify(mc.correct_order||[])},'${(mc.explication||'').replace(/'/g,"\\'")}' )" style="background:#7c3aed;color:#fff;border:none;border-radius:7px;padding:.35rem .8rem;font-size:.73rem;font-weight:800;cursor:pointer;">Valider l'ordre</button>
+      <div id="${id}-fb" style="font-size:.72rem;margin-top:.3rem;display:none;"></div>
+    </div>`;
+  }
+  if(mc.type==='scenario'&&Array.isArray(mc.opts)){
+    return`<div class="mq-card" id="${id}" style="margin-top:.65rem;border-color:#fb923c;background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+      <div class="mq-q" style="color:#9a3412;">⚠️ Situation — ${_e(mc.q)}</div>
+      <div style="display:flex;flex-direction:column;gap:.22rem;margin-top:.4rem;">${(mc.opts||[]).map((o,oi)=>`<div class="mq-opt" onclick="_checkScenario('${id}',${oi},${mc.correct||0},'${(mc.explication||'').replace(/'/g,"\\'")}' )">${_e(o)}</div>`).join('')}</div>
+      <div id="${id}-fb" style="font-size:.72rem;margin-top:.35rem;display:none;"></div>
+    </div>`;
+  }
+  if(mc.type==='subcalc'||mc.type==='prediction'){
+    return`<div class="mq-card" id="${id}" style="margin-top:.65rem;border-color:#fb923c;background:linear-gradient(135deg,#fff7ed,#ffedd5);">
+      <div class="mq-q" style="color:#9a3412;">🔢 ${_e(mc.q)}</div>
+      ${mc.hint?`<div style="font-size:.7rem;color:#c2410c;margin:.2rem 0;">Aide : ${_e(mc.hint)}</div>`:''}
+      <div style="display:flex;gap:.4rem;align-items:center;margin-top:.3rem;">
+        <input id="${id}-inp" type="text" placeholder="Votre réponse…" style="flex:1;padding:.38rem .6rem;border:1.5px solid #fed7aa;border-radius:7px;font-size:.77rem;font-family:inherit;outline:none;">
+        <button onclick="_revealSubcalc('${id}','${(mc.expected||'').replace(/'/g,"\\'")}' )" style="background:#ea580c;color:#fff;border:none;border-radius:7px;padding:.38rem .8rem;font-size:.73rem;font-weight:800;cursor:pointer;">Voir la réponse</button>
+      </div>
+      <div id="${id}-fb" style="font-size:.72rem;margin-top:.3rem;display:none;"></div>
+    </div>`;
+  }
+  return'';
+}
+function _checkCompletion(id,answer){
+  const inp=document.getElementById(id+'-inp');
+  const fb=document.getElementById(id+'-fb');
+  if(!inp||!fb)return;
+  const val=(inp.value||'').trim().toLowerCase();
+  const ans=(answer||'').trim().toLowerCase();
+  const ok=val&&(ans.includes(val)||val.includes(ans)||_levenshtein(val,ans)<=2);
+  inp.disabled=true;
+  fb.style.display='block';
+  fb.innerHTML=ok?`<span style="color:#059669;font-weight:700;">✅ Correct ! ${_e(answer)}</span>`:`<span style="color:#dc2626;font-weight:700;">❌ La réponse attendue : <em>${_e(answer)}</em></span>`;
+}
+function _levenshtein(a,b){const m=a.length,n=b.length,d=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:1+Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1]);return d[m][n];}
+function _checkSequencing(id,correctOrder,explication){
+  const list=document.getElementById(id+'-list');
+  const fb=document.getElementById(id+'-fb');
+  if(!list||!fb)return;
+  const items=[...list.children];
+  const userOrder=items.map(el=>parseInt(el.dataset.orig));
+  const ok=JSON.stringify(userOrder)===JSON.stringify(correctOrder);
+  fb.style.display='block';
+  fb.innerHTML=ok?`<span style="color:#059669;font-weight:700;">✅ Bon ordre ! ${_e(explication)}</span>`:`<span style="color:#dc2626;font-weight:700;">❌ Ordre incorrect. ${_e(explication)}</span>`;
+}
+function _checkScenario(id,chosen,correct,explication){
+  const card=document.getElementById(id);
+  if(!card)return;
+  card.querySelectorAll('.mq-opt').forEach((el,i)=>{el.classList.add(i===correct?'mq-ok':i===chosen?'mq-ko':'mq-disabled');});
+  const fb=document.getElementById(id+'-fb');
+  if(fb){fb.style.display='block';fb.innerHTML=chosen===correct?`<span style="color:#059669;font-weight:700;">✅ Correct ! ${_e(explication)}</span>`:`<span style="color:#dc2626;font-weight:700;">❌ ${_e(explication)}</span>`;}
+}
+function _revealSubcalc(id,expected){
+  const inp=document.getElementById(id+'-inp');
+  const fb=document.getElementById(id+'-fb');
+  if(!inp||!fb)return;
+  inp.disabled=true;
+  fb.style.display='block';
+  const user=(inp.value||'').trim();
+  fb.innerHTML=`<span style="color:#92400e;font-weight:700;">Réponse attendue : <em>${_e(expected)}</em>${user?` — Votre réponse : <em>${_e(user)}</em>`:''}</span>`;
+}
+
 function _bgVerifyModule(mod,key){
   if(!key||!mod)return;
   const ctxPlan=`Titre: ${mod.titre||''}\nDomaine: ${mod.dom||''}\nObjectifs: ${(mod.objectifs||[]).slice(0,3).join(' | ')}`;
@@ -1987,17 +2241,34 @@ FIABILITÉ RÉGLEMENTAIRE : ne jamais écrire un numéro de norme précis (ex: "
   }catch{}
 
   let _psDone=0;
+  /* Fading index : section procédurale n°0=exemple résolu, 1=partiel, 2+=autonome */
+  let _proFadeCount=0;
   setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections en parallèle…`,true);
   const sections=await Promise.all((plan.sections||[]).map(async(s,i)=>{
     try{
       const _angle=_pickAngle('pro',fd.dom);
+      /* Fading pour sections procédurales */
+      let _fadeInstr='';
+      if(s.type==='procedure'||s.type==='exercice'){
+        const _fi=_proFadeCount++;
+        if(_fi===0)_fadeInstr=`\n\nFADING PHASE 1 — Exemple entièrement résolu : dans le champ "exemple_fade", fournis un cas complet de "${s.titre}" dans "${fd.dom}", avec TOUTES les étapes détaillées, valeurs et raisonnements expliqués. Le stagiaire observe — il ne fait rien seul.`;
+        else if(_fi===1)_fadeInstr=`\n\nFADING PHASE 2 — Exemple partiellement guidé : dans le champ "exemple_fade", fournis un cas de "${s.titre}" où 2 étapes clés sont laissées vides [À COMPLÉTER PAR LE STAGIAIRE]. Indique clairement quelles informations sont disponibles et quelles réponses sont attendues.`;
+        else _fadeInstr=`\n\nFADING PHASE 3 — Problème autonome : dans le champ "exemple_fade", fournis uniquement le contexte et les données d'une situation réelle de "${s.titre}" dans "${fd.dom}". Aucune aide. Le stagiaire résout seul. La correction apparaît dans "exemple_fade_correction".`;
+      }
+      /* Formative check adapté au type de section */
+      const _checkByType={
+        theorie:`"mini_check":{"type":"completion","q":"Complétez la définition : dans ${fd.dom}, [terme clé de cette section] correspond à ___ [valeur ou principe central]","answer":"le terme ou la valeur manquante","indice":"première lettre ou unité"}`,
+        procedure:`"mini_check":{"type":"sequencing","q":"Remettez les étapes clés de cette procédure dans le bon ordre :","steps":["[Étape A de ${s.titre}]","[Étape B]","[Étape C]","[Étape D]"],"correct_order":[0,2,1,3],"explication":"pourquoi cet enchaînement est obligatoire dans ${fd.dom}"}`,
+        securite:`"mini_check":{"type":"scenario","q":"Dans cette situation en ${fd.dom} : [contexte de risque concret issu de la section], que faites-vous EN PREMIER ?","opts":["[Action correcte et prioritaire]","[Action efficace mais dans le mauvais ordre]","[Erreur fréquente des débutants dans ce métier]"],"correct":0,"explication":"pourquoi cette priorité est critique"}`,
+        exercice:`"mini_check":{"type":"subcalc","q":"Avant de voir la correction, calculez : [sous-question directement extraite d'une étape clé de l'exercice, avec données numériques]","expected":"[résultat attendu avec unité]","hint":"[formule ou règle applicable dans ${fd.dom}]"}`
+      }[s.type]||`"mini_check":{"type":"completion","q":"Complétez : [concept central de ${s.titre}] est défini comme ___","answer":"terme ou valeur attendue","indice":"contexte de ${fd.dom}"}`;
       const typePrompt={
         theorie:`Rédige le cours théorique de la section "${s.titre}". Angle pédagogique (varie à chaque section pour éviter la monotonie) : ${_angle} IMPÉRATIF : le POURQUOI derrière chaque fonctionnement, formules avec valeurs numériques typiques de "${fd.dom}". Avant de rédiger : vérifie mentalement que ce contenu ne pourrait pas s'appliquer tel quel à un métier voisin — si oui, remplace les passages génériques par des éléments concrets propres à "${fd.dom}".`,
         procedure:`Rédige la procédure opérationnelle experte de la section "${s.titre}". Angle : présente d'abord le résultat visé et son importance dans "${fd.dom}", puis déroule les étapes dans l'ordre qu'un expert suivrait naturellement avec les vérifications instinctives entre étapes. Pour chaque étape : action précise, paramètres exacts propres à "${fd.dom}" (valeurs, tolérances, durées), ET le POURQUOI. Avant de rédiger : vérifie que chaque étape ne serait pas identique dans un domaine adjacent.`,
         exercice:`Rédige des exercices pratiques de la section "${s.titre}" en partant d'une situation de travail réelle et complexe telle qu'elle se produit dans "${fd.dom}" — avec ses contraintes, ses imprévus, ses critères de réussite mesurables. Angle : le stagiaire est confronté à la situation avant qu'on lui donne les outils — il mobilise ce qu'il vient d'apprendre. Avant de rédiger : vérifie que les situations sont propres à "${fd.dom}" et non interchangeables avec un autre métier.`,
         securite:`Rédige les règles de sécurité de la section "${s.titre}". Angle : démarre par le mécanisme physique du danger tel qu'il se produit dans "${fd.dom}" (sans inventer d'incident spécifique, mais en décrivant le processus réel), puis explique les mesures de prévention. Pour chaque risque : nature exacte du danger, seuils réglementaires en vigueur (formulés prudemment si incertains), EPI adaptés, POURQUOI ce risque existe. Avant de rédiger : vérifie que chaque risque est spécifique à "${fd.dom}".`
       }[s.type]||`Rédige le contenu complet de la section "${s.titre}". Angle pédagogique : ${_angle} Explique systématiquement le POURQUOI. Avant de rédiger : vérifie que le contenu ne pourrait pas s'appliquer tel quel à un domaine voisin.`;
-      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtx}\nCohérence : vocabulaire, niveau de technicité et exemples restent alignés avec le plan ci-dessus, sans changer de registre.\n${typePrompt}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités, issues des données terrain ci-dessus ou propres à ${fd.dom} ; (B) au moins 2 normes ou certifications applicables (formulées prudemment si incertaines) ; (C) au moins 1 erreur terrain réelle avec son mécanisme et sa conséquence précise.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"10-12 paragraphes progressifs et clairs — qualité et compréhension avant volume. Règles de rédaction : (1) définis chaque terme technique avant de l'utiliser ; (2) une idée centrale par paragraphe, du concret vers l'abstrait ; (3) transitions logiques explicites entre paragraphes. Dans chaque paragraphe, entoure de **...** les 2-4 éléments les plus importants : valeur chiffrée précise, terme métier clé, norme ou seuil applicable. Avant de finaliser, vérifie silencieusement : un professionnel de niveau '${fd.niv}' en ${fd.dom} pourrait-il suivre chaque paragraphe sans lacune non expliquée ? Si non, complète avant de livrer. SYSTÉMATIQUEMENT : le POURQUOI physique/mécanique/chimique derrière chaque procédure, les valeurs numériques propres à ${fd.dom}. Sépare par \\n\\n.","etapes":["Étape 1: geste précis + paramètre exact + POURQUOI on fait ça ainsi","Étape 2: ...","Étape 3: ...","Étape 4: ...","Étape 5: ...","Étape 6: ..."],"points_vigilance":["⚠️ Point critique 1: risque exact + valeur seuil + conséquence si dépassé","⚠️ Point 2","⚠️ Point 3","⚠️ Point 4"],"outils":["Outil 1 avec référence technique précise","Outil 2","Outil 3"],"erreurs":["❌ Erreur 1: pourquoi les débutants la font + mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":["Réflexe 1 — signe visuel/sonore/tactile que l'expert reconnaît immédiatement et que le débutant manque : situation déclenchante → geste instinctif + POURQUOI (2 phrases)","Réflexe 2 — raccourci légitime que 10 ans de terrain permettent : condition d'application + action + pourquoi c'est sûr (2 phrases)","Réflexe 3 — subtilité de réglage ou de paramètre que personne n'enseigne explicitement mais que tous les experts appliquent (2 phrases)","Réflexe 4 — vérification instinctive avant ou après l'opération, avec le critère exact que l'expert contrôle (2 phrases)"],"donnees_cles":["Valeur/norme à mémoriser absolument 1 (ex: 230V nominal ±10%, soit 207-253V)","Valeur 2 avec contexte d'application","Valeur 3","Valeur 4","Valeur 5"]}`,2800);
+      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtx}\nCohérence : vocabulaire, niveau de technicité et exemples restent alignés avec le plan ci-dessus, sans changer de registre.\n${typePrompt}${_fadeInstr}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités, issues des données terrain ci-dessus ou propres à ${fd.dom} ; (B) au moins 2 normes ou certifications applicables (formulées prudemment si incertaines) ; (C) au moins 1 erreur terrain réelle avec son mécanisme et sa conséquence précise.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"10-12 paragraphes progressifs et clairs — qualité et compréhension avant volume. Règles de rédaction : (1) définis chaque terme technique avant de l'utiliser ; (2) une idée centrale par paragraphe, du concret vers l'abstrait ; (3) transitions logiques explicites entre paragraphes. Dans chaque paragraphe, entoure de **...** les 2-4 éléments les plus importants : valeur chiffrée précise, terme métier clé, norme ou seuil applicable. Avant de finaliser, vérifie silencieusement : un professionnel de niveau '${fd.niv}' en ${fd.dom} pourrait-il suivre chaque paragraphe sans lacune non expliquée ? Si non, complète avant de livrer. SYSTÉMATIQUEMENT : le POURQUOI physique/mécanique/chimique derrière chaque procédure, les valeurs numériques propres à ${fd.dom}. Sépare par \\n\\n.","etapes":["Étape 1: geste précis + paramètre exact + POURQUOI on fait ça ainsi","Étape 2: ...","Étape 3: ...","Étape 4: ...","Étape 5: ...","Étape 6: ..."],"points_vigilance":["⚠️ Point critique 1: risque exact + valeur seuil + conséquence si dépassé","⚠️ Point 2","⚠️ Point 3","⚠️ Point 4"],"outils":["Outil 1 avec référence technique précise","Outil 2","Outil 3"],"erreurs":["❌ Erreur 1: pourquoi les débutants la font + mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":["Réflexe 1 — signe visuel/sonore/tactile que l'expert reconnaît immédiatement et que le débutant manque : situation déclenchante → geste instinctif + POURQUOI (2 phrases)","Réflexe 2 — raccourci légitime que 10 ans de terrain permettent : condition d'application + action + pourquoi c'est sûr (2 phrases)","Réflexe 3 — subtilité de réglage ou de paramètre que personne n'enseigne explicitement mais que tous les experts appliquent (2 phrases)","Réflexe 4 — vérification instinctive avant ou après l'opération, avec le critère exact que l'expert contrôle (2 phrases)"],"donnees_cles":["Valeur/norme à mémoriser absolument 1 (ex: 230V nominal ±10%, soit 207-253V)","Valeur 2 avec contexte d'application","Valeur 3","Valeur 4","Valeur 5"],${_checkByType}}`,2800);
       const cnt=++_psDone;
       setStep('s2','active',`⚡ ${cnt}/${plan.sections.length} sections rédigées`,true);
       const _pl=document.getElementById('genPreviewList');
@@ -2067,14 +2338,30 @@ FIABILITÉ : ne jamais écrire un numéro de norme, de standard ou une valeur no
   }catch{}
 
   let _paDone=0;
+  /* Fading index pour sections de type demonstration/application */
+  let _acadFadeCount=0;
   setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections en parallèle…`,false);
   const sections=await Promise.all((plan.sections||[]).map(async(s,i)=>{
     try{
       const isDemo=s.type==='demonstration';const isApp=s.type==='application';
       const _angleAcad=_pickAngle('acad',fd.dom);
+      /* Fading adapté aux sections analytiques/application */
+      let _fadeInstrA='';
+      if(isDemo||isApp){
+        const _fia=_acadFadeCount++;
+        if(_fia===0)_fadeInstrA=`\n\nFADING PHASE 1 — Exemple entièrement résolu : dans "exemple_fade", fournis le problème complet avec TOUTES les étapes de résolution détaillées, formules déployées, calculs intermédiaires et résultat commenté. L'étudiant lit et comprend.`;
+        else if(_fia===1)_fadeInstrA=`\n\nFADING PHASE 2 — Résolution partielle : dans "exemple_fade", fournis le même type de problème mais avec 2 étapes intermédiaires laissées vides [CALCUL À EFFECTUER]. L'étudiant complète avant de voir la suite.`;
+        else _fadeInstrA=`\n\nFADING PHASE 3 — Problème autonome : dans "exemple_fade", fournis UNIQUEMENT le contexte et les données. Aucune aide. Résolution complète dans "exemple_fade_correction".`;
+      }
+      /* Mini-check formatif adapté au type académique */
+      const _checkByTypeA={
+        theorie:`"mini_check":{"type":"completion","q":"Complétez : dans ${fd.dom}, [concept clé de cette section] est défini par ___","answer":"terme ou formule attendue","indice":"première lettre ou symbole"}`,
+        demonstration:`"mini_check":{"type":"prediction","q":"Avant de voir la preuve complète : selon vous, dans ${fd.dom}, que vaut [grandeur intermédiaire] pour [données numériques de l'exemple] ?","expected":"[valeur attendue avec unité]","hint":"[loi ou théorème applicable]"}`,
+        application:`"mini_check":{"type":"subcalc","q":"Calculez [étape intermédiaire] avec les données fournies dans ${fd.dom} :","expected":"[résultat + unité]","hint":"[formule applicable]"}`
+      }[s.type]||`"mini_check":{"type":"completion","q":"Définissez en une phrase : [notion centrale de ${s.titre}] dans le contexte de ${fd.dom}","answer":"définition courte attendue","indice":"contexte : ${fd.dom}"}`;
       const contenuDesc=isApp?`Angle pédagogique : pars d'un cas industriel réel de "${fd.dom}", montre comment identifier la formule applicable à ce cas précis, puis déroule le calcul complet. Méthodologie de résolution + application numérique complète avec données chiffrées. Avant de rédiger : vérifie que le cas ne pourrait pas s'appliquer à une discipline voisine.`:isDemo?`Angle pédagogique : commence par le problème physique ou mathématique que cette démonstration résout, puis construis la preuve pas-à-pas avec les approximations explicitement justifiées et leurs limites de validité dans "${fd.dom}".`:`Angle pédagogique (varie à chaque section pour rompre la monotonie) : ${_angleAcad} Cours complet : définitions formelles, principes physiques en profondeur, relations entre concepts, applications industrielles de "${fd.dom}". Avant de rédiger : vérifie que le contenu est ancré dans "${fd.dom}" et non générique.`;
       const exempleDesc=isApp?`Exercice résolu complet : contexte industriel concret de "${fd.dom}", données numériques réalistes, démarche de résolution montrant le choix de la formule, calculs détaillés avec unités SI, résultat et interprétation physique dans le contexte de "${fd.dom}" (8-10 phrases).`:`Exemple illustratif concret de "${fd.dom}" avec valeurs numériques issues de l'industrie ou de l'expérimentation, analyse du résultat et de son sens physique (6-8 phrases). Avant de rédiger : vérifie que l'exemple est propre à "${fd.dom}".`;
-      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtxA}\nCohérence : reste dans le même registre, le même niveau de technicité et les mêmes symboles que le plan ci-dessus.\nRédige la section "${s.titre}" (${s.type||"theorie"}) de manière complète et rigoureuse.\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités SI ou ordres de grandeur typiques de ${fd.dom} ; (B) au moins 2 formules ou relations mathématiques explicitement développées ; (C) au moins 1 erreur conceptuelle fréquente expliquée avec son mécanisme.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"${contenuDesc}. 10-12 paragraphes progressifs — qualité et clarté avant volume. Règles : (1) définis chaque notion avant de l'utiliser ; (2) une idée par paragraphe avec transitions explicites ; (3) entoure de **...** les 2-3 formules, termes clés ou valeurs numériques essentiels de chaque paragraphe. Avant de finaliser, vérifie silencieusement : un étudiant de niveau '${fd.pub}' pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement (ex: U = R × I). Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis","def":"Définition formelle complète avec unité SI si applicable"}],"points_cles":["Point fondamental 1 avec formule ou valeur numérique si applicable","Point 2","Point 3","Point 4","Point 5"],"erreurs_courantes":["Raisonnement ou calcul erroné typique dans ce chapitre de ${fd.dom} — en quoi il diffère du bon raisonnement (1-2 phrases)","Erreur 2","Erreur 3"],"exemple":"${exempleDesc}","intuition_expert":["Intuition 1 — ce que les experts de ${fd.dom} comprennent instinctivement et que les manuels n'écrivent pas : lien physique non évident, signe de reconnaissance, pattern implicite (2 phrases)","Intuition 2 — connexion entre ce concept et un phénomène observable dans la réalité industrielle ou expérimentale (2 phrases)","Intuition 3 — pourquoi cette formule ou ce théorème fonctionne : l'explication physique/géométrique/algébrique profonde derrière le résultat (2 phrases)"]}`,2200);
+      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtxA}\nCohérence : reste dans le même registre, le même niveau de technicité et les mêmes symboles que le plan ci-dessus.\nRédige la section "${s.titre}" (${s.type||"theorie"}) de manière complète et rigoureuse.${_fadeInstrA}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités SI ou ordres de grandeur typiques de ${fd.dom} ; (B) au moins 2 formules ou relations mathématiques explicitement développées ; (C) au moins 1 erreur conceptuelle fréquente expliquée avec son mécanisme.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"${contenuDesc}. 10-12 paragraphes progressifs — qualité et clarté avant volume. Règles : (1) définis chaque notion avant de l'utiliser ; (2) une idée par paragraphe avec transitions explicites ; (3) entoure de **...** les 2-3 formules, termes clés ou valeurs numériques essentiels de chaque paragraphe. Avant de finaliser, vérifie silencieusement : un étudiant de niveau '${fd.pub}' pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement (ex: U = R × I). Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis","def":"Définition formelle complète avec unité SI si applicable"}],"points_cles":["Point fondamental 1 avec formule ou valeur numérique si applicable","Point 2","Point 3","Point 4","Point 5"],"erreurs_courantes":["Raisonnement ou calcul erroné typique dans ce chapitre de ${fd.dom} — en quoi il diffère du bon raisonnement (1-2 phrases)","Erreur 2","Erreur 3"],"exemple":"${exempleDesc}","intuition_expert":["Intuition 1 — ce que les experts de ${fd.dom} comprennent instinctivement et que les manuels n'écrivent pas : lien physique non évident, signe de reconnaissance, pattern implicite (2 phrases)","Intuition 2 — connexion entre ce concept et un phénomène observable dans la réalité industrielle ou expérimentale (2 phrases)","Intuition 3 — pourquoi cette formule ou ce théorème fonctionne : l'explication physique/géométrique/algébrique profonde derrière le résultat (2 phrases)"],${_checkByTypeA}}`,2200);
       const cntA=++_paDone;
       setStep('s2','active',`⚡ ${cntA}/${plan.sections.length} sections rédigées`,false);
       const _plA=document.getElementById('genPreviewList');
@@ -2396,7 +2683,8 @@ function renderViewer(m){
                 <button class="sec-media-btn sec-svg-btn" id="svgBtn-${m.id}-${idx}" onclick="generateSectionSVG(${m.id},${idx})">${s.svg?'🔄 Régén. schéma':'📊 Schéma IA'}</button>
                 <button class="card-act-btn" style="background:#fffbeb;border-color:#fbbf24;color:#92400e;" onclick="showSecQuiz(${m.id},${idx})">🧪 Tester</button>
               </div>
-              <div id="mq-${m.id}-${idx}"></div>
+              <div id="mq-${m.id}-${idx}">${s.mini_check?_renderMiniCheck(s.mini_check,m.id,idx):''}</div>
+              ${s.exemple_fade?`<div style="background:#fdf4ff;border:1.5px dashed #a78bfa;border-radius:11px;padding:.75rem 1rem;margin-top:.6rem;"><div style="font-size:.65rem;font-weight:900;text-transform:uppercase;color:#7c3aed;letter-spacing:.5px;margin-bottom:.4rem;">${s.exemple_fade.includes('[À COMPLÉTER')?(s.exemple_fade.includes('[CALCUL À EFFECTUER')&&false?'':'🔧 Exercice guidé — complétez les parties manquantes'):'🎯 Problème autonome — résolvez seul'}</div><div style="font-size:.79rem;color:#4c1d95;line-height:1.7;white-space:pre-wrap;">${_e(s.exemple_fade)}</div>${s.exemple_fade_correction?`<details style="margin-top:.6rem;"><summary style="font-size:.71rem;font-weight:700;color:#7c3aed;cursor:pointer;">Voir la correction ▾</summary><div style="font-size:.78rem;color:#374151;line-height:1.7;padding:.5rem 0;white-space:pre-wrap;">${_e(s.exemple_fade_correction)}</div></details>`:''}</div>`:''}
               <div id="svgArea-${m.id}-${idx}" style="margin-top:.4rem;">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
             </div>
           </div>
@@ -3192,7 +3480,26 @@ function submitQ(){
   _quiz.forEach((q,qi)=>{const rep=q.rep!==undefined?q.rep:q.correct;if(_qa[qi]===rep)correct++;else{const c=q.competence||q.notion||'Général';if(!wbc[c])wbc[c]=[];wbc[c].push(q);}});
   const score=Math.round(correct/total*100);
   const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
-  if(idx>=0){ms[idx].scores={quiz:score};ms[idx].wrongByComp=wbc;saveMods(ms);_cur=ms[idx];}
+  if(idx>=0){
+    /* Accumule l'historique des erreurs (multi-tentatives) */
+    const prevHistory=ms[idx].wrongByCompHistory||[];
+    const attempt={date:new Date().toISOString(),score,wbc};
+    prevHistory.push(attempt);
+    /* wrongByComp = union des erreurs des 3 dernières tentatives, pondérée par fréquence */
+    const merged={};
+    prevHistory.slice(-3).forEach(a=>{
+      Object.entries(a.wbc).forEach(([c,qs])=>{
+        if(!merged[c])merged[c]=[];
+        qs.forEach(q=>{if(!merged[c].find(x=>x.q===q.q))merged[c].push(q);});
+      });
+    });
+    ms[idx].scores={quiz:score};
+    ms[idx].wrongByComp=wbc;
+    ms[idx].wrongByCompMerged=merged;
+    ms[idx].wrongByCompHistory=prevHistory.slice(-10);
+    saveMods(ms);_cur=ms[idx];
+  }
+  scheduleSpacedReview(m.id,score);
   if(score>=80)setTimeout(_launchConfetti,200);
   const qel=document.getElementById('tp-quiz-inline');
   if(qel)qel.innerHTML=renderQuizRes(_cur);
@@ -3250,16 +3557,29 @@ async function openGLSRemediation(){
   const key=getKey();
   const box=document.getElementById('glsRemBox');if(!box)return;
   if(!key){box.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
-  const wbc=m.wrongByComp||{};
+  /* Utilise l'historique fusionné si disponible (erreurs récurrentes multi-tentatives) */
+  const wbc=m.wrongByCompMerged||m.wrongByComp||{};
+  const wbcHistory=m.wrongByCompHistory||[];
   const notions=Object.keys(wbc);
   if(!notions.length){box.innerHTML='<div class="alert alert-info">Aucune notion à réviser identifiée.</div>';return;}
-  box.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef9ee;border:1px solid #fde68a;border-radius:10px;padding:.8rem;"><div class="ai-spinner" style="border-top-color:var(--accent);flex-shrink:0;"></div><span style="font-size:.8rem;color:#92400e;font-weight:700;">L'IA prépare votre cours personnalisé sur ${notions.length} notion(s)…</span></div>`;
-  const questionsRatees=notions.map(n=>`• ${n} (${wbc[n].length} question(s) manquée(s)) : ${wbc[n].map(q=>q.q).join(' / ')}`).join('\n');
+  const nbAttempts=wbcHistory.length;
+  const multiLabel=nbAttempts>1?` (${nbAttempts} tentatives — erreurs récurrentes en priorité)`:'';
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef9ee;border:1px solid #fde68a;border-radius:10px;padding:.8rem;"><div class="ai-spinner" style="border-top-color:var(--accent);flex-shrink:0;"></div><span style="font-size:.8rem;color:#92400e;font-weight:700;">L'IA prépare votre cours personnalisé sur ${notions.length} notion(s)${multiLabel}…</span></div>`;
+  /* Enrichit le prompt avec la fréquence d'erreur si multi-tentatives */
+  const freqMap={};
+  wbcHistory.forEach(a=>Object.keys(a.wbc||{}).forEach(c=>{freqMap[c]=(freqMap[c]||0)+1;}));
+  const questionsRatees=notions
+    .sort((a,b)=>(freqMap[b]||0)-(freqMap[a]||0))
+    .map(n=>{const freq=freqMap[n]||1;const repeatStr=freq>1?` — ERREUR RÉCURRENTE (${freq} tentatives sur ${nbAttempts})`:''
+      ;return`• ${n}${repeatStr} (${wbc[n].length} question(s)) : ${wbc[n].map(q=>q.q).join(' / ')}`}).join('\n');
+  const recurringNotions=notions.filter(n=>(freqMap[n]||0)>1);
+  const recurrLabel=recurringNotions.length?`\n\nNOTIONS RÉCURRENTES (ratées sur plusieurs tentatives — à traiter en priorité absolue) : ${recurringNotions.join(', ')}`:'';
+
   const sysP=`Tu es un expert de "${m.dom||m.titre||'ingénierie'}" (formation : "${m.titre||''}"), spécialiste de la pédagogie corrective. Tu génères des cours de remédiation chirurgicaux : tu identifies POURQUOI l'étudiant a fait cette erreur dans le contexte précis de "${m.dom||m.titre}" (confusion entre deux notions proches de ce domaine ? lacune sur une formule spécifique ? mauvais réflexe hérité d'un domaine adjacent ?), puis tu expliques avec un exemple concret et mémorisable propre à "${m.dom||m.titre}" — pas une reformulation générique. Ton explication sonne comme celle d'un expert du domaine qui a vu cette erreur des centaines de fois, pas comme une définition de dictionnaire. Réponds en français.`;
-  const prompt=`Un étudiant a raté son quiz sur le module "${m.titre}" (domaine : "${m.dom||m.titre}", score < 70%). Génère un cours de remédiation personnalisé et ciblé.
+  const prompt=`Un étudiant a raté son quiz sur le module "${m.titre}" (domaine : "${m.dom||m.titre}", score < 70%${nbAttempts>1?`, ${nbAttempts} tentatives au total`:''}).  Génère un cours de remédiation personnalisé et ciblé.
 
 QUESTIONS RATÉES :
-${questionsRatees}
+${questionsRatees}${recurrLabel}
 
 Avant de rédiger (raisonnement interne, ne pas afficher) : pour chaque question ratée, identifie mentalement le type d'erreur — (A) valeur/donnée : le bon chiffre n'était pas mémorisé ; (B) principe/compréhension : le mécanisme fondamental n'est pas compris ; (C) procédure/ordre : la méthode ou la séquence est incorrecte ; (D) confusion entre deux notions proches de "${m.dom||m.titre}". Si plusieurs questions partagent le même type d'erreur, c'est la lacune prioritaire à traiter en premier.
 
@@ -3381,16 +3701,89 @@ function closeRem(){_apCloseModal(document.getElementById('remModal'));}
 /* ══════════════════════════════════════════════
    LIBRARY
 ══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   RÉPÉTITION ESPACÉE — SM-2 simplifié
+═══════════════════════════════════════════ */
+const _SR_KEY='_sr_v1';
+function _srLoad(){try{return JSON.parse(localStorage.getItem(_SR_KEY)||'{}');}catch{return{};}}
+function _srSave(d){localStorage.setItem(_SR_KEY,JSON.stringify(d));}
+
+/* Calcule la complexité d'un module (1-3) pour adapter l'intervalle de base */
+function _srComplexity(m){
+  const secN=(m.sections||[]).length;
+  const boldAvg=(m.sections||[]).reduce((a,s)=>a+(s.contenu||'').split('**').length/2,0)/Math.max(secN,1);
+  if(secN>=6||boldAvg>=15)return 3;
+  if(secN>=4||boldAvg>=10)return 2;
+  return 1;
+}
+
+/* Intervalles en jours selon complexité et répétition n : [1,3,7,18,45] × facteur */
+function _srNextInterval(rep,ef,complexity){
+  const base=complexity===3?[2,7,18,45,90]:complexity===2?[1,4,10,25,60]:[1,3,7,18,45];
+  if(rep<base.length)return base[rep];
+  return Math.round(base[base.length-1]*Math.pow(ef,rep-base.length+1));
+}
+
+/* Enregistre la complétion d'un module et planifie la prochaine révision */
+function scheduleSpacedReview(modId,quizScore){
+  const d=_srLoad();
+  const prev=d[modId]||{rep:0,ef:2.5,nextDate:null};
+  const quality=quizScore>=80?5:quizScore>=65?4:quizScore>=50?3:quizScore>=35?2:1;
+  const newEf=Math.max(1.3,prev.ef+(0.1-(5-quality)*(0.08+(5-quality)*0.02)));
+  const newRep=quality>=3?prev.rep+1:0;
+  const interval=_srNextInterval(newRep,newEf,_srComplexity(getMods().find(m=>m.id===modId)||{}));
+  const nextDate=new Date();nextDate.setDate(nextDate.getDate()+interval);
+  d[modId]={rep:newRep,ef:newEf,nextDate:nextDate.toISOString(),lastScore:quizScore,interval};
+  _srSave(d);
+  showToast(`📅 Révision programmée dans ${interval} jour${interval>1?'s':''}`,null,2800);
+}
+
+/* Renvoie les modIds dont la révision est due aujourd'hui ou en retard */
+function getDueReviews(){
+  const d=_srLoad();const now=Date.now();
+  return Object.entries(d).filter(([,v])=>v.nextDate&&new Date(v.nextDate).getTime()<=now).map(([id])=>parseInt(id));
+}
+
+/* Mini-révision : 3 questions tirées de wrongByComp */
+function startMiniReview(modId){
+  const mod=getMods().find(m=>m.id===modId);if(!mod)return;
+  const quiz=mod.quiz||mod.qcm||[];if(!quiz.length){showToast('Aucune question disponible','err');return;}
+  const wbc=mod.wrongByComp||{};
+  const sorted=quiz.slice().sort((a,b)=>{
+    const wa=wbc[a.competence||a.notion||'']||0;const wb=wbc[b.competence||b.notion||'']||0;
+    return wb-wa;
+  });
+  const sample=sorted.slice(0,3);
+  openMod(modId);
+  setTimeout(()=>{
+    const qDiv=document.getElementById('tp-quiz-inline');
+    if(qDiv&&sample.length){
+      qDiv.innerHTML=`<div style="background:#fef9c3;border:1.5px solid #fbbf24;border-radius:10px;padding:.6rem .9rem;margin-bottom:.5rem;font-size:.73rem;font-weight:700;color:#92400e;">📅 Révision espacée — ${sample.length} questions prioritaires</div>`;
+      sample.forEach((q,qi)=>{
+        const el=document.createElement('div');el.className='mq-card';
+        el.innerHTML=`<div class="mq-q">${qi+1}. ${_e(q.q)}</div>${(q.opts||[]).map((o,oi)=>`<div class="mq-opt" onclick="_checkScenario('mr-${modId}-${qi}',${oi},${q.correct||0},'${(q.explication||q.expl||'').replace(/'/g,"\\'")}' )">${_e(o)}</div>`).join('')}<div id="mr-${modId}-${qi}-fb" style="display:none;font-size:.72rem;margin-top:.3rem;"></div>`;
+        qDiv.appendChild(el);
+      });
+    }
+  },400);
+}
+
 function modCard(m){
   const p=m.mode==='pro';const sc=m.scores?.quiz;
   const _da=_domainAccent(m.secteur||m.dom);
   const _topStyle=_da?`style="background:linear-gradient(135deg,#0d1b2a,${_da}cc,#0a1622);background-size:200% 200%;animation:gradientShift 9s ease infinite;"`:'';
+  /* Badge révision espacée */
+  const _srData=_srLoad()[m.id];
+  const _isDue=_srData&&_srData.nextDate&&new Date(_srData.nextDate).getTime()<=Date.now();
+  const _revBadge=_isDue?`<div style="font-size:.6rem;background:rgba(245,158,11,.25);color:#fbbf24;border-radius:5px;padding:.1rem .4rem;font-weight:800;cursor:pointer;" onclick="event.stopPropagation();startMiniReview(${m.id})" title="Révision due">📅 Révision</div>`
+    :_srData?`<div style="font-size:.6rem;color:rgba(255,255,255,.4);">⏳ J+${Math.max(0,Math.round((new Date(_srData.nextDate)-Date.now())/86400000))}</div>`:'';
   return`<div class="mod-lib-card ap-press ${m.mode||''}" onclick="openMod(${m.id})">
     <div class="mod-lib-top ${p?'pro':'acad'}" ${_topStyle}>
       <div><div class="mod-lib-ico">${p?'💼':'🎓'}</div></div>
       <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:.2rem;">
         <button class="fav-btn${m.fav?' fav-on':''}" id="fav-${m.id}" onclick="toggleFav(${m.id},event)" title="${m.fav?'Retirer des favoris':'Ajouter aux favoris'}">${m.fav?'⭐':'☆'}</button>
         ${sc!=null?`<div class="mod-lib-score" style="background:${sc>=70?'rgba(5,150,105,.2)':'rgba(220,38,38,.2)'};color:${sc>=70?'#065f46':'#991b1b'};">${sc}%</div>`:''}
+        ${_revBadge}
         <div style="font-size:.65rem;color:rgba(255,255,255,.6);">${_d(m.id)}</div>
       </div>
     </div>
@@ -3737,7 +4130,9 @@ function renderGloss(m){
 /* ══════════════════════════════════════════════
    ATTESTATION (PRO)
 ══════════════════════════════════════════════ */
+let _attMod=null;
 function showAttestation(m){
+  _attMod=m;
   const _smin=getCfg().quizScoreMin;
   const score=m.scores?.quiz??null;const pass=score!=null&&score>=_smin;
   document.getElementById('attContent').innerHTML=`
@@ -3766,6 +4161,118 @@ function showAttestation(m){
   _apOpenModal(document.getElementById('attModal'));
 }
 function closeAtt(){_apCloseModal(document.getElementById('attModal'));}
+
+/* ── Génération UUID court (8 chars hex) ── */
+function _genUUID8(){return Math.random().toString(16).slice(2,6)+Math.random().toString(16).slice(2,6);}
+
+/* ── Export PDF attestation via jsPDF ── */
+async function downloadAttPDF(){
+  const m=_attMod;if(!m){showToast('Aucune attestation ouverte.','err');return;}
+  const btn=document.getElementById('attDownload');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Génération…';}
+  try{
+    if(!window.jspdf){
+      await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+    const {jsPDF}=window.jspdf;
+    const cfg=getCfg();
+    const _smin=cfg.quizScoreMin;
+    const score=m.scores?.quiz??null;
+    const pass=score!=null&&score>=_smin;
+    const p=m.mode==='pro';
+    const mc=p?[245,158,11]:[124,58,237];
+    const mcHex=p?'#f59e0b':'#7c3aed';
+
+    /* UUID + stockage attestation */
+    const uuid=_genUUID8().toUpperCase();
+    const attRecord={uuid,modId:m.id,titre:m.titre,dom:m.dom,score,pass,date:new Date().toISOString(),formateur:cfg.formateur||'',etablissement:cfg.etablissement||''};
+    const prevAtts=JSON.parse(localStorage.getItem('gls_attestations')||'[]');
+    prevAtts.push(attRecord);
+    localStorage.setItem('gls_attestations',JSON.stringify(prevAtts));
+
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const W=210,margin=20;
+    let y=margin;
+
+    /* En-tête fond coloré */
+    doc.setFillColor(...mc);doc.roundedRect(margin,y,W-2*margin,14,3,3,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(255,255,255);
+    doc.text((cfg.platformName||'GREEN LAB STUDIO').toUpperCase()+' — FORMATION',W/2,y+5.5,{align:'center'});
+    doc.setFontSize(8.5);doc.text(cfg.etablissement||'',W/2,y+11,{align:'center'});
+    y+=18;
+
+    /* Titre attestation */
+    doc.setFont('helvetica','bold');doc.setFontSize(18);doc.setTextColor(15,23,42);
+    doc.text((cfg.certifIntitule||'ATTESTATION DE FORMATION').toUpperCase(),W/2,y+7,{align:'center'});
+    y+=14;
+
+    /* Médaille */
+    doc.setFontSize(28);doc.text('🏅',W/2,y+8,{align:'center'});
+    y+=14;
+
+    /* Ligne de statut */
+    if(pass){doc.setFillColor(236,253,245);doc.roundedRect(margin,y,W-2*margin,8,2,2,'F');}
+    else{doc.setFillColor(254,242,242);doc.roundedRect(margin,y,W-2*margin,8,2,2,'F');}
+    doc.setFontSize(9.5);doc.setFont('helvetica','bold');
+    doc.setTextColor(pass?5:185,pass?150:28,pass?105:26);
+    doc.text(pass?'✅ VALIDÉ':'⚠️ NON VALIDÉ'+(score!=null?` (${score}% — ${_smin}% requis)`:''),W/2,y+5.5,{align:'center'});
+    y+=12;
+
+    /* Bloc informations */
+    doc.setDrawColor(...mc);doc.setLineWidth(.4);doc.roundedRect(margin,y,W-2*margin,60,3,3,'S');
+    const rows=[
+      ['Domaine',m.dom||''],['Formation',m.titre||''],['Public cible',m.pub||''],
+      ['Niveau',(m.niv||m.niveau||'')],['Durée',m.dur||m.duree||''],['Langue',m.lang||''],
+      ...(score!=null?[['Score d\'évaluation',score+'%']]:[] ),
+      ['Date d\'émission',new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})]
+    ];
+    doc.setFontSize(9);let ry=y+5;
+    rows.forEach(([lbl,val])=>{
+      doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);doc.text(lbl+' :',margin+4,ry);
+      doc.setFont('helvetica','bold');doc.setTextColor(15,23,42);doc.text(val,margin+52,ry);
+      ry+=6.5;
+    });
+    y+=64;
+
+    /* Objectifs */
+    if((m.objectifs||[]).length){
+      doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(100,116,139);
+      doc.text('OBJECTIFS OPÉRATIONNELS COUVERTS',margin,y+5);y+=8;
+      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,41,59);
+      (m.objectifs||[]).slice(0,6).forEach(o=>{
+        doc.setTextColor(...mc);doc.text('✓',margin+2,y);
+        doc.setTextColor(30,41,59);
+        const lines=doc.splitTextToSize(o,W-2*margin-12);
+        doc.text(lines,margin+8,y);y+=lines.length*5+1;
+      });
+      y+=4;
+    }
+
+    /* Formateur + signature */
+    doc.setDrawColor(226,232,240);doc.setLineWidth(.3);doc.line(margin,y,W-margin,y);y+=6;
+    if(cfg.formateur){
+      doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(148,163,184);
+      doc.text(cfg.formateurTitre||'Formateur',margin,y);
+      doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(15,23,42);
+      doc.text(cfg.formateur,margin,y+5);
+    }
+    doc.setFont('helvetica','bold');doc.setFontSize(10);
+    doc.setTextColor(pass?5:148,pass?150:163,pass?105:184);
+    doc.text(pass?'✅ VALIDÉ':'Non validé',W-margin,y+3,{align:'right'});
+
+    /* Pied de page discret avec UUID */
+    const pageH=doc.internal.pageSize.getHeight();
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(200,200,200);
+    doc.text(`Généré par ${cfg.platformName||'Green Lab Studio'} · ID de vérification : ${uuid}`,W/2,pageH-8,{align:'center'});
+
+    doc.save(`attestation-${(m.titre||'formation').replace(/\s+/g,'-').toLowerCase()}-${uuid}.pdf`);
+    showToast(`✅ PDF téléchargé — ID : ${uuid}`);
+  }catch(e){
+    showToast('Erreur PDF : '+e.message,'err');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='⬇️ Télécharger PDF';}
+  }
+}
 
 /* ══════════════════════════════════════════════
    MEDIA — IMAGES & SVG
