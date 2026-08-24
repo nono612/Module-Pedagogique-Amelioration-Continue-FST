@@ -1254,6 +1254,61 @@ const _MODEL_OPTIONS=[
   {value:'mixtral-8x7b-32768',label:'✅ Mixtral 8x7B',info:'Gratuit · Long contexte (32k tokens), idéal pour documents joints volumineux.'},
 ];
 
+/* ─── Groq Live Model Discovery ─── */
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v2';
+const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
+// Hardcoded fallback chain if the API itself is unreachable
+const _GROQ_FALLBACK_CHAIN=['llama-3.1-8b-instant','llama3-8b-8192','gemma2-9b-it','mixtral-8x7b-32768','llama3-70b-8192'];
+
+function _groqModelLabel(id){
+  if(id.includes('instant'))return'⚡ '+id+' (rapide)';
+  if(/8b/i.test(id))return'⚡ '+id;
+  if(/gemma/i.test(id))return'💎 '+id;
+  if(/mixtral/i.test(id))return'📦 '+id+' (32k)';
+  if(/70b|90b|120b/i.test(id))return'🧠 '+id;
+  return id;
+}
+
+async function _fetchGroqModels(key){
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
+    if(!r.ok)return null;
+    const d=await r.json();
+    const ids=(d.data||[])
+      .filter(m=>m.object==='model'&&!m.id.includes('whisper')&&!m.id.includes('distil'))
+      .map(m=>m.id)
+      .sort((a,b)=>{
+        const sc=s=>s.includes('instant')?0:s.includes('8b')?1:s.includes('9b')?2:s.includes('mixtral')?3:s.includes('70b')?4:5;
+        return sc(a)-sc(b);
+      });
+    return ids.length?ids:null;
+  }catch(e){return null;}
+}
+
+let _groqRefreshTimer=null;
+async function _refreshGroqSelector(key,force=false){
+  if(!key||!key.startsWith('gsk_'))return;
+  const cached=JSON.parse(localStorage.getItem(_GROQ_MODELS_KEY)||'null');
+  const ids=(!force&&cached&&Date.now()-cached.ts<_GROQ_MODELS_TTL)
+    ?cached.ids
+    :await _fetchGroqModels(key);
+  if(!ids||!ids.length)return;
+  localStorage.setItem(_GROQ_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
+  // Rebuild _MODEL_OPTIONS from live data
+  _MODEL_OPTIONS.length=0;
+  ids.forEach(id=>_MODEL_OPTIONS.push({value:id,label:_groqModelLabel(id),info:'Disponible sur votre compte Groq.'}));
+  // Auto-migrate config if current model no longer available
+  const cur=getCfg().model;
+  if(cur&&!ids.includes(cur)){
+    const first=ids[0];
+    saveCfg('model',first);
+    if(typeof showToast==='function')showToast('Modèle Groq mis à jour : '+first);
+  }
+  // Refresh selector in settings panel if already open
+  _fillSelect('cfg-model',_MODEL_OPTIONS,getCfg().model,o=>o.value,o=>o.label);
+  if(typeof updateModelPill==='function')updateModelPill();
+}
+
 const _LANG_OPTIONS=[
   {value:'Français',label:'Français'},{value:'English',label:'English'},
   {value:'Arabe',label:'Arabe (العربية)'},{value:'Espagnol',label:'Espagnol'},
@@ -1873,8 +1928,23 @@ async function _callAI(key,sys,usr,maxTok,temp,json){
   if(!provider)throw new Error('Clé non reconnue. Formats : gsk_… (Groq), sk-… (OpenAI), sk-ant-… (Anthropic), AIza… (Google AI).');
   const model=_providerModel(provider);
   switch(provider){
-    case'groq':
-      return _callOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,usr,maxTok,temp,json,model);
+    case'groq':{
+      // Build fallback chain: configured model first, then hardcoded fallbacks (deduplicated)
+      const _tried=new Set();
+      const _chain=[model,..._GROQ_FALLBACK_CHAIN].filter(m=>!_tried.has(m)&&_tried.add(m));
+      let _lastErr;
+      for(const _m of _chain){
+        try{
+          const _res=await _callOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,usr,maxTok,temp,json,_m);
+          if(_m!==model){saveCfg('model',_m);setTimeout(()=>_refreshGroqSelector(key,true),0);}
+          return _res;
+        }catch(_e){
+          if(/does not exist|not found|invalid_model|access/i.test(_e.message)){_lastErr=_e;continue;}
+          throw _e; // Vrai erreur (auth, rate limit…)
+        }
+      }
+      throw _lastErr||new Error('Aucun modèle Groq disponible');
+    }
     case'openai':
       return _callOAICompat('https://api.openai.com/v1/chat/completions',key,sys,usr,maxTok,temp,json,model);
     case'anthropic':{
@@ -2136,6 +2206,11 @@ function _onKeyInput(value){
   const inp=document.getElementById('apiKeyInput');if(inp&&inp!==this)inp.value=value;
   const set=document.getElementById('apiKeySettings');if(set&&set!==this)set.value=value;
   _updateProviderBadge(value);
+  // Refresh Groq model list when a valid-looking Groq key is entered
+  if(value.startsWith('gsk_')&&value.length>15){
+    clearTimeout(_groqRefreshTimer);
+    _groqRefreshTimer=setTimeout(()=>_refreshGroqSelector(value,true),900);
+  }
   // Badge dans la card Paramètres
   const b2=document.getElementById('providerBadgeSettings');
   if(b2){
@@ -4654,7 +4729,10 @@ function importConfig(file){
     if(!cfg.model||_DEPRECATED.includes(cfg.model)){cfg.model='llama-3.1-8b-instant';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
-  if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);}
+  if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
+    // Non-blocking: refresh Groq model list on startup (uses 6h cache)
+    if(k.startsWith('gsk_'))setTimeout(()=>_refreshGroqSelector(k),300);
+  }
   renderNav();
   loadSettingsUI();
   applyPlatformName();
