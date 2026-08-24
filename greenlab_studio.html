@@ -1255,7 +1255,7 @@ const _MODEL_OPTIONS=[
 ];
 
 /* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v2';
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v3';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 // Hardcoded fallback chain if the API itself is unreachable
 const _GROQ_FALLBACK_CHAIN=['llama-3.1-8b-instant','llama3-8b-8192','gemma2-9b-it','mixtral-8x7b-32768','llama3-70b-8192'];
@@ -1275,7 +1275,13 @@ async function _fetchGroqModels(key){
     if(!r.ok)return null;
     const d=await r.json();
     const ids=(d.data||[])
-      .filter(m=>m.object==='model'&&!m.id.includes('whisper')&&!m.id.includes('distil'))
+      .filter(m=>
+        m.object==='model'&&
+        !m.id.includes('whisper')&&
+        !m.id.includes('distil')&&
+        !m.id.includes('tool-use')&&
+        (m.context_window==null||m.context_window>=4096) // exclut les modèles avec fenêtre trop petite
+      )
       .map(m=>m.id)
       .sort((a,b)=>{
         const sc=s=>s.includes('instant')?0:s.includes('8b')?1:s.includes('9b')?2:s.includes('mixtral')?3:s.includes('70b')?4:5;
@@ -1939,7 +1945,7 @@ async function _callAI(key,sys,usr,maxTok,temp,json){
           if(_m!==model){saveCfg('model',_m);setTimeout(()=>_refreshGroqSelector(key,true),0);}
           return _res;
         }catch(_e){
-          if(/does not exist|not found|invalid_model|access/i.test(_e.message)){_lastErr=_e;continue;}
+          if(/does not exist|not found|invalid_model|access|max_tokens|context_window/i.test(_e.message)){_lastErr=_e;continue;}
           throw _e; // Vrai erreur (auth, rate limit…)
         }
       }
