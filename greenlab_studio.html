@@ -1225,18 +1225,48 @@ const _NAV_GROUPS=[
   ]},
 ];
 
+/* Liste de départ. Elle est remplacée au chargement par les modèles réellement
+   disponibles sur le compte (voir _refreshGroqSelector). */
 const _MODEL_OPTIONS=[
-  {value:'llama-3.1-8b-instant',label:'✅ Llama 3.1 8B Instant ⭐ Recommandé',info:'Gratuit · Ultra-rapide (1200 T/s), idéal pour tous les modules. Modèle par défaut.'},
-  {value:'llama3-70b-8192',label:'✅ Llama 3 70B',info:'Gratuit · Plus lent mais très capable, pour modules complexes (8192 tokens de contexte).'},
-  {value:'gemma2-9b-it',label:'✅ Gemma 2 9B',info:'Gratuit · Modèle Google via Groq, bon équilibre vitesse/qualité.'},
-  {value:'mixtral-8x7b-32768',label:'✅ Mixtral 8x7B',info:'Gratuit · Long contexte (32k tokens), idéal pour documents joints volumineux.'},
+  {value:'llama-3.1-8b-instant',label:'⚡ Llama 3.1 8B Instant ⭐ Recommandé',info:'Gratuit · Très rapide et quota généreux — idéal pour tous les modules.'},
+  {value:'llama-3.3-70b-versatile',label:'🧠 Llama 3.3 70B Versatile',info:'Gratuit · Plus fin sur les contenus complexes, mais quota par minute plus serré.'},
 ];
 
 /* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v4';
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v5';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
-// Hardcoded fallback chain if the API itself is unreachable
-const _GROQ_FALLBACK_CHAIN=['llama-3.1-8b-instant','llama3-8b-8192','gemma2-9b-it','mixtral-8x7b-32768','llama3-70b-8192'];
+// Modèles Groq réellement en production (vérifiés) — secours si l'API /models est injoignable
+const _GROQ_FALLBACK_CHAIN=['llama-3.1-8b-instant','llama-3.3-70b-versatile'];
+
+/* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur.
+   Évite de tenter des modèles supprimés par Groq. */
+function _groqChain(preferred){
+  const seen=new Set();
+  const out=[];
+  const push=m=>{if(m&&!seen.has(m)){seen.add(m);out.push(m);}};
+  push(preferred);
+  try{
+    const cached=JSON.parse(localStorage.getItem(_GROQ_MODELS_KEY)||'null');
+    if(cached&&Array.isArray(cached.ids))cached.ids.forEach(push);
+  }catch(_){}
+  _GROQ_FALLBACK_CHAIN.forEach(push);
+  return out;
+}
+
+/* Erreurs qui justifient d'essayer un autre modèle (le modèle est inutilisable tel quel) */
+const _RE_SWITCH_MODEL=/does not exist|not found|invalid_model|no access|do not have access|decommission|deprecat/i;
+/* Erreurs de quota — attendre puis réessayer le MÊME modèle est plus efficace */
+const _RE_RATE_LIMIT=/rate.?limit|tokens per minute|TPM|requests per minute|RPM|429/i;
+/* Le modèle refuse la taille demandée — réessayer en réduisant max_tokens */
+const _RE_MAX_TOKENS=/max_tokens|context_window|maximum context length|reduce the length/i;
+
+const _sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* Groq renvoie « Please try again in 27.6225s » — on extrait le délai réel */
+function _parseRetryDelay(msg){
+  const m=/try again in ([\d.]+)\s*s/i.exec(msg||'');
+  if(m){const s=parseFloat(m[1]);if(s>0&&s<75)return Math.ceil(s*1000)+400;}
+  return null;
+}
 
 function _groqModelLabel(id){
   if(id.includes('instant'))return'⚡ '+id+' (rapide)';
@@ -1263,9 +1293,10 @@ async function _fetchGroqModels(key){
         (m.context_window==null||m.context_window>=4096)
       )
       .map(m=>m.id)
+      // Les plus rapides et les plus généreux en quota d'abord
       .sort((a,b)=>{
-        const sc=s=>s.includes('instant')?0:s.includes('8b')?1:s.includes('9b')?2:s.includes('mixtral')?3:s.includes('70b')?4:5;
-        return sc(a)-sc(b);
+        const sc=s=>s.includes('instant')?0:/llama-3\.3.*versatile/.test(s)?1:/llama/.test(s)?2:/gemma/.test(s)?3:4;
+        return sc(a)-sc(b)||a.localeCompare(b);
       });
     return ids.length?ids:null;
   }catch(e){return null;}
@@ -1850,35 +1881,71 @@ function detectProvider(key){
 }
 const _PROVIDER_INFO={groq:{label:'⚡ Groq · Llama',color:'#f59e0b'}};
 
-async function _callOAICompat(endpoint,key,sys,usr,maxTok,temp,json,model){
-  const msgs=[];
-  if(sys)msgs.push({role:'system',content:sys});
-  msgs.push({role:'user',content:usr});
-  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,max_tokens:maxTok||2500};
+const _GROQ_EP='https://api.groq.com/openai/v1/chat/completions';
+
+/* Un aller-retour HTTP vers Groq. Lève une Error portant le message de l'API. */
+async function _groqFetch(key,model,msgs,maxTok,temp,json){
+  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,max_tokens:maxTok};
   if(json)body.response_format={type:'json_object'};
-  const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify(body)});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
+  const r=await fetch(_GROQ_EP,{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify(body)});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
   return d.choices?.[0]?.message?.content||'';
 }
 
-async function _callAI(key,sys,usr,maxTok,temp,json){
+/* Exécuteur unique : gère quotas, modèles retirés, tailles refusées et coupures réseau.
+   Utilisé par tous les appels IA de l'application. */
+async function _groqExec(key,msgs,maxTok,temp,json){
   if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
-  const model=getCfg().model||'llama-3.1-8b-instant';
-  const _tried=new Set();
-  const _chain=[model,..._GROQ_FALLBACK_CHAIN].filter(m=>!_tried.has(m)&&_tried.add(m));
-  let _lastErr;
-  for(const _m of _chain){
-    try{
-      const _res=await _callOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,usr,maxTok,temp,json,_m);
-      if(_m!==model){saveCfg('model',_m);setTimeout(()=>_refreshGroqSelector(key,true),0);}
-      return _res;
-    }catch(_e){
-      if(/does not exist|not found|invalid_model|access|max_tokens|context_window|rate.limit|rate_limit|tokens per minute|TPM/i.test(_e.message)){_lastErr=_e;continue;}
-      throw _e;
+  const configured=getCfg().model||'llama-3.1-8b-instant';
+  const chain=_groqChain(configured);
+  let lastErr;
+
+  for(const model of chain){
+    let tok=maxTok||2500;
+    let waited=0;   // temps déjà passé à patienter sur ce modèle
+    let shrinks=0;  // réductions de max_tokens appliquées
+
+    for(let attempt=0;attempt<4;attempt++){
+      try{
+        const res=await _groqFetch(key,model,msgs,tok,temp,json);
+        if(model!==configured){saveCfg('model',model);setTimeout(()=>_refreshGroqSelector(key,true),0);}
+        return res;
+      }catch(e){
+        const msg=e.message||'';
+        lastErr=e;
+
+        // Quota atteint → patienter le délai annoncé par Groq, puis réessayer ce modèle
+        if(_RE_RATE_LIMIT.test(msg)){
+          const delay=_parseRetryDelay(msg)??4000;
+          if(waited+delay<=45000){await _sleep(delay);waited+=delay;continue;}
+          break; // attente trop longue : on tente un autre modèle
+        }
+        // Sortie trop grande pour ce modèle → réduire de moitié (plancher 512)
+        if(_RE_MAX_TOKENS.test(msg)&&shrinks<3&&tok>512){
+          tok=Math.max(512,Math.floor(tok/2));shrinks++;continue;
+        }
+        // Modèle retiré par Groq → passer au suivant
+        if(_RE_SWITCH_MODEL.test(msg))break;
+        // Coupure réseau passagère → une seule nouvelle tentative
+        if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _sleep(1200);continue;}
+        // Vraie erreur (clé invalide…) → remonter immédiatement
+        throw e;
+      }
     }
   }
-  throw _lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
+  if(_RE_RATE_LIMIT.test(lastErr?.message||''))
+    throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
+  throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
+}
+
+async function _callAI(key,sys,usr,maxTok,temp,json){
+  const msgs=[];
+  if(sys)msgs.push({role:'system',content:sys});
+  msgs.push({role:'user',content:usr});
+  return _groqExec(key,msgs,maxTok,temp,json);
 }
 
 async function gemini(key,sys,usr,maxTok){
@@ -1890,28 +1957,10 @@ async function geminiText(key,sys,usr,maxTok,temp){
   return _callAI(key,sys,usr,maxTok,temp,false);
 }
 
+/* Conversation multi-tours (panneau chat) — format natif préservé,
+   même robustesse que les autres appels. */
 async function _callAIWithHistory(key,msgs,maxTok,temp){
-  if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…).');
-  const model=getCfg().model||'llama-3.1-8b-instant';
-  const t=temp!==undefined?temp:getCfg().temperature;
-  const _tried=new Set();
-  const _chain=[model,..._GROQ_FALLBACK_CHAIN].filter(m=>!_tried.has(m)&&_tried.add(m));
-  let _lastErr;
-  for(const _m of _chain){
-    try{
-      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-        body:JSON.stringify({model:_m,messages:msgs,temperature:t,max_tokens:maxTok||2500})});
-      const d=await r.json();
-      if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
-      if(_m!==model){saveCfg('model',_m);setTimeout(()=>_refreshGroqSelector(key,true),0);}
-      return d.choices?.[0]?.message?.content||'';
-    }catch(_e){
-      if(/does not exist|not found|invalid_model|access|max_tokens|context_window|rate.limit|rate_limit|tokens per minute|TPM/i.test(_e.message)){_lastErr=_e;continue;}
-      throw _e;
-    }
-  }
-  throw _lastErr||new Error('Aucun modèle Groq disponible.');
+  return _groqExec(key,msgs,maxTok,temp,false);
 }
 
 /* ── Content quality verification (background, non-blocking) ── */
@@ -2185,6 +2234,23 @@ function setStep(id,state,msg,p){
 
 async function _retry(fn,attempts=2){let last;for(let i=0;i<attempts;i++){try{return await fn();}catch(e){last=e;}}throw last;}
 
+/* Exécute des tâches par petits lots plutôt que toutes en parallèle.
+   Lancer 6 sections d'un coup dépasse le quota Groq par minute ; deux à la fois
+   passe sans encombre tout en restant nettement plus rapide que du séquentiel.
+   L'ordre des résultats est préservé. */
+async function _mapLimited(items,limit,fn){
+  const out=new Array(items.length);
+  let next=0;
+  async function worker(){
+    while(next<items.length){
+      const i=next++;
+      out[i]=await fn(items[i],i);
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(limit,items.length)},worker));
+  return out;
+}
+
 async function _gatherTerrainData(fd,key,SYS,ctx){
   try{
     return await gemini(key,SYS,
@@ -2227,7 +2293,7 @@ FIABILITÉ RÉGLEMENTAIRE : ne jamais écrire un numéro de norme précis (ex: "
   /* Fading index : section procédurale n°0=exemple résolu, 1=partiel, 2+=autonome */
   let _proFadeCount=0;
   setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections en parallèle…`,true);
-  const sections=await Promise.all((plan.sections||[]).map(async(s,i)=>{
+  const sections=await _mapLimited(plan.sections||[],2,async(s,i)=>{
     try{
       const _angle=_pickAngle('pro',fd.dom);
       /* Fading pour sections procédurales */
@@ -2262,7 +2328,7 @@ FIABILITÉ RÉGLEMENTAIRE : ne jamais écrire un numéro de norme précis (ex: "
       setStep('s2','active',`⚡ ${cnt}/${plan.sections.length} sections rédigées`,true);
       return s;
     }
-  }));
+  });
   setStep('s2','done',sections.length+' sections rédigées',true);
 
   setStep('s3','active','',true);
@@ -2324,7 +2390,7 @@ FIABILITÉ : ne jamais écrire un numéro de norme, de standard ou une valeur no
   /* Fading index pour sections de type demonstration/application */
   let _acadFadeCount=0;
   setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections en parallèle…`,false);
-  const sections=await Promise.all((plan.sections||[]).map(async(s,i)=>{
+  const sections=await _mapLimited(plan.sections||[],2,async(s,i)=>{
     try{
       const isDemo=s.type==='demonstration';const isApp=s.type==='application';
       const _angleAcad=_pickAngle('acad',fd.dom);
@@ -2355,7 +2421,7 @@ FIABILITÉ : ne jamais écrire un numéro de norme, de standard ou une valeur no
       setStep('s2','active',`⚡ ${cntA}/${plan.sections.length} sections rédigées`,false);
       return s;
     }
-  }));
+  });
   setStep('s2','done',sections.length+' sections rédigées',false);
 
   setStep('s3','active','',false);
@@ -4548,10 +4614,8 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'llama-3.1-8b-instant':'✅ Gratuit — Ultra-rapide (1200 T/s), recommandé pour tous les modules.',
-  'llama3-70b-8192':'✅ Gratuit — Llama 3 70B, très capable, pour modules complexes.',
-  'gemma2-9b-it':'✅ Gratuit — Modèle Google via Groq, bon équilibre vitesse/qualité.',
-  'mixtral-8x7b-32768':'✅ Gratuit — Long contexte 32k, idéal pour documents volumineux.',
+  'llama-3.1-8b-instant':'⚡ Gratuit — Très rapide, quota généreux. Recommandé.',
+  'llama-3.3-70b-versatile':'🧠 Gratuit — Plus fin sur les contenus complexes, quota plus serré.',
 };
 
 function applyPlatformName(){
@@ -4570,8 +4634,11 @@ function updateModelPill(){
   if(info)info.textContent=_MODEL_INFO[m]||'Modèle sélectionné.';
   const pill=document.querySelector('.cl-model-pill');
   if(pill){
-    const labels={'llama-3.1-8b-instant':'Llama 3.1 8B','llama3-70b-8192':'Llama 3 70B','gemma2-9b-it':'Gemma 2 9B','mixtral-8x7b-32768':'Mixtral 8x7B'};
-    pill.innerHTML='<div class="cl-model-dot"></div>'+(getCfg().platformName||'Green Lab')+' Assistant · '+(labels[m]||m);
+    // Nom lisible : « llama-3.1-8b-instant » → « Llama 3.1 8B »
+    const pretty=(m||'').replace(/^groq\//,'').replace(/-(instant|versatile|it)$/,'')
+      .replace(/(^|[-\s])([a-z])/g,(_,p,c)=>p+c.toUpperCase()).replace(/-/g,' ')
+      .replace(/\b(\d+)b\b/i,(_,n)=>n+'B');
+    pill.innerHTML='<div class="cl-model-dot"></div>'+(getCfg().platformName||'Green Lab')+' Assistant · '+(pretty||m);
   }
 }
 
@@ -4625,11 +4692,17 @@ function importConfig(file){
 ══════════════════════════════════════════════ */
 (function(){
   // Migration : remplace les anciens modèles dépréciés
-  const _DEPRECATED=['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-2.5-flash','gemini-2.5-flash-preview-05-20','gemini-2.5-flash-lite-preview-06-17','gemini-1.5-flash','gemini-1.5-pro','gemini-2.5-pro','gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','grok-3-mini','grok-3','grok-3-fast','grok-2','llama-3.3-70b-versatile','llama-3.1-70b-versatile'];
+  /* Le modèle mémorisé n'est conservé que s'il reste plausible.
+     Une liste noire devient vite obsolète : on valide plutôt le format et on
+     laisse la découverte en direct (_refreshGroqSelector) confirmer ou corriger. */
   try{
     const cfg=JSON.parse(localStorage.getItem(_CFG_KEY)||'{}');
-    // Réinitialise si modèle déprécié OU si modèle openai/* (TPM trop bas)
-    if(!cfg.model||_DEPRECATED.includes(cfg.model)||cfg.model.startsWith('openai/')){cfg.model='llama-3.1-8b-instant';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+    const m=cfg.model;
+    const suspect=!m
+      ||m.startsWith('openai/')        // quota par minute trop bas
+      ||/^(gemini|grok|gpt|claude)/.test(m)  // reliquats d'autres fournisseurs
+      ||/^llama3-|mixtral|llama-3\.1-70b/.test(m); // retirés par Groq
+    if(suspect){cfg.model='llama-3.1-8b-instant';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
