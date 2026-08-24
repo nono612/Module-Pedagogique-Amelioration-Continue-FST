@@ -831,7 +831,7 @@ h1,h2,.ap-title-lg{
   </div>
   <div class="sb-key">
     <span class="sb-key-label">Clé API IA</span>
-    <input type="password" id="apiKeyInput" placeholder="gsk_… / sk-… / sk-ant-… / AIza…" oninput="_onKeyInput.call(this,this.value)">
+    <input type="password" id="apiKeyInput" placeholder="gsk_… (clé Groq gratuite)" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadge" style="display:none;"></div>
   </div>
   <div class="sb-mode" id="sbMode"></div>
@@ -966,41 +966,19 @@ h1,h2,.ap-title-lg{
     </div>
   </div>
 
-  <!-- ② CLÉ API — Multi-fournisseur -->
+  <!-- ② CLÉ API — Groq -->
   <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
-    <div class="ccard-title">🔑 Clé API — Tous fournisseurs acceptés</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">✅ Sauvegardée automatiquement. Le fournisseur est détecté automatiquement selon le format de votre clé.</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.8rem;font-size:.75rem;">
-      <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:8px;padding:.5rem .7rem;">
-        <div style="font-weight:800;color:#92400e;margin-bottom:.15rem;">⚡ Groq (gratuit)</div>
-        <div style="color:#78350f;">Préfixe <code>gsk_…</code></div>
-        <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#d97706;font-weight:700;text-decoration:none;font-size:.7rem;">console.groq.com ↗</a>
-      </div>
-      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:8px;padding:.5rem .7rem;">
-        <div style="font-weight:800;color:#065f46;margin-bottom:.15rem;">🟢 OpenAI</div>
-        <div style="color:#14532d;">Préfixe <code>sk-…</code></div>
-        <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="color:#16a34a;font-weight:700;text-decoration:none;font-size:.7rem;">platform.openai.com ↗</a>
-      </div>
-      <div style="background:#faf5ff;border:1.5px solid #d8b4fe;border-radius:8px;padding:.5rem .7rem;">
-        <div style="font-weight:800;color:#4c1d95;margin-bottom:.15rem;">🟣 Anthropic</div>
-        <div style="color:#3b0764;">Préfixe <code>sk-ant-…</code></div>
-        <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener" style="color:#7c3aed;font-weight:700;text-decoration:none;font-size:.7rem;">console.anthropic.com ↗</a>
-      </div>
-      <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:8px;padding:.5rem .7rem;">
-        <div style="font-weight:800;color:#1e3a8a;margin-bottom:.15rem;">🔵 Google AI</div>
-        <div style="color:#1e40af;">Préfixe <code>AIza…</code></div>
-        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#2563eb;font-weight:700;text-decoration:none;font-size:.7rem;">aistudio.google.com ↗</a>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">Votre clé API</label>
-    <input type="password" id="apiKeySettings" class="form-input" placeholder="gsk_… ou sk-… ou sk-ant-… ou AIza…" oninput="_onKeyInput.call(this,this.value)">
+    <div class="ccard-title">🔑 Clé API Groq</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">✅ Gratuit · Sauvegardée automatiquement. Créez votre clé sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#d97706;font-weight:700;text-decoration:none;">console.groq.com ↗</a></p>
+    <div class="form-group"><label class="form-label">Votre clé Groq</label>
+    <input type="password" id="apiKeySettings" class="form-input" placeholder="gsk_…" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadgeSettings" style="margin-top:.4rem;"></div></div>
   </div>
 
   <!-- ③ MOTEUR IA -->
   <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
     <div class="ccard-title">🤖 Moteur IA</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle et la créativité. <span style="background:#fffbeb;border:1px solid #fcd34d;border-radius:5px;padding:.05rem .4rem;font-size:.7rem;color:#92400e;font-weight:700;">⚡ Groq uniquement</span> — OpenAI, Anthropic et Google utilisent automatiquement leur meilleur modèle rapide.</p>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle Groq et la créativité. La liste est mise à jour automatiquement depuis votre compte.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:end;">
       <div class="form-group"><label class="form-label">Modèle (Groq)</label>
         <select id="cfg-model" class="form-input" onchange="saveCfg('model',this.value);updateModelPill()"></select>
@@ -1863,37 +1841,15 @@ function _loadScript(src){
 }
 
 /* ══════════════════════════════════════════════
-   API
-══════════════════════════════════════════════ */
-/* ── Groq API — OpenAI-compatible ── */
-/* ══════════════════════════════════════════════
-   MULTI-PROVIDER — Groq · OpenAI · Anthropic · Google AI
+   API — Groq uniquement
 ══════════════════════════════════════════════ */
 function detectProvider(key){
   if(!key)return null;
   if(key.startsWith('gsk_'))return'groq';
-  if(key.startsWith('sk-ant-'))return'anthropic';
-  if(key.startsWith('AIza'))return'google';
-  if(key.startsWith('sk-'))return'openai';
   return null;
 }
-const _PROVIDER_INFO={
-  groq:  {label:'⚡ Groq · Llama',  color:'#f59e0b'},
-  openai:{label:'🟢 OpenAI · GPT',  color:'#10b981'},
-  anthropic:{label:'🟣 Anthropic · Claude',color:'#7c3aed'},
-  google:{label:'🔵 Google · Gemini',color:'#3b82f6'},
-};
-function _providerModel(provider){
-  switch(provider){
-    case'groq':return getCfg().model||'llama-3.1-8b-instant';
-    case'openai':return'gpt-4o-mini';
-    case'anthropic':return'claude-haiku-4-5-20251001';
-    case'google':return'gemini-2.0-flash';
-    default:return'llama-3.1-8b-instant';
-  }
-}
+const _PROVIDER_INFO={groq:{label:'⚡ Groq · Llama',color:'#f59e0b'}};
 
-/* ── OpenAI-compatible (Groq + OpenAI) ── */
 async function _callOAICompat(endpoint,key,sys,usr,maxTok,temp,json,model){
   const msgs=[];
   if(sys)msgs.push({role:'system',content:sys});
@@ -1906,65 +1862,25 @@ async function _callOAICompat(endpoint,key,sys,usr,maxTok,temp,json,model){
   return d.choices?.[0]?.message?.content||'';
 }
 
-/* ── Anthropic Messages API ── */
-async function _callAnthropic(key,sys,usr,maxTok,temp){
-  const body={model:'claude-haiku-4-5-20251001',max_tokens:maxTok||2500,messages:[{role:'user',content:usr}]};
-  if(sys)body.system=sys;
-  if(temp!==undefined)body.temperature=Math.min(temp,1.0);
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify(body)});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error?.message||'Erreur Anthropic '+r.status);
-  return d.content?.[0]?.text||'';
-}
-
-/* ── Google AI (Gemini) ── */
-async function _callGoogle(key,sys,usr,maxTok,json){
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
-  const prompt=sys?`${sys}\n\n${usr}`:usr;
-  const body={contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok||2500}};
-  if(json)body.generationConfig.responseMimeType='application/json';
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error?.message||'Erreur Google AI '+r.status);
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
-}
-
-/* ── Dispatcher unifié ── */
 async function _callAI(key,sys,usr,maxTok,temp,json){
-  const provider=detectProvider(key);
-  if(!provider)throw new Error('Clé non reconnue. Formats : gsk_… (Groq), sk-… (OpenAI), sk-ant-… (Anthropic), AIza… (Google AI).');
-  const model=_providerModel(provider);
-  switch(provider){
-    case'groq':{
-      // Build fallback chain: configured model first, then hardcoded fallbacks (deduplicated)
-      const _tried=new Set();
-      const _chain=[model,..._GROQ_FALLBACK_CHAIN].filter(m=>!_tried.has(m)&&_tried.add(m));
-      let _lastErr;
-      for(const _m of _chain){
-        try{
-          const _res=await _callOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,usr,maxTok,temp,json,_m);
-          if(_m!==model){saveCfg('model',_m);setTimeout(()=>_refreshGroqSelector(key,true),0);}
-          return _res;
-        }catch(_e){
-          if(/does not exist|not found|invalid_model|access|max_tokens|context_window|rate.limit|rate_limit|tokens per minute|TPM/i.test(_e.message)){_lastErr=_e;continue;}
-          throw _e; // Vrai erreur (auth, rate limit…)
-        }
-      }
-      throw _lastErr||new Error('Aucun modèle Groq disponible');
+  if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
+  const model=getCfg().model||'llama-3.1-8b-instant';
+  const _tried=new Set();
+  const _chain=[model,..._GROQ_FALLBACK_CHAIN].filter(m=>!_tried.has(m)&&_tried.add(m));
+  let _lastErr;
+  for(const _m of _chain){
+    try{
+      const _res=await _callOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,usr,maxTok,temp,json,_m);
+      if(_m!==model){saveCfg('model',_m);setTimeout(()=>_refreshGroqSelector(key,true),0);}
+      return _res;
+    }catch(_e){
+      if(/does not exist|not found|invalid_model|access|max_tokens|context_window|rate.limit|rate_limit|tokens per minute|TPM/i.test(_e.message)){_lastErr=_e;continue;}
+      throw _e;
     }
-    case'openai':
-      return _callOAICompat('https://api.openai.com/v1/chat/completions',key,sys,usr,maxTok,temp,json,model);
-    case'anthropic':{
-      const sysJ=json?(sys?sys+'\n\n':'')+'Réponds UNIQUEMENT en JSON valide, aucun texte avant ou après.':sys;
-      return _callAnthropic(key,sysJ,usr,maxTok,temp);
-    }
-    case'google':
-      return _callGoogle(key,sys,usr,maxTok,json);
   }
+  throw _lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
-/* ── API publique (signatures inchangées — tout le code existant continue de fonctionner) ── */
 async function gemini(key,sys,usr,maxTok){
   const raw=await _callAI(key,sys,usr,maxTok,undefined,true);
   const cleaned=raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
@@ -1974,44 +1890,16 @@ async function geminiText(key,sys,usr,maxTok,temp){
   return _callAI(key,sys,usr,maxTok,temp,false);
 }
 
-/* ── Multi-turn conversation (used by chat panel) ── */
 async function _callAIWithHistory(key,msgs,maxTok,temp){
-  const provider=detectProvider(key);
-  if(!provider)throw new Error('Clé non reconnue. Formats : gsk_… (Groq), sk-… (OpenAI), sk-ant-… (Anthropic), AIza… (Google AI).');
-  const model=_providerModel(provider);
+  if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…).');
+  const model=getCfg().model||'llama-3.1-8b-instant';
   const t=temp!==undefined?temp:getCfg().temperature;
-
-  if(provider==='groq'||provider==='openai'){
-    const ep=provider==='groq'?'https://api.groq.com/openai/v1/chat/completions':'https://api.openai.com/v1/chat/completions';
-    const r=await fetch(ep,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body:JSON.stringify({model,messages:msgs,temperature:t,max_tokens:maxTok||2500})});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
-    return d.choices?.[0]?.message?.content||'';
-  }
-  if(provider==='anthropic'){
-    const sys=msgs.find(m=>m.role==='system')?.content||'';
-    const anthMsgs=msgs.filter(m=>m.role!=='system').map(m=>({role:m.role==='assistant'?'assistant':'user',content:m.content}));
-    const body={model:'claude-haiku-4-5-20251001',max_tokens:maxTok||2500,messages:anthMsgs};
-    if(sys)body.system=sys;
-    if(temp!==undefined)body.temperature=Math.min(temp,1.0);
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},body:JSON.stringify(body)});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.error?.message||'Erreur Anthropic '+r.status);
-    return d.content?.[0]?.text||'';
-  }
-  if(provider==='google'){
-    const sys=msgs.find(m=>m.role==='system')?.content||'';
-    const contents=msgs.filter(m=>m.role!=='system').map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
-    const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
-    const body={contents,generationConfig:{maxOutputTokens:maxTok||2500}};
-    if(sys)body.system_instruction={parts:[{text:sys}]};
-    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    const d=await r.json();
-    if(!r.ok)throw new Error(d.error?.message||'Erreur Google AI '+r.status);
-    return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
-  }
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+    body:JSON.stringify({model,messages:msgs,temperature:t,max_tokens:maxTok||2500})});
+  const d=await r.json();
+  if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
+  return d.choices?.[0]?.message?.content||'';
 }
 
 /* ── Content quality verification (background, non-blocking) ── */
@@ -2199,32 +2087,26 @@ function _bgVerifyModule(mod,key){
   })();
 }
 
-/* ── Badge fournisseur ── */
 function _updateProviderBadge(key){
-  const provider=detectProvider(key);
   const badge=document.getElementById('providerBadge');
   if(!badge)return;
-  if(!provider){badge.style.display='none';return;}
-  const info=_PROVIDER_INFO[provider];
-  badge.textContent=info.label;
-  badge.style.cssText=`display:inline-block;margin-top:.35rem;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:${info.color}18;color:${info.color};border:1.5px solid ${info.color}40;`;
+  if(key?.startsWith('gsk_')){
+    badge.textContent='⚡ Groq · Llama';
+    badge.style.cssText='display:inline-block;margin-top:.35rem;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#f59e0b18;color:#f59e0b;border:1.5px solid #f59e0b40;';
+  } else {
+    badge.style.display='none';
+  }
 }
 function _onKeyInput(value){
   localStorage.setItem('gls_key',value);
   const inp=document.getElementById('apiKeyInput');if(inp&&inp!==this)inp.value=value;
   const set=document.getElementById('apiKeySettings');if(set&&set!==this)set.value=value;
   _updateProviderBadge(value);
-  // Refresh Groq model list when a valid-looking Groq key is entered
+  const b2=document.getElementById('providerBadgeSettings');
+  if(b2)b2.innerHTML=value.startsWith('gsk_')?'<span style="display:inline-block;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#f59e0b18;color:#f59e0b;border:1.5px solid #f59e0b40;">⚡ Groq détecté ✓</span>':'';
   if(value.startsWith('gsk_')&&value.length>15){
     clearTimeout(_groqRefreshTimer);
     _groqRefreshTimer=setTimeout(()=>_refreshGroqSelector(value,true),900);
-  }
-  // Badge dans la card Paramètres
-  const b2=document.getElementById('providerBadgeSettings');
-  if(b2){
-    const provider=detectProvider(value);
-    if(provider){const info=_PROVIDER_INFO[provider];b2.innerHTML=`<span style="display:inline-block;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:${info.color}18;color:${info.color};border:1.5px solid ${info.color}40;">${info.label} détecté ✓</span>`;}
-    else b2.innerHTML='';
   }
 }
 
@@ -2233,8 +2115,8 @@ function _onKeyInput(value){
 ══════════════════════════════════════════════ */
 async function startGen(){
   const key=getKey();
-  if(!key){setFMsg('⚠️ Saisissez votre clé API (Groq, OpenAI, Anthropic ou Google AI) dans la barre latérale.','var(--red)');return;}
-  if(!detectProvider(key)){setFMsg('⚠️ Clé non reconnue — formats : gsk_… (Groq) · sk-… (OpenAI) · sk-ant-… (Anthropic) · AIza… (Google AI).','var(--red)');return;}
+  if(!key){setFMsg('⚠️ Saisissez votre clé API Groq (gsk_…) dans la barre latérale.','var(--red)');return;}
+  if(!key.startsWith('gsk_')){setFMsg('⚠️ Clé Groq requise — format : gsk_… Obtenez-en une gratuite sur console.groq.com','var(--red)');return;}
   const dom=document.getElementById('fDom')?.value.trim();
   if(!dom){setFMsg('⚠️ Saisissez le domaine/matière.','var(--red)');return;}
   const comp=document.getElementById('fComp')?.value.trim();
