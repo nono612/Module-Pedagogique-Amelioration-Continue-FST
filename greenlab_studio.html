@@ -1169,7 +1169,7 @@ const _CFG_DEFAULTS={
   formateur:'',
   formateurTitre:'Formateur / Responsable pédagogique',
   certifIntitule:'Attestation de Formation',
-  model:'llama-3.1-8b-instant',
+  model:'llama-3.3-70b-versatile',
   temperature:0.75,
   defaultMode:'pro',
   defaultNiveau:'intermédiaire',
@@ -1228,15 +1228,16 @@ const _NAV_GROUPS=[
 /* Liste de départ. Elle est remplacée au chargement par les modèles réellement
    disponibles sur le compte (voir _refreshGroqSelector). */
 const _MODEL_OPTIONS=[
-  {value:'llama-3.1-8b-instant',label:'⚡ Llama 3.1 8B Instant ⭐ Recommandé',info:'Gratuit · Très rapide et quota généreux — idéal pour tous les modules.'},
-  {value:'llama-3.3-70b-versatile',label:'🧠 Llama 3.3 70B Versatile',info:'Gratuit · Plus fin sur les contenus complexes, mais quota par minute plus serré.'},
+  {value:'llama-3.3-70b-versatile',label:'🧠 Llama 3.3 70B ⭐ Recommandé',info:'Gratuit · Français soigné et contenu fiable. À privilégier pour les modules.'},
+  {value:'llama-3.1-8b-instant',label:'⚡ Llama 3.1 8B Instant (rapide)',info:'Gratuit · Beaucoup plus rapide, mais français approximatif. Pour tester uniquement.'},
 ];
 
 /* ─── Groq Live Model Discovery ─── */
 const _GROQ_MODELS_KEY='_gls_groq_mdls_v5';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
-// Modèles Groq réellement en production (vérifiés) — secours si l'API /models est injoignable
-const _GROQ_FALLBACK_CHAIN=['llama-3.1-8b-instant','llama-3.3-70b-versatile'];
+/* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
+   français trop approximatif pour du contenu pédagogique publiable. */
+const _GROQ_FALLBACK_CHAIN=['llama-3.3-70b-versatile','llama-3.1-8b-instant'];
 
 /* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur.
    Évite de tenter des modèles supprimés par Groq. */
@@ -1293,9 +1294,10 @@ async function _fetchGroqModels(key){
         (m.context_window==null||m.context_window>=4096)
       )
       .map(m=>m.id)
-      // Les plus rapides et les plus généreux en quota d'abord
+      // Qualité de rédaction d'abord : les gros modèles écrivent un français
+      // nettement plus sûr, ce qui prime sur la vitesse pour du pédagogique.
       .sort((a,b)=>{
-        const sc=s=>s.includes('instant')?0:/llama-3\.3.*versatile/.test(s)?1:/llama/.test(s)?2:/gemma/.test(s)?3:4;
+        const sc=s=>/llama-3\.3.*versatile/.test(s)?0:/70b|120b|90b/.test(s)?1:/llama/.test(s)?2:/gemma/.test(s)?3:4;
         return sc(a)-sc(b)||a.localeCompare(b);
       });
     return ids.length?ids:null;
@@ -1899,7 +1901,7 @@ async function _groqFetch(key,model,msgs,maxTok,temp,json){
    Utilisé par tous les appels IA de l'application. */
 async function _groqExec(key,msgs,maxTok,temp,json){
   if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
-  const configured=getCfg().model||'llama-3.1-8b-instant';
+  const configured=getCfg().model||'llama-3.3-70b-versatile';
   const chain=_groqChain(configured);
   let lastErr;
 
@@ -4614,8 +4616,8 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'llama-3.1-8b-instant':'⚡ Gratuit — Très rapide, quota généreux. Recommandé.',
-  'llama-3.3-70b-versatile':'🧠 Gratuit — Plus fin sur les contenus complexes, quota plus serré.',
+  'llama-3.3-70b-versatile':'🧠 Gratuit — Français soigné et contenu fiable. Recommandé pour les modules.',
+  'llama-3.1-8b-instant':'⚡ Gratuit — Très rapide, mais français approximatif. Pour tester uniquement.',
 };
 
 function applyPlatformName(){
@@ -4702,7 +4704,7 @@ function importConfig(file){
       ||m.startsWith('openai/')        // quota par minute trop bas
       ||/^(gemini|grok|gpt|claude)/.test(m)  // reliquats d'autres fournisseurs
       ||/^llama3-|mixtral|llama-3\.1-70b/.test(m); // retirés par Groq
-    if(suspect){cfg.model='llama-3.1-8b-instant';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+    if(suspect){cfg.model='llama-3.3-70b-versatile';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
@@ -4743,7 +4745,14 @@ Quand quelqu'un veut créer un module, voici le cadre (mode actif fixé : **__MO
 - "pro" → Formation Professionnelle : métier terrain — procédures, scénarios, check-list, mémo
 - "acad" → Cours Ingénieur : enseignement supérieur — cours rigoureux, formules, TD/TP, quiz, fiche de révision
 
+RÈGLE DE LANGUE — impérative :
+Tu écris dans un français irréprochable. Phrases courtes, syntaxe simple, vocabulaire courant.
+Relis-toi avant de répondre : chaque phrase doit être grammaticalement correcte et vouloir dire quelque chose.
+Jamais de mot anglais non traduit, jamais de tournure approximative ou de mot employé hors de son sens.
+En cas de doute sur une formulation, choisis la version la plus simple.
+
 Tu poses maximum 1-2 questions ciblées sur ce domaine précis. Si le sujet est clair (domaine + public + objectif), tu vas directement au récapitulatif.
+Une seule question par ligne, formulée simplement.
 
 Quand tu as tout, tu récapitules, demandes confirmation, puis génères (après confirmation seulement) :
 [[READY]]{"mode":"__MODE__","titre":"Titre accrocheur max 10 mots","dom":"Domaine/métier","pub":"Public précis","niv":"debutant|intermediaire|avance|tous niveaux","dur":"durée","lang":"Français","prerequis":"prérequis ou vide"}[[/READY]]
@@ -4824,13 +4833,38 @@ function initChat(){
     _chatHistory=[];_chatReady=false;_chatPending=null;
     let msg,suggestions;
     if(_mode==='pro'){
-      msg='Bonjour ! Je suis votre assistant spécialisé en **formation professionnelle**. 💼\n\nDites-moi quel métier ou compétence terrain vous souhaitez enseigner — le domaine, le public visé, le niveau — et je construis le module complet avec vous.\n\nVous pouvez aussi joindre un référentiel métier, une fiche de poste ou un mode opératoire via 📎.';
+      msg='Bonjour ! Je suis votre assistant spécialisé en **formation professionnelle**. 💼\n\n'
+        +'**Pour construire votre module, indiquez-moi :**\n'
+        +'- **Le métier ou la compétence** — ex : soudure TIG, maintenance préventive\n'
+        +'- **Le public** — ex : apprentis CAP, salariés en reconversion\n'
+        +'- **Le niveau** — débutant, intermédiaire ou avancé\n'
+        +'- **La durée** — ex : 2 heures, une journée\n\n'
+        +'*Facultatif : prérequis, normes à respecter, matériel disponible.*\n\n'
+        +'**Tout en une phrase suffit :**\n'
+        +'« Formation soudure TIG pour apprentis CAP débutants, 3 heures »\n\n'
+        +'Vous pouvez aussi joindre un référentiel métier, une fiche de poste ou un mode opératoire via 📎.';
       suggestions=['⚡ Électricité industrielle CAP','🔧 Maintenance préventive salariés','🍳 Cuisine professionnelle','🏗️ Soudure TIG débutants','🚛 Logistique & manutention'];
     } else if(_mode==='acad'){
-      msg='Bonjour ! Je suis votre assistant spécialisé en **cours d\'ingénieur et enseignement technique**. 🎓\n\nDites-moi la discipline, le chapitre et le niveau de vos étudiants — et je construis le cours rigoureux avec vous.\n\nVous pouvez joindre votre polycopié, programme officiel ou fiche de TP via 📎.';
+      msg='Bonjour ! Je suis votre assistant spécialisé en **cours d\'ingénieur et enseignement technique**. 🎓\n\n'
+        +'**Pour construire votre cours, indiquez-moi :**\n'
+        +'- **La discipline et le chapitre** — ex : thermodynamique, second principe\n'
+        +'- **Le niveau des étudiants** — ex : BUT1, licence 3, cycle ingénieur 1A\n'
+        +'- **Le volume horaire** — ex : 3 heures de CM, une séance de TD\n\n'
+        +'*Facultatif : prérequis supposés, programme officiel à suivre, notations imposées.*\n\n'
+        +'**Tout en une phrase suffit :**\n'
+        +'« Cours sur le second principe de la thermodynamique, ingénieur 1A, 3 heures »\n\n'
+        +'Vous pouvez joindre votre polycopié, programme officiel ou fiche de TP via 📎.';
       suggestions=['⚡ Électrotechnique BUT1','🔩 Mécanique des fluides IUT','🧪 Thermodynamique ingénieur 1A','📡 Réseaux & Télécoms licence','💻 Algorithmique & structures de données'];
     } else {
-      msg='Bonjour ! Je suis votre assistant pédagogique. 👋\n\nDites-moi quel module vous voulez créer — le métier, la discipline, ou la compétence — et je m\'occupe de tout.\n\nJe peux aussi m\'appuyer sur vos documents : programmes, référentiels, notes de cours — joignez-les via le 📎.';
+      msg='Bonjour ! Je suis votre assistant pédagogique. 👋\n\n'
+        +'**Pour construire votre module, indiquez-moi :**\n'
+        +'- **Le sujet** — un métier, une discipline ou une compétence précise\n'
+        +'- **Le public et son niveau** — ex : apprentis CAP débutants, étudiants BUT2\n'
+        +'- **La durée** — ex : 2 heures, une journée\n\n'
+        +'*Facultatif : prérequis, normes ou programme à respecter.*\n\n'
+        +'**Tout en une phrase suffit :**\n'
+        +'« Formation plomberie sanitaire pour apprentis CAP, 4 heures »\n\n'
+        +'Je peux aussi m\'appuyer sur vos documents : programmes, référentiels, notes de cours — joignez-les via le 📎.';
       suggestions=['💼 Formation plomberie CAP','⚡ Cours électrotechnique BTS','🍳 Formation cuisine professionnelle','🔧 Maintenance industrielle salariés','💻 Développement web débutants'];
     }
     _renderChatMsg({role:'ai',text:msg,suggestions},false);
@@ -4923,7 +4957,7 @@ async function sendChat(){
   const input=document.getElementById('chatInput');
   const text=(input?.value||'').trim();if(!text)return;
   const key=getKey();
-  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API dans la barre latérale (Groq, OpenAI, Anthropic ou Google AI).'},false);return;}
+  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API Groq (gsk_…) dans la barre latérale.\n\nElle est gratuite : créez-la sur **console.groq.com/keys**.'},false);return;}
   input.value='';input.style.height='auto';
   document.getElementById('chatSendBtn').disabled=true;
   _renderChatMsg({role:'user',text});
