@@ -1121,7 +1121,7 @@ textarea{resize:vertical;min-height:80px;}
     <div class="api-field" style="position:relative;display:flex;flex-direction:column;gap:.15rem;">
       <div style="display:flex;align-items:center;gap:.4rem;">
         <span style="color:inherit;font-weight:700;font-size:.75rem;white-space:nowrap;">Clé API</span>
-        <input type="password" id="apiKey" placeholder="gsk_… / sk-… / sk-ant-… / AIza…" oninput="saveKey();_idxUpdateProviderBadge(this.value)" style="width:195px;">
+        <input type="password" id="apiKey" placeholder="gsk_… (clé Groq)" oninput="saveKey();_idxUpdateProviderBadge(this.value)" style="width:195px;">
       </div>
       <div id="idxProviderBadge" style="display:none;font-size:.62rem;font-weight:800;padding:.1rem .45rem;border-radius:12px;align-self:flex-start;"></div>
     </div>
@@ -2549,11 +2549,17 @@ function copySessionCode(){
   const btn=event.currentTarget;btn.textContent='✅ Copié !';
   setTimeout(()=>btn.textContent='📋 Copier',2200);
 }
+let _idxModelsTimer=null;
 function saveKey(){
   const v=document.getElementById('apiKey')?.value||'';
   if(!v.trim())return;
   localStorage.setItem('ac_grok_key',v.trim());
   _idxUpdateProviderBadge(v.trim());
+  // Rafraîchit la liste des modèles réellement accessibles sur ce compte
+  if(v.trim().startsWith('gsk_')&&v.trim().length>15){
+    clearTimeout(_idxModelsTimer);
+    _idxModelsTimer=setTimeout(()=>_idxRefreshModels(v.trim(),true),900);
+  }
   if(_currentUser){
     _sb.from('profiles').upsert({user_id:_currentUser.id,api_key:v.trim()},{onConflict:'user_id'});
   }
@@ -2984,69 +2990,122 @@ function formatAIText(text){
   );
 }
 
-/* ── AI Call (Grok / xAI) ── */
 /* ══════════════════════════════════════════════
-   MULTI-PROVIDER — Groq · OpenAI · Anthropic · Google AI
+   API — Groq uniquement
 ══════════════════════════════════════════════ */
 function _idxDetectProvider(key){
   if(!key)return null;
-  if(key.startsWith('gsk_'))return'groq';
-  if(key.startsWith('sk-ant-'))return'anthropic';
-  if(key.startsWith('AIza'))return'google';
-  if(key.startsWith('sk-'))return'openai';
+  return key.startsWith('gsk_')?'groq':null;
+}
+const _IDX_PROVIDER_INFO={groq:{label:'⚡ Groq · Llama',color:'#f59e0b',model:'llama-3.3-70b-versatile'}};
+
+/* ─── Découverte des modèles disponibles sur le compte ─── */
+const _IDX_MODELS_KEY='_idx_groq_mdls_v1';
+const _IDX_MODELS_TTL=6*60*60*1000; // 6 h
+/* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
+   français trop approximatif pour du contenu pédagogique publiable. */
+const _IDX_FALLBACK_CHAIN=['llama-3.3-70b-versatile','llama-3.1-8b-instant'];
+
+function _idxGroqChain(preferred){
+  const seen=new Set(),out=[];
+  const push=m=>{if(m&&!seen.has(m)){seen.add(m);out.push(m);}};
+  push(preferred);
+  try{
+    const c=JSON.parse(localStorage.getItem(_IDX_MODELS_KEY)||'null');
+    if(c&&Array.isArray(c.ids))c.ids.forEach(push);
+  }catch(_){}
+  _IDX_FALLBACK_CHAIN.forEach(push);
+  return out;
+}
+
+async function _idxRefreshModels(key,force){
+  if(!key||!key.startsWith('gsk_'))return;
+  try{
+    const cached=JSON.parse(localStorage.getItem(_IDX_MODELS_KEY)||'null');
+    if(!force&&cached&&Date.now()-cached.ts<_IDX_MODELS_TTL)return;
+    const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
+    if(!r.ok)return;
+    const d=await r.json();
+    const ids=(d.data||[])
+      .filter(m=>m.object==='model'
+        &&!m.id.startsWith('openai/')      // quota par minute trop bas
+        &&!/whisper|distil|tool-use|guard/.test(m.id)
+        &&(m.context_window==null||m.context_window>=4096))
+      .map(m=>m.id)
+      // Qualité de rédaction d'abord : décisive pour du contenu pédagogique
+      .sort((a,b)=>{
+        const sc=s=>/llama-3\.3.*versatile/.test(s)?0:/70b|120b|90b/.test(s)?1:/llama/.test(s)?2:/gemma/.test(s)?3:4;
+        return sc(a)-sc(b)||a.localeCompare(b);
+      });
+    if(ids.length)localStorage.setItem(_IDX_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
+  }catch(_){}
+}
+
+/* Erreurs justifiant de changer de modèle (il est inutilisable tel quel) */
+const _IDX_RE_SWITCH=/does not exist|not found|invalid_model|no access|do not have access|decommission|deprecat/i;
+/* Quota : attendre puis réessayer le MÊME modèle est plus efficace */
+const _IDX_RE_RATE=/rate.?limit|tokens per minute|TPM|requests per minute|RPM|429/i;
+/* Le modèle refuse la taille demandée → réduire max_tokens */
+const _IDX_RE_MAXTOK=/max_tokens|context_window|maximum context length|reduce the length/i;
+
+const _idxSleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* Groq renvoie « Please try again in 27.6225s » — on extrait le délai réel */
+function _idxRetryDelay(msg){
+  const m=/try again in ([\d.]+)\s*s/i.exec(msg||'');
+  if(m){const s=parseFloat(m[1]);if(s>0&&s<75)return Math.ceil(s*1000)+400;}
   return null;
 }
-const _IDX_PROVIDER_INFO={
-  groq:  {label:'⚡ Groq · Llama', color:'#f59e0b', model:'llama-3.3-70b-versatile'},
-  openai:{label:'🟢 OpenAI · GPT',  color:'#10b981', model:'gpt-4o-mini'},
-  anthropic:{label:'🟣 Anthropic · Claude',color:'#7c3aed',model:'claude-haiku-4-5-20251001'},
-  google:{label:'🔵 Google · Gemini',color:'#3b82f6',model:'gemini-2.0-flash'},
-};
 
-async function _idxCallOAICompat(endpoint,key,sys,usr,maxTok,temp,model){
+async function _idxGroqFetch(key,model,sys,usr,maxTok,temp){
   const msgs=[];
   if(sys)msgs.push({role:'system',content:sys});
   msgs.push({role:'user',content:usr});
-  const r=await fetch(endpoint,{method:'POST',
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
     body:JSON.stringify({model,messages:msgs,max_tokens:maxTok||1024,temperature:temp!==undefined?temp:0.7})});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error?.message||'Erreur API '+r.status);
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
   return d.choices?.[0]?.message?.content||'';
 }
 
-async function _idxCallAnthropic(key,sys,usr,maxTok,temp){
-  const body={model:'claude-haiku-4-5-20251001',max_tokens:maxTok||1024,messages:[{role:'user',content:usr}]};
-  if(sys)body.system=sys;
-  if(temp!==undefined)body.temperature=Math.min(temp,1.0);
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-    body:JSON.stringify(body)});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error?.message||'Erreur Anthropic '+r.status);
-  return d.content?.[0]?.text||'';
-}
-
-async function _idxCallGoogle(key,sys,usr,maxTok){
-  const url=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
-  const prompt=sys?`${sys}\n\n${usr}`:usr;
-  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok||1024}})});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error?.message||'Erreur Google AI '+r.status);
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||'';
-}
-
+/* Appel IA unique de l'application : gère quotas, modèles retirés,
+   tailles refusées et coupures réseau. */
 async function _geminiRaw(key,prompt,maxTokens,temp,sys){
-  const provider=_idxDetectProvider(key);
-  if(!provider)throw new Error('Clé non reconnue. Formats : gsk_… (Groq), sk-… (OpenAI), sk-ant-… (Anthropic), AIza… (Google AI).');
-  const info=_IDX_PROVIDER_INFO[provider];
-  switch(provider){
-    case'groq':   return _idxCallOAICompat('https://api.groq.com/openai/v1/chat/completions',key,sys,prompt,maxTokens,temp,info.model);
-    case'openai': return _idxCallOAICompat('https://api.openai.com/v1/chat/completions',key,sys,prompt,maxTokens,temp,info.model);
-    case'anthropic': return _idxCallAnthropic(key,sys,prompt,maxTokens,temp);
-    case'google':    return _idxCallGoogle(key,sys,prompt,maxTokens);
+  if(!key?.startsWith('gsk_'))
+    throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
+  const configured=_IDX_PROVIDER_INFO.groq.model;
+  const chain=_idxGroqChain(configured);
+  let lastErr;
+
+  for(const model of chain){
+    let tok=maxTokens||1024, waited=0, shrinks=0;
+    for(let attempt=0;attempt<4;attempt++){
+      try{
+        return await _idxGroqFetch(key,model,sys,prompt,tok,temp);
+      }catch(e){
+        const msg=e.message||'';
+        lastErr=e;
+        // Quota atteint → patienter le délai annoncé, puis réessayer ce modèle
+        if(_IDX_RE_RATE.test(msg)){
+          const delay=_idxRetryDelay(msg)??4000;
+          if(waited+delay<=45000){await _idxSleep(delay);waited+=delay;continue;}
+          break;
+        }
+        // Sortie trop grande → réduire de moitié (plancher 256)
+        if(_IDX_RE_MAXTOK.test(msg)&&shrinks<3&&tok>256){
+          tok=Math.max(256,Math.floor(tok/2));shrinks++;continue;
+        }
+        // Modèle retiré par Groq → passer au suivant
+        if(_IDX_RE_SWITCH.test(msg))break;
+        // Coupure réseau passagère → une seule nouvelle tentative
+        if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _idxSleep(1200);continue;}
+        throw e; // vraie erreur (clé invalide…)
+      }
+    }
   }
+  if(_IDX_RE_RATE.test(lastErr?.message||''))
+    throw new Error('Quota Groq atteint. Patientez une minute puis relancez.');
+  throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
 function _idxUpdateProviderBadge(key){
@@ -3062,8 +3121,8 @@ async function callGeminiAI(prompt,elId,maxTokens=1024,sys=''){
   const key=getKey();
   const el=document.getElementById(elId);
   if(!el)return null;
-  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API requise — entrez-la en haut de la page (Groq, OpenAI, Anthropic ou Google AI).</div>';return null;}
-  if(!_idxDetectProvider(key)){el.innerHTML='<div class="alert alert-danger">⚠️ Clé non reconnue — formats : gsk_… (Groq) · sk-… (OpenAI) · sk-ant-… (Anthropic) · AIza… (Google AI).</div>';return null;}
+  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API Groq requise — entrez-la en haut de la page (format gsk_…).</div>';return null;}
+  if(!_idxDetectProvider(key)){el.innerHTML='<div class="alert alert-danger">⚠️ Clé non reconnue — une clé Groq commence par gsk_… (gratuite sur console.groq.com).</div>';return null;}
   el.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse en cours...</div><div class="ai-loading-text">L\'IA traite votre demande...</div></div>';
   try{
     const text=await _geminiRaw(key,prompt,maxTokens,0.7,sys||undefined);
@@ -6621,7 +6680,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   updateNav();loadPDCA();initPareto();renderParetoRows();
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
   const savedKey=localStorage.getItem('ac_grok_key');
-  if(savedKey){const kf=document.getElementById('apiKey');if(kf)kf.value=savedKey;const cf=document.getElementById('cvApiKey');if(cf)cf.value=savedKey;_idxUpdateProviderBadge(savedKey);}
+  if(savedKey){const kf=document.getElementById('apiKey');if(kf)kf.value=savedKey;const cf=document.getElementById('cvApiKey');if(cf)cf.value=savedKey;_idxUpdateProviderBadge(savedKey);
+    // Sans bloquer : met à jour la liste des modèles (cache 6 h)
+    if(savedKey.startsWith('gsk_'))setTimeout(()=>_idxRefreshModels(savedKey),300);
+  }
   // CV modal setup
   const inp=document.getElementById('cvFileInput');
   const drop=document.getElementById('cvDropZone');
@@ -6786,7 +6848,7 @@ async function generateRemediationCourse(n,score,minScore){
   body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem 1rem;color:#6b7280;"><div class="ai-spinner"></div><span style="font-size:.88rem;">Génération de votre cours personnalisé en cours…</span></div>`;
   const key=getKey();
   if(!key){
-    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Google AI requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
+    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Groq requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
     return;
   }
   const ctx=_REM_CTX[n]||{concepts:modName,pitfalls:'Erreurs communes',formulas:'',example:'Cas industriel',tools:'Outils associés'};
@@ -6972,7 +7034,7 @@ async function generateCustomModule(){
   const prev=document.getElementById('genPreview');
   const msg=document.getElementById('admGenMsg');
   if(!title||!rawDesc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et les objectifs pédagogiques.</span>';return;}
-  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Google AI requise (renseignez-la sur la page d\'accueil).</span>';return;}
+  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>🔍 Analyse du domaine…</div></div>';
   const sysPrompt=`Tu es un expert formateur en Génie Industriel, Lean Manufacturing et Excellence Opérationnelle. Tu crées des modules pédagogiques professionnels de niveau universitaire. Réponds UNIQUEMENT en JSON valide, sans markdown ni texte autour.`;
@@ -7062,18 +7124,8 @@ STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai conte
 
 IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de descriptions génériques.`;
   try{
-    const _gr=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({systemInstruction:{parts:[{text:sysPrompt}]},contents:[{role:'user',parts:[{text:userPrompt}]}],generationConfig:{maxOutputTokens:12000,temperature:0.7,responseMimeType:'application/json'}})
-    });
-    const _gd=await _gr.json();
-    if(!_gr.ok){
-      const errMsg=_gd.error?.message||'';
-      if(errMsg.includes('quota')||errMsg.includes('RESOURCE_EXHAUSTED'))throw new Error('Quota dépassé — attendez quelques secondes et réessayez.');
-      if(errMsg.includes('API_KEY_INVALID')||errMsg.includes('invalid'))throw new Error('Clé API invalide — vérifiez votre clé Google AI dans les paramètres.');
-      throw new Error(`Erreur serveur (${_gr.status}) — réessayez dans quelques instants.`);
-    }
-    const text=_gd.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    // Passe par l'appel Groq commun : mêmes garanties de reprise que le reste de l'app
+    const text=await _geminiRaw(key,userPrompt,4096,0.6,sysPrompt);
     try{_genPreviewData=JSON.parse(text);}
     catch(pe){
       const m=text.match(/\{[\s\S]*\}/);
@@ -8670,8 +8722,8 @@ function renderDocsList(){
     <div class="cv-body">
       <!-- ÉTAPE 1 : Clé API -->
       <div id="cvKeyStep" style="background:#f5f3ff;border:2px solid #c4b5fd;border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem;">
-        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Google AI</div>
-        <input type="password" id="cvApiKey" placeholder="AIza…" oninput="cvSyncKey(this.value)"
+        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Groq</div>
+        <input type="password" id="cvApiKey" placeholder="gsk_…" oninput="cvSyncKey(this.value)"
           style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:.45rem .7rem;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:border .2s;box-sizing:border-box;"
           onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#c4b5fd'">
         <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">aistudio.google.com ↗</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
