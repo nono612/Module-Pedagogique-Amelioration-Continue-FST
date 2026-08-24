@@ -1191,7 +1191,7 @@ const _CFG_DEFAULTS={
   formateur:'',
   formateurTitre:'Formateur / Responsable pédagogique',
   certifIntitule:'Attestation de Formation',
-  model:'llama-3.3-70b-versatile',
+  model:'llama-3.1-8b-instant',
   temperature:0.75,
   defaultMode:'pro',
   defaultNiveau:'intermédiaire',
@@ -1248,10 +1248,10 @@ const _NAV_GROUPS=[
 ];
 
 const _MODEL_OPTIONS=[
-  {value:'llama-3.3-70b-versatile',label:'✅ Llama 3.3 70B — Gratuit ⭐ Recommandé',info:'Gratuit · Meilleur modèle Groq — très intelligent, idéal pour tous types de modules pédagogiques.'},
-  {value:'llama-3.1-8b-instant',label:'✅ Llama 3.1 8B Instant — Gratuit',info:'Gratuit · Ultra-rapide, pour réponses instantanées et tests.'},
-  {value:'mixtral-8x7b-32768',label:'✅ Mixtral 8x7B — Gratuit',info:'Gratuit · Long contexte (32k tokens), idéal pour documents joints volumineux.'},
-  {value:'gemma2-9b-it',label:'✅ Gemma 2 9B — Gratuit',info:'Gratuit · Modèle Google via Groq, bon équilibre vitesse/qualité.'},
+  {value:'llama-3.1-8b-instant',label:'✅ Llama 3.1 8B Instant ⭐ Recommandé',info:'Gratuit · Ultra-rapide (1200 T/s), idéal pour tous les modules. Modèle par défaut.'},
+  {value:'llama3-70b-8192',label:'✅ Llama 3 70B',info:'Gratuit · Plus lent mais très capable, pour modules complexes (8192 tokens de contexte).'},
+  {value:'gemma2-9b-it',label:'✅ Gemma 2 9B',info:'Gratuit · Modèle Google via Groq, bon équilibre vitesse/qualité.'},
+  {value:'mixtral-8x7b-32768',label:'✅ Mixtral 8x7B',info:'Gratuit · Long contexte (32k tokens), idéal pour documents joints volumineux.'},
 ];
 
 const _LANG_OPTIONS=[
@@ -1822,11 +1822,11 @@ const _PROVIDER_INFO={
 };
 function _providerModel(provider){
   switch(provider){
-    case'groq':return getCfg().model||'llama-3.3-70b-versatile';
+    case'groq':return getCfg().model||'llama-3.1-8b-instant';
     case'openai':return'gpt-4o-mini';
     case'anthropic':return'claude-haiku-4-5-20251001';
     case'google':return'gemini-2.0-flash';
-    default:return'llama-3.3-70b-versatile';
+    default:return'llama-3.1-8b-instant';
   }
 }
 
@@ -4571,10 +4571,10 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'llama-3.3-70b-versatile':'✅ Gratuit — Meilleur modèle Groq, recommandé pour tous les modules.',
-  'llama-3.1-8b-instant':'✅ Gratuit — Ultra-rapide, pour tests et réponses instantanées.',
+  'llama-3.1-8b-instant':'✅ Gratuit — Ultra-rapide (1200 T/s), recommandé pour tous les modules.',
+  'llama3-70b-8192':'✅ Gratuit — Llama 3 70B, très capable, pour modules complexes.',
+  'gemma2-9b-it':'✅ Gratuit — Modèle Google via Groq, bon équilibre vitesse/qualité.',
   'mixtral-8x7b-32768':'✅ Gratuit — Long contexte 32k, idéal pour documents volumineux.',
-  'gemma2-9b-it':'✅ Gratuit — Bon équilibre vitesse/qualité.',
 };
 
 function applyPlatformName(){
@@ -4593,7 +4593,7 @@ function updateModelPill(){
   if(info)info.textContent=_MODEL_INFO[m]||'Modèle sélectionné.';
   const pill=document.querySelector('.cl-model-pill');
   if(pill){
-    const labels={'llama-3.3-70b-versatile':'Llama 3.3 70B','llama-3.1-8b-instant':'Llama 3.1 8B','mixtral-8x7b-32768':'Mixtral 8x7B','gemma2-9b-it':'Gemma 2 9B'};
+    const labels={'llama-3.1-8b-instant':'Llama 3.1 8B','llama3-70b-8192':'Llama 3 70B','gemma2-9b-it':'Gemma 2 9B','mixtral-8x7b-32768':'Mixtral 8x7B'};
     pill.innerHTML='<div class="cl-model-dot"></div>'+(getCfg().platformName||'Green Lab')+' Assistant · '+(labels[m]||m);
   }
 }
@@ -4647,11 +4647,11 @@ function importConfig(file){
    INIT
 ══════════════════════════════════════════════ */
 (function(){
-  // Migration : remplace les anciens modèles dépréciés par grok-3-mini
-  const _DEPRECATED=['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-2.5-flash','gemini-2.5-flash-preview-05-20','gemini-2.5-flash-lite-preview-06-17','gemini-1.5-flash','gemini-1.5-pro','gemini-2.5-pro','gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','grok-3-mini','grok-3','grok-3-fast','grok-2'];
+  // Migration : remplace les anciens modèles dépréciés
+  const _DEPRECATED=['gemini-2.0-flash','gemini-2.0-flash-lite','gemini-2.5-flash','gemini-2.5-flash-preview-05-20','gemini-2.5-flash-lite-preview-06-17','gemini-1.5-flash','gemini-1.5-pro','gemini-2.5-pro','gemini-3.6-flash','gemini-3.5-flash','gemini-3.5-flash-lite','grok-3-mini','grok-3','grok-3-fast','grok-2','llama-3.3-70b-versatile','llama-3.1-70b-versatile'];
   try{
     const cfg=JSON.parse(localStorage.getItem(_CFG_KEY)||'{}');
-    if(!cfg.model||_DEPRECATED.includes(cfg.model)){cfg.model='llama-3.3-70b-versatile';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+    if(!cfg.model||_DEPRECATED.includes(cfg.model)){cfg.model='llama-3.1-8b-instant';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);}
