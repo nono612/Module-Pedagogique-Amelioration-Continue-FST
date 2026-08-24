@@ -1440,6 +1440,19 @@ function enterApp(){
 /* ══════════════════════════════════════════════
    DOMAIN ACCENT THEMING
 ══════════════════════════════════════════════ */
+/* Éclaircit (amt>0) ou assombrit (amt<0) une couleur hex. amt entre -1 et 1. */
+function _shade(hex,amt){
+  const h=(hex||'').replace('#','');
+  if(h.length!==6)return hex;
+  const n=parseInt(h,16);
+  const ch=(shift)=>{
+    const c=(n>>shift)&255;
+    const v=amt<0?c*(1+amt):c+(255-c)*amt;
+    return Math.max(0,Math.min(255,Math.round(v)));
+  };
+  return'#'+[ch(16),ch(8),ch(0)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
 function _domainAccent(dom){
   const d=(dom||'').toLowerCase();
   const map=[
@@ -2502,14 +2515,16 @@ function _renderStepGrid(steps,mc,mcd){
 
 function _renderRoadmap(etapes,mc,mcd){
   if(!etapes||!etapes.length)return'';
-  const gradColors=['#2563eb','#6366f1','#059669','#d97706','#dc2626','#8b5cf6','#0891b2','#ec4899'];
+  /* Le fil du processus décline la couleur du module : la progression reste
+     lisible sans introduire un arc-en-ciel étranger à l'identité du module. */
   const n=etapes.length;
+  const stepColor=i=>_shade(mc||'#7c3aed',-Math.min(i,6)*0.06);
   return`<div class="ccard" style="padding:1.2rem 1.4rem;">
     <div class="ccard-title">🗺️ Processus — ${n} étapes</div>
     <div style="overflow-x:auto;padding:.3rem 0 .8rem;">
       <div style="display:flex;align-items:flex-start;min-width:max-content;gap:0;padding:.2rem .4rem;">
         ${etapes.map((e,i)=>{
-          const c=gradColors[i%gradColors.length];
+          const c=stepColor(i);
           const isLast=i===n-1;
           return`<div style="display:flex;align-items:flex-start;gap:0;">
             <div style="display:flex;flex-direction:column;align-items:center;gap:.35rem;width:88px;">
@@ -2519,7 +2534,7 @@ function _renderRoadmap(etapes,mc,mcd){
             </div>
             ${!isLast?`<div style="display:flex;align-items:center;margin-top:25px;flex-shrink:0;">
               <div style="width:22px;height:2px;background:${c};opacity:.4;"></div>
-              <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid ${gradColors[(i+1)%gradColors.length]};opacity:.7;"></div>
+              <div style="width:0;height:0;border-top:5px solid transparent;border-bottom:5px solid transparent;border-left:7px solid ${stepColor(i+1)};opacity:.7;"></div>
             </div>`:''}
           </div>`;
         }).join('')}
@@ -2653,37 +2668,40 @@ function renderViewer(m){
   const mcd=p?'#b45309':'#5b21b6';
   const bg=mc+'18';
   const bd=mc+'44';
-  const sColors=['#3b82f6','#8b5cf6','#059669','#f59e0b'];
+  /* Les en-têtes de section déclinent la couleur du domaine en s'assombrissant
+     légèrement : on garde un repère visuel de progression sans casser l'identité
+     chromatique du module (un module « maintenance » reste rouge de bout en bout). */
+  const secColor=i=>_shade(mc,-Math.min(i,5)*0.07);
 
   // ── Cas terrain/industriel ──
   const cas=m.cas||{};
   const casHtml=_cfg.showCas?(cas&&cas.entreprise?`<div class="ccard">
-    <div class="ccard-title"><span style="background:${mc};color:#fff;border-radius:6px;padding:.12rem .55rem;font-size:.7rem;font-weight:800;margin-right:.35rem;">${p?'TERRAIN':'INDUSTRIEL'}</span>${p?'Cas terrain':'Cas industriel'} — ${_e(cas.entreprise)}</div>
-    <div style="background:linear-gradient(135deg,${bg},${mc}0d);border-radius:12px;padding:.95rem 1.1rem;border:1.5px solid ${bd};margin-bottom:.85rem;">
+    <div class="ccard-title"><span style="background:${mc};color:#fff;border-radius:6px;padding:.12rem .55rem;font-size:.70rem;font-weight:800;margin-right:.35rem;">${p?'TERRAIN':'INDUSTRIEL'}</span>${p?'Cas terrain':'Cas industriel'} — ${_e(cas.entreprise)}</div>
+    <div style="background:linear-gradient(135deg,${bg},${mc}0d);border-radius:14px;padding:.95rem 1.1rem;border:1.5px solid ${bd};margin-bottom:.85rem;">
       <div style="display:flex;gap:.8rem;align-items:flex-start;flex-wrap:wrap;">
         <div style="font-size:2.5rem;line-height:1;">${p?'🏭':'🎓'}</div>
         <div style="flex:1;min-width:160px;">
-          <div style="font-weight:900;font-size:.9rem;color:${mcd};margin-bottom:.3rem;">${_e(cas.entreprise)}</div>
-          <p style="font-size:.81rem;line-height:1.7;color:#374151;margin:0;">${_e(cas.contexte||'')}</p>
+          <div style="font-weight:900;font-size:.86rem;color:${mcd};margin-bottom:.3rem;">${_e(cas.entreprise)}</div>
+          <p style="font-size:.78rem;line-height:1.7;color:#374151;margin:0;">${_e(cas.contexte||'')}</p>
         </div>
       </div>
-      ${cas.donnees?`<div style="margin-top:.75rem;padding:.5rem .75rem;background:#fff;border-radius:9px;border:1px solid ${bd};font-size:.77rem;color:#374151;line-height:1.55;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:${mcd};">📊 Données — </strong>${_e(cas.donnees)}</div>`:''}
+      ${cas.donnees?`<div style="margin-top:.75rem;padding:.5rem .75rem;background:#fff;border-radius:10px;border:1px solid ${bd};font-size:.78rem;color:#374151;line-height:1.55;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:${mcd};">📊 Données — </strong>${_e(cas.donnees)}</div>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.7rem;">
       <div style="background:#fef2f2;border-radius:10px;padding:.75rem .85rem;border:1.5px solid #fecaca;">
-        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;color:#dc2626;letter-spacing:.4px;margin-bottom:.28rem;">⚠️ Problème</div>
-        <p style="font-size:.79rem;color:#374151;line-height:1.55;margin:0;">${_e(cas.probleme||'')}</p>
+        <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;color:#dc2626;letter-spacing:.4px;margin-bottom:.28rem;">⚠️ Problème</div>
+        <p style="font-size:.78rem;color:#374151;line-height:1.55;margin:0;">${_e(cas.probleme||'')}</p>
       </div>
       <div style="background:#f0fdf4;border-radius:10px;padding:.75rem .85rem;border:1.5px solid #86efac;">
-        <div style="font-size:.63rem;font-weight:800;text-transform:uppercase;color:#15803d;letter-spacing:.4px;margin-bottom:.28rem;">🎯 Objectif</div>
-        <p style="font-size:.79rem;color:#374151;line-height:1.55;margin:0;">${_e(cas.objectif||'')}</p>
+        <div style="font-size:.62rem;font-weight:800;text-transform:uppercase;color:#15803d;letter-spacing:.4px;margin-bottom:.28rem;">🎯 Objectif</div>
+        <p style="font-size:.78rem;color:#374151;line-height:1.55;margin:0;">${_e(cas.objectif||'')}</p>
       </div>
     </div>
-    ${cas.enjeux?`<div style="background:#fffbeb;border-radius:9px;padding:.55rem .85rem;border:1px solid #fcd34d;font-size:.79rem;color:#374151;margin-bottom:.55rem;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:#b45309;">💰 Enjeux — </strong>${_e(cas.enjeux)}</div>`:''}
-    ${cas.contraintes?`<div style="font-size:.75rem;color:#6b7280;padding:.4rem .65rem;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;"><strong>🔒 Contraintes :</strong> ${_e(cas.contraintes)}</div>`:''}
+    ${cas.enjeux?`<div style="background:#fffbeb;border-radius:10px;padding:.55rem .85rem;border:1px solid #fcd34d;font-size:.78rem;color:#374151;margin-bottom:.55rem;"><strong style="font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;color:#b45309;">💰 Enjeux — </strong>${_e(cas.enjeux)}</div>`:''}
+    ${cas.contraintes?`<div style="font-size:.78rem;color:#6b7280;padding:.4rem .65rem;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;"><strong>🔒 Contraintes :</strong> ${_e(cas.contraintes)}</div>`:''}
   </div>`
   :`<div class="ccard"><div class="ccard-title">🏭 Cas ${p?'terrain':'industriel'}</div>
-    <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.82rem;">Ce module n'a pas encore de cas ${p?'terrain':'industriel'}.</div>
+    <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Ce module n'a pas encore de cas ${p?'terrain':'industriel'}.</div>
     <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenCas(${m.id})">🔄 Générer le cas</button></div>
   </div>`):'';
 
@@ -2691,8 +2709,8 @@ function renderViewer(m){
   const objHtml=(m.objectifs||[]).length?`<div class="ccard">
     <div class="ccard-title">🎯 Objectifs pédagogiques</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:.42rem;">
-      ${(m.objectifs||[]).map((o,oi)=>`<div style="display:flex;align-items:flex-start;gap:.45rem;background:${bg};border:1px solid ${bd};border-radius:9px;padding:.5rem .65rem;">
-        <span style="background:${mc};color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.61rem;font-weight:800;margin-top:1px;">${oi+1}</span>
+      ${(m.objectifs||[]).map((o,oi)=>`<div style="display:flex;align-items:flex-start;gap:.45rem;background:${bg};border:1px solid ${bd};border-radius:10px;padding:.5rem .65rem;">
+        <span style="background:${mc};color:#fff;border-radius:50%;width:18px;height:18px;min-width:18px;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:800;margin-top:1px;">${oi+1}</span>
         <span style="font-size:.78rem;color:#374151;line-height:1.45;font-weight:500;">${_e(o)}</span>
       </div>`).join('')}
     </div>
@@ -2707,8 +2725,8 @@ function renderViewer(m){
     <div class="ccard-title">🔑 Formules &amp; outils clés</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.55rem;">
       ${(m.formules||[]).map(f=>`<div style="background:#1e293b;border-radius:10px;padding:.7rem .85rem;text-align:center;">
-        <div style="font-size:.58rem;font-weight:700;color:${mc};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.32rem;">${_e(f.nom||'')}</div>
-        <div style="font-size:.9rem;font-family:'JetBrains Mono','Courier New',monospace;color:#e2e8f0;font-weight:700;line-height:1.35;">${_e(f.valeur||'')}</div>
+        <div style="font-size:.62rem;font-weight:700;color:${mc};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.32rem;">${_e(f.nom||'')}</div>
+        <div style="font-size:.86rem;font-family:'JetBrains Mono','Courier New',monospace;color:#e2e8f0;font-weight:700;line-height:1.35;">${_e(f.valeur||'')}</div>
       </div>`).join('')}
     </div>
   </div>`:'';
@@ -2723,7 +2741,7 @@ function renderViewer(m){
     ${totalSecs?`<div class="read-progress-bar" style="margin-bottom:.8rem;"><div class="rpb-wrap"><div class="rpb-fill" id="readProgress" style="width:${readPct}%"></div></div><div class="read-lbl" id="readLabel">${readDone}/${totalSecs} lues</div></div>`:''}
     <div style="display:flex;flex-direction:column;gap:.5rem;">
       ${(m.sections||[]).map((s,idx)=>{
-        const sc2=sColors[idx%4];
+        const sc2=secColor(idx);
         const rKey='s'+idx;
         const isRead=readSecs[rKey];
         const noteVal=getNote(m.id,(p?'ps':'cs')+idx);
@@ -2733,18 +2751,18 @@ function renderViewer(m){
         const allSteps=steps?_renderStepGrid(steps,mc,mcd):'';
         const prose=_n(s.contenu).replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
         const proseBlock=`<div style="position:relative;">
-          <div id="sp-${m.id}-${idx}" style="font-size:.8rem;color:#374151;line-height:1.78;max-height:6.5rem;overflow:hidden;transition:max-height .3s ease;">${prose}</div>
+          <div id="sp-${m.id}-${idx}" style="font-size:.78rem;color:#374151;line-height:1.78;max-height:6.5rem;overflow:hidden;transition:max-height .3s ease;">${prose}</div>
           <div id="sg-${m.id}-${idx}" style="position:absolute;bottom:0;left:0;right:0;height:2rem;background:linear-gradient(transparent,#fff);pointer-events:none;"></div>
-          <button id="sb-${m.id}-${idx}" onclick="expandSecProse('${m.id}',${idx})" style="font-size:.71rem;color:#6b7280;background:none;border:none;cursor:pointer;padding:.15rem 0 0;display:block;">▶ Voir la suite</button>
+          <button id="sb-${m.id}-${idx}" onclick="expandSecProse('${m.id}',${idx})" style="font-size:.70rem;color:#6b7280;background:none;border:none;cursor:pointer;padding:.15rem 0 0;display:block;">▶ Voir la suite</button>
         </div>`;
-        const fullBody=steps?`${allSteps}<details style="margin-top:.6rem;"><summary style="font-size:.72rem;color:#6b7280;cursor:pointer;">▶ Lire le contenu détaillé</summary><div style="font-size:.8rem;color:#374151;line-height:1.78;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #f1f5f9;">${prose}</div></details>`:proseBlock;
+        const fullBody=steps?`${allSteps}<details style="margin-top:.6rem;"><summary style="font-size:.70rem;color:#6b7280;cursor:pointer;">▶ Lire le contenu détaillé</summary><div style="font-size:.78rem;color:#374151;line-height:1.78;margin-top:.5rem;padding-top:.5rem;border-top:1px solid #f1f5f9;">${prose}</div></details>`:proseBlock;
         return`<div style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
           <div style="background:${sc2};padding:.5rem .9rem;display:flex;align-items:center;gap:.55rem;cursor:pointer;" onclick="toggleGLSSection(this)">
             <div class="read-dot${isRead?' done':''}" id="rdot-${rKey}" onclick="event.stopPropagation();markRead(${m.id},'${rKey}')" style="flex-shrink:0;"></div>
-            <span style="background:rgba(255,255,255,.2);border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:.71rem;font-weight:800;color:#fff;">${idx+1}</span>
+            <span style="background:rgba(255,255,255,.2);border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:.70rem;font-weight:800;color:#fff;">${idx+1}</span>
             <span style="font-weight:800;font-size:.83rem;color:#fff;flex:1;">${_e((s.titre||'').replace(/^[📘⚙️🏭💡]\s*/,''))}</span>
-            ${s.type?`<span style="font-size:.6rem;background:rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:.1rem .35rem;font-weight:700;text-transform:uppercase;">${_e(s.type)}</span>`:''}
-            ${s.duree||s.dur?`<span style="font-size:.64rem;color:rgba(255,255,255,.85);">⏱️ ${_e(s.duree||s.dur||'')}</span>`:''}
+            ${s.type?`<span style="font-size:.62rem;background:rgba(255,255,255,.2);color:#fff;border-radius:6px;padding:.1rem .35rem;font-weight:700;text-transform:uppercase;">${_e(s.type)}</span>`:''}
+            ${s.duree||s.dur?`<span style="font-size:.62rem;color:rgba(255,255,255,.85);">⏱️ ${_e(s.duree||s.dur||'')}</span>`:''}
             <span class="gls-sec-arrow" style="font-size:.66rem;color:rgba(255,255,255,.85);white-space:nowrap;flex-shrink:0;">▶ Lire</span>
           </div>
           <div style="padding:.7rem 1rem;background:#fff;">
@@ -2755,10 +2773,10 @@ function renderViewer(m){
               ${p&&s.reflexe_pro?`<div class="reflexe-pro-box"><div class="reflexe-pro-lbl">⚡ Réflexe du pro expérimenté</div><div class="reflexe-pro-txt">${Array.isArray(s.reflexe_pro)?`<ul style="margin:0;padding-left:1.1rem;">${s.reflexe_pro.map(r=>`<li style="margin-bottom:.25rem;">${_e(r)}</li>`).join('')}</ul>`:_e(s.reflexe_pro)}</div></div>`:''}
               ${p&&(s.points_vigilance||[]).length?`<div style="margin-top:.5rem;">${(s.points_vigilance||[]).map(v=>`<div class="kp">${_e(v)}</div>`).join('')}</div>`:''}
               ${!p&&(s.definitions||[]).length?`<div style="margin-top:.5rem;">${(s.definitions||[]).map(d=>`<div class="def-box"><span class="def-term">${_e(d.terme||d.term||'')} :</span> ${_e(d.def||d.definition||'')}</div>`).join('')}</div>`:''}
-              ${!p&&s.exemple?`<div style="background:${bg};border-left:3px solid ${mc};border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.8rem;color:${mcd};line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
+              ${!p&&s.exemple?`<div style="background:${bg};border-left:3px solid ${mc};border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.78rem;color:${mcd};line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
               ${!p&&(s.points_cles||[]).length?`<div>${(s.points_cles||[]).map(pt=>`<div class="kp acad">💡 ${_e(pt)}</div>`).join('')}</div>`:''}
               ${!p&&(s.intuition_expert||[]).length?`<div class="reflexe-pro-box" style="border-left-color:#7c3aed;"><div class="reflexe-pro-lbl" style="color:#7c3aed;">🧠 Intuition de l'expert</div><ul style="margin:0;padding-left:1.1rem;">${(s.intuition_expert||[]).map(r=>`<li style="margin-bottom:.25rem;font-size:.78rem;">${_e(r)}</li>`).join('')}</ul></div>`:''}
-              ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
+              ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
               <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem;">
                 <button class="note-ico${noteVal?' has-note':p?'':' an'}" id="nbtn-${p?'ps':'cs'}${idx}" onclick="openNoteModal(${m.id},'${p?'ps':'cs'}${idx}',${JSON.stringify(s.titre||'')},${!p})">${noteVal?'📝':'+ Note'}</button>
                 <button class="card-act-btn" id="rsBtn-${idx}" onclick="regenSection(${idx})">🔄 Régénérer</button>
@@ -2767,7 +2785,7 @@ function renderViewer(m){
                 <button class="card-act-btn" style="background:#fffbeb;border-color:#fbbf24;color:#92400e;" onclick="showSecQuiz(${m.id},${idx})">🧪 Tester</button>
               </div>
               <div id="mq-${m.id}-${idx}">${s.mini_check?_renderMiniCheck(s.mini_check,m.id,idx):''}</div>
-              ${s.exemple_fade?`<div style="background:#fdf4ff;border:1.5px dashed #a78bfa;border-radius:11px;padding:.75rem 1rem;margin-top:.6rem;"><div style="font-size:.65rem;font-weight:900;text-transform:uppercase;color:#7c3aed;letter-spacing:.5px;margin-bottom:.4rem;">${s.exemple_fade.includes('[À COMPLÉTER')?(s.exemple_fade.includes('[CALCUL À EFFECTUER')&&false?'':'🔧 Exercice guidé — complétez les parties manquantes'):'🎯 Problème autonome — résolvez seul'}</div><div style="font-size:.79rem;color:#4c1d95;line-height:1.7;white-space:pre-wrap;">${_e(s.exemple_fade)}</div>${s.exemple_fade_correction?`<details style="margin-top:.6rem;"><summary style="font-size:.71rem;font-weight:700;color:#7c3aed;cursor:pointer;">Voir la correction ▾</summary><div style="font-size:.78rem;color:#374151;line-height:1.7;padding:.5rem 0;white-space:pre-wrap;">${_e(s.exemple_fade_correction)}</div></details>`:''}</div>`:''}
+              ${s.exemple_fade?`<div style="background:#fdf4ff;border:1.5px dashed #a78bfa;border-radius:10px;padding:.75rem 1rem;margin-top:.6rem;"><div style="font-size:.66rem;font-weight:900;text-transform:uppercase;color:#7c3aed;letter-spacing:.5px;margin-bottom:.4rem;">${s.exemple_fade.includes('[À COMPLÉTER')?(s.exemple_fade.includes('[CALCUL À EFFECTUER')&&false?'':'🔧 Exercice guidé — complétez les parties manquantes'):'🎯 Problème autonome — résolvez seul'}</div><div style="font-size:.78rem;color:#4c1d95;line-height:1.7;white-space:pre-wrap;">${_e(s.exemple_fade)}</div>${s.exemple_fade_correction?`<details style="margin-top:.6rem;"><summary style="font-size:.70rem;font-weight:700;color:#7c3aed;cursor:pointer;">Voir la correction ▾</summary><div style="font-size:.78rem;color:#374151;line-height:1.7;padding:.5rem 0;white-space:pre-wrap;">${_e(s.exemple_fade_correction)}</div></details>`:''}</div>`:''}
               <div id="svgArea-${m.id}-${idx}" style="margin-top:.4rem;">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
               <div id="threedArea-${m.id}-${idx}"></div>
             </div>
@@ -2782,9 +2800,9 @@ function renderViewer(m){
   const qcmHtml=`<div class="ccard" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:2px solid #93c5fd;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:.65rem;">
       <div class="ccard-title" style="color:#1e40af;margin:0;">❓ Quiz de compréhension${quiz.length?' — '+quiz.length+' questions':''}</div>
-      <button class="btn btn-ghost btn-sm" id="regenQuizBtn" onclick="regenQuiz()" style="font-size:.71rem;border-color:#93c5fd;color:#1e40af;">🔄 Nouveau quiz</button>
+      <button class="btn btn-ghost btn-sm" id="regenQuizBtn" onclick="regenQuiz()" style="font-size:.70rem;border-color:#93c5fd;color:#1e40af;">🔄 Nouveau quiz</button>
     </div>
-    <div id="tp-quiz-inline">${quiz.length?'':'<div style="font-size:.76rem;color:#1e40af;opacity:.8;">Cliquez sur "Nouveau quiz" pour en générer un.</div>'}</div>
+    <div id="tp-quiz-inline">${quiz.length?'':'<div style="font-size:.78rem;color:#1e40af;opacity:.8;">Cliquez sur "Nouveau quiz" pour en générer un.</div>'}</div>
     <div id="tp-quiz"></div>
   </div>`;
 
@@ -2796,15 +2814,15 @@ function renderViewer(m){
   const exercisesCard=_cfg.showExercices?`<div class="ccard" style="background:linear-gradient(135deg,${bg},${mc}0d);border:2px solid ${bd};">
     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;flex-wrap:wrap;margin-bottom:.4rem;">
       <div>
-        <div style="font-weight:800;font-size:.88rem;color:${mcd};">🎯 Exercices IA — 3 niveaux progressifs</div>
-        <div style="font-size:.73rem;color:#6b7280;margin-top:.15rem;">Complétez Débutant → Intermédiaire → Avancé dans l'ordre.</div>
+        <div style="font-weight:800;font-size:.86rem;color:${mcd};">🎯 Exercices IA — 3 niveaux progressifs</div>
+        <div style="font-size:.70rem;color:#6b7280;margin-top:.15rem;">Complétez Débutant → Intermédiaire → Avancé dans l'ordre.</div>
       </div>
       <div id="glsExBadge-${exId}" style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;">${_renderGLSLevelBadge(exId)}</div>
     </div>
     ${allExDone?`<div class="alert alert-success" style="margin:0;">🎉 Les 3 niveaux sont validés !</div>`:`
     <div id="glsExCard-${exId}" class="ex-level-wrap ex-level-current" style="border-color:${lvEx.border};background:${lvEx.bg};margin-top:.6rem;">
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem;">
-        <span style="font-size:.72rem;font-weight:900;color:${lvEx.color};">${lvEx.stars} Niveau ${lvEx.label}</span>
+        <span style="font-size:.70rem;font-weight:900;color:${lvEx.color};">${lvEx.stars} Niveau ${lvEx.label}</span>
         <div id="glsExTimer-${exId}" style="margin-left:auto;"></div>
       </div>
       <div id="glsExContent-${exId}">
@@ -2824,20 +2842,20 @@ function renderViewer(m){
     const scens=(m.scenarios||[]).map((s2,i)=>`
       <div class="sc-card"><div class="sc-hdr pro" onclick="toggleSC(this)">
         <div><div class="sc-title">Scénario ${i+1} — ${_e(s2.titre)}</div>
-        <span style="font-size:.65rem;background:rgba(0,0,0,.06);border-radius:5px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:${cols[s2.difficulte]||'var(--gray600)'};">${_e(s2.difficulte||'')}</span></div>
-        <span class="sc-arr" style="color:var(--gray600);font-size:.8rem;">${i===0?'▼':'▶'}</span></div>
+        <span style="font-size:.66rem;background:rgba(0,0,0,.06);border-radius:6px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:${cols[s2.difficulte]||'var(--gray600)'};">${_e(s2.difficulte||'')}</span></div>
+        <span class="sc-arr" style="color:var(--gray600);font-size:.78rem;">${i===0?'▼':'▶'}</span></div>
         <div class="sc-body ${i===0?'open':''}">
           <div class="sc-field"><strong>Contexte</strong>${_e(s2.contexte||'')}</div>
           <div class="sc-field"><strong>Situation</strong>${_e(s2.situation||'')}</div>
-          <div style="background:var(--pro-bg);border-radius:9px;padding:.55rem .85rem;margin:.5rem 0;font-size:.8rem;color:var(--pro-dark);font-weight:700;">📋 Consigne : ${_e(s2.consigne||'')}</div>
-          ${(s2.indices||[]).length?`<div style="font-size:.77rem;color:#374151;margin:.4rem 0;"><strong>🔍 Indices :</strong> ${s2.indices.map(x=>_e(x)).join(' · ')}</div>`:''}
+          <div style="background:var(--pro-bg);border-radius:10px;padding:.55rem .85rem;margin:.5rem 0;font-size:.78rem;color:var(--pro-dark);font-weight:700;">📋 Consigne : ${_e(s2.consigne||'')}</div>
+          ${(s2.indices||[]).length?`<div style="font-size:.78rem;color:#374151;margin:.4rem 0;"><strong>🔍 Indices :</strong> ${s2.indices.map(x=>_e(x)).join(' · ')}</div>`:''}
           <button class="corr-btn" onclick="toggleCorr(this)">👁️ Voir le corrigé expert</button>
           <div class="corr-body">${_e(s2.correction||'').replace(/\n/g,'<br>')}</div>
         </div></div>`).join('');
     extra+=scens
       ?`<div class="ccard"><div class="ccard-title">🔧 Mises en situation terrain (${m.scenarios?.length||0})</div>${scens}</div>`
       :`<div class="ccard"><div class="ccard-title">🔧 Mises en situation terrain</div>
-        <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.82rem;">Aucune mise en situation générée pour ce module.</div>
+        <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Aucune mise en situation générée pour ce module.</div>
         <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenScenarios(${m.id})">🔄 Générer les mises en situation</button></div>
       </div>`;
     const cl=m.checklist||{avant:[],pendant:[],apres:[]};
@@ -2847,7 +2865,7 @@ function renderViewer(m){
     </div>`;
     const s2=m.memo||{};
     extra+=`<div class="ccard"><div class="ccard-title">📄 Mémo terrain</div><div style="max-width:640px;">
-      <div style="border-left:4px solid var(--accent);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.64rem;font-weight:800;color:var(--accent);text-transform:uppercase;">Mémo terrain — Quick Reference</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(s2.titre||m.titre)}</h3></div>
+      <div style="border-left:4px solid var(--accent);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:var(--accent);text-transform:uppercase;">Mémo terrain — Quick Reference</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(s2.titre||m.titre)}</h3></div>
       ${(s2.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s2.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
       ${(s2.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s2.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
       ${(s2.interdits||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">🚫 À ne jamais faire</h4>${(s2.interdits||[]).map(e2=>`<div class="memo-item" style="color:#7f1d1d;">${_e(e2)}</div>`).join('')}</div>`:''}
@@ -2859,24 +2877,24 @@ function renderViewer(m){
     const exos=(m.exercices||[]).map((ex,i)=>`
       <div class="sc-card"><div class="sc-hdr" style="background:var(--acad-bg);" onclick="toggleSC(this)">
         <div><div class="sc-title" style="color:var(--acad-dark);">${_e(ex.titre||'Exercice '+(i+1))}</div>
-        <span style="font-size:.65rem;background:rgba(0,0,0,.06);border-radius:5px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:var(--purple);">${_e(ex.difficulte||'')}</span></div>
-        <span class="sc-arr" style="color:var(--gray600);font-size:.8rem;">${i===0?'▼':'▶'}</span></div>
+        <span style="font-size:.66rem;background:rgba(0,0,0,.06);border-radius:6px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:var(--purple);">${_e(ex.difficulte||'')}</span></div>
+        <span class="sc-arr" style="color:var(--gray600);font-size:.78rem;">${i===0?'▼':'▶'}</span></div>
         <div class="sc-body ${i===0?'open':''}">
-          ${ex.enonce?`<div style="font-size:.81rem;line-height:1.7;color:#374151;margin-bottom:.75rem;">${_e(ex.enonce)}</div>`:''}
-          ${(ex.questions||[]).length?`<ul style="margin:.4rem 0 .6rem;padding-left:1.1rem;">${(ex.questions||[]).map(q=>`<li style="font-size:.8rem;color:#374151;margin-bottom:.3rem;">${_e(q)}</li>`).join('')}</ul>`:''}
+          ${ex.enonce?`<div style="font-size:.78rem;line-height:1.7;color:#374151;margin-bottom:.75rem;">${_e(ex.enonce)}</div>`:''}
+          ${(ex.questions||[]).length?`<ul style="margin:.4rem 0 .6rem;padding-left:1.1rem;">${(ex.questions||[]).map(q=>`<li style="font-size:.78rem;color:#374151;margin-bottom:.3rem;">${_e(q)}</li>`).join('')}</ul>`:''}
           <button class="corr-btn" onclick="toggleCorr(this)">👁️ Voir le corrigé</button>
           <div class="corr-body">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div>
         </div></div>`).join('');
     extra+=exos
       ?`<div class="ccard"><div class="ccard-title">✏️ Exercices TD/TP (${m.exercices?.length||0})</div>${exos}</div>`
       :`<div class="ccard"><div class="ccard-title">✏️ Exercices TD/TP</div>
-        <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.82rem;">Aucun exercice généré pour ce module.</div>
+        <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Aucun exercice généré pour ce module.</div>
         <div style="text-align:center;"><button class="btn btn-purple btn-sm" onclick="regenExercices(${m.id})">🔄 Générer les exercices TD/TP</button></div>
       </div>`;
     const rv=m.revision||{};
     if(rv.titre||rv.notions?.length){
       extra+=`<div class="ccard"><div class="ccard-title">📋 Fiche de révision</div><div style="max-width:640px;">
-        <div style="border-left:4px solid var(--purple);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.64rem;font-weight:800;color:var(--purple);text-transform:uppercase;">Fiche synthèse — Examen</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(rv.titre||m.titre)}</h3></div>
+        <div style="border-left:4px solid var(--purple);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:var(--purple);text-transform:uppercase;">Fiche synthèse — Examen</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(rv.titre||m.titre)}</h3></div>
         ${(rv.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(rv.notions||[]).map(n2=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n2)}</div>`).join('')}</div>`:''}
         ${(rv.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(rv.formules||[]).map(f2=>`<span class="formula-tag">${_e(f2)}</span>`).join('')}</div>`:''}
         ${(rv.methode||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🗂️ Démarche à l'examen</h4><ul class="steps-ol">${(rv.methode||[]).map((e2,j)=>`<li class="step-li"><div class="step-n acad">${j+1}</div><div class="step-t" style="color:#78350f;">${_e(e2)}</div></li>`).join('')}</ul></div>`:''}
@@ -2935,9 +2953,9 @@ function renderViewer(m){
         const isLast=i===_etps.length-1;
         return`<div style="display:flex;align-items:flex-start;gap:0;">
           <div style="display:flex;flex-direction:column;align-items:center;gap:.28rem;width:82px;">
-            <div style="width:34px;height:34px;border-radius:50%;background:${isFirst?mc:'transparent'};border:2.5px solid ${isFirst?mc:bd};color:${isFirst?'#fff':mcd};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.71rem;flex-shrink:0;transition:background .2s;">${_e(e.id||String(i+1))}</div>
-            <div style="font-size:.59rem;font-weight:700;text-align:center;color:#1e293b;line-height:1.3;max-width:74px;">${_e(e.titre||'')}</div>
-            ${e.outil?`<div style="font-size:.53rem;color:#9ca3af;text-align:center;max-width:74px;">${_e(e.outil)}</div>`:''}
+            <div style="width:34px;height:34px;border-radius:50%;background:${isFirst?mc:'transparent'};border:2.5px solid ${isFirst?mc:bd};color:${isFirst?'#fff':mcd};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.70rem;flex-shrink:0;transition:background .2s;">${_e(e.id||String(i+1))}</div>
+            <div style="font-size:.62rem;font-weight:700;text-align:center;color:#1e293b;line-height:1.3;max-width:74px;">${_e(e.titre||'')}</div>
+            ${e.outil?`<div style="font-size:.55rem;color:#9ca3af;text-align:center;max-width:74px;">${_e(e.outil)}</div>`:''}
           </div>
           ${!isLast?`<div style="margin-top:16px;flex-shrink:0;display:flex;align-items:center;">
             <div style="width:22px;height:2px;background:${bd};"></div>
@@ -2948,11 +2966,11 @@ function renderViewer(m){
     </div>
   </div>`:'';
 
-  const _heroHtml=`<div style="background:${bg};border:1.5px solid ${bd};border-radius:18px;padding:1.5rem 1.8rem 1.35rem;margin-bottom:1rem;box-shadow:0 4px 20px ${mc}14;">
+  const _heroHtml=`<div style="background:${bg};border:1.5px solid ${bd};border-radius:14px;padding:1.5rem 1.8rem 1.35rem;margin-bottom:1rem;box-shadow:0 4px 20px ${mc}14;">
     <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:.85rem;">
       <div style="font-size:2.75rem;line-height:1;flex-shrink:0;">${_icone}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:.59rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${mc};margin-bottom:.2rem;">${p?'Formation Professionnelle':'Cours Ingénieur'}</div>
+        <div style="font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${mc};margin-bottom:.2rem;">${p?'Formation Professionnelle':'Cours Ingénieur'}</div>
         <h2 style="font-size:1.38rem;font-weight:900;color:${mcd};line-height:1.2;margin:0 0 .3rem;font-family:'Plus Jakarta Sans',sans-serif;">${_e(m.titre)}</h2>
         ${_accroche?`<p style="font-size:.83rem;color:#374151;line-height:1.65;font-style:italic;margin:0;">${_e(_accroche)}</p>`:''}
       </div>
@@ -2965,7 +2983,7 @@ function renderViewer(m){
       ${_lang?`<span style="background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.66rem;">🌐 ${_e(_lang)}</span>`:''}
       ${m.pub?`<span style="background:#fff;color:#374151;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.66rem;">👥 ${_e(m.pub)}</span>`:''}
       ${_scoreVal?`<span style="background:#fff;color:${mcd};border:1.5px solid ${bd};border-radius:6px;padding:.14rem .48rem;font-size:.66rem;font-weight:800;">📊 ${_scoreVal}</span>`:''}
-      ${m.prerequis?`<span style="background:#fff;color:#6b7280;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.63rem;">📚 ${_e(m.prerequis)}</span>`:''}
+      ${m.prerequis?`<span style="background:#fff;color:#6b7280;border:1px solid #e2e8f0;border-radius:6px;padding:.14rem .48rem;font-size:.62rem;">📚 ${_e(m.prerequis)}</span>`:''}
     </div>
     ${_friseHtml}
   </div>`;
@@ -3021,19 +3039,19 @@ function renderProcs(m){
       <div style="display:flex;align-items:center;gap:.5rem;" onclick="event.stopPropagation()">
         <button class="note-ico${noteVal?' has-note':''}" id="nbtn-ps${i}" onclick="openNoteModal(${m.id},'ps${i}',${JSON.stringify(s.titre)},false)">${noteVal?'📝':'+ Note'}</button>
         <button class="card-act-btn" id="rsBtn-${i}" title="Régénérer avec l'IA" onclick="regenSection(${i})">🔄</button>
-        ${s.type?`<span style="font-size:.63rem;background:var(--pro-bg);color:var(--pro-dark);border-radius:5px;padding:.1rem .45rem;font-weight:700;text-transform:uppercase;">${_e(s.type)}</span>`:''}
-        <span style="font-size:.7rem;color:var(--gray400);">⏱️ ${_e(s.duree||s.dur||'')}</span>
+        ${s.type?`<span style="font-size:.62rem;background:var(--pro-bg);color:var(--pro-dark);border-radius:6px;padding:.1rem .45rem;font-weight:700;text-transform:uppercase;">${_e(s.type)}</span>`:''}
+        <span style="font-size:.70rem;color:var(--gray400);">⏱️ ${_e(s.duree||s.dur||'')}</span>
         <span class="cs-arr" style="font-size:.78rem;color:var(--gray400);">${i===0?'▼':'▶'}</span>
       </div></div>
       <div class="cs-body ${i===0?'open':''}">
         ${s.contenu?`<div style="font-size:.83rem;line-height:1.8;color:#374151;margin-bottom:.8rem;">${fmtTxt(_n(s.contenu))}</div>`:''}
-        ${(s.etapes||[]).length?`<div style="margin-bottom:.8rem;"><div style="font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:.45rem;">Étapes</div><ul class="steps-ol">${(s.etapes||[]).map((e,j)=>`<li class="step-li"><div class="step-n">${j+1}</div><div class="step-t">${_e(e)}</div></li>`).join('')}</ul></div>`:''}
-        ${(s.points_vigilance||[]).length?`<div style="border-left:3px solid var(--accent);background:var(--pro-bg);border-radius:0 9px 9px 0;padding:.55rem .85rem;margin-bottom:.6rem;"><div style="font-size:.65rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;margin-bottom:.3rem;">⚠️ Points de vigilance</div>${(s.points_vigilance||[]).map(p=>`<div style="font-size:.79rem;color:var(--pro-dark);margin-bottom:.2rem;">· ${_e(p)}</div>`).join('')}</div>`:''}
-        ${(s.outils||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.6rem;">${(s.outils||[]).map(o=>`<span style="background:var(--gray100);border:1px solid var(--gray200);border-radius:6px;padding:.15rem .5rem;font-size:.71rem;color:var(--gray700);">🔧 ${_e(o)}</span>`).join('')}</div>`:''}
-        ${(s.erreurs||[]).length?`<div style="border-left:3px solid var(--red);background:#fef2f2;border-radius:0 9px 9px 0;padding:.55rem .85rem;"><div style="font-size:.65rem;font-weight:800;color:#991b1b;text-transform:uppercase;margin-bottom:.3rem;">❌ Erreurs à éviter</div>${(s.erreurs||[]).map(e=>`<div style="font-size:.79rem;color:#7f1d1d;margin-bottom:.2rem;">· ${_e(e)}</div>`).join('')}</div>`:''}
-        ${(s.donnees_cles||[]).length?`<div style="margin:.6rem 0;"><div style="font-size:.63rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.3rem;">🔢 Données clés à mémoriser</div><div class="donnees-cles-row">${(s.donnees_cles||[]).map(d=>`<div class="donnee-cle-chip">${_e(d)}</div>`).join('')}</div></div>`:''}
+        ${(s.etapes||[]).length?`<div style="margin-bottom:.8rem;"><div style="font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:.45rem;">Étapes</div><ul class="steps-ol">${(s.etapes||[]).map((e,j)=>`<li class="step-li"><div class="step-n">${j+1}</div><div class="step-t">${_e(e)}</div></li>`).join('')}</ul></div>`:''}
+        ${(s.points_vigilance||[]).length?`<div style="border-left:3px solid var(--accent);background:var(--pro-bg);border-radius:0 9px 9px 0;padding:.55rem .85rem;margin-bottom:.6rem;"><div style="font-size:.66rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;margin-bottom:.3rem;">⚠️ Points de vigilance</div>${(s.points_vigilance||[]).map(p=>`<div style="font-size:.78rem;color:var(--pro-dark);margin-bottom:.2rem;">· ${_e(p)}</div>`).join('')}</div>`:''}
+        ${(s.outils||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.6rem;">${(s.outils||[]).map(o=>`<span style="background:var(--gray100);border:1px solid var(--gray200);border-radius:6px;padding:.15rem .5rem;font-size:.70rem;color:var(--gray700);">🔧 ${_e(o)}</span>`).join('')}</div>`:''}
+        ${(s.erreurs||[]).length?`<div style="border-left:3px solid var(--red);background:#fef2f2;border-radius:0 9px 9px 0;padding:.55rem .85rem;"><div style="font-size:.66rem;font-weight:800;color:#991b1b;text-transform:uppercase;margin-bottom:.3rem;">❌ Erreurs à éviter</div>${(s.erreurs||[]).map(e=>`<div style="font-size:.78rem;color:#7f1d1d;margin-bottom:.2rem;">· ${_e(e)}</div>`).join('')}</div>`:''}
+        ${(s.donnees_cles||[]).length?`<div style="margin:.6rem 0;"><div style="font-size:.62rem;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.3rem;">🔢 Données clés à mémoriser</div><div class="donnees-cles-row">${(s.donnees_cles||[]).map(d=>`<div class="donnee-cle-chip">${_e(d)}</div>`).join('')}</div></div>`:''}
         ${s.reflexe_pro?`<div class="reflexe-pro-box"><div class="reflexe-pro-lbl">⚡ Réflexe du professionnel expérimenté</div><div class="reflexe-pro-txt">${Array.isArray(s.reflexe_pro)?`<ul style="margin:0;padding-left:1.1rem;">${s.reflexe_pro.map(r=>`<li style="margin-bottom:.25rem;">${_e(r)}</li>`).join('')}</ul>`:_e(s.reflexe_pro)}</div></div>`:''}
-        ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
+        ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
         <div class="sec-media">
           <div id="svgArea-${m.id}-${i}">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
           <div id="threedArea-${m.id}-${i}"></div>
@@ -3055,14 +3073,14 @@ function renderScens(m){
   const proLevelDesc=['Mise en situation simple — lecture du contexte, identification du problème, première solution proposée.','Analyse complète — diagnostic approfondi, calculs si nécessaire, plan d\'action structuré en 4-5 étapes.','Cas complexe — contraintes multiples, arbitrages, justification des choix, gestion des risques.'][Math.min(done,2)];
   const proSection=`<div style="margin-bottom:1.2rem;background:#fff;border-radius:14px;padding:1.1rem 1.2rem;border:1.5px solid ${allDone?'#6ee7b7':lvPro.border};">
     <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem;">
-      <div style="font-size:.72rem;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;">🎯 Exercice IA — 3 niveaux progressifs</div>
+      <div style="font-size:.70rem;font-weight:900;color:var(--accent);text-transform:uppercase;letter-spacing:.4px;">🎯 Exercice IA — 3 niveaux progressifs</div>
     </div>
     <div id="glsExBadge-${proId}" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;margin-bottom:.8rem;">${_renderGLSLevelBadge(proId)}</div>
     ${allDone?`<div class="alert alert-success" style="margin:0;">🎉 Les 3 niveaux sont validés — excellente maîtrise du métier !</div>`:`
     <div id="glsExCard-${proId}" class="ex-level-wrap ex-level-current" style="border-color:${lvPro.border};background:${lvPro.bg};">
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem;">
-        <span data-lv-label style="font-size:.72rem;font-weight:900;color:${lvPro.color};">${lvPro.stars} Niveau ${lvPro.label}</span>
-        <span style="font-size:.68rem;color:var(--gray400);">${proLevelDesc}</span>
+        <span data-lv-label style="font-size:.70rem;font-weight:900;color:${lvPro.color};">${lvPro.stars} Niveau ${lvPro.label}</span>
+        <span style="font-size:.70rem;color:var(--gray400);">${proLevelDesc}</span>
         <div id="glsExTimer-${proId}" style="margin-left:auto;"></div>
       </div>
       <div id="glsExContent-${proId}">
@@ -3077,12 +3095,12 @@ function renderScens(m){
   const scenarios=(m.scenarios||[]).map((s,i)=>`
     <div class="sc-card"><div class="sc-hdr pro" onclick="toggleSC(this)">
       <div><div class="sc-title">Scénario ${i+1} — ${_e(s.titre)}</div>
-      <span style="font-size:.65rem;background:rgba(0,0,0,.06);border-radius:5px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:${cols[s.difficulte]||'var(--gray600)'};">${_e(s.difficulte||'')}</span></div>
-      <span class="sc-arr" style="color:var(--gray600);font-size:.8rem;">${i===0?'▼':'▶'}</span></div>
+      <span style="font-size:.66rem;background:rgba(0,0,0,.06);border-radius:6px;padding:.1rem .45rem;font-weight:800;text-transform:uppercase;color:${cols[s.difficulte]||'var(--gray600)'};">${_e(s.difficulte||'')}</span></div>
+      <span class="sc-arr" style="color:var(--gray600);font-size:.78rem;">${i===0?'▼':'▶'}</span></div>
       <div class="sc-body ${i===0?'open':''}">
         <div class="sc-field"><strong>Contexte</strong>${_e(s.contexte||'')}</div>
         <div class="sc-field"><strong>Situation</strong>${_e(s.situation||'')}</div>
-        <div style="background:var(--pro-bg);border-radius:9px;padding:.55rem .85rem;margin:.5rem 0;font-size:.8rem;color:var(--pro-dark);font-weight:700;">📋 Consigne : ${_e(s.consigne||'')}</div>
+        <div style="background:var(--pro-bg);border-radius:10px;padding:.55rem .85rem;margin:.5rem 0;font-size:.78rem;color:var(--pro-dark);font-weight:700;">📋 Consigne : ${_e(s.consigne||'')}</div>
         <button class="corr-btn" onclick="toggleCorr(this)">👁️ Voir le corrigé expert</button>
         <div class="corr-body">${_e(s.correction||'').replace(/\n/g,'<br>')}</div>
       </div></div>`).join('')||'';
@@ -3094,7 +3112,7 @@ async function generateGLSProExercise(proId,modId){
   const done=_getGLSLevDone(proId);if(done>=3)return;
   const lv=_GLS_EX_LEVELS[done];
   const el=document.getElementById('glsExContent-'+proId);if(!el)return;
-  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;padding:.8rem;background:${lv.bg};border-radius:9px;"><div class="ai-spinner" style="border-top-color:${lv.color};"></div><span style="font-size:.8rem;color:${lv.color};font-weight:700;">Génération exercice terrain niveau ${lv.label}…</span></div>`;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;padding:.8rem;background:${lv.bg};border-radius:10px;"><div class="ai-spinner" style="border-top-color:${lv.color};"></div><span style="font-size:.78rem;color:${lv.color};font-weight:700;">Génération exercice terrain niveau ${lv.label}…</span></div>`;
   const key=getKey();if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const sectionsText=(m.sections||[]).map(s=>`## ${s.titre}\n${(s.contenu||'').slice(0,400)}`).join('\n\n').slice(0,3500);
   const levelPrompts=[
@@ -3124,19 +3142,19 @@ JSON structure exacte :
     _glsCurrentEx[proId]=ex;
     const mins=ex.dureeMinutes||[10,18,28][done];
     el.innerHTML=`
-      <div style="background:#fff;border-radius:9px;padding:.7rem .9rem;border:1px solid var(--gray200);margin-bottom:.7rem;font-size:.81rem;color:#374151;line-height:1.7;">
-        <div style="font-size:.65rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📍 Mise en situation</div>
+      <div style="background:#fff;border-radius:10px;padding:.7rem .9rem;border:1px solid var(--gray200);margin-bottom:.7rem;font-size:.78rem;color:#374151;line-height:1.7;">
+        <div style="font-size:.66rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📍 Mise en situation</div>
         ${_e(ex.situation||'')}
       </div>
       <div style="font-size:.86rem;font-weight:700;color:var(--navy);margin-bottom:.7rem;padding:.5rem .8rem;background:var(--pro-bg);border-left:3px solid var(--accent);border-radius:0 9px 9px 0;">⚠️ Situation à gérer : ${_e(ex.probleme||'')}</div>
-      <div style="margin:.5rem 0 .8rem;">${(ex.questions||[]).map((q,i2)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem;font-size:.82rem;color:#374151;"><span style="color:${lv.color};font-weight:800;flex-shrink:0;">${i2+1}.</span><span>${_e(q)}</span></div>`).join('')}</div>
+      <div style="margin:.5rem 0 .8rem;">${(ex.questions||[]).map((q,i2)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem;font-size:.83rem;color:#374151;"><span style="color:${lv.color};font-weight:800;flex-shrink:0;">${i2+1}.</span><span>${_e(q)}</span></div>`).join('')}</div>
       <textarea id="glsExAnswer-${proId}" class="ex-level-ta" style="border:1.5px solid ${lv.border};" placeholder="Décrivez votre réponse terrain : actions, ordre d'intervention, justifications…" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
       <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem;">
         <button class="btn btn-gold btn-sm" onclick="evalGLSProAnswer('${proId}',${modId})">🤖 Feedback formateur IA</button>
         <button class="btn btn-green btn-sm" onclick="completeGLSProLevel('${proId}')">✅ Valider ce niveau ${lv.stars}</button>
       </div>
       <div id="glsExFeedback-${proId}" style="margin-top:.6rem;"></div>
-      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-size:.73rem;color:var(--gray400);font-weight:700;">📄 Voir le corrigé expert</summary><div style="margin-top:.5rem;background:var(--pro-bg);border-radius:9px;padding:.7rem .95rem;font-size:.8rem;color:var(--pro-dark);line-height:1.75;border:1px solid #fde68a;">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div></details>`;
+      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-size:.70rem;color:var(--gray400);font-weight:700;">📄 Voir le corrigé expert</summary><div style="margin-top:.5rem;background:var(--pro-bg);border-radius:10px;padding:.7rem .95rem;font-size:.78rem;color:var(--pro-dark);line-height:1.75;border:1px solid #fde68a;">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div></details>`;
     _startGLSTimer(proId,mins);
   }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
 }
@@ -3149,7 +3167,7 @@ async function evalGLSProAnswer(proId,modId){
   const key=getKey();if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const done=_getGLSLevDone(proId);const lv=_GLS_EX_LEVELS[Math.min(done,2)];
   const ms=getMods();const m=ms.find(x=>x.id==modId)||{};
-  feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--gray400);"><div class="ai-spinner"></div>Évaluation formateur IA…</div>`;
+  feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--gray400);"><div class="ai-spinner"></div>Évaluation formateur IA…</div>`;
   const sysP=`Tu es formateur professionnel expert en ${m.titre||'métier'} (${m.dom||''}). Tu évalues des réponses de stagiaires avec le regard d'un professionnel expérimenté du terrain. Niveau attendu : ${lv.label}.`;
   const prompt=`RÈGLE ABSOLUE : Si la réponse est du charabia ou hors-sujet, réponds UNIQUEMENT : "❌ Réponse invalide — décrivez une vraie intervention professionnelle."
 
@@ -3185,7 +3203,7 @@ function completeGLSProLevel(proId){
     if(card)card.outerHTML=`<div>
       <div class="alert alert-success" style="margin-bottom:.8rem;">🎉 <strong>Félicitations !</strong> Les 3 niveaux terrain sont validés.</div>
       <div id="glsModuleScore-${proId}">
-        <button class="btn btn-gold" style="font-size:.88rem;" onclick="validateGLSModule('${proId}')">✅ Valider le module et voir mon score →</button>
+        <button class="btn btn-gold" style="font-size:.86rem;" onclick="validateGLSModule('${proId}')">✅ Valider le module et voir mon score →</button>
       </div>
     </div>`;
     return;
@@ -3228,16 +3246,16 @@ function renderCours(m){
       <div style="display:flex;align-items:center;gap:.5rem;" onclick="event.stopPropagation()">
         <button class="note-ico${noteVal?' has-note an':''}" id="nbtn-cs${i}" onclick="openNoteModal(${m.id},'cs${i}',${JSON.stringify(s.titre)},true)">${noteVal?'📝':'+ Note'}</button>
         <button class="card-act-btn" id="rsBtn-${i}" title="Régénérer avec l'IA" onclick="regenSection(${i})">🔄</button>
-        <span style="font-size:.7rem;color:var(--gray400);">⏱️ ${_e(s.duree||s.dur||'')}</span>
+        <span style="font-size:.70rem;color:var(--gray400);">⏱️ ${_e(s.duree||s.dur||'')}</span>
         <span class="cs-arr" style="font-size:.78rem;color:var(--gray400);">${i===0?'▼':'▶'}</span>
       </div></div>
       <div class="cs-body ${i===0?'open':''}">
         ${(s.definitions||[]).length?`<div style="margin-bottom:.7rem;">${(s.definitions||[]).map(d=>`<div class="def-box"><span class="def-term">${_e(d.terme||d.term||'')} :</span> ${_e(d.def||d.definition||'')}</div>`).join('')}</div>`:''}
         ${s.contenu?`<div style="font-size:.83rem;line-height:1.8;color:#374151;margin-bottom:.8rem;">${fmtTxt(_n(s.contenu),s.definitions||[])}</div>`:''}
         ${(s.points_cles||[]).map(p=>`<div class="kp acad">💡 ${_e(p)}</div>`).join('')}
-        ${(s.erreurs_courantes||[]).length?`<div class="err-freq-box"><div class="err-freq-lbl">⚠️ Erreurs fréquentes à distinguer</div>${(s.erreurs_courantes||[]).map(e=>`<div style="font-size:.79rem;color:#78350f;margin-bottom:.25rem;">· ${_e(e)}</div>`).join('')}</div>`:''}
-        ${s.exemple?`<div style="background:var(--acad-bg);border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.8rem;color:var(--acad-dark);line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
-        ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:9px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
+        ${(s.erreurs_courantes||[]).length?`<div class="err-freq-box"><div class="err-freq-lbl">⚠️ Erreurs fréquentes à distinguer</div>${(s.erreurs_courantes||[]).map(e=>`<div style="font-size:.78rem;color:#78350f;margin-bottom:.25rem;">· ${_e(e)}</div>`).join('')}</div>`:''}
+        ${s.exemple?`<div style="background:var(--acad-bg);border-left:3px solid var(--purple);border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.78rem;color:var(--acad-dark);line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
+        ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
         <div class="sec-media">
           <div id="svgArea-${m.id}-${i}">${s.svg?`<div class="sec-svg-wrap">${s.svg}</div>`:''}</div>
           <div id="threedArea-${m.id}-${i}"></div>
@@ -3262,21 +3280,21 @@ function _getGLSLevDone(modId){
 function _saveGLSLev(modId,n){localStorage.setItem('gls_lev_'+modId,n);}
 
 function formatAIText(text){
-  return text.replace(/\n/g,'<br>').replace(/((?:✅|☑️)[^\n<]+)/g,'<span style="color:#059669;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:❌|✗)[^\n<]+)/g,'<span style="color:#dc2626;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:📊|📋|📝)[^\n<]+)/g,'<span style="color:#2563eb;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:💡|🔆)[^\n<]+)/g,'<span style="color:#d97706;font-weight:800;font-size:.88rem;display:block;margin-top:.6rem;">$1</span>');
+  return text.replace(/\n/g,'<br>').replace(/((?:✅|☑️)[^\n<]+)/g,'<span style="color:#059669;font-weight:800;font-size:.86rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:❌|✗)[^\n<]+)/g,'<span style="color:#dc2626;font-weight:800;font-size:.86rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:📊|📋|📝)[^\n<]+)/g,'<span style="color:#2563eb;font-weight:800;font-size:.86rem;display:block;margin-top:.6rem;">$1</span>').replace(/((?:💡|🔆)[^\n<]+)/g,'<span style="color:#d97706;font-weight:800;font-size:.86rem;display:block;margin-top:.6rem;">$1</span>');
 }
 
 function _renderGLSLevelBadge(modId){
   const done=_getGLSLevDone(modId);
   return _GLS_EX_LEVELS.map((s,i)=>{
     const isDone=i<done,isCur=i===done&&done<3,isLocked=i>done;
-    return `<span style="display:inline-flex;align-items:center;gap:.18rem;font-size:.67rem;font-weight:800;padding:.15rem .5rem;border-radius:12px;background:${isDone?s.color+'25':isCur?s.color+'15':'#f1f5f9'};color:${isDone||isCur?s.color:'#94a3b8'};border:1.5px solid ${isDone?s.color:isCur?s.color+'99':'#e2e8f0'};white-space:nowrap;">${isDone?'✓ ':isCur?'→ ':'🔒 '}${s.label} ${s.stars}</span>`;
-  }).join('<span style="color:#cbd5e1;font-size:.65rem;margin:0 .05rem;">›</span>');
+    return `<span style="display:inline-flex;align-items:center;gap:.18rem;font-size:.66rem;font-weight:800;padding:.15rem .5rem;border-radius:14px;background:${isDone?s.color+'25':isCur?s.color+'15':'#f1f5f9'};color:${isDone||isCur?s.color:'#94a3b8'};border:1.5px solid ${isDone?s.color:isCur?s.color+'99':'#e2e8f0'};white-space:nowrap;">${isDone?'✓ ':isCur?'→ ':'🔒 '}${s.label} ${s.stars}</span>`;
+  }).join('<span style="color:#cbd5e1;font-size:.66rem;margin:0 .05rem;">›</span>');
 }
 
 function renderExos(m){
   const done=_getGLSLevDone(m.id);
   const allDone=done>=3;
-  let html=`<div style="margin-bottom:1rem;"><div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:.5rem;">Progression des niveaux</div><div id="glsExBadge-${m.id}" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;">${_renderGLSLevelBadge(m.id)}</div></div>`;
+  let html=`<div style="margin-bottom:1rem;"><div style="font-size:.70rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--gray400);margin-bottom:.5rem;">Progression des niveaux</div><div id="glsExBadge-${m.id}" style="display:inline-flex;align-items:center;gap:.2rem;flex-wrap:wrap;">${_renderGLSLevelBadge(m.id)}</div></div>`;
   if(allDone){
     html+=`<div class="alert alert-success">🎉 Tous les niveaux sont validés ! Passez au quiz pour obtenir votre attestation.</div>`;
     return html;
@@ -3284,8 +3302,8 @@ function renderExos(m){
   const lv=_GLS_EX_LEVELS[done];
   html+=`<div class="ex-level-wrap ex-level-current" id="glsExCard-${m.id}" style="border-color:${lv.border};background:${lv.bg};">
     <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.7rem;">
-      <span data-lv-label style="font-size:.72rem;font-weight:900;color:${lv.color};">${lv.stars} Niveau ${lv.label}</span>
-      <div id="glsExTimer-${m.id}" style="margin-left:auto;font-size:.72rem;color:var(--gray600);font-family:'JetBrains Mono',monospace;"></div>
+      <span data-lv-label style="font-size:.70rem;font-weight:900;color:${lv.color};">${lv.stars} Niveau ${lv.label}</span>
+      <div id="glsExTimer-${m.id}" style="margin-left:auto;font-size:.70rem;color:var(--gray600);font-family:'JetBrains Mono',monospace;"></div>
     </div>
     <div id="glsExContent-${m.id}">
       <div style="text-align:center;padding:1.5rem 0;">
@@ -3298,13 +3316,13 @@ function renderExos(m){
     </div>
   </div>`;
   if(m.exercices?.length){
-    html+=`<details style="margin-top:1rem;"><summary style="cursor:pointer;font-size:.77rem;font-weight:700;color:var(--gray600);padding:.4rem 0;">📚 Exercices du cours (${m.exercices.length})</summary><div style="margin-top:.6rem;">${m.exercices.map((ex,i)=>`
+    html+=`<details style="margin-top:1rem;"><summary style="cursor:pointer;font-size:.78rem;font-weight:700;color:var(--gray600);padding:.4rem 0;">📚 Exercices du cours (${m.exercices.length})</summary><div style="margin-top:.6rem;">${m.exercices.map((ex,i)=>`
       <div class="ex-card">
         <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem;">
           <span class="ex-diff ${ex.difficulte||ex.type||'debutant'}">${_e(ex.difficulte||ex.type||'')}</span>
-          ${ex.duree?`<span style="font-size:.68rem;color:var(--gray400);">⏱️ ${_e(ex.duree)}</span>`:''}
+          ${ex.duree?`<span style="font-size:.70rem;color:var(--gray400);">⏱️ ${_e(ex.duree)}</span>`:''}
         </div>
-        <h4 style="font-size:.87rem;font-weight:800;color:var(--navy);margin-bottom:.5rem;">${i+1}. ${_e(ex.titre)}</h4>
+        <h4 style="font-size:.86rem;font-weight:800;color:var(--navy);margin-bottom:.5rem;">${i+1}. ${_e(ex.titre)}</h4>
         <div style="font-size:.83rem;color:#374151;line-height:1.7;margin-bottom:.55rem;">${_e(ex.enonce||'')}</div>
         ${ex.questions?.length?`<div style="margin:.5rem 0 .65rem;">${ex.questions.map(q=>`<div class="ex-q">${_e(q)}</div>`).join('')}</div>`:''}
         <button class="corr-btn" onclick="toggleCorr(this)">📄 Voir le corrigé</button>
@@ -3331,7 +3349,7 @@ function _drawGLSTimer(modId){
   const m2=Math.floor(_glsTimerLeft/60),s2=_glsTimerLeft%60;
   const pct=_glsTimerLeft/_glsTimerTotal;
   const color=pct>.5?'#059669':pct>.25?'#d97706':'#dc2626';
-  el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:${color}12;border:1.5px solid ${color}40;border-radius:20px;padding:.22rem .65rem;">
+  el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:${color}12;border:1.5px solid ${color}40;border-radius:14px;padding:.22rem .65rem;">
     <svg width="14" height="14" viewBox="0 0 36 36" style="flex-shrink:0;transform:rotate(-90deg);">
       <circle cx="18" cy="18" r="15" fill="none" stroke="#e2e8f0" stroke-width="4"/>
       <circle cx="18" cy="18" r="15" fill="none" stroke="${color}" stroke-width="4" stroke-dasharray="${Math.round(94.2*pct)} 94.2" stroke-linecap="round"/>
@@ -3341,7 +3359,7 @@ function _drawGLSTimer(modId){
 }
 function _onGLSTimeout(modId){
   const el=document.getElementById('glsExTimer-'+modId);
-  if(el)el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:20px;padding:.22rem .65rem;font-size:.78rem;font-weight:800;color:#dc2626;">⏰ Temps écoulé !</div>`;
+  if(el)el.innerHTML=`<div style="display:inline-flex;align-items:center;gap:.35rem;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:14px;padding:.22rem .65rem;font-size:.78rem;font-weight:800;color:#dc2626;">⏰ Temps écoulé !</div>`;
 }
 
 async function generateGLSExercise(modId){
@@ -3349,7 +3367,7 @@ async function generateGLSExercise(modId){
   const done=_getGLSLevDone(modId);if(done>=3)return;
   const lv=_GLS_EX_LEVELS[done];
   const el=document.getElementById('glsExContent-'+modId);if(!el)return;
-  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;padding:.8rem;background:${lv.bg};border-radius:9px;"><div class="ai-spinner" style="border-top-color:${lv.color};"></div><span style="font-size:.8rem;color:${lv.color};font-weight:700;">Génération niveau ${lv.label}…</span></div>`;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;padding:.8rem;background:${lv.bg};border-radius:10px;"><div class="ai-spinner" style="border-top-color:${lv.color};"></div><span style="font-size:.78rem;color:${lv.color};font-weight:700;">Génération niveau ${lv.label}…</span></div>`;
   const key=getKey();
   if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API Grok requise.</div>';return;}
   const sectionsText=(m.sections||[]).map(s=>`=== ${s.titre} ===\n${(s.contenu||'').slice(0,400)}`).join('\n\n').slice(0,3000);
@@ -3378,18 +3396,18 @@ JSON structure exacte :
     const mins=ex.dureeMinutes||[8,15,25][done];
     el.innerHTML=`
       <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.6rem;">
-        <button class="btn btn-ghost btn-sm" style="font-size:.72rem;border-color:${lv.color}40;color:${lv.color};" onclick="showGLSPreCours(${modId})">📚 Cours niveau ${lv.label} avant de commencer</button>
+        <button class="btn btn-ghost btn-sm" style="font-size:.70rem;border-color:${lv.color}40;color:${lv.color};" onclick="showGLSPreCours(${modId})">📚 Cours niveau ${lv.label} avant de commencer</button>
         <div id="glsPreCours-${modId}" style="display:none;width:100%;margin-top:.4rem;"></div>
       </div>
       <div style="font-size:.86rem;font-weight:700;color:#1e293b;margin-bottom:.7rem;line-height:1.65;">${_e(ex.enonce||'')}</div>
-      <div style="margin:.5rem 0 .8rem;">${(ex.questions||[]).map((q,i2)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem;font-size:.82rem;color:#374151;"><span style="color:${lv.color};font-weight:800;flex-shrink:0;">${i2+1}.</span><span>${_e(q)}</span></div>`).join('')}</div>
+      <div style="margin:.5rem 0 .8rem;">${(ex.questions||[]).map((q,i2)=>`<div style="display:flex;gap:.5rem;margin-bottom:.4rem;font-size:.83rem;color:#374151;"><span style="color:${lv.color};font-weight:800;flex-shrink:0;">${i2+1}.</span><span>${_e(q)}</span></div>`).join('')}</div>
       <textarea id="glsExAnswer-${modId}" class="ex-level-ta" style="border:1.5px solid ${lv.border};" placeholder="Rédigez votre réponse complète…" onfocus="this.style.borderColor='${lv.color}'" onblur="this.style.borderColor='${lv.border}'"></textarea>
       <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.6rem;">
         <button class="btn btn-gold btn-sm" onclick="evalGLSAnswer(${modId})">🤖 Feedback IA</button>
         <button class="btn btn-green btn-sm" onclick="completeGLSLevel(${modId})">✅ Valider ce niveau ${lv.stars}</button>
       </div>
       <div id="glsExFeedback-${modId}" style="margin-top:.6rem;"></div>
-      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-size:.73rem;color:var(--gray400);font-weight:700;">📄 Voir le corrigé</summary><div style="margin-top:.5rem;background:#ecfdf5;border-radius:9px;padding:.7rem .95rem;font-size:.8rem;color:#065f46;line-height:1.75;border:1px solid #6ee7b7;">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div></details>`;
+      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-size:.70rem;color:var(--gray400);font-weight:700;">📄 Voir le corrigé</summary><div style="margin-top:.5rem;background:#ecfdf5;border-radius:10px;padding:.7rem .95rem;font-size:.78rem;color:#065f46;line-height:1.75;border:1px solid #6ee7b7;">${_e(ex.correction||'').replace(/\n/g,'<br>')}</div></details>`;
     _startGLSTimer(modId,mins);
   }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
 }
@@ -3404,7 +3422,7 @@ async function evalGLSAnswer(modId){
   if(!key){feedEl.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const done=_getGLSLevDone(modId);const lv=_GLS_EX_LEVELS[Math.min(done,2)];
   const ms=getMods();const m=ms.find(x=>x.id==modId)||{};
-  feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--gray400);"><div class="ai-spinner"></div>Évaluation IA en cours…</div>`;
+  feedEl.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--gray400);"><div class="ai-spinner"></div>Évaluation IA en cours…</div>`;
   const domLbl=m.dom?` (${m.dom})`:'';
   const sysPrompt=`Tu es professeur-ingénieur expert en ${m.titre||'ingénierie'}${domLbl}. Tu évalues des réponses d'étudiants avec rigueur et pédagogie. Tu fournis un retour détaillé, structuré et actionnable. Niveau attendu : ${lv.label}.`;
   const prompt=`RÈGLE ABSOLUE : Si la réponse est du charabia, vide, ou hors-sujet, réponds UNIQUEMENT : "❌ Réponse invalide — écrivez une vraie réponse en lien avec la question posée."
@@ -3445,7 +3463,7 @@ function completeGLSLevel(modId){
     if(card)card.outerHTML=`<div>
       <div class="alert alert-success" style="margin-bottom:.8rem;">🎉 <strong>Félicitations !</strong> Les 3 niveaux sont validés — vous maîtrisez ce module.</div>
       <div id="glsModuleScore-${modId}">
-        <button class="btn btn-green" style="font-size:.88rem;" onclick="validateGLSModule(${modId})">✅ Valider le module et voir mon score →</button>
+        <button class="btn btn-green" style="font-size:.86rem;" onclick="validateGLSModule(${modId})">✅ Valider le module et voir mon score →</button>
       </div>
     </div>`;
     return;
@@ -3469,7 +3487,7 @@ async function showGLSPreCours(modId){
   const ms=getMods();const m=ms.find(x=>x.id==modId)||{};
   const key=getKey();
   if(!key){el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
-  el.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;background:${lv.bg};border:1px solid ${lv.border};border-radius:9px;padding:.6rem .9rem;"><div class="ai-spinner" style="border-top-color:${lv.color};flex-shrink:0;"></div><span style="font-size:.78rem;color:${lv.color};font-weight:700;">Génération du cours ${lv.label}…</span></div>`;
+  el.innerHTML=`<div style="display:flex;align-items:center;gap:.5rem;background:${lv.bg};border:1px solid ${lv.border};border-radius:10px;padding:.6rem .9rem;"><div class="ai-spinner" style="border-top-color:${lv.color};flex-shrink:0;"></div><span style="font-size:.78rem;color:${lv.color};font-weight:700;">Génération du cours ${lv.label}…</span></div>`;
   const sectionsText=(m.sections||[]).map(s=>`## ${s.titre}\n${(s.contenu||'').slice(0,300)}`).join('\n\n').slice(0,3500);
   const adapts=['notions fondamentales avec définitions claires, exemples simples et analogies','application pratique des concepts avec mise en situation concrète','analyse approfondie, liens entre concepts, cas complexes et nuances techniques'][done];
   const sysP=`Tu es professeur-ingénieur expert en ${m.titre||'ingénierie'} (${m.dom||''}). Tu génères des cours pédagogiques adaptés au niveau de l'étudiant. Réponds en français, de façon structurée et lisible.`;
@@ -3495,10 +3513,10 @@ Structure attendue (en texte, pas de JSON) :
 (1 notion souvent mal comprise, expliquée clairement)`;
   try{
     const text=await geminiText(key,sysP,prompt,1200,0.5);
-    el.innerHTML=`<div style="background:${lv.bg};border:1.5px solid ${lv.border};border-radius:12px;padding:1rem 1.1rem;font-size:.82rem;line-height:1.8;color:#1e293b;">
-      <div style="font-size:.7rem;font-weight:800;color:${lv.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;">📚 Cours préparatoire — Niveau ${lv.label} ${lv.stars}</div>
+    el.innerHTML=`<div style="background:${lv.bg};border:1.5px solid ${lv.border};border-radius:14px;padding:1rem 1.1rem;font-size:.83rem;line-height:1.8;color:#1e293b;">
+      <div style="font-size:.70rem;font-weight:800;color:${lv.color};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;">📚 Cours préparatoire — Niveau ${lv.label} ${lv.stars}</div>
       ${formatAIText(text)}
-      <button onclick="this.closest('[id^=glsPreCours]').style.display='none'" style="margin-top:.7rem;background:none;border:none;font-size:.72rem;color:var(--gray400);cursor:pointer;font-family:inherit;">Masquer le cours ↑</button>
+      <button onclick="this.closest('[id^=glsPreCours]').style.display='none'" style="margin-top:.7rem;background:none;border:none;font-size:.70rem;color:var(--gray400);cursor:pointer;font-family:inherit;">Masquer le cours ↑</button>
     </div>`;
   }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
 }
@@ -3515,7 +3533,7 @@ function validateGLSModule(modId){
   const _sc=pass?'#16a34a':'#dc2626';
   const _r=38,_circ=2*Math.PI*_r;
   const uid='gls'+modId;
-  box.innerHTML=`<div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;background:${pass?'#ecfdf5':'#fef2f2'};border:1.5px solid ${pass?'#6ee7b7':'#fca5a5'};border-radius:16px;padding:1.2rem 1.4rem;">
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;background:${pass?'#ecfdf5':'#fef2f2'};border:1.5px solid ${pass?'#6ee7b7':'#fca5a5'};border-radius:14px;padding:1.2rem 1.4rem;">
     <div style="flex-shrink:0;position:relative;width:90px;height:90px;">
       <svg width="90" height="90" viewBox="0 0 90 90" style="transform:rotate(-90deg);">
         <circle cx="45" cy="45" r="${_r}" fill="none" stroke="#e2e8f0" stroke-width="7"/>
@@ -3529,7 +3547,7 @@ function validateGLSModule(modId){
     </div>
     <div style="flex:1;">
       <div style="font-weight:800;font-size:1rem;color:${_sc};">${pass?'✅ Module validé — excellente maîtrise !':'📖 Relisez le contenu et recommencez les exercices.'}</div>
-      <div style="font-size:.8rem;color:#6b7280;margin-top:.3rem;">Score : ${score}% — Minimum requis : 70%</div>
+      <div style="font-size:.78rem;color:#6b7280;margin-top:.3rem;">Score : ${score}% — Minimum requis : 70%</div>
       <div style="font-size:.78rem;color:#6b7280;margin-top:.2rem;">✓ 3 exercices complétés avec feedback IA</div>
     </div>
   </div>`;
@@ -3618,12 +3636,12 @@ function renderQuizRes(m){
     ${svgRing}
     <div style="flex:1;">
       <div style="font-weight:800;font-size:1rem;color:${col};">${pass?'✅ Validé !':score>=(_smin-20)?'💪 Encore un effort':'⚠️ À retravailler'}</div>
-      <div style="font-size:.8rem;color:var(--gray600);margin-top:.3rem;">${good} / ${_quiz.length} bonnes réponses — Minimum requis : ${_smin}%</div>
+      <div style="font-size:.78rem;color:var(--gray600);margin-top:.3rem;">${good} / ${_quiz.length} bonnes réponses — Minimum requis : ${_smin}%</div>
     </div></div>
     <div style="margin-bottom:1.2rem;">${_quiz.map((q,qi)=>{const ans=_qa[qi],rep=q.rep!==undefined?q.rep:q.correct,ok=ans===rep,expl=q.expl||q.explication||'';return`<div class="quiz-q">
       <div class="quiz-q-txt">${qi+1}. ${_e(q.q)}</div>
       ${(q.opts||[]).map((o,oi)=>`<div class="quiz-opt ${oi===rep?'correct':oi===ans&&!ok?'wrong':''}">${oi===rep?'✓':oi===ans&&!ok?'✗':''} ${_e(o)}</div>`).join('')}
-      ${expl?`<div style="font-size:.73rem;color:var(--green);padding:.35rem .6rem;background:#ecfdf5;border-radius:6px;margin-top:.3rem;border-left:3px solid var(--green);">💡 ${_e(expl)}</div>`:''}
+      ${expl?`<div style="font-size:.70rem;color:var(--green);padding:.35rem .6rem;background:#ecfdf5;border-radius:6px;margin-top:.3rem;border-left:3px solid var(--green);">💡 ${_e(expl)}</div>`:''}
     </div>`;}).join('')}</div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
       <button class="btn btn-ghost btn-sm" onclick="retryQ()">🔄 Recommencer le quiz</button>
@@ -3633,7 +3651,7 @@ function renderQuizRes(m){
     ${!pass&&Object.keys(wbc).length?`<div style="margin-top:1.2rem;">
       <div style="font-size:.78rem;font-weight:800;color:var(--navy);margin-bottom:.5rem;">📌 Notions à retravailler :</div>
       ${Object.keys(wbc).map(c=>`<div class="rem-card"><h4>⚠️ ${_e(c)}</h4>
-        <div style="font-size:.73rem;color:#92400e;">${wbc[c].length} question(s) manquée(s)</div></div>`).join('')}
+        <div style="font-size:.70rem;color:#92400e;">${wbc[c].length} question(s) manquée(s)</div></div>`).join('')}
     </div>`:''}
     <div id="glsRemBox" style="margin-top:1rem;"></div>`;
 }
@@ -3652,7 +3670,7 @@ async function openGLSRemediation(){
   if(!notions.length){box.innerHTML='<div class="alert alert-info">Aucune notion à réviser identifiée.</div>';return;}
   const nbAttempts=wbcHistory.length;
   const multiLabel=nbAttempts>1?` (${nbAttempts} tentatives — erreurs récurrentes en priorité)`:'';
-  box.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef9ee;border:1px solid #fde68a;border-radius:10px;padding:.8rem;"><div class="ai-spinner" style="border-top-color:var(--accent);flex-shrink:0;"></div><span style="font-size:.8rem;color:#92400e;font-weight:700;">L'IA prépare votre cours personnalisé sur ${notions.length} notion(s)${multiLabel}…</span></div>`;
+  box.innerHTML=`<div style="display:flex;align-items:center;gap:.6rem;background:#fef9ee;border:1px solid #fde68a;border-radius:10px;padding:.8rem;"><div class="ai-spinner" style="border-top-color:var(--accent);flex-shrink:0;"></div><span style="font-size:.78rem;color:#92400e;font-weight:700;">L'IA prépare votre cours personnalisé sur ${notions.length} notion(s)${multiLabel}…</span></div>`;
   /* Enrichit le prompt avec la fréquence d'erreur si multi-tentatives */
   const freqMap={};
   wbcHistory.forEach(a=>Object.keys(a.wbc||{}).forEach(c=>{freqMap[c]=(freqMap[c]||0)+1;}));
@@ -3689,11 +3707,11 @@ Structure du cours de remédiation :
   try{
     const text=await geminiText(key,sysP,prompt,1400,0.45);
     box.innerHTML=`<div style="background:linear-gradient(135deg,#fffbeb,#fff7ed);border:1.5px solid #fde68a;border-radius:14px;padding:1.1rem 1.2rem;">
-      <div style="font-size:.7rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">📚 Cours de remédiation personnalisé — ${_e(m.titre||'')}</div>
+      <div style="font-size:.70rem;font-weight:800;color:#92400e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">📚 Cours de remédiation personnalisé — ${_e(m.titre||'')}</div>
       <div style="font-size:.83rem;line-height:1.85;color:#1e293b;">${formatAIText(text)}</div>
       <div style="margin-top:.9rem;display:flex;gap:.5rem;">
         <button class="btn btn-gold btn-sm" onclick="retryQ()">🔄 Retenter le quiz</button>
-        <button onclick="document.getElementById('glsRemBox').innerHTML=''" style="background:none;border:none;font-size:.72rem;color:var(--gray400);cursor:pointer;font-family:inherit;">Masquer ↑</button>
+        <button onclick="document.getElementById('glsRemBox').innerHTML=''" style="background:none;border:none;font-size:.70rem;color:var(--gray400);cursor:pointer;font-family:inherit;">Masquer ↑</button>
       </div>
     </div>`;
   }catch(e){box.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
@@ -3704,7 +3722,7 @@ function renderMemo(m){
   const s=m.memo;if(!s)return empty('📄','Aucun mémo');
   return`<div style="max-width:640px;">
     <div class="ccard" style="border-left:4px solid var(--accent);margin-bottom:1rem;">
-      <div style="font-size:.64rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Mémo terrain — Quick Reference</div>
+      <div style="font-size:.62rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Mémo terrain — Quick Reference</div>
       <h3 style="font-size:.95rem;color:var(--navy);">${_e(s.titre||m.titre)}</h3></div>
     ${(s.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
     ${(s.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
@@ -3718,12 +3736,12 @@ function renderMemo(m){
 function renderKPIs(m){
   if(!(m.kpis?.length))return`<div style="text-align:center;padding:2rem;color:var(--gray400);">
     <div style="font-size:2.5rem;margin-bottom:.5rem;">📈</div>
-    <div style="font-size:.85rem;font-weight:700;margin-bottom:.3rem;">KPIs non disponibles</div>
-    <div style="font-size:.75rem;">Les modules créés avant cette mise à jour n'ont pas de KPIs.<br>Dupliquez et régénérez le module pour obtenir les indicateurs de performance.</div>
+    <div style="font-size:.86rem;font-weight:700;margin-bottom:.3rem;">KPIs non disponibles</div>
+    <div style="font-size:.78rem;">Les modules créés avant cette mise à jour n'ont pas de KPIs.<br>Dupliquez et régénérez le module pour obtenir les indicateurs de performance.</div>
   </div>`;
   const intro=`<div style="background:linear-gradient(135deg,var(--pro-bg),#fff);border:1.5px solid #fde68a;border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
-    <div style="font-size:.68rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📈 Indicateurs de Performance Clés — ${_e(m.dom||m.titre)}</div>
-    <div style="font-size:.8rem;color:var(--gray700);line-height:1.55;">Ces KPIs vous permettent de vous situer précisément dans votre progression professionnelle et de vous fixer des objectifs concrets. Un expert se reconnait à ses indicateurs terrain, pas seulement à ses diplômes.</div>
+    <div style="font-size:.70rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📈 Indicateurs de Performance Clés — ${_e(m.dom||m.titre)}</div>
+    <div style="font-size:.78rem;color:var(--gray700);line-height:1.55;">Ces KPIs vous permettent de vous situer précisément dans votre progression professionnelle et de vous fixer des objectifs concrets. Un expert se reconnait à ses indicateurs terrain, pas seulement à ses diplômes.</div>
   </div>`;
   const cards=(m.kpis||[]).map(k=>`
     <div class="kpi-meter-card">
@@ -3738,8 +3756,8 @@ function renderKPIs(m){
       ${k.comment_progresser?`<div class="kpi-progress-tip">⬆ ${_e(k.comment_progresser)}</div>`:''}
     </div>`).join('');
   const reflexes=m.memo?.reflexes_expert?.length?`<div style="margin-top:1.5rem;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1.5px solid #c4b5fd;border-radius:14px;padding:1rem 1.2rem;">
-    <div style="font-size:.68rem;font-weight:900;color:#6d28d9;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">⚡ Réflexes de l'Expert</div>
-    ${(m.memo.reflexes_expert||[]).map(r=>`<div style="font-size:.8rem;color:#4c1d95;padding:.35rem 0;border-bottom:1px solid #ddd6fe;line-height:1.55;">→ ${_e(r)}</div>`).join('')}
+    <div style="font-size:.70rem;font-weight:900;color:#6d28d9;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem;">⚡ Réflexes de l'Expert</div>
+    ${(m.memo.reflexes_expert||[]).map(r=>`<div style="font-size:.78rem;color:#4c1d95;padding:.35rem 0;border-bottom:1px solid #ddd6fe;line-height:1.55;">→ ${_e(r)}</div>`).join('')}
   </div>`:'';
   return intro+`<div class="kpi-meter-wrap">${cards}</div>`+reflexes;
 }
@@ -3749,7 +3767,7 @@ function renderRev(m){
   const s=m.revision;if(!s)return empty('📋','Aucune fiche');
   return`<div style="max-width:640px;">
     <div class="ccard" style="border-left:4px solid var(--purple);margin-bottom:1rem;">
-      <div style="font-size:.64rem;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Fiche de révision — Examen</div>
+      <div style="font-size:.62rem;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Fiche de révision — Examen</div>
       <h3 style="font-size:.95rem;color:var(--navy);">${_e(s.titre||m.titre)}</h3></div>
     ${(s.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(s.notions||[]).map(n=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n)}</div>`).join('')}</div>`:''}
     ${(s.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(s.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
@@ -3768,18 +3786,18 @@ async function openRem(comp){
   const p=m?.mode==='pro';
   document.getElementById('remTitle').textContent=(p?'🔧':'📖')+' Remédiation : '+comp;
   _apOpenModal(document.getElementById('remModal'));
-  document.getElementById('remBody').innerHTML=`<div style="text-align:center;padding:2rem;"><div class="spinner" style="border-color:var(--gray200);border-top-color:var(--${p?'accent':'purple'});width:28px;height:28px;margin:0 auto 1rem;"></div><div style="font-size:.82rem;color:var(--gray600);">Génération en cours…</div></div>`;
+  document.getElementById('remBody').innerHTML=`<div style="text-align:center;padding:2rem;"><div class="spinner" style="border-color:var(--gray200);border-top-color:var(--${p?'accent':'purple'});width:28px;height:28px;margin:0 auto 1rem;"></div><div style="font-size:.83rem;color:var(--gray600);">Génération en cours…</div></div>`;
   try{
     const SYS=p?`Tu es formateur expert en "${m.dom}". Remédiation terrain pratique. JSON.`:`Tu es professeur expert en "${m.dom}". Remédiation pédagogique claire. JSON.`;
     const rem=await gemini(key,SYS,`Module: "${m.titre}" — ${m.niv}\nÉchec sur: "${comp}"\n{"titre":"Remédiation: [titre]","explication":"Réexplication différente, analogies, décomposition. 8-10 phrases${p?' avec exemples terrain concrets':' progressives'}.","astuce":"${p?'Règle mémo':'Moyen mnémotechnique'} (1-2 phrases percutantes)","exemple":"${p?'Cas professionnel avec données précises':'Exemple résolu étape par étape'} (5-7 phrases)","verification":[{"q":"Question 1?","reponse":"Réponse complète"},{"q":"Question 2?","reponse":"Réponse"}]}`,900,T.CONTENU);
     document.getElementById('remBody').innerHTML=`
       <h3 style="color:var(--${p?'accent':'purple'});margin-bottom:.8rem;">${_e(rem.titre||'')}</h3>
       <div style="font-size:.83rem;line-height:1.8;margin-bottom:1rem;">${fmtTxt(rem.explication||'')}</div>
-      ${rem.exemple?`<div style="background:${p?'var(--pro-bg)':'var(--acad-bg)'};border-left:3px solid var(--${p?'accent':'purple'});border-radius:0 9px 9px 0;padding:.75rem 1rem;margin-bottom:1rem;font-size:.81rem;line-height:1.7;"><strong>${p?'🔧 Cas terrain :':'📐 Exemple :'}</strong><br>${_e(rem.exemple)}</div>`:''}
+      ${rem.exemple?`<div style="background:${p?'var(--pro-bg)':'var(--acad-bg)'};border-left:3px solid var(--${p?'accent':'purple'});border-radius:0 9px 9px 0;padding:.75rem 1rem;margin-bottom:1rem;font-size:.78rem;line-height:1.7;"><strong>${p?'🔧 Cas terrain :':'📐 Exemple :'}</strong><br>${_e(rem.exemple)}</div>`:''}
       ${rem.astuce?`<div class="alert alert-warning" style="margin-bottom:1rem;"><strong>💡 ${p?'Règle mémo :':'À retenir :'}</strong> ${_e(rem.astuce)}</div>`:''}
       ${(rem.verification||[]).length?`<div><strong style="font-size:.78rem;color:var(--navy);display:block;margin-bottom:.5rem;">✓ Vérifiez votre compréhension :</strong>
-        ${(rem.verification||[]).map((v,i)=>`<div style="border:1.5px solid var(--gray200);border-radius:9px;padding:.65rem .9rem;margin-bottom:.45rem;">
-          <div style="font-size:.81rem;font-weight:700;margin-bottom:.3rem;">${i+1}. ${_e(v.q)}</div>
+        ${(rem.verification||[]).map((v,i)=>`<div style="border:1.5px solid var(--gray200);border-radius:10px;padding:.65rem .9rem;margin-bottom:.45rem;">
+          <div style="font-size:.78rem;font-weight:700;margin-bottom:.3rem;">${i+1}. ${_e(v.q)}</div>
           <button class="corr-btn" onclick="toggleCorr(this)">Voir la réponse</button>
           <div class="corr-body">${_e(v.reponse)}</div></div>`).join('')}</div>`:''}`;
   }catch(e){document.getElementById('remBody').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div>`;}
