@@ -1154,6 +1154,9 @@ function _normMod(m){
   const raw=m.qcm||m.quiz||[];
   const nq=raw.map(q=>({...q,rep:q.rep!==undefined?q.rep:q.correct,correct:q.correct!==undefined?q.correct:q.rep,expl:q.expl||q.explication||'',explication:q.explication||q.expl||''}));
   m.qcm=nq;m.quiz=nq;
+  /* Nettoie aussi les modules créés avant l'ajout de ce filtre :
+     les libellés de gabarit disparaissent à l'affichage sans regénération. */
+  if(Array.isArray(m.sections))m.sections=m.sections.map(_cleanSection);
   return m;
 }
 const getMods=()=>{try{return(JSON.parse(localStorage.getItem('gls_modules')||'[]')).map(_normMod);}catch{return[];}};
@@ -2005,6 +2008,43 @@ function _detectModuleType(m){
 }
 
 /* ── Score de charge cognitive d'une section (0-10) ── */
+/* ── Nettoyage des libellés de gabarit ──
+   Les modèles recopient volontiers les étiquettes du JSON d'exemple
+   (« Valeur 2 : … », « Erreur propre aux débutants de X — … »). La consigne
+   dans le prompt réduit le phénomène sans l'éliminer : on retire donc ces
+   préfixes après coup, ce qui garantit le résultat quel que soit le modèle. */
+const _RE_TPL_PREFIX=new RegExp(
+  '^\\s*(?:[⚠️❌⛔✔✅💡🔧📐🎯•\\-]\\s*)*'+                    // puce ou émoji éventuel
+  '(?:'+
+    'valeur(?:/norme)?(?:\\s+critique)?(?:\\s+à\\s+mémoriser(?:\\s+absolument)?)?|'+
+    'outil|erreur(?:\\s+propre\\s+aux\\s+débutants(?:\\s+de\\s+[^:—-]{0,40})?)?|'+
+    'point(?:\\s+(?:critique|de\\s+vigilance))?|risque(?:\\s+précis)?|'+
+    'étape|règle|formule|indice|piège|réflexe(?:\\s+pro)?|intuition|compétence|'+
+    'question|q|objectif|contrainte|notion'+
+  ')'+
+  '\\s*(?:n°\\s*)?\\d*\\s*(?:avec\\s+contexte\\s+d[\'’]application)?\\s*[:—–-]\\s+',
+  'i');
+
+function _stripTplLabel(v){
+  if(typeof v!=='string')return v;
+  const out=v.replace(_RE_TPL_PREFIX,'').replace(/^\[|\]$/g,'').trim();
+  // On ne garde le nettoyage que s'il reste une phrase utile
+  return out.length>=8?out:v.trim();
+}
+
+/* Applique le nettoyage aux champs rédactionnels d'une section. */
+function _cleanSection(sec){
+  if(!sec||typeof sec!=='object')return sec;
+  const listFields=['etapes','points_vigilance','outils','erreurs','donnees_cles',
+                    'points_cles','erreurs_courantes','intuition_expert','reflexe_pro'];
+  const out={...sec};
+  listFields.forEach(f=>{
+    if(Array.isArray(out[f]))out[f]=out[f].map(_stripTplLabel).filter(x=>typeof x!=='string'||x.length>2);
+    else if(typeof out[f]==='string')out[f]=_stripTplLabel(out[f]);
+  });
+  return out;
+}
+
 function _cognitiveLoadScore(section){
   const text=section.contenu||'';
   const boldCount=(text.match(/\*\*[^*]+\*\*/g)||[]).length;
@@ -2248,11 +2288,23 @@ async function startGen(){
     const mod=p?await pipePro(fd,key):await pipeAcad(fd,key);
     addMod(mod);_cur=mod;openMod(mod.id);
     _bgVerifyModule(mod,key);
+    _reportIncomplete(mod);
   }catch(e){
     document.getElementById('gErr').style.display='block';
     document.getElementById('gErr').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div><button class="btn btn-ghost btn-sm" style="margin-top:.5rem;" onclick="nav('chat')">← Retour</button>`;
   }
 }
+/* Prévient quand une partie du module n'a pas pu être générée.
+   Sans cela, l'utilisateur repart avec un module qui paraît complet
+   alors que le quiz, le mémo ou des sections entières sont vides. */
+function _reportIncomplete(mod){
+  const parts=(mod._incomplet||[]).slice();
+  const secKO=(mod.sections||[]).filter(s=>s._failed).length;
+  if(secKO)parts.unshift(secKO+(secKO>1?' sections':' section'));
+  if(!parts.length)return;
+  showToast(`⚠️ Généré partiellement — manquant : ${parts.join(', ')}. Utilisez « Régénérer » pour compléter.`,'err');
+}
+
 function setFMsg(m,c){document.getElementById('fMsg').innerHTML=`<span style="color:${c};">${m}</span>`;}
 function setStep(id,state,msg,p){
   const el=document.getElementById('gs-'+id),ico=document.getElementById('gi-'+id),sub=document.getElementById('gsub-'+id);
@@ -2297,6 +2349,7 @@ async function _gatherTerrainData(fd,key,SYS,ctx){
    PIPELINE PRO
 ══════════════════════════════════════════════ */
 async function pipePro(fd,key){
+  const _warn=[]; // étapes optionnelles ayant échoué — signalées à la fin
   const docCtx=fd.doc?`\n\n--- DOCUMENT DE RÉFÉRENCE FOURNI PAR LE FORMATEUR ---\n${fd.doc.slice(0,8000)}\n--- FIN DOCUMENT ---`:'';
   const ctx=`Domaine: ${fd.dom}\nCompétence/thème: ${fd.comp}\nPublic cible: ${fd.pub}\nNiveau: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nNormes applicables: '+fd.norm:''}${fd.ctx?'\nMatériel/équipements: '+fd.ctx:''}${docCtx}`;
   const SYS=`Tu es un formateur professionnel expert du métier "${fd.dom}" (spécialité : ${fd.comp||fd.dom}), avec 20 ans d'expérience terrain dans CE domaine précis.
@@ -2310,6 +2363,12 @@ AVANT DE GÉNÉRER, identifie mentalement ces 4 ancres qui distinguent "${fd.dom
 Tu génères des formations qui permettent de VRAIMENT comprendre le métier : le pourquoi physique/chimique/mécanique de chaque geste, ce que les experts savent implicitement, les chiffres et normes exacts, les indicateurs terrain concrets. Si un document de référence est fourni, base-toi dessus prioritairement.
 
 FIABILITÉ RÉGLEMENTAIRE : ne jamais écrire un numéro de norme précis (ex: "NF XP C 12-345 art.4.2") ou un seuil réglementaire chiffré dont tu n'es pas certain qu'il est correct. Si incertain : formule de façon générale ("selon la réglementation en vigueur pour ce type d'installation, la valeur est de l'ordre de X"). Exemples pédagogiques, ordres de grandeur d'entraînement → approximatifs acceptables. Normes réglementaires, seuils de sécurité, dosages médicaux → exacts ou formulés prudemment. Ne jamais inventer un nom d'organisme, de texte de loi ou de certification.
+
+GABARIT — impératif : le JSON d'exemple décrit CE QU'IL FAUT ÉCRIRE, ce n'est pas du texte à recopier.
+N'écris jamais dans ta réponse les libellés du gabarit : pas de « Valeur 1 », « Outil 2 », « Erreur propre aux débutants », « Point critique 3 », « Étape 1 » suivis de deux-points. Chaque élément commence directement par son contenu réel.
+Les crochets [ ] du gabarit sont des emplacements à remplir, jamais à conserver.
+
+RÉPÉTITION — interdite : ne redis jamais une phrase déjà écrite, même reformulée. Chaque phrase apporte une information nouvelle. Un paragraphe court et dense vaut mieux qu'un paragraphe étiré par des redites.
 
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres, les étapes et les explications. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Chaque phrase doit vouloir dire quelque chose de précis — relis-toi avant de répondre.
@@ -2361,44 +2420,50 @@ JSON uniquement.`;
       setStep('s2','active',`⚡ ${cnt}/${plan.sections.length} sections rédigées`,true);
       const _pl=document.getElementById('genPreviewList');
       if(_pl){const _pi=document.createElement('div');_pi.className='gen-preview-item';_pi.textContent=sc.titre||s.titre||('Section '+cnt);_pl.appendChild(_pi);_pl.scrollTop=_pl.scrollHeight;}
-      return{...s,...sc};
-    }catch{
+      return _cleanSection({...s,...sc});
+    }catch(e){
       const cnt=++_psDone;
       setStep('s2','active',`⚡ ${cnt}/${plan.sections.length} sections rédigées`,true);
-      return s;
+      /* Échec : on marque la section pour que le lecteur le voie et puisse
+         relancer, au lieu de livrer un titre sans contenu. */
+      return{...s,_failed:true,_failReason:(e&&e.message)||'Erreur inconnue'};
     }
   });
-  setStep('s2','done',sections.length+' sections rédigées',true);
+  const _proFails=sections.filter(s=>s._failed).length;
+  setStep('s2',_proFails?'error':'done',
+    _proFails?`${sections.length-_proFails}/${sections.length} sections rédigées — ${_proFails} à relancer`
+             :sections.length+' sections rédigées',true);
 
   setStep('s3','active','',true);
   let scenarios=[],cas={};
-  try{const sr=await _retry(()=>gemini(key,SYS,`${ctxPlan}\n\nGénère un cas terrain réel ET 3 mises en situation progressives.\n{"cas":{"entreprise":"Nom entreprise fictive réaliste (ex: ELEC Solutions, Chantier Dupont)","contexte":"Présentation de l'entreprise, du secteur, de l'environnement de travail (3-4 phrases réalistes)","donnees":"Données chiffrées clés du contexte: effectifs, production, équipements, chiffres terrain (ex: 120 salariés, 3 lignes de production, maintenance 4h/semaine)","enjeux":"Enjeux financiers/opérationnels concrets (ex: 15 000€ de pertes/semaine en cas de panne)","probleme":"Le problème concret observé sur le terrain — symptômes mesurables, situation actuelle (3-4 phrases)","objectif":"Objectif SMART à atteindre avec cette formation (ex: réduire les pannes de 40% en 3 mois)","contraintes":"Contraintes réelles: budget, délai, normes, équipe (1-2 phrases)"},"scenarios":[{"titre":"Titre scénario précis (lieu + situation)","difficulte":"débutant|intermédiaire|expert","contexte":"Environnement précis: lieu, heure, conditions, équipements (4-5 phrases)","situation":"Ce que le professionnel observe (5-6 phrases très détaillées avec données techniques)","consigne":"Mission exacte avec critères de réussite mesurables.","indices":["Indice 1","Indice 2","Indice 3"],"pieges":["Piège 1","Piège 2"],"correction":"Raisonnement expert complet: analyse, diagnostic, plan d'action, vérification. 10-12 phrases."}]}`,2000,T.EXERCICE));scenarios=sr.scenarios||[];cas=sr.cas||{};}catch{}
+  try{const sr=await _retry(()=>gemini(key,SYS,`${ctxPlan}\n\nGénère un cas terrain réel ET 3 mises en situation progressives.\n{"cas":{"entreprise":"Nom entreprise fictive réaliste (ex: ELEC Solutions, Chantier Dupont)","contexte":"Présentation de l'entreprise, du secteur, de l'environnement de travail (3-4 phrases réalistes)","donnees":"Données chiffrées clés du contexte: effectifs, production, équipements, chiffres terrain (ex: 120 salariés, 3 lignes de production, maintenance 4h/semaine)","enjeux":"Enjeux financiers/opérationnels concrets (ex: 15 000€ de pertes/semaine en cas de panne)","probleme":"Le problème concret observé sur le terrain — symptômes mesurables, situation actuelle (3-4 phrases)","objectif":"Objectif SMART à atteindre avec cette formation (ex: réduire les pannes de 40% en 3 mois)","contraintes":"Contraintes réelles: budget, délai, normes, équipe (1-2 phrases)"},"scenarios":[{"titre":"Titre scénario précis (lieu + situation)","difficulte":"débutant|intermédiaire|expert","contexte":"Environnement précis: lieu, heure, conditions, équipements (4-5 phrases)","situation":"Ce que le professionnel observe (5-6 phrases très détaillées avec données techniques)","consigne":"Mission exacte avec critères de réussite mesurables.","indices":["Indice 1","Indice 2","Indice 3"],"pieges":["Piège 1","Piège 2"],"correction":"Raisonnement expert complet: analyse, diagnostic, plan d'action, vérification. 10-12 phrases."}]}`,2000,T.EXERCICE));scenarios=sr.scenarios||[];cas=sr.cas||{};}catch(e){_warn.push('cas terrain + scénarios');}
   setStep('s3','done',scenarios.length+' mises en situation + cas terrain générés',true);
   const casCtx=cas.entreprise?`\nFil rouge du module : ${cas.entreprise}${cas.contexte?' — '+cas.contexte.slice(0,180):''}${cas.probleme?' — Problème observé : '+cas.probleme.slice(0,150):''}`:''
 
   setStep('s4','active','',true);
   let checklist={avant:[],pendant:[],apres:[]},quiz=[];
-  try{const cr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtx}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n${getCfg().quizCount} questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Chaque mauvaise réponse correspond à un type d'erreur réelle et identifiable dans ce métier : confusion entre deux valeurs/normes proches de "${fd.dom}", erreur d'unité ou de facteur, geste presque correct mais incorrect dans CE contexte précis, ou réponse correcte dans un contexte légèrement différent (autre matériau, autre tension, autre norme). L'explication indique POURQUOI la mauvaise réponse est une erreur courante dans "${fd.dom}", pas seulement pourquoi la bonne est correcte (2-3 phrases).`,2200,T.EXERCICE));checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch{}
+  try{const cr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtx}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n${getCfg().quizCount} questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Chaque mauvaise réponse correspond à un type d'erreur réelle et identifiable dans ce métier : confusion entre deux valeurs/normes proches de "${fd.dom}", erreur d'unité ou de facteur, geste presque correct mais incorrect dans CE contexte précis, ou réponse correcte dans un contexte légèrement différent (autre matériau, autre tension, autre norme). L'explication indique POURQUOI la mauvaise réponse est une erreur courante dans "${fd.dom}", pas seulement pourquoi la bonne est correcte (2-3 phrases).`,2200,T.EXERCICE));checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch(e){_warn.push('check-list + quiz');}
   setStep('s4','done','Check-list + '+quiz.length+' questions QCM',true);
 
   setStep('s5','active','',true);
   let memo={};
-  try{memo=await gemini(key,SYS,`${ctxPlan}${casCtx}\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${fd.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5","Règle 6","Règle 7"],"formules":["Formule/valeur 1: [formule ou valeur] — dans quel cas l'utiliser — exemple chiffré","Formule 2","Valeur critique 3","Valeur 4"],"formules_kv":[{"nom":"Nom court (ex: Loi d'Ohm)","valeur":"U = R × I"},{"nom":"Nom 2","valeur":"formule ou valeur numérique exacte"},{"nom":"Nom 3","valeur":"..."},{"nom":"Nom 4","valeur":"..."},{"nom":"Nom 5","valeur":"..."},{"nom":"Nom 6","valeur":"..."}],"interdits":["⛔ JAMAIS: erreur critique 1 — risque exact (blessure/panne/non-conformité)","⛔ JAMAIS: erreur 2","⛔ JAMAIS: erreur 3","⛔ JAMAIS: erreur 4"],"reflexes_expert":["Réflexe pro 1: situation déclenchante → action instinctive d'un expert","Réflexe 2","Réflexe 3","Réflexe 4"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante que tout professionnel gravé dans sa mémoire"}`,1400,T.CONTENU);}catch{}
+  try{memo=await gemini(key,SYS,`${ctxPlan}${casCtx}\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${fd.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5","Règle 6","Règle 7"],"formules":["Formule/valeur 1: [formule ou valeur] — dans quel cas l'utiliser — exemple chiffré","Formule 2","Valeur critique 3","Valeur 4"],"formules_kv":[{"nom":"Nom court (ex: Loi d'Ohm)","valeur":"U = R × I"},{"nom":"Nom 2","valeur":"formule ou valeur numérique exacte"},{"nom":"Nom 3","valeur":"..."},{"nom":"Nom 4","valeur":"..."},{"nom":"Nom 5","valeur":"..."},{"nom":"Nom 6","valeur":"..."}],"interdits":["⛔ JAMAIS: erreur critique 1 — risque exact (blessure/panne/non-conformité)","⛔ JAMAIS: erreur 2","⛔ JAMAIS: erreur 3","⛔ JAMAIS: erreur 4"],"reflexes_expert":["Réflexe pro 1: situation déclenchante → action instinctive d'un expert","Réflexe 2","Réflexe 3","Réflexe 4"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante que tout professionnel gravé dans sa mémoire"}`,1400,T.CONTENU);}catch(e){_warn.push('mémo terrain');}
   setStep('s5','done','Mémo terrain complet',true);
 
   setStep('s6','active','',true);
   let kpis=[];
-  try{const kr=await gemini(key,SYS,`${ctxPlan}\n\nGénère 5 à 6 KPIs (indicateurs de performance clés) qui permettent de mesurer concrètement le niveau professionnel dans ce métier. Ces KPIs doivent être mesurables, issus de la réalité du terrain.\n{"kpis":[{"indicateur":"Nom précis de l'indicateur (ex: Productivité de pose câble)","quoi_mesurer":"Ce qu'on mesure exactement et comment (ex: mètres de câble posé par heure en pose encastrée standard)","unite":"unité de mesure (ex: m/h, %, min, €/intervention)","seuil_debutant":"Valeur typique d'un débutant (ex: 4-6 m/h)","seuil_operationnel":"Valeur pour être autonome et employable (ex: 10-13 m/h)","seuil_expert":"Valeur d'un professionnel confirmé (ex: 16-20 m/h)","pourquoi_important":"Pourquoi cet indicateur est stratégique pour l'employabilité et la rentabilité — 2 phrases","comment_progresser":"Comment un débutant peut travailler cet indicateur pour progresser — 2 phrases concrètes"}]}`,1400,T.CONTENU);kpis=kr.kpis||[];}catch{}
+  try{const kr=await gemini(key,SYS,`${ctxPlan}\n\nGénère 5 à 6 KPIs (indicateurs de performance clés) qui permettent de mesurer concrètement le niveau professionnel dans ce métier. Ces KPIs doivent être mesurables, issus de la réalité du terrain.\n{"kpis":[{"indicateur":"Nom précis de l'indicateur (ex: Productivité de pose câble)","quoi_mesurer":"Ce qu'on mesure exactement et comment (ex: mètres de câble posé par heure en pose encastrée standard)","unite":"unité de mesure (ex: m/h, %, min, €/intervention)","seuil_debutant":"Valeur typique d'un débutant (ex: 4-6 m/h)","seuil_operationnel":"Valeur pour être autonome et employable (ex: 10-13 m/h)","seuil_expert":"Valeur d'un professionnel confirmé (ex: 16-20 m/h)","pourquoi_important":"Pourquoi cet indicateur est stratégique pour l'employabilité et la rentabilité — 2 phrases","comment_progresser":"Comment un débutant peut travailler cet indicateur pour progresser — 2 phrases concrètes"}]}`,1400,T.CONTENU);kpis=kr.kpis||[];}catch(e){_warn.push('indicateurs KPI');}
   setStep('s6','done',kpis.length+' KPIs métier générés',true);
 
   const qcm=(quiz||[]).map(q=>({...q,rep:q.rep!==undefined?q.rep:q.correct,expl:q.expl||q.explication||''}));
-  return{id:Date.now(),mode:'pro',icone:plan.icone||'💼',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],etapes:plan.etapes||[],formules:(memo.formules_kv||[]),cas,sections,scenarios,checklist,qcm,quiz:qcm,memo,kpis,scores:{},wrongByComp:{}};
+  return{id:Date.now(),mode:'pro',icone:plan.icone||'💼',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],etapes:plan.etapes||[],formules:(memo.formules_kv||[]),cas,sections,scenarios,checklist,qcm,quiz:qcm,memo,kpis,scores:{},wrongByComp:{},_incomplet:_warn.slice()};
 }
 
 /* ══════════════════════════════════════════════
    PIPELINE ACADÉMIQUE
 ══════════════════════════════════════════════ */
 async function pipeAcad(fd,key){
+  const _warn=[]; // étapes optionnelles ayant échoué — signalées à la fin
   const docCtx=fd.doc?`\n\n--- DOCUMENT DU PROFESSEUR ---\n${fd.doc.slice(0,8000)}\n--- FIN DOCUMENT ---`:'';
   const ctx=`Discipline: ${fd.dom}\nChapitre/notion: ${fd.comp}\nNiveau: ${fd.pub}\nType de séance: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nPrérequis techniques: '+fd.norm:''}${fd.ctx?'\nObjectifs pédagogiques: '+fd.ctx:''}${docCtx}`;
   const SYS=`Tu es un professeur-ingénieur expert en "${fd.dom}" (chapitre : ${fd.comp||fd.dom}), spécialiste de l'enseignement supérieur en ingénierie — toutes filières : génie électrique, informatique, mécanique, génie civil, chimie, aéronautique, biotechnologie, management industriel, environnement, mathématiques appliquées, et toute autre discipline d'ingénierie (BUT, Licence Pro, cycle ingénieur, Master).
@@ -2414,6 +2479,12 @@ Tu crées des cours rigoureux : théorie appuyée sur bases physiques, formules 
 FIABILITÉ : ne jamais écrire un numéro de norme, de standard ou une valeur normative précise dont tu n'es pas certain de l'exactitude. Si incertain : "de l'ordre de", "selon les standards industriels pour ce type d'application". Exercices numériques TD/TP → construits librement pour la pédagogie. Valeurs normatives réglementaires → exactes ou formulées prudemment. Ne jamais inventer un nom d'organisme ou de certification.
 
 COHÉRENCE NUMÉRIQUE — impératif : dans un exercice, les valeurs de l'énoncé et celles du corrigé doivent correspondre exactement. Refais le calcul avant de l'écrire : un résultat faux rend l'exercice inutilisable. Chaque résultat porte son unité.
+
+GABARIT — impératif : le JSON d'exemple décrit CE QU'IL FAUT ÉCRIRE, ce n'est pas du texte à recopier.
+N'écris jamais dans ta réponse les libellés du gabarit : pas de « Valeur 1 », « Outil 2 », « Erreur propre aux débutants », « Point critique 3 », « Étape 1 » suivis de deux-points. Chaque élément commence directement par son contenu réel.
+Les crochets [ ] du gabarit sont des emplacements à remplir, jamais à conserver.
+
+RÉPÉTITION — interdite : ne redis jamais une phrase déjà écrite, même reformulée. Chaque phrase apporte une information nouvelle. Un paragraphe court et dense vaut mieux qu'un paragraphe étiré par des redites.
 
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres et les corrigés. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Relis-toi avant de répondre.
@@ -2461,35 +2532,38 @@ JSON uniquement.`;
       setStep('s2','active',`⚡ ${cntA}/${plan.sections.length} sections rédigées`,false);
       const _plA=document.getElementById('genPreviewList');
       if(_plA){const _piA=document.createElement('div');_piA.className='gen-preview-item';_piA.textContent=sc.titre||s.titre||('Section '+cntA);_plA.appendChild(_piA);_plA.scrollTop=_plA.scrollHeight;}
-      return{...s,...sc};
-    }catch{
+      return _cleanSection({...s,...sc});
+    }catch(e){
       const cntA=++_paDone;
       setStep('s2','active',`⚡ ${cntA}/${plan.sections.length} sections rédigées`,false);
-      return s;
+      return{...s,_failed:true,_failReason:(e&&e.message)||'Erreur inconnue'};
     }
   });
-  setStep('s2','done',sections.length+' sections rédigées',false);
+  const _acadFails=sections.filter(s=>s._failed).length;
+  setStep('s2',_acadFails?'error':'done',
+    _acadFails?`${sections.length-_acadFails}/${sections.length} sections rédigées — ${_acadFails} à relancer`
+              :sections.length+' sections rédigées',false);
 
   setStep('s3','active','',false);
   let exercices=[],cas={};
   const exPrompt=`${ctxPlan}\nCohérence : utilise les mêmes notions, symboles et ordres de grandeur que ceux établis dans le plan.\n\nGénère un cas industriel pédagogique ET 3 exercices TD/TP:\n{"cas":{"entreprise":"Nom entreprise industrielle fictive réaliste (ex: Usine MECA-TECH, Centrale EDF Sud)","contexte":"Contexte industriel réaliste: secteur, équipements, organisation (3-4 phrases)","donnees":"Données techniques numériques du contexte: puissances, débits, tensions, dimensions, capacités (données chiffrées)","enjeux":"Enjeux pédagogiques et industriels — ce qu'on cherche à résoudre ou optimiser","probleme":"Problème technique concret observé sur le terrain qui motive le cours (3-4 phrases)","objectif":"Objectif technique à atteindre grâce aux compétences du cours (formulation SMART)","contraintes":"Contraintes techniques, réglementaires ou économiques"},"exercices":[{"titre":"Exercice 1 — [theme precis]","type":"application directe ou analyse de systeme ou synthese ou etude de cas industriel","difficulte":"debutant|intermediaire|avance","enonce":"Contexte industriel réaliste + données numériques complètes (5-7 phrases)","questions":["Q1. Question technique?","Q2. ...","Q3. ...","Q4. ..."],"correction":"Corrigé complet: démarche, formules, calculs pas-à-pas, résultats avec unités (10-12 phrases)","duree":"ex: 20 min"}]}`;
-  try{const er=await _retry(()=>gemini(key,SYS,exPrompt,2000,T.EXERCICE));exercices=er.exercices||[];cas=er.cas||{};}catch{}
+  try{const er=await _retry(()=>gemini(key,SYS,exPrompt,2000,T.EXERCICE));exercices=er.exercices||[];cas=er.cas||{};}catch(e){_warn.push('cas industriel + exercices');}
   setStep('s3','done',exercices.length+' exercices TD/TP + cas industriel générés',false);
   const casCtxAcad=cas.entreprise?`\nCas industriel du cours : ${cas.entreprise}${cas.contexte?' — '+cas.contexte.slice(0,180):''}`:''
 
   setStep('s4','active','',false);
   let quiz=[];
-  try{const qr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtxAcad}\nNotions: ${(plan.notions||[]).join(', ')}\n\n${getCfg().quizCount} QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nChaque mauvaise réponse correspond à un type d'erreur conceptuelle réelle dans "${fd.dom}" : erreur d'unité ou d'exposant, confusion entre deux formules proches du chapitre, résultat d'une démarche presque correcte avec une hypothèse fausse, ou valeur correcte dans un autre régime ou une autre configuration. L'explication précise pourquoi la mauvaise réponse est une erreur que les étudiants font souvent dans "${fd.dom}", pas seulement pourquoi la bonne est correcte.`,1800,T.EXERCICE));quiz=qr.quiz||[];}catch{}
+  try{const qr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtxAcad}\nNotions: ${(plan.notions||[]).join(', ')}\n\n${getCfg().quizCount} QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nChaque mauvaise réponse correspond à un type d'erreur conceptuelle réelle dans "${fd.dom}" : erreur d'unité ou d'exposant, confusion entre deux formules proches du chapitre, résultat d'une démarche presque correcte avec une hypothèse fausse, ou valeur correcte dans un autre régime ou une autre configuration. L'explication précise pourquoi la mauvaise réponse est une erreur que les étudiants font souvent dans "${fd.dom}", pas seulement pourquoi la bonne est correcte.`,1800,T.EXERCICE));quiz=qr.quiz||[];}catch(e){_warn.push('quiz');}
   setStep('s4','done',quiz.length+' questions QCM générées',false);
 
   setStep('s5','active','',false);
   let revision={};
   const revPrompt=`${ctxPlan}\nNotions: ${(plan.notions||[]).join(', ')}\n\nFiche de révision synthétique pour examen ingénieur:\n{"titre":"Fiche synthèse: [titre]","notions":["Notion 1: définition + formule si applicable","Notion 2: ...","Notion 3: ...","Notion 4: ...","Notion 5: ...","Notion 6: ..."],"formules":["Formule 1: formule mathématique — conditions application — unités","Formule 2","Formule 3","Théorème ou propriété 4"],"formules_kv":[{"nom":"Nom court (ex: Loi de Kirchhoff)","valeur":"formule mathématique exacte (ex: ΣI = 0)"},{"nom":"Nom 2","valeur":"formule 2"},{"nom":"Nom 3","valeur":"formule 3"},{"nom":"Nom 4","valeur":"formule 4"},{"nom":"Nom 5","valeur":"formule 5"},{"nom":"Nom 6","valeur":"formule 6"}],"pieges":["Piège classique 1: erreur fréquente à éviter","Piège 2: confusion entre deux notions","Piège 3: erreur unité ou de signe","Piège 4"],"methode":["Étape 1: action à faire en premier à examen","Étape 2","Étape 3","Étape 4"],"conseil":"Conseil stratégique examen (1 phrase percutante)"}`;
-  try{revision=await gemini(key,SYS,revPrompt,1200,T.CONTENU);}catch{}
+  try{revision=await gemini(key,SYS,revPrompt,1200,T.CONTENU);}catch(e){_warn.push('fiche de révision');}
   setStep('s5','done','Fiche de révision complète',false);
 
   const qcm=(quiz||[]).map(q=>({...q,rep:q.rep!==undefined?q.rep:q.correct,expl:q.expl||q.explication||''}));
-  return{id:Date.now(),mode:'acad',icone:plan.icone||'🎓',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],etapes:plan.etapes||[],formules:(revision.formules_kv||[]),cas,sections,exercices,qcm,quiz:qcm,revision,scores:{},wrongByComp:{}};
+  return{id:Date.now(),mode:'acad',icone:plan.icone||'🎓',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],etapes:plan.etapes||[],formules:(revision.formules_kv||[]),cas,sections,exercices,qcm,quiz:qcm,revision,scores:{},wrongByComp:{},_incomplet:_warn.slice()};
 }
 
 /* ══════════════════════════════════════════════
@@ -2742,6 +2816,10 @@ function renderViewer(m){
     <div style="display:flex;flex-direction:column;gap:.5rem;">
       ${(m.sections||[]).map((s,idx)=>{
         const sc2=secColor(idx);
+        /* Une section peut être vide soit parce que sa génération a échoué
+           (_failed), soit — pour les modules créés avant ce contrôle — parce
+           qu'elle ne contient ni texte ni étapes. Dans les deux cas on le dit. */
+        const isEmptySec=s._failed||(!_n(s.contenu).trim()&&!(s.etapes||[]).length&&!(s.points_cles||[]).length);
         const rKey='s'+idx;
         const isRead=readSecs[rKey];
         const noteVal=getNote(m.id,(p?'ps':'cs')+idx);
@@ -2766,9 +2844,15 @@ function renderViewer(m){
             <span class="gls-sec-arrow" style="font-size:.66rem;color:rgba(255,255,255,.85);white-space:nowrap;flex-shrink:0;">▶ Lire</span>
           </div>
           <div style="padding:.7rem 1rem;background:#fff;">
-            ${preview}
+            ${isEmptySec?`<div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:.75rem .9rem;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;">
+              <div style="flex:1;min-width:180px;">
+                <div style="font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:.15rem;">Contenu non généré</div>
+                <div style="font-size:.70rem;color:#a16207;line-height:1.5;">Cette section n'a pas pu être rédigée${s._failReason?` (${_e(s._failReason)})`:''}. Relancez-la pour la compléter.</div>
+              </div>
+              <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();regenSection(${idx})">🔄 Générer cette section</button>
+            </div>`:preview}
             <div class="gls-sec-body" style="display:none;border-top:1px solid #f1f5f9;padding-top:.55rem;margin-top:.4rem;">
-              ${fullBody}
+              ${isEmptySec?'':fullBody}
               ${p&&(s.donnees_cles||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin:.6rem 0;">${(s.donnees_cles||[]).map(d=>`<div class="donnee-cle-chip">${_e(d)}</div>`).join('')}</div>`:''}
               ${p&&s.reflexe_pro?`<div class="reflexe-pro-box"><div class="reflexe-pro-lbl">⚡ Réflexe du pro expérimenté</div><div class="reflexe-pro-txt">${Array.isArray(s.reflexe_pro)?`<ul style="margin:0;padding-left:1.1rem;">${s.reflexe_pro.map(r=>`<li style="margin-bottom:.25rem;">${_e(r)}</li>`).join('')}</ul>`:_e(s.reflexe_pro)}</div></div>`:''}
               ${p&&(s.points_vigilance||[]).length?`<div style="margin-top:.5rem;">${(s.points_vigilance||[]).map(v=>`<div class="kp">${_e(v)}</div>`).join('')}</div>`:''}
@@ -4040,7 +4124,7 @@ function toggleFav(id,e){
 ══════════════════════════════════════════════ */
 function exportMods(){
   const ms=getMods();if(!ms.length){showToast('Aucun module à exporter.','err');return;}
-  const blob=new Blob([JSON.stringify({version:2,exported:new Date().toISOString(),modules:ms},null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify({version:2,exported:new Date().toISOString(),modules:ms},null,2)],{type:'application/json;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download='greenlab-modules-'+new Date().toISOString().slice(0,10)+'.json';a.click();
   showToast(ms.length+' module(s) exporté(s) !');
@@ -4214,7 +4298,12 @@ async function regenSection(secIdx){
       :`Cours: "${m.titre}" — ${m.pub} — niveau ${m.niv||''}\nDiscipline: ${m.dom}\nRégénère la section "${s.titre}" avec une approche différente de la version précédente.\nIMPÉRATIF : nouvelles formules ou applications numériques non vues, un piège conceptuel propre à ${m.dom} dans ce chapitre, une application industrielle concrète de "${m.dom}".\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"7-9 paragraphes progressifs — une notion par paragraphe, définis les termes avant de les utiliser. Entoure de **...** les 2-3 formules, valeurs ou termes clés de chaque paragraphe. Avant de finaliser : un étudiant de ce niveau pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement. Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis de ${m.dom}","def":"Définition formelle complète avec unité SI"}],"points_cles":["Point fondamental avec formule ou valeur numérique typique de ${m.dom}","Point 2","Point 3","Point 4"],"exemple":"Exercice résolu complet : contexte industriel ${m.dom}, données numériques réalistes, démarche pas-à-pas, résultat avec interprétation physique (8-10 phrases)"}`;
     const sc=await gemini(key,SYS,prompt,1200,T.CONTENU);
     const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
-    if(idx>=0){ms[idx].sections[secIdx]={...ms[idx].sections[secIdx],...sc};saveMods(ms);_cur=ms[idx];}
+    if(idx>=0){
+      // Le marqueur d'échec est levé puisque la section vient d'être rédigée
+      const merged=_cleanSection({...ms[idx].sections[secIdx],...sc});
+      delete merged._failed;delete merged._failReason;
+      ms[idx].sections[secIdx]=merged;saveMods(ms);_cur=ms[idx];
+    }
     renderViewer(_cur);
     showToast('Section régénérée !');
   }catch(e){showToast('Erreur: '+e.message,'err');}
@@ -4727,7 +4816,7 @@ function loadSettingsUI(){
 }
 
 function exportConfig(){
-  const blob=new Blob([JSON.stringify(getCfg(),null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(getCfg(),null,2)],{type:'application/json;charset=utf-8'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gls_config_'+new Date().toISOString().slice(0,10)+'.json';a.click();
 }
 
