@@ -84,6 +84,16 @@ nav{padding:.7rem 0;flex:1;}
 .yt-link:hover{background:#dc2626;color:#fff;border-color:#dc2626;}
 .yt-link-ico{font-size:1rem;flex-shrink:0;}
 .yt-link-label{flex:1;}
+/* Vraies vidéos (API YouTube) — vignette + métadonnées */
+.yt-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.7rem;}
+.yt-card{display:flex;flex-direction:column;border:1px solid var(--gray200);border-radius:10px;overflow:hidden;background:#fff;text-decoration:none;transition:transform .18s cubic-bezier(.34,1.2,.64,1),box-shadow .18s,border-color .18s;}
+.yt-card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(6,12,21,.14);border-color:#fca5a5;}
+.yt-card-thumb{position:relative;aspect-ratio:16/9;background:#0f172a;}
+.yt-card-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.yt-card-dur{position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,.82);color:#fff;font-size:.62rem;font-weight:700;padding:.08rem .3rem;border-radius:4px;letter-spacing:.2px;}
+.yt-card-body{padding:.55rem .7rem .65rem;}
+.yt-card-title{font-size:.78rem;font-weight:600;color:var(--gray800);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.25rem;}
+.yt-card-meta{font-size:.66rem;color:var(--gray600);line-height:1.4;}
 
 /* ═══ PAGE HEADER ═══ */
 .ph h1{font-size:1.55rem;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.03em;margin-bottom:.3rem;}
@@ -973,6 +983,15 @@ h1,h2,.ap-title-lg{
     <div class="form-group"><label class="form-label">Votre clé Groq</label>
     <input type="password" id="apiKeySettings" class="form-input" placeholder="gsk_…" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadgeSettings" style="margin-top:.4rem;"></div></div>
+
+    <div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;">
+      <label class="form-label">Clé YouTube Data API <span>facultative</span></label>
+      <p style="font-size:.70rem;color:var(--gray600);margin-bottom:.45rem;line-height:1.55;">
+        Sans elle, la carte vidéo propose des recherches ciblées. Avec elle, les vidéos s'affichent directement (titre, chaîne, durée).
+        Gratuite via <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener" style="color:#d97706;font-weight:700;text-decoration:none;">Google Cloud ↗</a> — environ 100 recherches par jour.
+      </p>
+      <input type="password" id="cfg-ytKey" class="form-input" placeholder="AIza…" oninput="saveCfg('ytKey',this.value.trim())">
+    </div>
   </div>
 
   <!-- ③ MOTEUR IA -->
@@ -1189,7 +1208,8 @@ const _CFG_DEFAULTS={
   showImages:true,
   showChecklist:true,
   showKpis:true,
-  showVideos:true
+  showVideos:true,
+  ytKey:''   // clé YouTube Data API v3 — facultative, active les vraies vidéos
 };
 const getCfg=()=>{try{return Object.assign({},_CFG_DEFAULTS,JSON.parse(localStorage.getItem(_CFG_KEY)||'{}'));}catch{return{..._CFG_DEFAULTS};}};
 const saveCfg=(k,v)=>{const c=getCfg();c[k]=v;localStorage.setItem(_CFG_KEY,JSON.stringify(c));};
@@ -3005,20 +3025,22 @@ function renderViewer(m){
 
   // Carte vidéos YouTube — liens de recherche auto-générés
   if(_cfg.showVideos){
-    const dom=m.secteur||m.dom||'';
-    const titre=m.titre||dom;
-    const secTitres=(m.sections||[]).slice(0,3).map(s=>s.titre).filter(Boolean);
-    const queries=[
-      `${titre} formation complète`,
-      `${dom} tutoriel pratique`,
-      ...secTitres.map(t=>`${t} cours`),
-      p?`${dom} formation professionnelle`:`${dom} cours ingénieur`,
-    ].filter(Boolean).slice(0,5);
-    const links=queries.map(q=>`<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}" target="_blank" rel="noopener" class="yt-link"><span class="yt-link-ico">▶</span><span class="yt-link-label">${_e(q)}</span></a>`).join('');
+    const hasResults=(m.ytVideos||[]).length||(m.ytQueries||[]).length;
+    const body=hasResults
+      ? _renderVideos(m.ytQueries||_ytFallbackQueries(m),m.ytVideos||[],'',m.id)
+      : `<div class="yt-links-grid">${_ytFallbackQueries(m).map(q=>
+          `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}" target="_blank" rel="noopener" class="yt-link"><span class="yt-link-ico">▶</span><span class="yt-link-label">${_e(q)}</span></a>`).join('')}</div>`;
     extra+=`<div class="ccard">
-      <div class="ccard-title">📺 Ressources vidéo — YouTube</div>
-      <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.85rem;">Recherches YouTube générées automatiquement pour approfondir chaque aspect de ce module. Cliquez pour ouvrir YouTube.</p>
-      <div class="yt-links-grid">${links}</div>
+      <div class="ccard-title">📺 Ressources vidéo</div>
+      <div style="display:flex;align-items:flex-start;gap:.7rem;flex-wrap:wrap;margin-bottom:.85rem;">
+        <p style="font-size:.78rem;color:var(--gray600);flex:1;min-width:200px;margin:0;line-height:1.6;">
+          ${(m.ytVideos||[]).length
+            ? 'Vidéos sélectionnées sur YouTube à partir des objectifs de ce module.'
+            : 'Recherches ciblées sur les notions du module. Lancez la recherche pour obtenir les vidéos elles-mêmes.'}
+        </p>
+        <button class="btn btn-ghost btn-sm" id="ytBtn-${m.id}" onclick="generateVideos(${m.id})">${hasResults?'🔄 Actualiser':'🎬 Trouver des vidéos'}</button>
+      </div>
+      <div id="ytArea-${m.id}">${body}</div>
     </div>`;
   }
 
@@ -4548,6 +4570,153 @@ function _buildDiagramSVG(data, mc){
 </svg>`;
 }
 
+/* ══════════════════════════════════════════════
+   RESSOURCES VIDÉO
+   Règle absolue : aucun identifiant de vidéo ne provient de l'IA. Les modèles
+   inventent des ID YouTube d'apparence crédible qui mènent à des pages mortes
+   ou hors sujet. L'IA ne sert qu'à formuler les requêtes ; les vidéos elles-
+   mêmes viennent uniquement de l'API YouTube.
+══════════════════════════════════════════════ */
+
+/* Requêtes de repli, construites sans IA à partir du contenu du module. */
+function _ytFallbackQueries(m){
+  const dom=m.secteur||m.dom||'';
+  const p=m.mode==='pro';
+  const secs=(m.sections||[]).map(s=>s.titre).filter(Boolean);
+  const out=[];
+  if(dom)out.push(`${dom} ${p?'formation professionnelle':'cours'}`);
+  secs.slice(0,3).forEach(t=>out.push(`${t} ${dom}`.trim()));
+  if(dom)out.push(`${dom} ${p?'geste technique démonstration':'exercice corrigé'}`);
+  return [...new Set(out.filter(q=>q.trim().length>3))].slice(0,5);
+}
+
+/* Fait formuler par l'IA des requêtes ciblées sur les objectifs réels du
+   module. On ne lui demande que du texte de recherche — jamais d'URL. */
+async function _ytBuildQueries(m,key){
+  const dom=m.secteur||m.dom||'';
+  const objectifs=(m.objectifs||[]).slice(0,4).join(' | ');
+  const notions=[...(m.competences||[]),...(m.notions||[])].slice(0,6).join(', ');
+  const secs=(m.sections||[]).map(s=>s.titre).filter(Boolean).slice(0,5).join(' | ');
+  try{
+    const r=await gemini(key,
+      `Tu formules des requêtes de recherche YouTube pour trouver des vidéos pédagogiques réellement utiles.
+Une bonne requête utilise le vocabulaire exact que les praticiens du métier emploient, et vise UN geste ou UNE notion précise — pas le domaine entier.
+Tu ne fournis JAMAIS d'URL, d'identifiant de vidéo ni de nom de chaîne : uniquement des mots-clés de recherche.
+JSON uniquement.`,
+      `Domaine : ${dom}\nType : ${m.mode==='pro'?'formation professionnelle terrain':'cours d\'enseignement supérieur'}\nNiveau : ${m.niveau||m.niv||''}\nObjectifs : ${objectifs}\nNotions clés : ${notions}\nSections : ${secs}\n\nProduis 5 requêtes de recherche YouTube en ${m.lang||'français'}, classées de la plus fondamentale à la plus spécialisée.\nChacune : 3 à 7 mots, vocabulaire technique exact du métier, orientée démonstration ou explication pratique.\n\n{"queries":["requête 1","requête 2","requête 3","requête 4","requête 5"]}`,
+      300,T.FACTUEL);
+    const qs=(r?.queries||[]).filter(q=>typeof q==='string'&&q.trim().length>3);
+    if(qs.length)return qs.slice(0,5);
+  }catch(_){}
+  return _ytFallbackQueries(m);
+}
+
+/* Convertit une durée ISO 8601 (PT12M30S) en affichage lisible. */
+function _ytDuration(iso){
+  const mt=/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso||'');
+  if(!mt)return'';
+  const h=+(mt[1]||0),mn=+(mt[2]||0),sc=+(mt[3]||0);
+  return h?`${h}:${String(mn).padStart(2,'0')}:${String(sc).padStart(2,'0')}`
+          :`${mn}:${String(sc).padStart(2,'0')}`;
+}
+
+/* Interroge l'API YouTube. Retourne [] si la clé manque ou si le quota est
+   épuisé — jamais d'exception qui casserait l'affichage du module. */
+async function _ytSearch(query,ytKey,lang){
+  const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:'3',
+    videoEmbeddable:'true',order:'relevance',safeSearch:'strict',
+    relevanceLanguage:(lang||'fr').toLowerCase().startsWith('fr')?'fr':'en',
+    key:ytKey});
+  const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error?.message||'Erreur YouTube '+r.status);
+  const items=(d.items||[]).filter(i=>i.id?.videoId);
+  if(!items.length)return[];
+  // Deuxième appel (1 unité) pour durée et nombre de vues
+  let details={};
+  try{
+    const ids=items.map(i=>i.id.videoId).join(',');
+    const r2=await fetch('https://www.googleapis.com/youtube/v3/videos?'+
+      new URLSearchParams({part:'contentDetails,statistics',id:ids,key:ytKey}));
+    const d2=await r2.json();
+    (d2.items||[]).forEach(v=>{details[v.id]={
+      duree:_ytDuration(v.contentDetails?.duration),
+      vues:+(v.statistics?.viewCount||0)};});
+  }catch(_){}
+  return items.map(i=>({
+    id:i.id.videoId,
+    titre:i.snippet?.title||'',
+    chaine:i.snippet?.channelTitle||'',
+    date:(i.snippet?.publishedAt||'').slice(0,4),
+    vignette:i.snippet?.thumbnails?.medium?.url||'',
+    duree:details[i.id.videoId]?.duree||'',
+    vues:details[i.id.videoId]?.vues||0,
+    requete:query
+  }));
+}
+
+function _ytFormatViews(n){
+  if(!n)return'';
+  if(n>=1e6)return (n/1e6).toFixed(1).replace('.0','')+' M vues';
+  if(n>=1e3)return Math.round(n/1e3)+' k vues';
+  return n+' vues';
+}
+
+async function generateVideos(modId){
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const btn=document.getElementById('ytBtn-'+modId);
+  const area=document.getElementById('ytArea-'+modId);
+  const key=getKey(), ytKey=(getCfg().ytKey||'').trim();
+  if(btn){btn.disabled=true;btn.textContent='⏳ Recherche…';}
+  try{
+    const queries=key?await _ytBuildQueries(m,key):_ytFallbackQueries(m);
+    let videos=[],ytError='';
+    if(ytKey){
+      for(const q of queries.slice(0,4)){
+        try{videos=videos.concat(await _ytSearch(q,ytKey,m.lang));}
+        catch(e){ytError=e.message;break;}
+      }
+      // Une même vidéo peut ressortir sur plusieurs requêtes
+      const seen=new Set();
+      videos=videos.filter(v=>!seen.has(v.id)&&seen.add(v.id))
+                   .sort((a,b)=>b.vues-a.vues).slice(0,8);
+    }
+    const ms2=getMods();const i=ms2.findIndex(x=>x.id==modId);
+    if(i>=0){ms2[i].ytQueries=queries;ms2[i].ytVideos=videos;saveMods(ms2);if(_cur&&_cur.id==modId)_cur=ms2[i];}
+    if(area)area.innerHTML=_renderVideos(queries,videos,ytError,modId);
+    if(btn){btn.disabled=false;btn.textContent='🔄 Actualiser';}
+    showToast(videos.length?`${videos.length} vidéos trouvées`:'Recherches ciblées prêtes');
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='🎬 Trouver des vidéos';}
+    showToast('Erreur : '+e.message,'err');
+  }
+}
+
+function _renderVideos(queries,videos,ytError,modId){
+  const searchLinks=(queries||[]).map(q=>
+    `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(q)}" target="_blank" rel="noopener" class="yt-link">
+       <span class="yt-link-ico">▶</span><span class="yt-link-label">${_e(q)}</span></a>`).join('');
+
+  if(videos&&videos.length){
+    const cards=videos.map(v=>`<a href="https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}" target="_blank" rel="noopener" class="yt-card">
+      <div class="yt-card-thumb"><img src="${_e(v.vignette)}" alt="" loading="lazy">${v.duree?`<span class="yt-card-dur">${_e(v.duree)}</span>`:''}</div>
+      <div class="yt-card-body">
+        <div class="yt-card-title">${_e(v.titre)}</div>
+        <div class="yt-card-meta">${_e(v.chaine)}${v.vues?' · '+_ytFormatViews(v.vues):''}${v.date?' · '+_e(v.date):''}</div>
+      </div></a>`).join('');
+    return `<div class="yt-cards">${cards}</div>
+      <details style="margin-top:.7rem;">
+        <summary style="font-size:.70rem;color:var(--gray600);cursor:pointer;">Voir les recherches utilisées</summary>
+        <div class="yt-links-grid" style="margin-top:.5rem;">${searchLinks}</div>
+      </details>`;
+  }
+
+  const notice=ytError
+    ? `<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:.6rem .85rem;font-size:.70rem;color:#991b1b;margin-bottom:.7rem;">API YouTube indisponible (${_e(ytError)}) — recherches ciblées affichées à la place.</div>`
+    : `<div style="background:#f8fafc;border:1px solid var(--gray200);border-radius:10px;padding:.6rem .85rem;font-size:.70rem;color:var(--gray600);margin-bottom:.7rem;">Ajoutez une clé <b>YouTube Data API</b> dans les Paramètres pour afficher directement les vidéos (titre, chaîne, durée) au lieu de simples recherches.</div>`;
+  return notice+`<div class="yt-links-grid">${searchLinks}</div>`;
+}
+
 async function generateSectionSVG(modId,idx){
   const key=getKey();if(!key){showToast('Clé API requise.','err');return;}
   const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
@@ -4789,6 +4958,7 @@ function loadSettingsUI(){
   set('cfg-platformName',c.platformName);set('cfg-etablissement',c.etablissement);
   set('cfg-formateur',c.formateur);set('cfg-formateurTitre',c.formateurTitre);
   set('cfg-certifIntitule',c.certifIntitule);
+  set('cfg-ytKey',c.ytKey);
   set('cfg-temperature',c.temperature);
   const tv=document.getElementById('cfg-temp-val');if(tv)tv.textContent=parseFloat(c.temperature).toFixed(2);
   set('cfg-nbSections',c.nbSections);
