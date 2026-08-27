@@ -3018,27 +3018,36 @@ function _idxGroqChain(preferred){
   return out;
 }
 
-async function _idxRefreshModels(key,force){
-  if(!key||!key.startsWith('gsk_'))return;
+/* Interroge /models en direct et renvoie la liste des modèles utilisables,
+   classés par préférence (français fiable d'abord). Ne filtre que les
+   catégories structurellement incompatibles — ne restreint jamais à une
+   liste de noms figée, sinon une clé à accès restreint n'a plus AUCUN
+   modèle utilisable dès que les noms habituels ne sont pas autorisés. */
+async function _idxFetchGroqModels(key){
   try{
-    const cached=JSON.parse(localStorage.getItem(_IDX_MODELS_KEY)||'null');
-    if(!force&&cached&&Date.now()-cached.ts<_IDX_MODELS_TTL)return;
     const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
-    if(!r.ok)return;
+    if(!r.ok)return null;
     const d=await r.json();
     const ids=(d.data||[])
       .filter(m=>m.object==='model'
-        &&!m.id.startsWith('openai/')      // quota par minute trop bas
-        &&!/whisper|distil|tool-use|guard/.test(m.id)
+        &&!/whisper|tts|distil|tool-use|guard|moderation/i.test(m.id)
         &&(m.context_window==null||m.context_window>=4096))
       .map(m=>m.id)
       // Qualité de rédaction d'abord : décisive pour du contenu pédagogique
       .sort((a,b)=>{
-        const sc=s=>/llama-3\.3.*versatile/.test(s)?0:/70b|120b|90b/.test(s)?1:/llama/.test(s)?2:/gemma/.test(s)?3:4;
+        const sc=s=>/llama-3\.3.*versatile/.test(s)?0:/70b|120b|90b/.test(s)?1:/llama-3\.1-8b-instant/.test(s)?2:/gemma/.test(s)?3:/^openai\//.test(s)?4:5;
         return sc(a)-sc(b)||a.localeCompare(b);
       });
-    if(ids.length)localStorage.setItem(_IDX_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
-  }catch(_){}
+    return ids.length?ids:null;
+  }catch(_){return null;}
+}
+
+async function _idxRefreshModels(key,force){
+  if(!key||!key.startsWith('gsk_'))return;
+  const cached=JSON.parse(localStorage.getItem(_IDX_MODELS_KEY)||'null');
+  if(!force&&cached&&Date.now()-cached.ts<_IDX_MODELS_TTL)return;
+  const ids=await _idxFetchGroqModels(key);
+  if(ids&&ids.length)localStorage.setItem(_IDX_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
 }
 
 /* Erreurs justifiant de changer de modèle (il est inutilisable tel quel) */
@@ -3074,37 +3083,63 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
   if(!key?.startsWith('gsk_'))
     throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
   const configured=_IDX_PROVIDER_INFO.groq.model;
-  const chain=_idxGroqChain(configured);
+  const tried=new Set();
   let lastErr;
 
-  for(const model of chain){
-    let tok=maxTokens||1024, waited=0, shrinks=0;
-    for(let attempt=0;attempt<4;attempt++){
-      try{
-        return await _idxGroqFetch(key,model,sys,prompt,tok,temp);
-      }catch(e){
-        const msg=e.message||'';
-        lastErr=e;
-        // Quota atteint → patienter le délai annoncé, puis réessayer ce modèle
-        if(_IDX_RE_RATE.test(msg)){
-          const delay=_idxRetryDelay(msg)??4000;
-          if(waited+delay<=45000){await _idxSleep(delay);waited+=delay;continue;}
-          break;
+  /* Essaie chaque modèle de la liste (en sautant ceux déjà tentés) et renvoie
+     le texte généré, ou undefined si tous ont échoué. */
+  const tryChain=async(chain)=>{
+    for(const model of chain){
+      if(tried.has(model))continue;
+      tried.add(model);
+      let tok=maxTokens||1024, waited=0, shrinks=0;
+      for(let attempt=0;attempt<4;attempt++){
+        try{
+          return await _idxGroqFetch(key,model,sys,prompt,tok,temp);
+        }catch(e){
+          const msg=e.message||'';
+          lastErr=e;
+          // Quota atteint → patienter le délai annoncé, puis réessayer ce modèle
+          if(_IDX_RE_RATE.test(msg)){
+            const delay=_idxRetryDelay(msg)??4000;
+            if(waited+delay<=45000){await _idxSleep(delay);waited+=delay;continue;}
+            break;
+          }
+          // Sortie trop grande → réduire de moitié (plancher 256)
+          if(_IDX_RE_MAXTOK.test(msg)&&shrinks<3&&tok>256){
+            tok=Math.max(256,Math.floor(tok/2));shrinks++;continue;
+          }
+          // Modèle retiré ou inaccessible pour cette clé → passer au suivant
+          if(_IDX_RE_SWITCH.test(msg))break;
+          // Coupure réseau passagère → une seule nouvelle tentative
+          if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _idxSleep(1200);continue;}
+          throw e; // vraie erreur (clé invalide…)
         }
-        // Sortie trop grande → réduire de moitié (plancher 256)
-        if(_IDX_RE_MAXTOK.test(msg)&&shrinks<3&&tok>256){
-          tok=Math.max(256,Math.floor(tok/2));shrinks++;continue;
-        }
-        // Modèle retiré par Groq → passer au suivant
-        if(_IDX_RE_SWITCH.test(msg))break;
-        // Coupure réseau passagère → une seule nouvelle tentative
-        if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _idxSleep(1200);continue;}
-        throw e; // vraie erreur (clé invalide…)
       }
     }
-  }
+    return undefined; // chaîne épuisée sans succès
+  };
+
+  let res=await tryChain(_idxGroqChain(configured));
+  if(res!==undefined)return res;
+
+  // Toute la chaîne connue (configurée + cache + secours codé en dur) a échoué.
+  // Avant d'abandonner, on force une redécouverte live des modèles RÉELLEMENT
+  // accessibles à cette clé : la liste mémorisée peut être obsolète, ou la clé
+  // peut n'avoir accès qu'à un sous-ensemble différent des modèles standards.
+  try{
+    const fresh=await _idxFetchGroqModels(key);
+    if(fresh&&fresh.length){
+      localStorage.setItem(_IDX_MODELS_KEY,JSON.stringify({ts:Date.now(),ids:fresh}));
+      res=await tryChain(fresh);
+      if(res!==undefined)return res;
+    }
+  }catch(_){}
+
   if(_IDX_RE_RATE.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez.');
+  if(_IDX_RE_SWITCH.test(lastErr?.message||''))
+    throw new Error('Aucun modèle Groq n\'est accessible avec cette clé. Vérifiez sur console.groq.com/keys que la clé est active, ou générez-en une nouvelle clé gratuite.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 

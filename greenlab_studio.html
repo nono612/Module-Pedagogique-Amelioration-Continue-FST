@@ -1354,23 +1354,24 @@ function _groqModelLabel(id){
   return id;
 }
 
-/* WHITELIST — seuls ces modèles Groq sont réellement fiables pour générer du
-   contenu pédagogique en français (chat + JSON valide). L'API /models expose
-   aussi des modèles audio (whisper/tts), de garde (guard), « tool-use »,
-   « compound », ainsi que des modèles tiers (qwen, deepseek, moonshot, allam…)
-   qui produisent du JSON invalide ou un français cassé : on les EXCLUT pour que
-   changer de modèle ne casse jamais la génération. */
-const _GROQ_WHITELIST=[
-  {re:/^llama-3\.3-70b-versatile$/, rank:0},  // meilleur français, référence
-  {re:/^llama-3\.1-8b-instant$/,    rank:2},  // rapide, français correct
-  {re:/^gemma2-9b-it$/,             rank:3},  // alternative légère (optionnelle)
-  // Note : llama3-*, mixtral et llama-3.1-70b sont retirés par Groq → exclus.
-  // Les modèles tiers (qwen, deepseek, moonshot, allam, compound…) produisent
-  // du JSON invalide ou un français cassé → volontairement absents.
-];
+/* CLASSEMENT (pas d'exclusion stricte) — certains comptes Groq n'ont accès
+   qu'à un sous-ensemble restreint de modèles (clé à portée limitée, quotas
+   spécifiques…). Exclure tout ce qui n'est pas dans une liste figée garantit
+   un échec total dès que ces modèles précis ne sont pas autorisés pour la
+   clé utilisée. On classe donc par préférence (français fiable d'abord) sans
+   jamais éliminer un modèle utilisable — seules les catégories structurellement
+   incompatibles (audio, modération, contexte trop court) sont écartées. */
 function _groqRankOf(id){
-  for(const w of _GROQ_WHITELIST){if(w.re.test(id))return w.rank;}
-  return -1; // hors whitelist
+  if(/^llama-3\.3-70b-versatile$/.test(id))return 0;               // meilleur français, référence
+  if(/70b|90b|120b/i.test(id)&&!/guard/i.test(id))return 1;         // autres gros modèles
+  if(/^llama-3\.1-8b-instant$/.test(id))return 2;                   // rapide, français correct
+  if(/gemma/i.test(id))return 3;                                    // alternative légère
+  if(/^openai\//.test(id))return 4;                                 // gpt-oss : capable, TPM plus bas
+  return 5;                                                         // tout autre modèle non exclu — secours ultime
+}
+function _groqModelExcluded(id,contextWindow){
+  return /whisper|tts|guard|prompt-guard|moderation/i.test(id)
+    ||(contextWindow!=null&&contextWindow<4096);
 }
 async function _fetchGroqModels(key){
   try{
@@ -1378,7 +1379,7 @@ async function _fetchGroqModels(key){
     if(!r.ok)return null;
     const d=await r.json();
     const ids=(d.data||[])
-      .filter(m=>m.object==='model'&&_groqRankOf(m.id)>=0)   // whitelist stricte
+      .filter(m=>m.object==='model'&&!_groqModelExcluded(m.id,m.context_window))
       .map(m=>m.id)
       // Qualité de rédaction d'abord : les gros modèles écrivent un français
       // nettement plus sûr, ce qui prime sur la vitesse pour du pédagogique.
@@ -2074,44 +2075,70 @@ async function _groqFetch(key,model,msgs,maxTok,temp,json){
 async function _groqExec(key,msgs,maxTok,temp,json){
   if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
   const configured=getCfg().model||'llama-3.3-70b-versatile';
-  const chain=_groqChain(configured);
+  const tried=new Set();
   let lastErr;
 
-  for(const model of chain){
-    let tok=maxTok||2500;
-    let waited=0;   // temps déjà passé à patienter sur ce modèle
-    let shrinks=0;  // réductions de max_tokens appliquées
+  /* Essaie chaque modèle de la liste donnée (en sautant ceux déjà tentés) et
+     renvoie le contenu généré, ou undefined si tous ont échoué. */
+  const tryChain=async(chain)=>{
+    for(const model of chain){
+      if(tried.has(model))continue;
+      tried.add(model);
+      let tok=maxTok||2500;
+      let waited=0;   // temps déjà passé à patienter sur ce modèle
+      let shrinks=0;  // réductions de max_tokens appliquées
 
-    for(let attempt=0;attempt<4;attempt++){
-      try{
-        const res=await _groqFetch(key,model,msgs,tok,temp,json);
-        if(model!==configured){saveCfg('model',model);setTimeout(()=>_refreshGroqSelector(key,true),0);}
-        return res;
-      }catch(e){
-        const msg=e.message||'';
-        lastErr=e;
+      for(let attempt=0;attempt<4;attempt++){
+        try{
+          const res=await _groqFetch(key,model,msgs,tok,temp,json);
+          if(model!==configured){saveCfg('model',model);setTimeout(()=>_refreshGroqSelector(key,true),0);}
+          return res;
+        }catch(e){
+          const msg=e.message||'';
+          lastErr=e;
 
-        // Quota atteint → patienter le délai annoncé par Groq, puis réessayer ce modèle
-        if(_RE_RATE_LIMIT.test(msg)){
-          const delay=_parseRetryDelay(msg)??4000;
-          if(waited+delay<=45000){await _sleep(delay);waited+=delay;continue;}
-          break; // attente trop longue : on tente un autre modèle
+          // Quota atteint → patienter le délai annoncé par Groq, puis réessayer ce modèle
+          if(_RE_RATE_LIMIT.test(msg)){
+            const delay=_parseRetryDelay(msg)??4000;
+            if(waited+delay<=45000){await _sleep(delay);waited+=delay;continue;}
+            break; // attente trop longue : on tente un autre modèle
+          }
+          // Sortie trop grande pour ce modèle → réduire de moitié (plancher 512)
+          if(_RE_MAX_TOKENS.test(msg)&&shrinks<3&&tok>512){
+            tok=Math.max(512,Math.floor(tok/2));shrinks++;continue;
+          }
+          // Modèle retiré ou inaccessible pour cette clé → passer au suivant
+          if(_RE_SWITCH_MODEL.test(msg))break;
+          // Coupure réseau passagère → une seule nouvelle tentative
+          if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _sleep(1200);continue;}
+          // Vraie erreur (clé invalide…) → remonter immédiatement
+          throw e;
         }
-        // Sortie trop grande pour ce modèle → réduire de moitié (plancher 512)
-        if(_RE_MAX_TOKENS.test(msg)&&shrinks<3&&tok>512){
-          tok=Math.max(512,Math.floor(tok/2));shrinks++;continue;
-        }
-        // Modèle retiré par Groq → passer au suivant
-        if(_RE_SWITCH_MODEL.test(msg))break;
-        // Coupure réseau passagère → une seule nouvelle tentative
-        if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _sleep(1200);continue;}
-        // Vraie erreur (clé invalide…) → remonter immédiatement
-        throw e;
       }
     }
-  }
+    return undefined; // chaîne épuisée sans succès
+  };
+
+  let res=await tryChain(_groqChain(configured));
+  if(res!==undefined)return res;
+
+  // Toute la chaîne connue (configurée + cache + secours codé en dur) a échoué.
+  // Avant d'abandonner, on force une redécouverte live des modèles RÉELLEMENT
+  // accessibles à cette clé : la liste mémorisée peut être obsolète, ou la clé
+  // peut n'avoir accès qu'à un sous-ensemble différent des modèles standards.
+  try{
+    const fresh=await _fetchGroqModels(key);
+    if(fresh&&fresh.length){
+      localStorage.setItem(_GROQ_MODELS_KEY,JSON.stringify({ts:Date.now(),ids:fresh}));
+      res=await tryChain(fresh);
+      if(res!==undefined)return res;
+    }
+  }catch(_){}
+
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
+  if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
+    throw new Error('Aucun modèle Groq n\'est accessible avec cette clé. Vérifiez sur console.groq.com/keys que la clé est active, ou générez-en une nouvelle clé gratuite.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
