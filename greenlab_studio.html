@@ -908,13 +908,17 @@ h1,h2,.ap-title-lg{
 
 <!-- FORM -->
 <div class="screen" id="screen-form">
-  <div class="ph" id="formPh"><h1>✨ Créer un module</h1><p id="formPhSub">Configurez votre module et laissez l'IA générer le contenu complet.</p></div>
   <div class="mode-switch" id="formModeSwitch"></div>
-  <div class="ccard" style="max-width:880px;">
-    <div id="formFields"></div>
-    <div style="margin-top:1.3rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;">
-      <button class="btn btn-gold btn-lg" id="fSubmit" onclick="startGen()">✨ Générer le module</button>
-      <div id="fMsg" style="font-size:.78rem;"></div>
+  <div style="max-width:640px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.08);border:1px solid var(--gray200);">
+    <div id="genCardHdr" style="padding:1.1rem 1.3rem;color:#fff;"></div>
+    <div style="padding:1.1rem 1.3rem;display:flex;flex-direction:column;gap:.15rem;">
+      <div id="formFields"></div>
+      <button class="btn" id="fSubmit" onclick="startGen()" style="margin-top:.5rem;font-size:.9rem;font-weight:800;padding:.8rem;border-radius:11px;border:none;color:#fff;cursor:pointer;"></button>
+      <div id="fMsg" style="font-size:.78rem;margin-top:.3rem;"></div>
+    </div>
+    <div style="padding:0 1.3rem 1.3rem;">
+      <div style="font-weight:800;font-size:.82rem;color:#374151;margin:.2rem 0 .6rem;padding-top:1rem;border-top:2px solid #f1f5f9;">📦 Modules récents</div>
+      <div id="genRecentList"></div>
     </div>
   </div>
 </div>
@@ -1794,21 +1798,43 @@ function renderForm(){
   const p=_mode==='pro';
   const m=_MODES.find(x=>x.id===_mode)||_MODES[0];
   updateSbMode();
-  document.getElementById('formPh').querySelector('h1').textContent=m.formTitle;
-  document.getElementById('formPhSub').textContent=m.formSub;
   // Boutons de mode — générés depuis _MODES
   const msEl=document.getElementById('formModeSwitch');
   if(msEl) msEl.innerHTML=_MODES.map(md=>
     `<button class="ms-btn${_mode===md.id?' '+md.msBtnCls:''}" id="ms-${md.id}" onclick="switchMode('${md.id}')">${md.ico} ${md.label}</button>`
   ).join('');
+  // En-tête coloré de la carte (dégradé ambre pour Pro, violet pour Académique)
+  const hdr=document.getElementById('genCardHdr');
+  if(hdr){
+    hdr.style.background=p?'linear-gradient(135deg,#b45309,#f59e0b)':'linear-gradient(135deg,#4c1d95,#7c3aed)';
+    hdr.innerHTML=`<div style="font-weight:900;font-size:.95rem;margin-bottom:.2rem;">${_e(m.formTitle)}</div>
+      <div style="font-size:.73rem;opacity:.85;line-height:1.4;">${_e(m.formSub)}</div>`;
+  }
   const fs=document.getElementById('fSubmit');
-  fs.className=`btn ${m.submitCls} btn-lg`;
+  fs.style.background=p?'linear-gradient(135deg,#f59e0b,#ea580c)':'linear-gradient(135deg,#7c3aed,#4c1d95)';
   fs.textContent=m.genLabel;
   document.getElementById('formFields').innerHTML=p?fieldsProHtml():fieldsAcadHtml();
   // Apply config defaults
   const _c=getCfg();
-  const _niv=document.getElementById('fNiv');if(_niv&&_c.defaultNiveau){[..._niv.options].forEach(o=>{o.selected=o.value===_c.defaultNiveau;});}
-  const _lang=document.getElementById('fLang');if(_lang&&_c.defaultLang){[..._lang.options].forEach(o=>{o.selected=o.value.toLowerCase()===_c.defaultLang.toLowerCase()||o.text.toLowerCase().startsWith(_c.defaultLang.toLowerCase());});}
+  const _niv=document.getElementById('fNiv');if(_niv&&_niv.tagName==='SELECT'&&_c.defaultNiveau){[..._niv.options].forEach(o=>{o.selected=o.value===_c.defaultNiveau;});}
+  renderFormRecentList();
+}
+
+/* Liste compacte des derniers modules créés, sous le formulaire */
+function renderFormRecentList(){
+  const wrap=document.getElementById('genRecentList');if(!wrap)return;
+  const ms=getMods().slice(0,5);
+  if(!ms.length){wrap.innerHTML='<div style="font-size:.75rem;color:var(--gray400);">Aucun module créé pour l\'instant.</div>';return;}
+  wrap.innerHTML=ms.map(mm=>{
+    const pr=mm.mode==='pro';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:.38rem .6rem;border-radius:8px;margin-bottom:.28rem;background:${pr?'#fffbeb':'#faf5ff'};border:1px solid ${pr?'#fde68a':'#ddd6fe'};">
+      <span style="font-size:.76rem;font-weight:700;color:${pr?'#92400e':'#4c1d95'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;">${mm.icone||(pr?'💼':'🎓')} ${_e(mm.titre)}</span>
+      <div style="display:flex;gap:.3rem;flex-shrink:0;">
+        <button onclick="openMod(${mm.id})" style="font-size:.67rem;font-weight:800;padding:.16rem .5rem;border-radius:5px;border:none;cursor:pointer;background:${pr?'#f59e0b':'#7c3aed'};color:#fff;">👁 Ouvrir</button>
+        <button onclick="if(confirm('Supprimer ce module ?')){delMod(${mm.id});renderFormRecentList();}" style="font-size:.67rem;padding:.16rem .4rem;border-radius:5px;border:none;cursor:pointer;background:#fee2e2;color:#dc2626;">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 const PRODOMS=['Lean Manufacturing','Maintenance industrielle','Électricité industrielle','Soudure','Logistique & Supply Chain','Automatisme','Hydraulique industrielle','Instrumentation','Chaudronnerie','CVC / Climatisation','Bloc opératoire','Cuisine professionnelle'];
@@ -1854,122 +1880,132 @@ const ACADDOMS=[
 ];
 
 function fieldsProHtml(){return`
-  <div class="alert alert-info" style="margin-bottom:1rem;">💡 Le module généré comprendra un <strong>cours théorique complet</strong> sur le métier, des procédures détaillées, des exercices pratiques, des mises en situation réelles et un QCM d'évaluation.</div>
   <div class="form-group">
-    <label class="form-label">1. Domaine / secteur métier <span>* tous secteurs acceptés</span></label>
-    <input type="text" id="fDom" class="form-input" placeholder="ex : Électricité industrielle, Maintenance, Soudure TIG, Automatisme, Chaudronnerie…" autocomplete="off">
-    <div class="dpills">${PRODOMS.map(d=>`<span class="dpill" onclick="document.getElementById('fDom').value='${d}'">${d}</span>`).join('')}</div>
+    <label class="form-label">📌 Titre du module <span>*</span></label>
+    <input type="text" id="fComp" class="form-input" placeholder="ex : Habilitation électrique BR, Méthode 8D, Soudure TIG, TPM…" autocomplete="off">
   </div>
   <div class="form-grid">
-    <div class="form-group"><label class="form-label">2. Compétence / thème du cours <span>*</span></label>
-    <input type="text" id="fComp" class="form-input" placeholder="ex : Lecture de schéma électrique, Diagnostic de panne hydraulique, Câblage d'armoire industrielle…"></div>
-    <div class="form-group"><label class="form-label">3. Public cible <span>*</span></label>
-    <input type="text" id="fPub" class="form-input" placeholder="ex : Technicien électricien débutant, apprenti mécanicien, opérateur de production…"></div>
-  </div>
-  <div class="form-grid-3">
-    <div class="form-group"><label class="form-label">4. Niveau de départ</label>
-    <select id="fNiv" class="form-select">${_FORM_LEVEL_OPTIONS.map(o=>`<option value="${o.value}"${o.value==='intermédiaire'?' selected':''}>${o.label}</option>`).join('')}</select></div>
-    <div class="form-group"><label class="form-label">5. Durée estimée</label>
-    <select id="fDur" class="form-select">${_DURATION_OPTIONS.map(o=>`<option value="${o.value}"${o.default?' selected':''}>${o.label}</option>`).join('')}</select></div>
-    <div class="form-group"><label class="form-label">6. Langue</label>
-    <select id="fLang" class="form-select">${_LANG_OPTIONS.map(o=>`<option value="${o.value}">${o.label}</option>`).join('')}</select></div>
+    <div class="form-group">
+      <label class="form-label">🏭 Secteur / domaine <span>*</span></label>
+      <input type="text" id="fDom" class="form-input" placeholder="ex : Électricité industrielle, Maintenance…" list="prodomsList" autocomplete="off">
+      <datalist id="prodomsList">${PRODOMS.map(d=>`<option value="${_e(d)}">`).join('')}</datalist>
+    </div>
+    <div class="form-group">
+      <label class="form-label">👥 Public cible</label>
+      <input type="text" id="fPub" class="form-input" placeholder="ex : Techniciens de maintenance, opérateurs débutants…">
+    </div>
   </div>
   <div class="form-grid">
-    <div class="form-group"><label class="form-label">7. Normes / réglementations <span>optionnel</span></label>
-    <input type="text" id="fNorm" class="form-input" placeholder="ex : NF C 15-100, NFC 18-510, ISO 9001, ATEX, Code du travail…"></div>
-    <div class="form-group"><label class="form-label">8. Matériel / équipements utilisés <span>optionnel</span></label>
-    <input type="text" id="fCtx" class="form-input" placeholder="ex : Automate Siemens S7-300, poste à souder MIG, multimètre Fluke…"></div>
+    <div class="form-group">
+      <label class="form-label">🎯 Niveau</label>
+      <select id="fNiv" class="form-select">${_FORM_LEVEL_OPTIONS.map(o=>`<option value="${o.value}"${o.value==='intermédiaire'?' selected':''}>${o.label}</option>`).join('')}</select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">⏱️ Durée estimée</label>
+      <select id="fDur" class="form-select">${_DURATION_OPTIONS.map(o=>`<option value="${o.value}"${o.default?' selected':''}>${o.label}</option>`).join('')}</select>
+    </div>
   </div>
-  <div class="form-group"><label class="form-label">9. Document de référence <span>optionnel · PDF / TXT</span></label>
-  <div class="file-drop" onclick="document.getElementById('fFile').click()">
-    <input type="file" id="fFile" accept=".txt,.md,.pdf" style="display:none" onchange="loadDoc(this)">
-    <div style="font-size:1.6rem;margin-bottom:.3rem;">📄</div>
-    <div style="font-weight:700;margin-bottom:.15rem;">Déposez un document de référence</div>
-    <div style="font-size:.73rem;color:var(--gray400);">Procédure · Mode opératoire · Fiche technique · Référentiel métier · PDF constructeur</div>
-    <div id="fDocName" style="font-size:.72rem;color:var(--accent);margin-top:.3rem;font-weight:800;"></div>
-  </div><input type="hidden" id="fDoc"></div>`;}
+  <div class="form-group">
+    <label class="form-label" style="display:flex;align-items:center;">📝 Objectifs pédagogiques <span>*</span><span id="fCtxCounter" style="margin-left:auto;font-size:.68rem;font-weight:500;color:#6b7280;background:#f3f4f6;border-radius:5px;padding:.1rem .4rem;text-transform:none;letter-spacing:0;">0 / 500 mots</span></label>
+    <textarea id="fCtx" class="form-textarea" placeholder="Décrivez précisément ce que le stagiaire apprendra : compétences visées, gestes maîtrisés, situations professionnelles traitées…" oninput="_updateWordCounter('fCtx','fCtxCounter',500)"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">📚 Prérequis <span>optionnel</span></label>
+    <input type="text" id="fNorm" class="form-input" placeholder="ex : Notions de base en électricité, lecture de plans techniques…">
+  </div>
+  <input type="hidden" id="fDoc">`;}
 
 function fieldsAcadHtml(){return`
   <div class="form-group">
-    <label class="form-label">1. Discipline / matière <span>* toutes disciplines acceptées</span></label>
-    <input type="text" id="fDom" class="form-input" placeholder="ex : Droit civil, Pharmacologie, Microéconomie, Résistance des matériaux, Psychologie cognitive, Littérature française…" autocomplete="off">
-    <div class="dpills">${ACADDOMS.map(d=>`<span class="dpill acad" onclick="document.getElementById('fDom').value='${d}'">${d}</span>`).join('')}</div>
+    <label class="form-label">📌 Titre / chapitre à enseigner <span>*</span></label>
+    <input type="text" id="fComp" class="form-input" placeholder="ex : Transformée de Laplace, Droit du contrat de vente, Biochimie des lipides…" autocomplete="off">
   </div>
   <div class="form-grid">
-    <div class="form-group"><label class="form-label">2. Chapitre / notion à enseigner <span>*</span></label>
-    <input type="text" id="fComp" class="form-input" placeholder="ex : Transformée de Laplace, Droit du contrat de vente, Biochimie des lipides, Analyse littéraire du roman…"></div>
-    <div class="form-group"><label class="form-label">3. Niveau / cursus <span>*</span></label>
-    <select id="fPub" class="form-select">
-      <optgroup label="Secondaire">
-        <option>Lycée — Terminale</option>
-        <option>Classe Préparatoire MPSI/PCSI</option>
-        <option>Classe Préparatoire MP/PC/PSI</option>
-      </optgroup>
-      <optgroup label="BTS / BUT">
-        <option>BTS 1ère année</option>
-        <option>BTS 2ème année</option>
-        <option>BUT / IUT 1ère année</option>
-        <option>BUT / IUT 2ème année</option>
-        <option>BUT / IUT 3ème année</option>
-      </optgroup>
-      <optgroup label="Licence">
-        <option>Licence L1 (Bac+1)</option>
-        <option>Licence L2 (Bac+2)</option>
-        <option selected>Licence L3 (Bac+3)</option>
-        <option>Licence Pro</option>
-      </optgroup>
-      <optgroup label="Ingénieur / Master">
-        <option>Ingénieur 1ère année (Bac+3)</option>
-        <option>Ingénieur 2ème année (Bac+4)</option>
-        <option>Ingénieur 3ème année (Bac+5)</option>
-        <option>Master M1 (Bac+4)</option>
-        <option>Master M2 (Bac+5)</option>
-      </optgroup>
-      <optgroup label="Santé">
-        <option>PASS / L.AS (ex-PACES)</option>
-        <option>DFGSM — Médecine 2e / 3e cycle</option>
-        <option>Pharmacie D1-D6</option>
-        <option>Infirmier(ère) — IFSI</option>
-        <option>Kinésithérapie — IFMK</option>
-      </optgroup>
-      <optgroup label="Doctorat / Recherche">
-        <option>Doctorat / PhD</option>
-        <option>Post-doctorat</option>
-      </optgroup>
-    </select></div>
-  </div>
-  <div class="form-grid-3">
-    <div class="form-group"><label class="form-label">4. Type de séance</label>
-    <select id="fNiv" class="form-select">
-      <option value="cours magistral">Cours magistral (CM)</option>
-      <option value="travaux dirigés" selected>Travaux Dirigés (TD)</option>
-      <option value="travaux pratiques">Travaux Pratiques (TP)</option>
-      <option value="cours + TD intégré">Cours + TD intégré</option>
-    </select></div>
-    <div class="form-group"><label class="form-label">5. Durée</label>
-    <select id="fDur" class="form-select">
-      <option>1 heure (CM)</option>
-      <option selected>1h30 (TD)</option>
-      <option>3 heures (TP)</option>
-      <option>Demi-journée (TP long)</option>
-    </select></div>
-    <div class="form-group"><label class="form-label">6. Langue</label>
-    <select id="fLang" class="form-select">${_LANG_OPTIONS.map(o=>`<option value="${o.value}">${o.label}</option>`).join('')}</select></div>
+    <div class="form-group">
+      <label class="form-label">🏫 Discipline / matière <span>*</span></label>
+      <input type="text" id="fDom" class="form-input" placeholder="ex : Droit civil, Pharmacologie, RDM…" list="acaddomsList" autocomplete="off">
+      <datalist id="acaddomsList">${ACADDOMS.map(d=>`<option value="${_e(d)}">`).join('')}</datalist>
+    </div>
+    <div class="form-group">
+      <label class="form-label">🎓 Niveau / cursus <span>*</span></label>
+      <select id="fPub" class="form-select">
+        <optgroup label="Secondaire">
+          <option>Lycée — Terminale</option>
+          <option>Classe Préparatoire MPSI/PCSI</option>
+          <option>Classe Préparatoire MP/PC/PSI</option>
+        </optgroup>
+        <optgroup label="BTS / BUT">
+          <option>BTS 1ère année</option>
+          <option>BTS 2ème année</option>
+          <option>BUT / IUT 1ère année</option>
+          <option>BUT / IUT 2ème année</option>
+          <option>BUT / IUT 3ème année</option>
+        </optgroup>
+        <optgroup label="Licence">
+          <option>Licence L1 (Bac+1)</option>
+          <option>Licence L2 (Bac+2)</option>
+          <option selected>Licence L3 (Bac+3)</option>
+          <option>Licence Pro</option>
+        </optgroup>
+        <optgroup label="Ingénieur / Master">
+          <option>Ingénieur 1ère année (Bac+3)</option>
+          <option>Ingénieur 2ème année (Bac+4)</option>
+          <option>Ingénieur 3ème année (Bac+5)</option>
+          <option>Master M1 (Bac+4)</option>
+          <option>Master M2 (Bac+5)</option>
+        </optgroup>
+        <optgroup label="Santé">
+          <option>PASS / L.AS (ex-PACES)</option>
+          <option>DFGSM — Médecine 2e / 3e cycle</option>
+          <option>Pharmacie D1-D6</option>
+          <option>Infirmier(ère) — IFSI</option>
+          <option>Kinésithérapie — IFMK</option>
+        </optgroup>
+        <optgroup label="Doctorat / Recherche">
+          <option>Doctorat / PhD</option>
+          <option>Post-doctorat</option>
+        </optgroup>
+      </select>
+    </div>
   </div>
   <div class="form-grid">
-    <div class="form-group"><label class="form-label">7. Prérequis techniques <span>optionnel</span></label>
-    <input type="text" id="fNorm" class="form-input" placeholder="ex : Algèbre complexe, lois de Kirchhoff, notions de dérivation, C embarqué…"></div>
-    <div class="form-group"><label class="form-label">8. Objectifs pédagogiques <span>optionnel</span></label>
-    <input type="text" id="fCtx" class="form-input" placeholder="ex : Savoir analyser un schéma électrique, dimensionner un variateur de vitesse…"></div>
+    <div class="form-group">
+      <label class="form-label">🗂️ Type de séance</label>
+      <select id="fNiv" class="form-select">
+        <option value="cours magistral">Cours magistral (CM)</option>
+        <option value="travaux dirigés" selected>Travaux Dirigés (TD)</option>
+        <option value="travaux pratiques">Travaux Pratiques (TP)</option>
+        <option value="cours + TD intégré">Cours + TD intégré</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">⏱️ Durée</label>
+      <select id="fDur" class="form-select">
+        <option>1 heure (CM)</option>
+        <option selected>1h30 (TD)</option>
+        <option>3 heures (TP)</option>
+        <option>Demi-journée (TP long)</option>
+      </select>
+    </div>
   </div>
-  <div class="form-group"><label class="form-label">9. Document du professeur <span>optionnel · PDF / TXT / MD</span></label>
-  <div class="file-drop" onclick="document.getElementById('fFile').click()">
-    <input type="file" id="fFile" accept=".txt,.md,.pdf" style="display:none" onchange="loadDoc(this)">
-    <div style="font-size:1.6rem;margin-bottom:.3rem;">📄</div>
-    <div style="font-weight:700;margin-bottom:.15rem;">Déposez le document du professeur ici</div>
-    <div style="font-size:.73rem;color:var(--gray400);">Polycopié · Cours PDF · Fiche technique · Datasheet · Programme officiel</div>
-    <div id="fDocName" style="font-size:.72rem;color:var(--purple);margin-top:.3rem;font-weight:800;"></div>
-  </div><input type="hidden" id="fDoc"></div>`;}
+  <div class="form-group">
+    <label class="form-label" style="display:flex;align-items:center;">📝 Objectifs pédagogiques <span>*</span><span id="fCtxCounter" style="margin-left:auto;font-size:.68rem;font-weight:500;color:#6b7280;background:#f3f4f6;border-radius:5px;padding:.1rem .4rem;text-transform:none;letter-spacing:0;">0 / 500 mots</span></label>
+    <textarea id="fCtx" class="form-textarea" placeholder="ex : Savoir analyser un schéma électrique, dimensionner un variateur de vitesse, démontrer un théorème…" oninput="_updateWordCounter('fCtx','fCtxCounter',500)"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="form-label">📚 Prérequis techniques <span>optionnel</span></label>
+    <input type="text" id="fNorm" class="form-input" placeholder="ex : Algèbre complexe, lois de Kirchhoff, notions de dérivation…">
+  </div>
+  <input type="hidden" id="fDoc">`;}
+
+/* Compteur de mots en direct sur les champs textarea (informatif, non bloquant) */
+function _updateWordCounter(fieldId,counterId,max){
+  const el=document.getElementById(fieldId);const c=document.getElementById(counterId);
+  if(!el||!c)return;
+  const words=(el.value||'').trim().split(/\s+/).filter(Boolean);
+  c.textContent=`${words.length} / ${max} mots`;
+  c.style.color=words.length>max?'#dc2626':'#6b7280';
+}
 
 async function loadDoc(inp){
   const f=inp.files[0];if(!f)return;
@@ -2473,7 +2509,7 @@ async function _gatherTerrainData(fd,key,SYS,ctx){
 async function pipePro(fd,key){
   const _warn=[]; // étapes optionnelles ayant échoué — signalées à la fin
   const docCtx=fd.doc?`\n\n--- DOCUMENT DE RÉFÉRENCE FOURNI PAR LE FORMATEUR ---\n${fd.doc.slice(0,8000)}\n--- FIN DOCUMENT ---`:'';
-  const ctx=`Domaine: ${fd.dom}\nCompétence/thème: ${fd.comp}\nPublic cible: ${fd.pub}\nNiveau: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nNormes applicables: '+fd.norm:''}${fd.ctx?'\nMatériel/équipements: '+fd.ctx:''}${docCtx}`;
+  const ctx=`Domaine: ${fd.dom}\nCompétence/thème: ${fd.comp}\nPublic cible: ${fd.pub}\nNiveau: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nPrérequis: '+fd.norm:''}${fd.ctx?'\nObjectifs pédagogiques précis: '+fd.ctx:''}${docCtx}`;
   const SYS=`Tu es un formateur professionnel expert du métier "${fd.dom}" (spécialité : ${fd.comp||fd.dom}), avec 20 ans d'expérience terrain dans CE domaine précis.
 
 AVANT DE GÉNÉRER, identifie mentalement ces 4 ancres qui distinguent "${fd.dom}" d'un domaine voisin :
@@ -5107,7 +5143,7 @@ function importConfig(file){
 function _seedModules(){
   return [
   {
-    id:'seed-secu-elec',mode:'pro',_seed:true,fav:false,ts:Date.now()-3*86400000,
+    id:1735430400000,mode:'pro',_seed:true,fav:false,ts:1735430400000,
     icone:'⚡',titre:'Sécurité électrique — Habilitation BR',
     desc:'Comprendre les risques électriques et les gestes qui sauvent pour intervenir en basse tension en toute sécurité.',
     description:'Comprendre les risques électriques et les gestes qui sauvent pour intervenir en basse tension en toute sécurité.',
@@ -5182,7 +5218,7 @@ function _seedModules(){
     scores:{},wrongByComp:{}
   },
   {
-    id:'seed-5s',mode:'pro',_seed:true,fav:false,ts:Date.now()-6*86400000,
+    id:1735171200000,mode:'pro',_seed:true,fav:false,ts:1735171200000,
     icone:'🧹',titre:'La méthode 5S — Organiser le poste de travail',
     desc:'Transformer un poste de travail en environnement propre, ordonné et performant grâce à la démarche 5S.',
     description:'Transformer un poste de travail en environnement propre, ordonné et performant grâce à la démarche 5S.',
@@ -5257,7 +5293,7 @@ function _seedModules(){
     scores:{},wrongByComp:{}
   },
   {
-    id:'seed-rdm-flexion',mode:'acad',_seed:true,fav:false,ts:Date.now()-1*86400000,
+    id:1735603200000,mode:'acad',_seed:true,fav:false,ts:1735603200000,
     icone:'📐',titre:'Résistance des matériaux — La flexion simple',
     desc:'Analyser une poutre en flexion : efforts internes, contrainte normale et dimensionnement.',
     description:'Analyser une poutre en flexion : efforts internes, contrainte normale et dimensionnement.',
@@ -5328,15 +5364,24 @@ function _seedModules(){
 }
 function _seedLibraryIfEmpty(){
   try{
-    if(localStorage.getItem('gls_seeded_v1'))return;   // déjà fait une fois
-    const existing=getMods();
+    // v1 utilisait des id texte ('seed-xxx') incompatibles avec openMod(${m.id})
+    // (appelé sans guillemets dans le onclick) — on purge ces entrées cassées
+    // avant de resemer avec des id numériques, même si v1 a déjà tourné.
+    const existing=getMods().filter(m=>!(typeof m.id==='string'&&m.id.startsWith('seed-')));
+    if(localStorage.getItem('gls_seeded_v2')){
+      if(existing.length!==getMods().length)saveMods(existing); // purge silencieuse des restes v1
+      return;
+    }
     const existingIds=new Set(existing.map(m=>String(m.id)));
     const seeds=_seedModules().filter(s=>!existingIds.has(String(s.id)));
     if(seeds.length){
       // Les modules pré-créés apparaissent après les modules de l'utilisateur
       saveMods(existing.concat(seeds));
+    }else{
+      saveMods(existing);
     }
     localStorage.setItem('gls_seeded_v1','1');
+    localStorage.setItem('gls_seeded_v2','1');
   }catch(e){console.warn('seed error',e);}
 }
 
