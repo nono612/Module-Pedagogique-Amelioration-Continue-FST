@@ -1243,7 +1243,7 @@ const _CFG_DEFAULTS={
   formateur:'',
   formateurTitre:'Formateur / Responsable pédagogique',
   certifIntitule:'Attestation de Formation',
-  model:'llama-3.3-70b-versatile',
+  model:'qwen/qwen3.8-27b',
   temperature:0.75,
   defaultMode:'pro',
   defaultNiveau:'intermédiaire',
@@ -1307,12 +1307,11 @@ const _NAV_GROUPS=[
    accessibles au compte (_refreshGroqSelector). L'ordre suit des mesures
    faites sur l'API : quota par minute, fiabilité du mode JSON, qualité du
    français, coût en jetons. */
+/* Un seul modèle proposé : choisi sur mesures faites le 2026-08-27 avec le
+   prompt réel du pipeline (voir _GROQ_TRUSTED pour le détail). */
 const _MODEL_OPTIONS=[
-  {value:'groq/compound-mini',label:'🛡️ Compound Mini ⭐ Recommandé',info:'Quota 70 000 jetons/min — près de 9× les autres. Génère sans interruption même sur les gros modules.'},
-  {value:'llama-3.3-70b-versatile',label:'🧠 Llama 3.3 70B',info:'Français soigné. Quota 8 000 jetons/min : coupures possibles sur les modules longs.'},
-  {value:'qwen/qwen3.8-27b',label:'✍️ Qwen 3.8 27B',info:'Très économe en jetons pour un contenu dense. Quota 8 000 jetons/min.'},
-  {value:'openai/gpt-oss-20b',label:'⚡ GPT-OSS 20B',info:'Rapide et fiable en JSON. Quota 8 000 jetons/min.'},
-  {value:'llama-3.1-8b-instant',label:'⚡ Llama 3.1 8B Instant',info:'Le plus rapide, mais français approximatif. Pour tester uniquement.'},
+  {value:'qwen/qwen3.8-27b',label:'✍️ Qwen 3.8 27B — modèle unique',
+   info:'Le plus fiable pour ce générateur : JSON toujours valide, français soigné, et le contenu le plus dense pour le moins de jetons — ce qui économise le quota.'},
 ];
 
 /* ─── Groq Live Model Discovery ─── */
@@ -1321,8 +1320,7 @@ const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 /* Secours si l'API /models est injoignable, ordonné par mesures réelles :
    compound-mini d'abord (70 000 jetons/min contre 8 000 pour les autres, ce qui
    supprime les coupures de quota), puis les modèles à français soigné. */
-const _GROQ_FALLBACK_CHAIN=['groq/compound-mini','llama-3.3-70b-versatile',
-  'qwen/qwen3.8-27b','openai/gpt-oss-20b','llama-3.1-8b-instant'];
+const _GROQ_FALLBACK_CHAIN=['qwen/qwen3.8-27b','qwen/qwen3.6-27b','groq/compound-mini','llama-3.3-70b-versatile']
 
 /* Écartés après essai sur l'API :
    - openai/gpt-oss-120b : échoue par intermittence en mode JSON
@@ -1373,15 +1371,16 @@ function _parseRetryDelay(msg){
    8 000 jetons/min, deux sections en parallèle suffisent à déclencher une
    attente ; compound-mini en offre 70 000. */
 const _GROQ_TRUSTED=[
-  {re:/^groq\/compound-mini$/,     rank:0},  // 70 000 j/min, aucun outil interne, JSON fiable
-  {re:/^llama-3\.3-70b-versatile$/,rank:1},  // meilleur français quand le compte y a accès
-  {re:/^qwen\/qwen3\.\d+-27b$/,    rank:2},  // contenu dense pour très peu de jetons
-  {re:/^openai\/gpt-oss-20b$/,     rank:3},  // fiable en JSON, rapide
-  {re:/^llama-3\.1-8b-instant$/,   rank:4},  // rapide, français approximatif
-  // Écartés volontairement (voir _GROQ_AVOID) :
-  //  · openai/gpt-oss-120b — échoue par intermittence en mode JSON
-  //  · groq/compound       — exécute du code avant de répondre (6× plus de jetons)
-  //  · gemma2-9b-it        — décommissionné par Groq
+  {re:/^qwen\/qwen3\.8-27b$/,     rank:0},  // modèle retenu
+  {re:/^qwen\/qwen3\.\d+-27b$/,   rank:1},  // même famille, si la version change
+  {re:/^groq\/compound-mini$/,     rank:2},  // secours : quota 70 000 j/min
+  {re:/^llama-3\.3-70b-versatile$/,rank:3},  // secours pour les comptes qui y ont accès
+  // Écartés — mesures du 2026-08-27 sur le prompt réel du pipeline :
+  //  · openai/gpt-oss-120b et -20b : « Failed to validate JSON » sur les
+  //    prompts longs, alors que tout le pipeline dépend du mode JSON
+  //  · groq/compound : exécute du code avant de répondre (12 196 jetons
+  //    contre 2 741 pour qwen sur la même section)
+  //  · gemma2-9b-it : décommissionné par Groq
 ];
 function _groqRankOf(id){
   for(const t of _GROQ_TRUSTED){if(t.re.test(id))return t.rank;}
@@ -1417,9 +1416,14 @@ async function _refreshGroqSelector(key,force=false){
     :await _fetchGroqModels(key);
   if(!ids||!ids.length)return;
   localStorage.setItem(_GROQ_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
-  // Rebuild _MODEL_OPTIONS from live data
+  /* On ne propose qu'un modèle : le mieux classé parmi ceux auxquels le compte
+     a réellement accès. Si le modèle retenu disparaît du catalogue Groq, le
+     suivant de la liste fermée prend sa place sans intervention. */
+  const best=ids[0];
   _MODEL_OPTIONS.length=0;
-  ids.forEach(id=>_MODEL_OPTIONS.push({value:id,label:_groqModelLabel(id),info:'Disponible sur votre compte Groq.'}));
+  _MODEL_OPTIONS.push({value:best,
+    label:(_groqModelLabel(best)||best)+' — modèle unique',
+    info:_MODEL_INFO[best]||'Modèle vérifié sur votre compte Groq.'});
   // Auto-migrate config if current model no longer available
   const cur=getCfg().model;
   if(cur&&!ids.includes(cur)){
@@ -2109,7 +2113,7 @@ async function _groqFetch(key,model,msgs,maxTok,temp,json){
    Utilisé par tous les appels IA de l'application. */
 async function _groqExec(key,msgs,maxTok,temp,json){
   if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
-  const configured=getCfg().model||'llama-3.3-70b-versatile';
+  const configured=getCfg().model||'qwen/qwen3.8-27b';
   const tried=new Set();
   let lastErr;
 
@@ -5139,12 +5143,10 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'groq/compound-mini':'🛡️ Quota 70 000 jetons/min — près de 9× les autres modèles. Génère les longs modules sans coupure.',
-  'llama-3.3-70b-versatile':'🧠 Le français le plus soigné. Quota 8 000 jetons/min : coupures possibles sur les modules longs.',
-  'qwen/qwen3.8-27b':'✍️ Contenu dense pour très peu de jetons. Quota 8 000 jetons/min.',
-  'qwen/qwen3.6-27b':'✍️ Même famille, version précédente. Quota 8 000 jetons/min.',
-  'openai/gpt-oss-20b':'⚡ Rapide et fiable en JSON. Quota 8 000 jetons/min.',
-  'llama-3.1-8b-instant':'⚡ Le plus rapide, mais français approximatif. Pour tester uniquement.',
+  'qwen/qwen3.8-27b':'✍️ JSON toujours valide, français soigné, contenu dense pour peu de jetons.',
+  'qwen/qwen3.6-27b':'✍️ Version précédente de la même famille.',
+  'groq/compound-mini':'🛡️ Secours — quota 70 000 jetons/min, contenu plus ramassé.',
+  'llama-3.3-70b-versatile':'🧠 Secours — français soigné, si votre compte y a accès.',
 };
 function _modelInfoText(id){
   return _MODEL_INFO[id]||'Modèle sélectionné.';
@@ -5529,7 +5531,7 @@ function _seedLibraryIfEmpty(){
     const suspect=!m
       ||/^(gemini|grok|claude)/.test(m)||/^(gpt-4|gpt-3)/.test(m)  // reliquats d'autres fournisseurs
       ||/^llama3-|mixtral|llama-3\.1-70b|^gemma/.test(m); // retirés/décommissionnés par Groq
-    if(suspect){cfg.model='llama-3.3-70b-versatile';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+    if(suspect){cfg.model='qwen/qwen3.8-27b';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
