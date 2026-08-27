@@ -3194,19 +3194,25 @@ function renderViewer(m){
         <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenScenarios(${m.id})">🔄 Générer les mises en situation</button></div>
       </div>`;
     const cl=m.checklist||{avant:[],pendant:[],apres:[]};
+    const _clEmpty=!(cl.avant?.length||cl.pendant?.length||cl.apres?.length);
     if(_cfg.showChecklist) extra+=`<div class="ccard"><div class="ccard-title">✅ Check-list terrain</div>
-      ${[['avant','🔵 Avant l\'intervention','#1d4ed8'],['pendant','🟡 Pendant','#b45309'],['apres','🟢 Après','#15803d']].map(([k,lbl,col])=>`<div class="cl-section"><div class="cl-section-title" style="background:rgba(0,0,0,.04);color:${col};">${lbl}</div>
+      ${_clEmpty?`<div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Cette check-list n'a pas encore été générée.</div>
+      <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenChecklist(${m.id})">🔄 Générer la check-list</button></div>`
+      :[['avant','🔵 Avant l\'intervention','#1d4ed8'],['pendant','🟡 Pendant','#b45309'],['apres','🟢 Après','#15803d']].map(([k,lbl,col])=>`<div class="cl-section"><div class="cl-section-title" style="background:rgba(0,0,0,.04);color:${col};">${lbl}</div>
         ${(cl[k]||[]).map((item,j)=>`<label class="cl-item" id="cl-${k}-${j}" onclick="this.classList.toggle('checked')"><input type="checkbox" style="accent-color:var(--accent);"> ${_e(item)}</label>`).join('')}</div>`).join('')}
     </div>`;
     const s2=m.memo||{};
-    extra+=`<div class="ccard"><div class="ccard-title">📄 Mémo terrain</div><div style="max-width:640px;">
-      <div style="border-left:4px solid var(--accent);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:var(--accent);text-transform:uppercase;">Mémo terrain — Quick Reference</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(s2.titre||m.titre)}</h3></div>
+    const _memoEmpty=!(s2.regles?.length||s2.formules?.length||s2.interdits?.length||s2.reflexes_expert?.length||s2.regle_or);
+    extra+=`<div class="ccard"><div class="ccard-title">📄 Mémo terrain</div>${_memoEmpty?`
+      <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Ce mémo n'a pas encore été généré.</div>
+      <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenMemo(${m.id})">🔄 Générer le mémo</button></div>`:`<div style="max-width:640px;">
+      <div style="border-left:4px solid ${mc};padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:${mc};text-transform:uppercase;">Mémo terrain — Quick Reference</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(s2.titre||m.titre)}</h3></div>
       ${(s2.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s2.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
       ${(s2.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s2.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
       ${(s2.interdits||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">🚫 À ne jamais faire</h4>${(s2.interdits||[]).map(e2=>`<div class="memo-item" style="color:#7f1d1d;">${_e(e2)}</div>`).join('')}</div>`:''}
       ${(s2.reflexes_expert||[]).length?`<div class="memo-block" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left-color:#7c3aed;"><h4 style="color:#6d28d9;">⚡ Réflexes de l'expert</h4>${(s2.reflexes_expert||[]).map(r=>`<div class="memo-item" style="color:#4c1d95;">→ ${_e(r)}</div>`).join('')}</div>`:''}
       ${s2.regle_or?`<div class="memo-gold"><h4>🏆 Règle d'or</h4><p>"${_e(s2.regle_or)}"</p></div>`:''}
-    </div></div>`;
+    </div>`}</div>`;
     if(_cfg.showKpis) extra+=`<div class="ccard">${renderKPIs(m,mc)}</div>`;
   } else {
     const exos=(m.exercices||[]).map((ex,i)=>`
@@ -3227,16 +3233,17 @@ function renderViewer(m){
         <div style="text-align:center;"><button class="btn btn-purple btn-sm" onclick="regenExercices(${m.id})">🔄 Générer les exercices TD/TP</button></div>
       </div>`;
     const rv=m.revision||{};
-    if(rv.titre||rv.notions?.length){
-      extra+=`<div class="ccard"><div class="ccard-title">📋 Fiche de révision</div><div style="max-width:640px;">
+    const _rvEmpty=!(rv.titre||rv.notions?.length||rv.formules?.length||rv.pieges?.length||rv.methode?.length);
+    extra+=`<div class="ccard"><div class="ccard-title">📋 Fiche de révision</div>${_rvEmpty?`
+      <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Cette fiche n'a pas encore été générée.</div>
+      <div style="text-align:center;"><button class="btn btn-purple btn-sm" onclick="regenRevision(${m.id})">🔄 Générer la fiche de révision</button></div>`:`<div style="max-width:640px;">
         <div style="border-left:4px solid var(--purple);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:var(--purple);text-transform:uppercase;">Fiche synthèse — Examen</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(rv.titre||m.titre)}</h3></div>
         ${(rv.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(rv.notions||[]).map(n2=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n2)}</div>`).join('')}</div>`:''}
         ${(rv.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(rv.formules||[]).map(f2=>`<span class="formula-tag">${_e(f2)}</span>`).join('')}</div>`:''}
         ${(rv.methode||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🗂️ Démarche à l'examen</h4><ul class="steps-ol">${(rv.methode||[]).map((e2,j)=>`<li class="step-li"><div class="step-n acad">${j+1}</div><div class="step-t" style="color:#78350f;">${_e(e2)}</div></li>`).join('')}</ul></div>`:''}
         ${(rv.pieges||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">⚠️ Pièges classiques</h4>${(rv.pieges||[]).map(pg=>`<div class="memo-item" style="color:#7f1d1d;">${_e(pg)}</div>`).join('')}</div>`:''}
         ${rv.conseil?`<div class="memo-gold"><h4>💡 Conseil stratégique</h4><p>"${_e(rv.conseil)}"</p></div>`:''}
-      </div></div>`;
-    }
+      </div>`}</div>`;
   }
 
   // Carte plan de révision
@@ -6047,6 +6054,52 @@ async function regenScenarios(modId){
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer les mises en situation';}}
 }
 
+/* Résumé des valeurs déjà écrites dans les sections, pour que la génération
+   ponctuelle (checklist/mémo seuls) reprenne les mêmes chiffres que le cours
+   au lieu d'en inventer d'autres — même logique que dans le pipeline complet. */
+function _moduleFactsDigest(m){
+  const field=m.mode==='acad'?'points_cles':'donnees_cles';
+  return(m.sections||[]).filter(s=>!s._failed)
+    .map(s=>{const vals=(s[field]||[]).slice(0,3).join(' · ');return vals?`${s.titre} : ${vals}`:'';})
+    .filter(Boolean).join('\n');
+}
+
+async function regenChecklist(modId){
+  const key=getKey();if(!key){showToast('Clé API requise','err');return;}
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳…';}
+  const SYS=`Tu es un formateur expert en "${m.secteur||m.dom||m.titre}". JSON uniquement.`;
+  const facts=_moduleFactsDigest(m);
+  const ctx=`Formation: "${m.titre}"\nObjectifs: ${(m.objectifs||[]).slice(0,3).join(' | ')}`
+    +(facts?`\n\nVALEURS RÉELLEMENT ENSEIGNÉES — reprends ces chiffres exacts :\n${facts}`:'');
+  try{
+    const r=await _retry(()=>gemini(key,SYS,
+      `${ctx}\n\nJSON:\n{"checklist":{"avant":["Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","2","3","4","5"],"pendant":["Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","2","3","4"],"apres":["Vérification/validation APRÈS 1 (critère mesurable)","2","3"]}}`,
+      1200,T.EXERCICE));
+    const idx=ms.findIndex(x=>x.id==modId);
+    if(idx>=0&&r.checklist){ms[idx].checklist=r.checklist;saveMods(ms);_cur=ms[idx];}
+    renderViewer(_cur);showToast('Check-list générée !');
+  }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer la check-list';}}
+}
+
+async function regenMemo(modId){
+  const key=getKey();if(!key){showToast('Clé API requise','err');return;}
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳…';}
+  const SYS=`Tu es un formateur expert en "${m.secteur||m.dom||m.titre}". JSON uniquement.`;
+  const facts=_moduleFactsDigest(m);
+  const ctx=`Formation: "${m.titre}"\nObjectifs: ${(m.objectifs||[]).slice(0,3).join(' | ')}`
+    +(facts?`\n\nVALEURS RÉELLEMENT ENSEIGNÉES — reprends ces chiffres exacts :\n${facts}`:'');
+  try{
+    const r=await gemini(key,SYS,
+      `${ctx}\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${m.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5"],"formules":["Formule/valeur 1: [formule ou valeur] — exemple chiffré","Formule 2","Valeur critique 3"],"formules_kv":[{"nom":"Nom court","valeur":"formule ou valeur numérique exacte"},{"nom":"Nom 2","valeur":"..."},{"nom":"Nom 3","valeur":"..."}],"interdits":["JAMAIS: erreur critique 1 — risque exact","JAMAIS: erreur 2","JAMAIS: erreur 3"],"reflexes_expert":["Réflexe 1: situation déclenchante → action instinctive","Réflexe 2","Réflexe 3"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante"}`,
+      1400,T.CONTENU);
+    const idx=ms.findIndex(x=>x.id==modId);
+    if(idx>=0&&r&&Object.keys(r).length){ms[idx].memo=r;saveMods(ms);_cur=ms[idx];}
+    renderViewer(_cur);showToast('Mémo terrain généré !');
+  }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer le mémo';}}
+}
+
 async function regenExercices(modId){
   const key=getKey();if(!key){showToast('Clé API requise','err');return;}
   const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
@@ -6060,6 +6113,24 @@ async function regenExercices(modId){
     if(idx>=0&&r.exercices?.length){ms[idx].exercices=r.exercices;saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast(r.exercices?.length+' exercices TD/TP générés !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer les exercices';}}
+}
+
+async function regenRevision(modId){
+  const key=getKey();if(!key){showToast('Clé API requise','err');return;}
+  const ms=getMods();const m=ms.find(x=>x.id==modId);if(!m)return;
+  const btn=event?.target;if(btn){btn.disabled=true;btn.textContent='⏳…';}
+  const SYS=`Tu es un professeur-ingénieur expert en "${m.secteur||m.dom||m.titre}". JSON uniquement.`;
+  const facts=_moduleFactsDigest(m);
+  const ctx=`Cours: "${m.titre}"\nObjectifs: ${(m.objectifs||[]).slice(0,3).join(' | ')}\nNotions: ${(m.notions||[]).join(', ')}`
+    +(facts?`\n\nVALEURS ET FORMULES RÉELLEMENT ENSEIGNÉES — reprends ces éléments exacts :\n${facts}`:'');
+  try{
+    const r=await gemini(key,SYS,
+      `${ctx}\n\nFiche de révision synthétique pour examen ingénieur:\n{"titre":"Fiche synthèse: [titre]","notions":["Notion 1: définition + formule si applicable","Notion 2","Notion 3","Notion 4"],"formules":["Formule 1: formule mathématique — conditions d'application — unités","Formule 2","Formule 3"],"formules_kv":[{"nom":"Nom court","valeur":"formule exacte"},{"nom":"Nom 2","valeur":"..."},{"nom":"Nom 3","valeur":"..."}],"pieges":["Piège classique 1: erreur fréquente à éviter","Piège 2","Piège 3"],"methode":["Étape 1: action à faire en premier à l'examen","Étape 2","Étape 3"],"conseil":"Conseil stratégique examen (1 phrase percutante)"}`,
+      1200,T.CONTENU);
+    const idx=ms.findIndex(x=>x.id==modId);
+    if(idx>=0&&r&&Object.keys(r).length){ms[idx].revision=r;saveMods(ms);_cur=ms[idx];}
+    renderViewer(_cur);showToast('Fiche de révision générée !');
+  }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer la fiche de révision';}}
 }
 
 /* ── Enrich panel ── */
