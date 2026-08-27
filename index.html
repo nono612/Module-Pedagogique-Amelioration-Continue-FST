@@ -3000,7 +3000,7 @@ function _idxDetectProvider(key){
 const _IDX_PROVIDER_INFO={groq:{label:'⚡ Groq · Llama',color:'#f59e0b',model:'llama-3.3-70b-versatile'}};
 
 /* ─── Découverte des modèles disponibles sur le compte ─── */
-const _IDX_MODELS_KEY='_idx_groq_mdls_v2';
+const _IDX_MODELS_KEY='_idx_groq_mdls_v3';
 const _IDX_MODELS_TTL=6*60*60*1000; // 6 h
 /* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
    français trop approximatif pour du contenu pédagogique publiable. */
@@ -3018,16 +3018,18 @@ function _idxGroqChain(preferred){
   return out;
 }
 
-/* LISTE FERMÉE — uniquement les modèles Groq officiels, testés et fiables à
-   100% pour générer du contenu pédagogique en français (chat + JSON valide).
-   Volontairement AUCUN repli vers des modèles non vérifiés (qwen, allam,
-   groq/compound, openai/gpt-oss…) : mieux vaut un message d'erreur clair
-   demandant de corriger la clé qu'une génération silencieusement peu fiable. */
+/* LISTE FERMÉE — uniquement les modèles Groq testés et fiables pour générer
+   du contenu pédagogique en français (chat + JSON valide). Volontairement
+   AUCUN repli vers des modèles jamais vérifiés (qwen, allam, groq/compound…) :
+   mieux vaut un message d'erreur clair demandant de corriger la clé qu'une
+   génération silencieusement peu fiable. */
 function _idxRankOf(id){
   if(/^llama-3\.3-70b-versatile$/.test(id))return 0;
   if(/^llama-3\.1-8b-instant$/.test(id))return 1;
   // gemma2-9b-it retiré : décommissionné par Groq (vérifié le 2026-08-27,
   // erreur "model_decommissioned" — plus aucun compte n'y a accès).
+  if(/^openai\/gpt-oss-120b$/.test(id))return 2;  // testé le 2026-08-27 : JSON valide, français correct
+  if(/^openai\/gpt-oss-20b$/.test(id))return 3;   // même famille, plus rapide et moins précis
   return -1;
 }
 async function _idxFetchGroqModels(key){
@@ -3070,9 +3072,18 @@ async function _idxGroqFetch(key,model,sys,usr,maxTok,temp){
   const msgs=[];
   if(sys)msgs.push({role:'system',content:sys});
   msgs.push({role:'user',content:usr});
+  /* Les modèles openai/gpt-oss-* raisonnent avant de répondre (jetons de
+     "reasoning" consommés dans le même budget max_tokens que le contenu
+     final) — sans ajustement, un contenu long peut être tronqué avant même
+     de commencer. reasoning_effort:'low' réduit ce raisonnement interne, et
+     on élargit la marge de tokens pour absorber ce qu'il en reste. */
+  const isReasoning=/^openai\//.test(model);
+  const body={model,messages:msgs,temperature:temp!==undefined?temp:0.7,
+    max_tokens:isReasoning?Math.round((maxTok||1024)*1.5):(maxTok||1024)};
+  if(isReasoning)body.reasoning_effort='low';
   const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-    body:JSON.stringify({model,messages:msgs,max_tokens:maxTok||1024,temperature:temp!==undefined?temp:0.7})});
+    body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({}));
   if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
   return d.choices?.[0]?.message?.content||'';
@@ -3140,7 +3151,7 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
   if(_IDX_RE_RATE.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez.');
   if(_IDX_RE_SWITCH.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun des modèles Groq fiables (llama-3.3-70b-versatile, llama-3.1-8b-instant). Créez une nouvelle clé gratuite sur console.groq.com/keys — les comptes standards y ont accès par défaut.');
+    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (llama-3.3-70b-versatile, llama-3.1-8b-instant, openai/gpt-oss-120b, openai/gpt-oss-20b). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 

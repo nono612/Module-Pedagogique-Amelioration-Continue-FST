@@ -1309,7 +1309,7 @@ const _MODEL_OPTIONS=[
 ];
 
 /* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v7';
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v8';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 /* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
    français trop approximatif pour du contenu pédagogique publiable. */
@@ -1345,16 +1345,18 @@ function _parseRetryDelay(msg){
   return null;
 }
 
-/* LISTE FERMÉE — uniquement les modèles Groq officiels, testés et fiables à
-   100% pour générer du contenu pédagogique en français (chat + JSON valide).
-   Volontairement AUCUN repli vers des modèles non vérifiés (qwen, allam,
-   groq/compound, openai/gpt-oss…) : mieux vaut un message d'erreur clair
-   demandant de corriger la clé qu'une génération silencieusement peu fiable. */
+/* LISTE FERMÉE — uniquement les modèles Groq testés et fiables pour générer
+   du contenu pédagogique en français (chat + JSON valide). Volontairement
+   AUCUN repli vers des modèles jamais vérifiés (qwen, allam, groq/compound…) :
+   mieux vaut un message d'erreur clair demandant de corriger la clé qu'une
+   génération silencieusement peu fiable. */
 const _GROQ_TRUSTED=[
   {re:/^llama-3\.3-70b-versatile$/,rank:0},  // meilleur français, référence
   {re:/^llama-3\.1-8b-instant$/,   rank:1},  // rapide, français correct
   // gemma2-9b-it retiré : décommissionné par Groq (vérifié le 2026-08-27,
   // erreur "model_decommissioned" — plus aucun compte n'y a accès).
+  {re:/^openai\/gpt-oss-120b$/,    rank:2},  // testé le 2026-08-27 : JSON valide, français correct
+  {re:/^openai\/gpt-oss-20b$/,     rank:3},  // même famille, plus rapide et moins précis
 ];
 function _groqRankOf(id){
   for(const t of _GROQ_TRUSTED){if(t.re.test(id))return t.rank;}
@@ -1362,6 +1364,8 @@ function _groqRankOf(id){
 }
 function _groqModelLabel(id){
   if(id.includes('instant'))return'⚡ '+id+' (rapide)';
+  if(id==='openai/gpt-oss-120b')return'🧠 '+id;
+  if(id==='openai/gpt-oss-20b')return'⚡ '+id+' (rapide)';
   if(/8b/i.test(id))return'⚡ '+id;
   if(/70b|90b|120b/i.test(id))return'🧠 '+id;
   return id;
@@ -2051,7 +2055,15 @@ const _GROQ_EP='https://api.groq.com/openai/v1/chat/completions';
 
 /* Un aller-retour HTTP vers Groq. Lève une Error portant le message de l'API. */
 async function _groqFetch(key,model,msgs,maxTok,temp,json){
-  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,max_tokens:maxTok};
+  /* Les modèles openai/gpt-oss-* raisonnent avant de répondre (jetons de
+     "reasoning" consommés dans le même budget max_tokens que le contenu final).
+     Sans ajustement, un contenu long peut être tronqué avant même de commencer.
+     reasoning_effort:'low' réduit ce raisonnement interne, et on élargit la
+     marge de tokens pour absorber ce qu'il en reste. */
+  const isReasoning=/^openai\//.test(model);
+  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,
+    max_tokens:isReasoning?Math.round((maxTok||2500)*1.5):maxTok};
+  if(isReasoning)body.reasoning_effort='low';
   if(json)body.response_format={type:'json_object'};
   const r=await fetch(_GROQ_EP,{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
@@ -2129,7 +2141,7 @@ async function _groqExec(key,msgs,maxTok,temp,json){
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun des modèles Groq fiables (llama-3.3-70b-versatile, llama-3.1-8b-instant). Créez une nouvelle clé gratuite sur console.groq.com/keys — les comptes standards y ont accès par défaut.');
+    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (llama-3.3-70b-versatile, llama-3.1-8b-instant, openai/gpt-oss-120b, openai/gpt-oss-20b). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
@@ -5097,6 +5109,8 @@ function _render3DViewer(containerId,code,modId,secIdx){
 const _MODEL_INFO={
   'llama-3.3-70b-versatile':'🧠 Gratuit — Français soigné et contenu fiable. Recommandé pour les modules.',
   'llama-3.1-8b-instant':'⚡ Gratuit — Très rapide, mais français approximatif. Pour tester uniquement.',
+  'openai/gpt-oss-120b':'🧠 Français correct, JSON fiable — bonne alternative si votre compte n\'a pas accès aux modèles Llama.',
+  'openai/gpt-oss-20b':'⚡ Version plus légère et rapide du même modèle, un peu moins précise.',
 };
 function _modelInfoText(id){
   return _MODEL_INFO[id]||'Modèle sélectionné.';
@@ -5476,10 +5490,11 @@ function _seedLibraryIfEmpty(){
   try{
     const cfg=JSON.parse(localStorage.getItem(_CFG_KEY)||'{}');
     const m=cfg.model;
+    // openai/gpt-oss-* est désormais dans la liste fermée des modèles fiables
+    // (_GROQ_TRUSTED) — ne plus le traiter comme suspect.
     const suspect=!m
-      ||m.startsWith('openai/')        // quota par minute trop bas
-      ||/^(gemini|grok|gpt|claude)/.test(m)  // reliquats d'autres fournisseurs
-      ||/^llama3-|mixtral|llama-3\.1-70b/.test(m); // retirés par Groq
+      ||/^(gemini|grok|claude)/.test(m)||/^(gpt-4|gpt-3)/.test(m)  // reliquats d'autres fournisseurs
+      ||/^llama3-|mixtral|llama-3\.1-70b|^gemma/.test(m); // retirés/décommissionnés par Groq
     if(suspect){cfg.model='llama-3.3-70b-versatile';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
