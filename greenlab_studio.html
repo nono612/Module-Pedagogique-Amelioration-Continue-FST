@@ -1045,7 +1045,7 @@ h1,h2,.ap-title-lg{
   <!-- ③ MOTEUR IA -->
   <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
     <div class="ccard-title">🤖 Moteur IA</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle Groq et la créativité. La liste est mise à jour automatiquement depuis votre compte.</p>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle Groq et la créativité. Seuls les modèles <b>testés et fiables</b> pour du contenu pédagogique en français sont proposés — tous fonctionnent, vous pouvez changer sans risque.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:end;">
       <div class="form-group"><label class="form-label">Modèle (Groq)</label>
         <select id="cfg-model" class="form-input" onchange="saveCfg('model',this.value);updateModelPill()"></select>
@@ -1288,7 +1288,7 @@ const _MODES=[
 const _NAV_GROUPS=[
   {section:'Navigation',items:[
     {id:'home',ico:'🏠',label:'Accueil'},
-    {id:'chat',ico:'💬',label:'Assistant IA'},
+    {id:'form',ico:'✨',label:'Générateur'},
     {id:'library',ico:'📚',label:'Bibliothèque'},
     {id:'stats',ico:'📊',label:'Statistiques'},
     {id:'profiles',ico:'👤',label:'Apprenants'},
@@ -1306,7 +1306,7 @@ const _MODEL_OPTIONS=[
 ];
 
 /* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v5';
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v6';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 /* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
    français trop approximatif pour du contenu pédagogique publiable. */
@@ -1351,28 +1351,35 @@ function _groqModelLabel(id){
   return id;
 }
 
+/* WHITELIST — seuls ces modèles Groq sont réellement fiables pour générer du
+   contenu pédagogique en français (chat + JSON valide). L'API /models expose
+   aussi des modèles audio (whisper/tts), de garde (guard), « tool-use »,
+   « compound », ainsi que des modèles tiers (qwen, deepseek, moonshot, allam…)
+   qui produisent du JSON invalide ou un français cassé : on les EXCLUT pour que
+   changer de modèle ne casse jamais la génération. */
+const _GROQ_WHITELIST=[
+  {re:/^llama-3\.3-70b-versatile$/, rank:0},  // meilleur français, référence
+  {re:/^llama-3\.1-8b-instant$/,    rank:2},  // rapide, français correct
+  {re:/^gemma2-9b-it$/,             rank:3},  // alternative légère (optionnelle)
+  // Note : llama3-*, mixtral et llama-3.1-70b sont retirés par Groq → exclus.
+  // Les modèles tiers (qwen, deepseek, moonshot, allam, compound…) produisent
+  // du JSON invalide ou un français cassé → volontairement absents.
+];
+function _groqRankOf(id){
+  for(const w of _GROQ_WHITELIST){if(w.re.test(id))return w.rank;}
+  return -1; // hors whitelist
+}
 async function _fetchGroqModels(key){
   try{
     const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
     if(!r.ok)return null;
     const d=await r.json();
     const ids=(d.data||[])
-      .filter(m=>
-        m.object==='model'&&
-        !m.id.startsWith('openai/')&&   // TPM trop bas sur free tier
-        !m.id.includes('whisper')&&
-        !m.id.includes('distil')&&
-        !m.id.includes('tool-use')&&
-        !m.id.includes('guard')&&
-        (m.context_window==null||m.context_window>=4096)
-      )
+      .filter(m=>m.object==='model'&&_groqRankOf(m.id)>=0)   // whitelist stricte
       .map(m=>m.id)
       // Qualité de rédaction d'abord : les gros modèles écrivent un français
       // nettement plus sûr, ce qui prime sur la vitesse pour du pédagogique.
-      .sort((a,b)=>{
-        const sc=s=>/llama-3\.3.*versatile/.test(s)?0:/70b|120b|90b/.test(s)?1:/llama/.test(s)?2:/gemma/.test(s)?3:4;
-        return sc(a)-sc(b)||a.localeCompare(b);
-      });
+      .sort((a,b)=>_groqRankOf(a)-_groqRankOf(b)||a.localeCompare(b));
     return ids.length?ids:null;
   }catch(e){return null;}
 }
@@ -1584,11 +1591,9 @@ function nav(name){
 
 function goCreate(mode){
   _mode=mode;
-  // Réinitialise le chat pour que initChat affiche le message spécialisé du bon mode
-  _chatHistory=[];_chatReady=false;_chatPending=null;_chatDocs=[];_chatDocCtx='';
-  const box=document.getElementById('chatMsgs');if(box)box.innerHTML='';
   updateSbMode();
-  nav('chat');
+  // Générateur à formulaire simple (comme index.html) — plus d'assistant conversationnel
+  nav('form');
 }
 
 /* ══════════════════════════════════════════════
@@ -2408,7 +2413,7 @@ async function startGen(){
     _reportIncomplete(mod);
   }catch(e){
     document.getElementById('gErr').style.display='block';
-    document.getElementById('gErr').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div><button class="btn btn-ghost btn-sm" style="margin-top:.5rem;" onclick="nav('chat')">← Retour</button>`;
+    document.getElementById('gErr').innerHTML=`<div class="alert alert-danger">❌ ${_e(e.message)}</div><button class="btn btn-ghost btn-sm" style="margin-top:.5rem;" onclick="nav('form')">← Retour</button>`;
   }
 }
 /* Prévient quand une partie du module n'a pas pu être générée.
@@ -5095,6 +5100,247 @@ function importConfig(file){
 }
 
 /* ══════════════════════════════════════════════
+   MODULES PRÉ-CRÉÉS (bibliothèque de démarrage)
+   Exemples complets prêts à consulter, dans le même schéma que les modules
+   générés par l'IA. Ajoutés une seule fois (flag gls_seeded_v1).
+══════════════════════════════════════════════ */
+function _seedModules(){
+  return [
+  {
+    id:'seed-secu-elec',mode:'pro',_seed:true,fav:false,ts:Date.now()-3*86400000,
+    icone:'⚡',titre:'Sécurité électrique — Habilitation BR',
+    desc:'Comprendre les risques électriques et les gestes qui sauvent pour intervenir en basse tension en toute sécurité.',
+    description:'Comprendre les risques électriques et les gestes qui sauvent pour intervenir en basse tension en toute sécurité.',
+    secteur:'Électricité industrielle',dom:'Électricité industrielle',pub:'Techniciens de maintenance',
+    niveau:'intermédiaire',niv:'intermédiaire',duree:'2 heures',dur:'2 heures',lang:'Français',
+    prerequis:'Notions de base en électricité (tension, courant, résistance), lecture d\'un schéma unifilaire.',
+    objectifs:[
+      'Identifier les zones d\'environnement électrique et les distances de sécurité',
+      'Appliquer la procédure de consignation en 4 étapes',
+      'Choisir et vérifier les EPI adaptés à une intervention BT',
+      'Réagir correctement face à un accident d\'origine électrique'
+    ],
+    competences:['Analyser un risque électrique','Consigner une installation BT','Utiliser un VAT','Porter secours (dégagement d\'urgence)'],
+    etapes:[
+      {id:'E1',titre:'Analyse du risque',outil:'Schéma unifilaire'},
+      {id:'E2',titre:'Consignation',outil:'Cadenas + VAT'},
+      {id:'E3',titre:'Intervention',outil:'EPI + outils isolés'},
+      {id:'E4',titre:'Déconsignation',outil:'Procédure inverse'}
+    ],
+    formules:[
+      {nom:'Loi d\'Ohm',valeur:'U = R × I'},
+      {nom:'Puissance',valeur:'P = U × I (courant continu)'},
+      {nom:'Seuil de danger',valeur:'30 mA = seuil de non-lâcher / fibrillation'}
+    ],
+    sections:[
+      {titre:'⚡ Le risque électrique : mécanismes et seuils',type:'theorie',
+       contenu:'Le courant électrique devient dangereux pour le corps humain bien avant les valeurs que l\'on imagine. Le paramètre déterminant n\'est pas la tension seule mais l\'**intensité qui traverse le corps**, elle-même fonction de la tension de contact et de la **résistance du corps** (environ **1000 à 3000 Ω** en conditions sèches, mais chutant à **500 Ω** si la peau est humide).\n\nÀ partir de **0,5 mA** on ressent le courant. À **10 mA** survient la tétanisation musculaire : la main se referme et ne peut plus lâcher le conducteur. À **30 mA** pendant quelques secondes, le risque de **fibrillation ventriculaire** devient mortel — c\'est le seuil retenu pour le calibre des dispositifs différentiels de protection des personnes.\n\nEn basse tension (**50 à 1000 V** en alternatif), la majorité des accidents graves surviennent lors d\'interventions considérées comme « banales ». Le danger vient autant du **contact direct** (toucher une pièce nue sous tension) que du **contact indirect** (toucher une masse mise accidentellement sous tension par un défaut d\'isolement).',
+       etapes:[],
+       donnees_cles:['Seuil de perception : 0,5 mA','Seuil de non-lâcher : 10 mA','Seuil de fibrillation : 30 mA','Résistance corps sec : 1000-3000 Ω','Domaine BT : 50-1000 V AC'],
+       points_vigilance:['⚠️ La peau humide divise la résistance du corps par 2 à 6 — le risque explose','⚠️ 230 V suffit à tuer : ce n\'est pas « juste du domestique »'],
+       mini_check:{type:'completion',q:'Complétez : le seuil d\'intensité au-delà duquel la fibrillation ventriculaire devient probable est de ___ mA.',answer:'30',indice:'valeur du calibre différentiel de protection des personnes'}
+      },
+      {titre:'🔒 La consignation : la procédure qui sauve',type:'procedure',
+       contenu:'La consignation est la séquence qui garantit qu\'une installation restera **hors tension pendant toute la durée de l\'intervention**. Elle repose sur un principe simple : ne jamais faire confiance à un interrupteur, toujours **vérifier physiquement l\'absence de tension**.\n\nLa procédure comporte quatre opérations dans un ordre strict. **Séparer** : ouvrir le sectionneur ou disjoncteur en amont de la zone. **Condamner** : verrouiller l\'organe de coupure avec un **cadenas personnel** et une pancarte, pour empêcher toute remise sous tension par un tiers. **Identifier** : s\'assurer, schéma à l\'appui, que l\'on agit bien sur le bon départ. **Vérifier l\'Absence de Tension (VAT)** : à l\'aide d\'un vérificateur testé avant et après usage sur une source connue.\n\nL\'ordre est non négociable : un technicien qui condamne avant de séparer, ou qui saute la VAT parce qu\'il « a vu » l\'interrupteur ouvert, s\'expose à un accident mortel. La VAT est le dernier rempart et le seul qui teste la réalité, pas l\'intention.',
+       etapes:['Séparer : ouvrir l\'organe de coupure en amont','Condamner : cadenas personnel + pancarte sur l\'organe','Identifier : confirmer le bon départ avec le schéma','Vérifier l\'Absence de Tension avec un VAT testé avant/après'],
+       donnees_cles:['4 étapes : Séparer, Condamner, Identifier, Vérifier','Le VAT se teste sur source connue avant ET après','Cadenas personnel = 1 seule clé, gardée sur soi'],
+       points_vigilance:['⚠️ Jamais de VAT sans avoir testé le vérificateur juste avant','⚠️ Un seul opérateur = un seul cadenas = une seule clé'],
+       mini_check:{type:'sequencing',q:'Remettez les étapes de la consignation dans l\'ordre :',steps:['Vérifier l\'absence de tension','Séparer','Identifier','Condamner'],correct_order:[1,3,2,0],explication:'Séparer d\'abord, condamner pour bloquer, identifier le bon circuit, puis VAT en dernier rempart.'}
+      },
+      {titre:'🦺 Les EPI et l\'intervention en sécurité',type:'securite',
+       contenu:'L\'équipement de protection individuelle constitue la barrière ultime entre l\'opérateur et le risque. Pour une intervention en basse tension, les **gants isolants de classe 00 ou 0** (jusqu\'à **500 V** ou **1000 V**) sont vérifiés visuellement avant chaque usage : un gant percé, craquelé ou humide n\'isole plus.\n\nLes **outils isolés 1000 V** portent le marquage du double triangle et sont contrôlés régulièrement. L\'**écran facial anti-UV** protège du risque d\'arc électrique, dont la température peut dépasser **19 000 °C** au point d\'amorçage et projeter du métal en fusion. Les vêtements doivent être en coton ou matière ignifugée : les synthétiques fondent sur la peau.\n\nEn cas d\'accident, la première règle est de **ne jamais toucher la victime** encore en contact avec le conducteur : il faut d\'abord couper l\'alimentation ou dégager la personne avec un isolant sec. Puis alerter (le **18** ou le **112**) et pratiquer les gestes de premiers secours. Chaque minute sans réanimation fait chuter les chances de survie d\'environ **10 %**.',
+       etapes:[],
+       donnees_cles:['Gants classe 0 : jusqu\'à 1000 V','Arc électrique : > 19 000 °C','Outils isolés : marquage double triangle 1000 V','Numéros d\'urgence : 18 (pompiers) / 112 (Europe)'],
+       points_vigilance:['⚠️ Ne JAMAIS toucher une victime encore sous tension','⚠️ Un gant isolant humide ou fissuré ne protège plus','⚠️ Vêtements synthétiques interdits (risque de fusion sur la peau)'],
+       mini_check:{type:'scenario',q:'Un collègue est en contact avec une armoire sous tension et ne réagit plus. Que faites-vous EN PREMIER ?',opts:['Couper l\'alimentation ou le dégager avec un isolant sec','Le tirer par le bras immédiatement','Appeler les secours avant toute action'],correct:0,explication:'Toucher la victime sous tension vous électrise à votre tour. On coupe/dégage d\'abord, puis on alerte et on secourt.'}
+      }
+    ],
+    scenarios:[{titre:'Intervention sur armoire de distribution',difficulte:'intermédiaire',
+      contexte:'Atelier de production, 8h du matin. Une ligne est à l\'arrêt suite au déclenchement d\'un disjoncteur.',
+      situation:'Vous devez intervenir sur l\'armoire électrique pour diagnostiquer le défaut. L\'armoire alimente 3 moteurs triphasés 400 V. Le chef d\'atelier vous presse de « faire vite » car la production est bloquée.',
+      consigne:'Décrivez la séquence complète et sûre avant de poser le premier outil.',
+      indices:['Qui d\'autre pourrait remettre sous tension ?','Avez-vous testé votre VAT ?'],
+      pieges:['Céder à la pression et sauter la consignation','Oublier de tester le VAT après usage'],
+      correction:'On refuse la précipitation : analyse du schéma, séparation au disjoncteur amont, condamnation par cadenas personnel, identification du bon départ, VAT testé avant/après. Seulement ensuite l\'intervention commence. La pression de production ne justifie jamais un raccourci sur la sécurité.'}],
+    checklist:{
+      avant:['✔ Schéma unifilaire consulté','✔ Organe de coupure identifié','✔ Cadenas personnel disponible','✔ VAT testé sur source connue','✔ EPI vérifiés (gants, écran)'],
+      pendant:['✔ Absence de tension confirmée','✔ Outils isolés 1000 V utilisés','✔ Zone balisée','✔ Pas de tiers dans la zone'],
+      apres:['✔ Outils et matériel retirés','✔ Déconsignation dans l\'ordre inverse','✔ Essai de remise en service contrôlé']
+    },
+    qcm:[
+      {q:'À partir de quelle intensité le courant peut-il provoquer une fibrillation ventriculaire mortelle ?',opts:['5 mA','30 mA','100 mA','500 mA'],correct:1,rep:1,competence:'Analyser un risque électrique',explication:'30 mA est le seuil retenu pour la protection différentielle des personnes.'},
+      {q:'Quel est le bon ordre des étapes de consignation ?',opts:['Condamner, Séparer, Vérifier, Identifier','Séparer, Condamner, Identifier, Vérifier','Vérifier, Séparer, Condamner, Identifier','Identifier, Vérifier, Séparer, Condamner'],correct:1,rep:1,competence:'Consigner une installation BT',explication:'Séparer, Condamner, Identifier, Vérifier (VAT) — la VAT en dernier rempart.'},
+      {q:'Avant d\'utiliser un VAT, il faut :',opts:['Le tester sur une source de tension connue','Le laisser au repos 5 minutes','Vérifier sa date de fabrication','Rien, il est toujours fiable'],correct:0,rep:0,competence:'Utiliser un VAT',explication:'On teste le VAT avant ET après usage pour garantir qu\'il fonctionne.'},
+      {q:'Face à une victime en contact avec un conducteur sous tension, le premier geste est :',opts:['La tirer par le bras','Couper l\'alimentation ou la dégager avec un isolant','Lui parler pour la rassurer','Commencer un massage cardiaque'],correct:1,rep:1,competence:'Porter secours',explication:'Toucher la victime sous tension vous met en danger : on coupe/dégage d\'abord.'},
+      {q:'Le domaine de la basse tension alternative correspond à :',opts:['0 à 50 V','50 à 1000 V','1000 à 50000 V','au-delà de 50000 V'],correct:1,rep:1,competence:'Analyser un risque électrique',explication:'La BT alternative va de 50 à 1000 V.'}
+    ],
+    quiz:[],
+    memo:{titre:'Mémo Sécurité électrique BT',
+      regles:['La VAT est le seul test de la réalité — jamais l\'intention','Un cadenas = un opérateur = une clé','30 mA = seuil mortel','La peau humide divise la résistance par 2 à 6','Ne jamais toucher une victime sous tension'],
+      regle_or:'On ne travaille jamais sous tension par confort ou par pression de production.'},
+    kpis:[{indicateur:'Respect de la procédure de consignation',quoi_mesurer:'Nombre d\'étapes correctement réalisées sur 4',unite:'/4',seuil_debutant:'2-3/4',seuil_operationnel:'4/4 avec rappel',seuil_expert:'4/4 systématique',pourquoi_important:'Une seule étape sautée peut être mortelle.',comment_progresser:'Répéter la séquence à voix haute avant chaque intervention.'}],
+    scores:{},wrongByComp:{}
+  },
+  {
+    id:'seed-5s',mode:'pro',_seed:true,fav:false,ts:Date.now()-6*86400000,
+    icone:'🧹',titre:'La méthode 5S — Organiser le poste de travail',
+    desc:'Transformer un poste de travail en environnement propre, ordonné et performant grâce à la démarche 5S.',
+    description:'Transformer un poste de travail en environnement propre, ordonné et performant grâce à la démarche 5S.',
+    secteur:'Lean Manufacturing',dom:'Lean Manufacturing',pub:'Opérateurs et chefs d\'équipe',
+    niveau:'débutant',niv:'débutant',duree:'1h30',dur:'1h30',lang:'Français',
+    prerequis:'Aucun prérequis technique. Une expérience du terrain est un plus.',
+    objectifs:[
+      'Nommer et expliquer les 5 étapes de la démarche 5S',
+      'Distinguer l\'utile de l\'inutile sur un poste (Seiri)',
+      'Mettre en place un marquage au sol et un rangement visuel',
+      'Construire un standard de nettoyage et un audit 5S'
+    ],
+    competences:['Trier un poste de travail','Définir une place pour chaque chose','Créer un standard visuel','Auditer un 5S'],
+    etapes:[
+      {id:'E1',titre:'Seiri — Trier',outil:'Étiquette rouge'},
+      {id:'E2',titre:'Seiton — Ranger',outil:'Marquage au sol'},
+      {id:'E3',titre:'Seiso — Nettoyer',outil:'Standard de propreté'},
+      {id:'E4',titre:'Seiketsu — Standardiser',outil:'Photo de référence'},
+      {id:'E5',titre:'Shitsuke — Respecter',outil:'Audit 5S'}
+    ],
+    formules:[
+      {nom:'Taux de 5S',valeur:'Score audit / score maximal × 100'},
+      {nom:'Gain de temps',valeur:'Temps de recherche évité × fréquence × coût horaire'}
+    ],
+    sections:[
+      {titre:'🧹 Les 5S : origine et principe',type:'theorie',
+       contenu:'La méthode 5S est née chez **Toyota** dans les années 1950 comme socle du Lean Manufacturing. Son nom vient de cinq mots japonais commençant par S : **Seiri** (trier), **Seiton** (ranger), **Seiso** (nettoyer), **Seiketsu** (standardiser) et **Shitsuke** (respecter et faire progresser).\n\nLe principe est qu\'un poste de travail **propre et ordonné** est plus sûr, plus rapide et de meilleure qualité. On estime qu\'un opérateur peut passer **jusqu\'à 30 minutes par jour** à chercher un outil, un document ou une pièce dans un environnement mal organisé — du temps sans aucune valeur ajoutée.\n\nLes 5S ne sont pas une opération de ménage ponctuelle mais une **démarche continue**. Les quatre premiers S installent l\'ordre ; le cinquième, Shitsuke, le fait vivre dans la durée. Sans ce dernier, tout poste retourne au désordre en quelques semaines.',
+       etapes:[],
+       donnees_cles:['5S = Seiri, Seiton, Seiso, Seiketsu, Shitsuke','Origine : Toyota, années 1950','Temps de recherche évité : jusqu\'à 30 min/jour/opérateur'],
+       points_vigilance:['⚠️ Les 5S ne sont pas un grand nettoyage ponctuel','⚠️ Sans le 5e S (Shitsuke), le poste se dégrade en quelques semaines'],
+       mini_check:{type:'completion',q:'Complétez : le premier S, ___, consiste à trier l\'utile de l\'inutile.',answer:'Seiri',indice:'commence par Sei-'}
+      },
+      {titre:'🔴 Seiri et Seiton : trier puis ranger',type:'procedure',
+       contenu:'**Seiri (Trier)** consiste à séparer ce qui est utile de ce qui ne l\'est pas. La technique de l\'**étiquette rouge** est la plus efficace : on marque d\'une étiquette rouge tout objet dont l\'utilité est douteuse, on le place en zone d\'attente, et si personne ne le réclame sous **30 jours**, il est évacué. On élimine ainsi les outils cassés, les pièces obsolètes et les documents périmés.\n\n**Seiton (Ranger)** attribue **une place définie à chaque chose**, selon la règle « une place pour chaque chose, chaque chose à sa place ». Les outils les plus utilisés sont placés à portée de main (moins de **60 cm**), les autres plus loin. Le **marquage au sol** délimite les zones (stockage, passage, sécurité) et le **management visuel** — silhouettes d\'outils, codes couleur — permet de voir d\'un coup d\'œil si un élément manque ou est mal rangé.\n\nLe test de réussite de Seiton est simple : un nouvel arrivant doit pouvoir trouver n\'importe quel outil en **moins de 30 secondes**, sans rien demander.',
+       etapes:['Marquer d\'une étiquette rouge tout objet à l\'utilité douteuse','Évacuer ce qui n\'est pas réclamé sous 30 jours','Attribuer une place fixe à chaque outil selon sa fréquence d\'usage','Poser le marquage au sol et les silhouettes d\'outils'],
+       donnees_cles:['Étiquette rouge : délai de 30 jours','Outils fréquents : à moins de 60 cm','Objectif Seiton : trouver un outil en < 30 s'],
+       points_vigilance:['⚠️ Ne pas jeter sans zone d\'attente : on garde 30 jours','⚠️ Ranger sans trier d\'abord = ranger du désordre'],
+       mini_check:{type:'scenario',q:'Vous trouvez une perceuse dont personne ne connaît l\'usage sur le poste. Que faites-vous selon Seiri ?',opts:['Étiquette rouge + zone d\'attente 30 jours','La jeter immédiatement','La ranger dans l\'armoire'],correct:0,explication:'Seiri passe par l\'étiquette rouge et une zone d\'attente avant évacuation définitive.'}
+      },
+      {titre:'✨ Nettoyer, standardiser, pérenniser',type:'procedure',
+       contenu:'**Seiso (Nettoyer)** va au-delà de la propreté : nettoyer, c\'est **inspecter**. En essuyant une machine, l\'opérateur détecte une fuite, un jeu anormal, un boulon desserré — le nettoyage devient un outil de **maintenance préventive**. On définit un standard : quoi nettoyer, avec quoi, à quelle fréquence.\n\n**Seiketsu (Standardiser)** fige les bonnes pratiques pour que le poste reste identique quel que soit l\'opérateur. L\'outil clé est la **photo de référence** de l\'état idéal, affichée au poste : tout écart se voit instantanément. Les standards sont visuels, courts et affichés là où l\'action se fait.\n\n**Shitsuke (Respecter)** ancre la discipline dans la durée par des **audits 5S réguliers** (souvent une grille notée sur 100) et l\'implication de l\'encadrement. C\'est le S le plus difficile car il touche aux habitudes : il demande de l\'exemplarité managériale et une reconnaissance des progrès, pas seulement des rappels à l\'ordre.',
+       etapes:['Définir un standard de nettoyage (quoi, comment, quand)','Nettoyer en inspectant : traquer fuites et anomalies','Afficher une photo de référence de l\'état idéal','Auditer régulièrement avec une grille notée'],
+       donnees_cles:['Seiso = nettoyer + inspecter','Seiketsu : photo de référence affichée au poste','Shitsuke : audit 5S périodique noté /100'],
+       points_vigilance:['⚠️ Un audit sans reconnaissance des progrès démotive','⚠️ Le standard doit être visuel et affiché, pas rangé dans un classeur'],
+       mini_check:{type:'completion',q:'Complétez : nettoyer selon Seiso, c\'est aussi ___ la machine pour détecter les anomalies.',answer:'inspecter',indice:'synonyme d\'examiner'}
+      }
+    ],
+    scenarios:[{titre:'Chantier 5S sur un poste d\'assemblage',difficulte:'débutant',
+      contexte:'Un poste d\'assemblage manuel accumule outils, cartons et rebuts. Les opérateurs se plaignent de perdre du temps.',
+      situation:'On vous demande d\'animer un premier chantier 5S d\'une demi-journée avec l\'équipe. Le poste contient une trentaine d\'objets dont beaucoup semblent inutiles.',
+      consigne:'Décrivez comment vous menez les deux premiers S avec l\'équipe.',
+      indices:['Comment gérer les objets « au cas où » ?','Qui décide de la place de chaque outil ?'],
+      pieges:['Décider seul à la place des opérateurs','Jeter sans zone d\'attente'],
+      correction:'On implique l\'équipe : chacun trie son poste avec des étiquettes rouges, on crée une zone d\'attente 30 jours, puis on définit ensemble la place de chaque outil selon sa fréquence d\'usage, avec marquage au sol et silhouettes. L\'adhésion vient de la participation, pas de l\'imposition.'}],
+    checklist:{
+      avant:['✔ Zone du chantier délimitée','✔ Étiquettes rouges préparées','✔ Zone d\'attente identifiée','✔ Équipe informée et disponible'],
+      pendant:['✔ Tri réalisé par les opérateurs eux-mêmes','✔ Places définies selon la fréquence d\'usage','✔ Marquage au sol posé','✔ Photo de référence prise'],
+      apres:['✔ Standard de nettoyage affiché','✔ Grille d\'audit 5S créée','✔ Première date d\'audit planifiée']
+    },
+    qcm:[
+      {q:'Que signifie le premier S, Seiri ?',opts:['Ranger','Trier','Nettoyer','Standardiser'],correct:1,rep:1,competence:'Trier un poste de travail',explication:'Seiri = trier l\'utile de l\'inutile.'},
+      {q:'La technique de l\'étiquette rouge sert à :',opts:['Signaler un danger','Marquer les objets à l\'utilité douteuse','Indiquer une place de rangement','Repérer les outils neufs'],correct:1,rep:1,competence:'Trier un poste de travail',explication:'L\'étiquette rouge identifie les objets douteux mis en zone d\'attente.'},
+      {q:'Selon Seiton, où placer les outils les plus utilisés ?',opts:['Le plus loin possible','À portée de main (< 60 cm)','Dans une armoire fermée','Peu importe'],correct:1,rep:1,competence:'Définir une place pour chaque chose',explication:'Les outils fréquents sont à portée immédiate pour éviter les déplacements.'},
+      {q:'Nettoyer selon Seiso, c\'est aussi :',opts:['Inspecter et détecter les anomalies','Repeindre les machines','Jeter les rebuts','Faire l\'inventaire'],correct:0,rep:0,competence:'Créer un standard visuel',explication:'Le nettoyage est un moyen d\'inspection et de maintenance préventive.'},
+      {q:'Quel S est le plus difficile à tenir dans la durée ?',opts:['Seiri','Seiton','Seiso','Shitsuke'],correct:3,rep:3,competence:'Auditer un 5S',explication:'Shitsuke (respecter/pérenniser) touche aux habitudes et demande de la discipline.'}
+    ],
+    quiz:[],
+    memo:{titre:'Mémo 5S',
+      regles:['Trier avant de ranger','Une place pour chaque chose','Nettoyer, c\'est inspecter','Un standard se voit, il ne se range pas','Sans audit, pas de 5S durable'],
+      regle_or:'Le 5S n\'est pas un état, c\'est une habitude entretenue chaque jour.'},
+    kpis:[{indicateur:'Score d\'audit 5S',quoi_mesurer:'Note obtenue à la grille d\'audit du poste',unite:'/100',seuil_debutant:'40-60/100',seuil_operationnel:'70-85/100',seuil_expert:'> 90/100 stable',pourquoi_important:'Mesure objective de la tenue du poste dans le temps.',comment_progresser:'Auditer chaque semaine et traiter le principal écart à chaque fois.'}],
+    scores:{},wrongByComp:{}
+  },
+  {
+    id:'seed-rdm-flexion',mode:'acad',_seed:true,fav:false,ts:Date.now()-1*86400000,
+    icone:'📐',titre:'Résistance des matériaux — La flexion simple',
+    desc:'Analyser une poutre en flexion : efforts internes, contrainte normale et dimensionnement.',
+    description:'Analyser une poutre en flexion : efforts internes, contrainte normale et dimensionnement.',
+    secteur:'Résistance des matériaux',dom:'Résistance des matériaux',pub:'Licence L3 / Ingénieur 1ère année',
+    niveau:'intermédiaire',niv:'travaux dirigés',duree:'1h30',dur:'1h30',lang:'Français',
+    prerequis:'Statique du solide, notions de moment, calcul intégral de base.',
+    objectifs:[
+      'Établir les diagrammes d\'effort tranchant et de moment fléchissant',
+      'Appliquer la formule de la contrainte normale de flexion',
+      'Calculer le moment quadratique d\'une section usuelle',
+      'Dimensionner une poutre vis-à-vis d\'une contrainte admissible'
+    ],
+    notions:['Effort tranchant','Moment fléchissant','Contrainte normale','Moment quadratique','Contrainte admissible'],
+    etapes:[
+      {id:'E1',titre:'Réactions d\'appui',outil:'Équations de la statique'},
+      {id:'E2',titre:'Efforts internes',outil:'Méthode des sections'},
+      {id:'E3',titre:'Contrainte maximale',outil:'σ = M·y/I'},
+      {id:'E4',titre:'Vérification',outil:'σ ≤ σ_adm'}
+    ],
+    formules:[
+      {nom:'Contrainte de flexion',valeur:'σ = M·y / I'},
+      {nom:'Moment quadratique (rectangle)',valeur:'I = b·h³ / 12'},
+      {nom:'Module de flexion',valeur:'W = I / y_max'},
+      {nom:'Condition de résistance',valeur:'σ_max = M_max / W ≤ σ_adm'}
+    ],
+    sections:[
+      {titre:'📊 Efforts internes : effort tranchant et moment fléchissant',type:'theorie',
+       contenu:'Lorsqu\'une poutre est chargée transversalement, elle transmet les efforts jusqu\'à ses appuis en développant des **efforts internes**. Deux grandeurs les décrivent en flexion simple : l\'**effort tranchant T(x)**, résultante des forces transversales d\'un côté de la coupure, et le **moment fléchissant M(x)**, somme des moments de ces mêmes forces.\n\nLa méthode des sections consiste à « couper » virtuellement la poutre à une abscisse x et à écrire l\'équilibre du tronçon isolé. On obtient T(x) et M(x) dont on trace les **diagrammes**. Une relation fondamentale les lie : **dM/dx = T(x)**. Le moment fléchissant est donc extrémal là où l\'effort tranchant s\'annule — c\'est en général la section la plus sollicitée, celle qu\'il faut dimensionner.\n\nPour une poutre simplement appuyée de portée **L** soumise à une charge ponctuelle **F** en son milieu, le moment maximal vaut **M_max = F·L/4** au centre. Pour une charge répartie **q**, il vaut **M_max = q·L²/8**. Ces deux cas types reviennent constamment et méritent d\'être mémorisés.',
+       etapes:[],
+       donnees_cles:['dM/dx = T(x)','Charge ponctuelle centrée : M_max = F·L/4','Charge répartie : M_max = q·L²/8','M extrémal là où T = 0'],
+       points_vigilance:['⚠️ Bien poser les conventions de signe avant de couper','⚠️ Ne pas oublier les réactions d\'appui dans l\'équilibre du tronçon'],
+       mini_check:{type:'completion',q:'Complétez : pour une poutre sur deux appuis avec charge répartie q, le moment fléchissant maximal vaut M = q·L² / ___.',answer:'8',indice:'un chiffre'}
+      },
+      {titre:'📐 La contrainte normale de flexion',type:'theorie',
+       contenu:'En flexion, les fibres de la poutre situées d\'un côté de la **fibre neutre** s\'allongent (traction) tandis que celles de l\'autre côté se raccourcissent (compression). La fibre neutre, elle, ne subit aucune contrainte normale. La contrainte varie **linéairement** avec la distance y à la fibre neutre.\n\nLa loi fondamentale s\'écrit **σ = M·y / I**, où σ est la contrainte normale (en **MPa**), M le moment fléchissant (**N·mm**), y la distance à la fibre neutre (**mm**) et I le **moment quadratique** de la section (**mm⁴**). La contrainte est maximale sur la fibre la plus éloignée, à **y = y_max**.\n\nOn définit alors le **module de flexion W = I / y_max**, qui synthétise la géométrie de la section. La contrainte maximale devient simplement **σ_max = M_max / W**. Plus W est grand, plus la section résiste : c\'est pourquoi les profilés en **I** (poutrelles IPE) concentrent la matière loin de la fibre neutre, là où elle travaille le plus.',
+       etapes:[],
+       donnees_cles:['σ = M·y / I','Répartition linéaire, nulle sur la fibre neutre','W = I / y_max','σ_max = M_max / W','Profilé en I : matière éloignée de la fibre neutre = efficace'],
+       points_vigilance:['⚠️ Cohérence des unités : N, mm, MPa (1 MPa = 1 N/mm²)','⚠️ y se mesure depuis la fibre neutre, pas depuis le bord'],
+       mini_check:{type:'completion',q:'Complétez : la contrainte normale de flexion s\'écrit σ = M·y / ___ .',answer:'I',indice:'le moment quadratique'}
+      },
+      {titre:'🏗️ Dimensionner une poutre',type:'exercice',
+       contenu:'Dimensionner, c\'est garantir que la contrainte maximale reste sous la **contrainte admissible** du matériau : **σ_max ≤ σ_adm**, avec σ_adm = σ_e / s, où σ_e est la limite élastique et **s le coefficient de sécurité** (souvent **1,5 à 3** selon le domaine).\n\nPrenons une poutre rectangulaire de largeur b et hauteur h. Son moment quadratique vaut **I = b·h³/12** et y_max = h/2, d\'où **W = b·h²/6**. Si le moment maximal est connu, la condition de résistance impose W ≥ M_max / σ_adm, ce qui permet de trouver les dimensions minimales.\n\nExemple : une poutre acier (**σ_e = 235 MPa**, s = 1,5 donc **σ_adm ≈ 157 MPa**) supporte M_max = 20 kN·m = **20×10⁶ N·mm**. Il faut W ≥ 20×10⁶ / 157 ≈ **1,27×10⁵ mm³**. Pour une section carrée (b = h), W = h³/6, d\'où h ≥ (6 × 1,27×10⁵)^(1/3) ≈ **92 mm**. On retient une section normalisée immédiatement supérieure. Noter que la hauteur h intervient au **carré** dans W : augmenter la hauteur est bien plus efficace que la largeur.',
+       etapes:['Calculer M_max à partir du chargement','Déterminer σ_adm = σ_e / s','Écrire la condition W ≥ M_max / σ_adm','En déduire les dimensions, arrondir à une section normalisée'],
+       donnees_cles:['σ_adm = σ_e / s','s = 1,5 à 3 typiquement','Rectangle : W = b·h²/6','Acier S235 : σ_e = 235 MPa','h intervient au carré dans W'],
+       points_vigilance:['⚠️ Convertir kN·m en N·mm (×10⁶) avant le calcul','⚠️ Augmenter h est plus efficace que b (h au carré)'],
+       mini_check:{type:'subcalc',q:'Pour une section rectangulaire b×h, exprimez le module de flexion W.',expected:'W = b·h²/6',hint:'W = I / y_max avec I = b·h³/12 et y_max = h/2'}
+      }
+    ],
+    exercices:[{niveau:'intermédiaire',enonce:'Une poutre sur deux appuis de portée L = 4 m supporte une charge répartie q = 5 kN/m. Calculez M_max puis la contrainte maximale pour une section rectangulaire 100×200 mm (h vertical).',
+      solution:'M_max = q·L²/8 = 5000 × 16 / 8 = 10 000 N·m = 10×10⁶ N·mm. W = b·h²/6 = 100×200²/6 = 6,67×10⁵ mm³. σ_max = M_max/W = 10×10⁶ / 6,67×10⁵ ≈ 15 MPa. Largement admissible pour de l\'acier.'}],
+    cas:{},
+    checklist:{avant:[],pendant:[],apres:[]},
+    qcm:[
+      {q:'La relation entre moment fléchissant et effort tranchant est :',opts:['M = T·x','dM/dx = T','T = M²','dM/dx = 0'],correct:1,rep:1,competence:'Effort tranchant',explication:'dM/dx = T(x) : le moment est extrémal quand T s\'annule.'},
+      {q:'Pour une charge ponctuelle F au milieu d\'une poutre de portée L, M_max vaut :',opts:['F·L/2','F·L/4','F·L/8','F·L²/8'],correct:1,rep:1,competence:'Moment fléchissant',explication:'M_max = F·L/4 au centre.'},
+      {q:'La contrainte normale de flexion est donnée par :',opts:['σ = F/S','σ = M·y/I','σ = T/A','σ = E·ε²'],correct:1,rep:1,competence:'Contrainte normale',explication:'σ = M·y/I, maximale sur la fibre la plus éloignée.'},
+      {q:'Le moment quadratique d\'une section rectangulaire b×h (flexion selon h) est :',opts:['b·h/2','b·h²/6','b·h³/12','b²·h/12'],correct:2,rep:2,competence:'Moment quadratique',explication:'I = b·h³/12 ; le module associé est W = b·h²/6.'},
+      {q:'La condition de résistance en flexion s\'écrit :',opts:['σ_max ≥ σ_adm','σ_max ≤ σ_adm','M_max = 0','T = σ_adm'],correct:1,rep:1,competence:'Contrainte admissible',explication:'On impose σ_max ≤ σ_adm = σ_e/s.'}
+    ],
+    quiz:[],
+    revision:{titre:'Fiche de révision — Flexion simple',
+      regles:['dM/dx = T(x)','σ = M·y/I','W = I/y_max','σ_max = M_max/W ≤ σ_adm','h intervient au carré dans W'],
+      formules_kv:[{nom:'Contrainte',valeur:'σ = M·y/I'},{nom:'I rectangle',valeur:'b·h³/12'},{nom:'M répartie',valeur:'q·L²/8'},{nom:'M ponctuelle',valeur:'F·L/4'}],
+      regle_or:'La section travaille d\'autant mieux que la matière est éloignée de la fibre neutre.'},
+    scores:{},wrongByComp:{}
+  }
+  ];
+}
+function _seedLibraryIfEmpty(){
+  try{
+    if(localStorage.getItem('gls_seeded_v1'))return;   // déjà fait une fois
+    const existing=getMods();
+    const existingIds=new Set(existing.map(m=>String(m.id)));
+    const seeds=_seedModules().filter(s=>!existingIds.has(String(s.id)));
+    if(seeds.length){
+      // Les modules pré-créés apparaissent après les modules de l'utilisateur
+      saveMods(existing.concat(seeds));
+    }
+    localStorage.setItem('gls_seeded_v1','1');
+  }catch(e){console.warn('seed error',e);}
+}
+
+/* ══════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════ */
 (function(){
@@ -5116,6 +5362,7 @@ function importConfig(file){
     // Non-blocking: refresh Groq model list on startup (uses 6h cache)
     if(k.startsWith('gsk_'))setTimeout(()=>_refreshGroqSelector(k),300);
   }
+  _seedLibraryIfEmpty();   // modules pré-créés de démonstration (une seule fois)
   renderNav();
   loadSettingsUI();
   applyPlatformName();
