@@ -4457,7 +4457,7 @@ async function regenQuiz(){
     const res=await gemini(key,SYS,prompt,1600,T.EXERCICE);
     if(res.quiz?.length){
       const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
-      if(idx>=0){ms[idx].quiz=res.quiz;ms[idx].scores={};ms[idx].wrongByComp={};saveMods(ms);_cur=ms[idx];}
+      if(idx>=0){ms[idx].qcm=res.quiz;ms[idx].quiz=res.quiz;ms[idx].scores={};ms[idx].wrongByComp={};saveMods(ms);_cur=ms[idx];}
       _qs=false;_qa={};
       _renderInlineQuiz(_cur);
       showToast(res.quiz.length+' nouvelles questions générées !');
