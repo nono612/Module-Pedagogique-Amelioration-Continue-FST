@@ -2608,7 +2608,7 @@ JSON uniquement.`;
   setStep('s1','active','',true);
   const plan=await gemini(key,SYS,`${ctx}\n\nCrée le plan complet de cette formation professionnelle. JSON:\n{"icone":"emoji unique représentant ce métier (1 seul emoji, ex: ⚡ électricien, 🔧 mécanicien, 🏗️ BTP, 🧪 chimie, 💊 santé)","titre":"Titre formation percutant (max 10 mots)","description":"Accroche professionnelle motivante qui explique ce que le stagiaire va VRAIMENT comprendre (2 phrases)","prerequis":"Prérequis techniques concrets nécessaires","objectifs":["À l'issue de la formation, le stagiaire SAURA/POURRA faire concrètement 1","... 2","... 3","... 4","... 5"],"etapes":[{"id":"E1","titre":"Étape principale du processus professionnel (ex: Préparation du chantier)","outil":"Outil ou équipement principal"},{"id":"E2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","duree":"ex: 30 min","type":"theorie|procedure|exercice|securite"},{"id":2,...}],"competences":["Compétence métier précise et mesurable 1","Compétence 2","Compétence 3","Compétence 4"]}\n5 à 6 sections. etapes = les 4-6 grandes étapes du processus de travail réel dans ce métier (pas les sections de cours).`,900,T.PLAN);
   setStep('s1','done',(plan.sections?.length||0)+' sections planifiées',true);
-  const ctxPlan=`${ctx}\nPlan validé — à respecter pour la cohérence de l'ensemble:\nTitre: ${plan.titre||''}\nObjectifs: ${(plan.objectifs||[]).slice(0,4).join(' | ')}\nCompétences visées: ${(plan.competences||[]).join(', ')}\nÉtapes du processus métier: ${(plan.etapes||[]).map(e=>e.titre).join(' → ')}`;
+  let ctxPlan=`${ctx}\nPlan validé — à respecter pour la cohérence de l'ensemble:\nTitre: ${plan.titre||''}\nObjectifs: ${(plan.objectifs||[]).slice(0,4).join(' | ')}\nCompétences visées: ${(plan.competences||[]).join(', ')}\nÉtapes du processus métier: ${(plan.etapes||[]).map(e=>e.titre).join(' → ')}`;
 
   setStep('s2','active','🔍 Analyse du domaine métier…',true);
   let _terrainCtx='';
@@ -2663,6 +2663,18 @@ JSON uniquement.`;
   setStep('s2',_proFails?'error':'done',
     _proFails?`${sections.length-_proFails}/${sections.length} sections rédigées — ${_proFails} à relancer`
              :sections.length+' sections rédigées',true);
+
+  /* Le quiz, la check-list, le mémo et les KPI sont générés dans des appels
+     séparés qui ne voyaient jusqu'ici que le plan (titres/objectifs), jamais
+     le contenu réellement écrit dans les sections. Chaque étape en venait à
+     inventer ses propres chiffres — d'où des valeurs qui se contredisent
+     d'une section à l'autre, ou un quiz qui teste un chiffre jamais enseigné.
+     On étend ctxPlan avec les valeurs effectivement écrites pour que tout le
+     reste du module s'appuie sur les mêmes faits. */
+  const _sectionFacts=sections.filter(s=>!s._failed)
+    .map(s=>{const vals=(s.donnees_cles||[]).slice(0,3).join(' · ');return vals?`${s.titre} : ${vals}`:'';})
+    .filter(Boolean).join('\n');
+  if(_sectionFacts)ctxPlan+=`\n\nVALEURS RÉELLEMENT ENSEIGNÉES DANS LE MODULE — reprends CES chiffres exacts pour rester cohérent, n'en invente pas d'autres :\n${_sectionFacts}`;
 
   setStep('s3','active','',true);
   let scenarios=[],cas={};
@@ -2724,7 +2736,7 @@ JSON uniquement.`;
   setStep('s1','active','',false);
   const plan=await gemini(key,SYS,`${ctx}\n\nCrée le plan structuré de ce cours technique. JSON:\n{"icone":"emoji représentant cette discipline (1 seul emoji, ex: ⚡ électrique, 🔩 mécanique, 🧪 chimie, 📡 réseaux, 🏗️ génie civil, ✈️ aéro, 🧬 biotech, 🌱 environnement, 🤖 IA/robotique, 🏛️ structures, 🌊 hydraulique, 🔥 thermique, 💻 info, 📐 maths)","titre":"Titre cours technique précis (max 12 mots)","description":"Accroche pédagogique (1-2 phrases qui motivent l'étudiant ingénieur)","prerequis":"Notions techniques préalables requises (formules, outils mathématiques, notions physiques)","objectifs":["À l'issue du cours, l'étudiant sera capable de VERBE+OBJET TECHNIQUE 1","... 2","... 3","... 4"],"etapes":[{"id":"1","titre":"Étape de la démarche pédagogique ou du processus technique (ex: Analyse du système)","outil":"Outil ou méthode utilisée"},{"id":"2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","objectif":"Compétence acquise","duree":"ex: 20 min","type":"theorie|demonstration|application"}],"notions":["Notion technique clé 1","Notion 2","Notion 3","Notion 4","Notion 5"]}\n4 à 6 sections avec progression logique. etapes = les 4-6 grandes étapes de la démarche technique ou du processus étudié.`,900,T.PLAN);
   setStep('s1','done',(plan.sections?.length||0)+' sections planifiées',false);
-  const ctxPlan=`${ctx}\nPlan validé — à respecter pour la cohérence de l'ensemble:\nTitre: ${plan.titre||''}\nObjectifs: ${(plan.objectifs||[]).slice(0,4).join(' | ')}\nNotions clés: ${(plan.notions||[]).join(', ')}\nDémarche pédagogique: ${(plan.etapes||[]).map(e=>e.titre).join(' → ')}`;
+  let ctxPlan=`${ctx}\nPlan validé — à respecter pour la cohérence de l'ensemble:\nTitre: ${plan.titre||''}\nObjectifs: ${(plan.objectifs||[]).slice(0,4).join(' | ')}\nNotions clés: ${(plan.notions||[]).join(', ')}\nDémarche pédagogique: ${(plan.etapes||[]).map(e=>e.titre).join(' → ')}`;
 
   setStep('s2','active','🔍 Analyse de la discipline…',false);
   let _terrainCtxA='';
@@ -2773,6 +2785,15 @@ JSON uniquement.`;
   setStep('s2',_acadFails?'error':'done',
     _acadFails?`${sections.length-_acadFails}/${sections.length} sections rédigées — ${_acadFails} à relancer`
               :sections.length+' sections rédigées',false);
+
+  /* Même correction que côté pro : les exercices, le quiz et la fiche de
+     révision ne voyaient que le plan (titres/notions), jamais les valeurs et
+     formules réellement écrites dans les sections — chaque étape inventait
+     donc ses propres chiffres, au risque de contredire le cours. */
+  const _sectionFactsA=sections.filter(s=>!s._failed)
+    .map(s=>{const vals=(s.points_cles||[]).slice(0,3).join(' · ');return vals?`${s.titre} : ${vals}`:'';})
+    .filter(Boolean).join('\n');
+  if(_sectionFactsA)ctxPlan+=`\n\nVALEURS ET FORMULES RÉELLEMENT ENSEIGNÉES — reprends CES éléments exacts pour rester cohérent, n'en invente pas d'autres :\n${_sectionFactsA}`;
 
   setStep('s3','active','',false);
   let exercices=[],cas={};
