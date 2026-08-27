@@ -2236,7 +2236,12 @@ function _detectModuleType(m){
    dans le prompt réduit le phénomène sans l'éliminer : on retire donc ces
    préfixes après coup, ce qui garantit le résultat quel que soit le modèle. */
 const _RE_TPL_PREFIX=new RegExp(
-  '^\\s*(?:[⚠️❌⛔✔✅💡🔧📐🎯•\\-]\\s*)*'+                    // puce ou émoji éventuel
+  /* groupe 1 : un seul émoji significatif, conservé. \p{Extended_Pictographic}
+     couvre aussi bien ⚠️ (symbole + sélecteur de variante U+FE0F, deux unités
+     de code) que les émoji sur paire de substitution comme 💡 ou 🔧 — une
+     classe de caractères littérale [⚠️❌…] échoue silencieusement sur ces cas. */
+  '^(\\s*(?:\\p{Extended_Pictographic}\\uFE0F?\\s*)?)'+
+  '(?:[•\\-]\\s*)*'+                        // puce purement décorative, celle-là jetée
   '(?:'+
     'valeur(?:/norme)?(?:\\s+critique)?(?:\\s+à\\s+mémoriser(?:\\s+absolument)?)?|'+
     'outil|erreur(?:\\s+propre\\s+aux\\s+débutants(?:\\s+de\\s+[^:—-]{0,40})?)?|'+
@@ -2245,11 +2250,13 @@ const _RE_TPL_PREFIX=new RegExp(
     'question|q|objectif|contrainte|notion'+
   ')'+
   '\\s*(?:n°\\s*)?\\d*\\s*(?:avec\\s+contexte\\s+d[\'’]application)?\\s*[:—–-]\\s+',
-  'i');
+  'iu');
 
 function _stripTplLabel(v){
   if(typeof v!=='string')return v;
-  const out=v.replace(_RE_TPL_PREFIX,'').replace(/^\[|\]$/g,'').trim();
+  // $1 réinjecte l'émoji d'alerte éventuel (⚠️❌…) : seul le libellé du
+  // gabarit ( « Point critique 1: » ) disparaît, pas le signal visuel.
+  const out=v.replace(_RE_TPL_PREFIX,'$1').replace(/^\[|\]$/g,'').trim();
   // On ne garde le nettoyage que s'il reste une phrase utile
   return out.length>=8?out:v.trim();
 }
