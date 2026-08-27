@@ -282,14 +282,14 @@ nav{padding:.7rem 0;flex:1;}
 .quiz-sub{font-size:.77rem;color:var(--gray600);}
 
 /* ═══ MÉMO & RÉVISION ═══ */
-.memo-block{border-radius:12px;padding:.9rem 1.1rem;margin-bottom:.8rem;}
-.memo-block h4{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
-.memo-item{display:flex;align-items:flex-start;gap:.45rem;font-size:.8rem;line-height:1.6;margin-bottom:.3rem;color:#374151;}
+.memo-block{border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.8rem;}
+.memo-block h4{font-size:.70rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.memo-item{display:flex;align-items:flex-start;gap:.45rem;font-size:.78rem;line-height:1.6;margin-bottom:.3rem;color:#374151;}
 .memo-item::before{content:"→";font-weight:800;flex-shrink:0;margin-top:.05rem;}
 .memo-gold{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:14px;padding:1.1rem 1.3rem;margin-top:.5rem;}
 .memo-gold h4{font-size:.62rem;opacity:.55;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;}
-.memo-gold p{font-size:.9rem;font-weight:700;line-height:1.6;color:#fff;}
-.formula-tag{font-family:'JetBrains Mono',monospace;background:var(--gray50);border:1.5px solid var(--gray200);border-radius:8px;padding:.3rem .65rem;font-size:.8rem;margin-bottom:.3rem;display:block;color:var(--navy);font-weight:600;}
+.memo-gold p{font-size:.86rem;font-weight:700;line-height:1.6;color:#fff;}
+.formula-tag{font-family:'JetBrains Mono',monospace;background:var(--gray50);border:1.5px solid var(--gray200);border-radius:10px;padding:.3rem .65rem;font-size:.78rem;margin-bottom:.3rem;display:block;color:var(--navy);font-weight:600;}
 
 /* ═══ ALERTS ═══ */
 .alert{padding:.8rem 1.1rem;border-radius:10px;margin-bottom:1rem;font-size:.82rem;display:flex;gap:.6rem;align-items:flex-start;line-height:1.5;}
@@ -517,12 +517,12 @@ nav{padding:.7rem 0;flex:1;}
 .chat-sugg:hover{border-color:var(--accent);color:var(--accent);background:#fffbeb;}
 /* KPI MÉTIER */
 .kpi-meter-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin:.8rem 0;}
-.kpi-meter-card{background:#fff;border:1.5px solid var(--gray200);border-radius:14px;padding:1.1rem 1.2rem;position:relative;overflow:hidden;}
-.kpi-meter-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--orange));}
+.kpi-meter-card{--kpi-accent:var(--accent);background:#fff;border:1.5px solid var(--gray200);border-radius:14px;padding:1.1rem 1.2rem;position:relative;overflow:hidden;}
+.kpi-meter-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--kpi-accent);}
 .kpi-meter-title{font-size:.82rem;font-weight:900;color:var(--navy);margin-bottom:.25rem;}
 .kpi-meter-sub{font-size:.72rem;color:var(--gray500);margin-bottom:.75rem;line-height:1.45;}
 .kpi-levels{display:flex;gap:.4rem;margin-bottom:.7rem;}
-.kpi-level{flex:1;border-radius:8px;padding:.4rem .5rem;text-align:center;}
+.kpi-level{flex:1;border-radius:10px;padding:.4rem .5rem;text-align:center;}
 .kpi-level.deb{background:#fef2f2;border:1px solid #fecaca;}
 .kpi-level.op{background:#fffbeb;border:1px solid #fde68a;}
 .kpi-level.exp{background:#f0fdf4;border:1px solid #bbf7d0;}
@@ -3207,7 +3207,7 @@ function renderViewer(m){
       ${(s2.reflexes_expert||[]).length?`<div class="memo-block" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left-color:#7c3aed;"><h4 style="color:#6d28d9;">⚡ Réflexes de l'expert</h4>${(s2.reflexes_expert||[]).map(r=>`<div class="memo-item" style="color:#4c1d95;">→ ${_e(r)}</div>`).join('')}</div>`:''}
       ${s2.regle_or?`<div class="memo-gold"><h4>🏆 Règle d'or</h4><p>"${_e(s2.regle_or)}"</p></div>`:''}
     </div></div>`;
-    if(_cfg.showKpis) extra+=`<div class="ccard">${renderKPIs(m)}</div>`;
+    if(_cfg.showKpis) extra+=`<div class="ccard">${renderKPIs(m,mc)}</div>`;
   } else {
     const exos=(m.exercices||[]).map((ex,i)=>`
       <div class="sc-card"><div class="sc-hdr" style="background:var(--acad-bg);" onclick="toggleSC(this)">
@@ -4055,34 +4055,21 @@ Structure du cours de remédiation :
   }catch(e){box.innerHTML=`<div class="alert alert-danger">Erreur: ${_e(e.message)}</div>`;}
 }
 
-/* ── Mémo terrain ── */
-function renderMemo(m){
-  const s=m.memo;if(!s)return empty('📄','Aucun mémo');
-  return`<div style="max-width:640px;">
-    <div class="ccard" style="border-left:4px solid var(--accent);margin-bottom:1rem;">
-      <div style="font-size:.62rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Mémo terrain — Quick Reference</div>
-      <h3 style="font-size:.95rem;color:var(--navy);">${_e(s.titre||m.titre)}</h3></div>
-    ${(s.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
-    ${(s.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
-    ${(s.interdits||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">🚫 À ne jamais faire</h4>${(s.interdits||[]).map(e=>`<div class="memo-item" style="color:#7f1d1d;">${_e(e)}</div>`).join('')}</div>`:''}
-    ${(s.reflexes_expert||[]).length?`<div class="memo-block" style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-left-color:#7c3aed;"><h4 style="color:#6d28d9;">⚡ Réflexes de l'expert</h4>${(s.reflexes_expert||[]).map(r=>`<div class="memo-item" style="color:#4c1d95;">→ ${_e(r)}</div>`).join('')}</div>`:''}
-    ${s.regle_or?`<div class="memo-gold"><h4>🏆 Règle d'or</h4><p>"${_e(s.regle_or)}"</p></div>`:''}
-  </div>`;
-}
 
 /* ── KPIs Métier (pro) ── */
-function renderKPIs(m){
+function renderKPIs(m,mc){
+  mc=mc||_domainAccent(m.secteur||m.dom)||'#f59e0b';
   if(!(m.kpis?.length))return`<div style="text-align:center;padding:2rem;color:var(--gray400);">
     <div style="font-size:2.5rem;margin-bottom:.5rem;">📈</div>
     <div style="font-size:.86rem;font-weight:700;margin-bottom:.3rem;">KPIs non disponibles</div>
     <div style="font-size:.78rem;">Les modules créés avant cette mise à jour n'ont pas de KPIs.<br>Dupliquez et régénérez le module pour obtenir les indicateurs de performance.</div>
   </div>`;
-  const intro=`<div style="background:linear-gradient(135deg,var(--pro-bg),#fff);border:1.5px solid #fde68a;border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
-    <div style="font-size:.70rem;font-weight:800;color:var(--pro-dark);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📈 Indicateurs de Performance Clés — ${_e(m.dom||m.titre)}</div>
+  const intro=`<div style="background:linear-gradient(135deg,${mc}14,#fff);border:1.5px solid ${mc}44;border-radius:14px;padding:1rem 1.2rem;margin-bottom:1.2rem;">
+    <div style="font-size:.70rem;font-weight:800;color:${mc};text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem;">📈 Indicateurs de Performance Clés — ${_e(m.dom||m.titre)}</div>
     <div style="font-size:.78rem;color:var(--gray700);line-height:1.55;">Ces KPIs vous permettent de vous situer précisément dans votre progression professionnelle et de vous fixer des objectifs concrets. Un expert se reconnait à ses indicateurs terrain, pas seulement à ses diplômes.</div>
   </div>`;
   const cards=(m.kpis||[]).map(k=>`
-    <div class="kpi-meter-card">
+    <div class="kpi-meter-card" style="--kpi-accent:${mc};">
       <div class="kpi-meter-title">📊 ${_e(k.indicateur||'')}</div>
       <div class="kpi-meter-sub">🎯 ${_e(k.quoi_mesurer||'')} <span style="font-weight:700;color:var(--gray500);">(${_e(k.unite||'')})</span></div>
       <div class="kpi-levels">
