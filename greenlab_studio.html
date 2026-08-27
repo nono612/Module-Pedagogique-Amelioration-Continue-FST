@@ -5971,19 +5971,36 @@ function _buildRevPlan(m,days){
   const quiz=m.qcm||m.quiz||[];
   const cas=m.cas&&m.cas.entreprise;
   if(!n&&!quiz.length)return`<div style="font-size:.8rem;color:var(--gray400);">Générez d'abord les sections du module.</div>`;
+
+  const field=m.mode==='acad'?'points_cles':'donnees_cles';
+  /* Une tâche « relire la section X » invite à la passivité. Quand la section
+     porte des valeurs clés, on transforme la tâche en rappel actif : le
+     lecteur doit essayer de se souvenir avant de vérifier. */
+  const taskForSection=s=>{
+    const val=(s[field]||[])[0];
+    return val?`📚 ${s.titre} — sans relire, rappelez-vous : ${val}`:`📚 ${s.titre}`;
+  };
+  const _trunc=(t,n2)=>t.length>n2?t.slice(0,n2-1)+'…':t;
+
   // Distribute tasks across days
   const plan=[];
   const secsPerDay=Math.max(1,Math.ceil(n/Math.max(1,days-2)));
   let secIdx=0;
   for(let d=1;d<=days;d++){
-    const tasks=[];
-    if(d===1){tasks.push('📖 Lecture des objectifs et introduction');if(secs[0])tasks.push('📚 Section 1 : '+secs[0].titre);}
+    const tasks=[];let title;
+    if(d===1){
+      title='Introduction & premiers concepts';
+      tasks.push('📖 Lecture des objectifs et introduction');
+      if(secs[0])tasks.push(taskForSection(secs[0]));
+    }
     else if(d===days){
+      title='Révision finale & évaluation';
       tasks.push('🔄 Révision rapide des points clés');
       if(quiz.length)tasks.push('❓ Quiz complet : '+quiz.length+' questions');
       tasks.push('🃏 Flashcards de mémorisation');
     }
     else if(d===days-1&&(exos.length||cas)){
+      title='Pratique & application';
       if(cas)tasks.push('🏭 Étude du cas '+(m.mode==='pro'?'terrain':'industriel'));
       if(exos.length)tasks.push('✏️ Exercices pratiques ('+exos.length+')');
       const midQ=quiz.slice(0,Math.ceil(quiz.length/2));
@@ -5991,20 +6008,31 @@ function _buildRevPlan(m,days){
     }
     else{
       const slice=secs.slice(secIdx,secIdx+secsPerDay);
-      slice.forEach(s=>{tasks.push('📚 '+s.titre);});
+      slice.forEach(s=>tasks.push(taskForSection(s)));
       secIdx+=secsPerDay;
+      /* Le titre du jour vient de ce qui est réellement étudié ce jour-là,
+         plutôt que d'un même libellé générique répété sur tous les jours
+         intermédiaires — c'était ce qui rendait le plan illisible. */
+      title=!slice.length?'Approfondissement des notions'
+        :slice.length===1?_trunc(slice[0].titre,48)
+        :slice.length===2?_trunc(`${slice[0].titre} & ${slice[1].titre}`,52)
+        :_trunc(slice[0].titre,34)+` +${slice.length-1} autres`;
       if(d%2===0&&quiz.length){
         const q=quiz[Math.floor(Math.random()*quiz.length)];
         tasks.push('🧪 Question bilan : "'+q.q.slice(0,50)+(q.q.length>50?'…':'')+'"');
       }
     }
-    if(tasks.length)plan.push({day:d,tasks});
+    if(tasks.length)plan.push({day:d,title,tasks});
   }
-  const colors=['#3b82f6','#8b5cf6','#059669','#f59e0b','#ec4899','#14b8a6'];
+  /* Les pastilles Jn déclinent la couleur d'identité du module au lieu d'un
+     arc-en-ciel sans rapport — même correction que sur les en-têtes de
+     section et le fil du processus. */
+  const mc=_domainAccent(m.secteur||m.dom)||(m.mode==='pro'?'#f59e0b':'#7c3aed');
+  const dayColor=i=>_shade(mc,-Math.min(i,6)*0.06);
   return`<div class="revplan-card">${plan.map((d,i)=>`<div class="revplan-day">
     <div class="revplan-day-hdr">
-      <span class="revplan-day-num" style="background:${colors[i%colors.length]};">J${d.day}</span>
-      <span class="revplan-day-title">${d.day===1?'Introduction & premiers concepts':d.day===days?'Révision finale & évaluation':d.day===days-1?'Pratique & application':'Approfondissement des notions'}</span>
+      <span class="revplan-day-num" style="background:${dayColor(i)};">J${d.day}</span>
+      <span class="revplan-day-title">${_e(d.title)}</span>
     </div>
     ${d.tasks.map(t=>`<div class="revplan-task">${_e(t)}</div>`).join('')}
   </div>`).join('')}</div>`;
