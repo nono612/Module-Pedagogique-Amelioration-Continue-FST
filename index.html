@@ -3026,7 +3026,8 @@ function _idxGroqChain(preferred){
 function _idxRankOf(id){
   if(/^llama-3\.3-70b-versatile$/.test(id))return 0;
   if(/^llama-3\.1-8b-instant$/.test(id))return 1;
-  if(/^gemma2-9b-it$/.test(id))return 2;
+  // gemma2-9b-it retiré : décommissionné par Groq (vérifié le 2026-08-27,
+  // erreur "model_decommissioned" — plus aucun compte n'y a accès).
   return -1;
 }
 async function _idxFetchGroqModels(key){
@@ -3139,7 +3140,7 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
   if(_IDX_RE_RATE.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez.');
   if(_IDX_RE_SWITCH.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun des modèles Groq fiables (llama-3.3-70b-versatile, llama-3.1-8b-instant, gemma2-9b-it). Créez une nouvelle clé gratuite sur console.groq.com/keys — les comptes standards y ont accès par défaut.');
+    throw new Error('Votre clé n\'a accès à aucun des modèles Groq fiables (llama-3.3-70b-versatile, llama-3.1-8b-instant). Créez une nouvelle clé gratuite sur console.groq.com/keys — les comptes standards y ont accès par défaut.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
