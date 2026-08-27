@@ -3911,7 +3911,8 @@ function renderQuizRes(m){
     <div style="margin-bottom:1.2rem;">${_quiz.map((q,qi)=>{const ans=_qa[qi],rep=q.rep!==undefined?q.rep:q.correct,ok=ans===rep,expl=q.expl||q.explication||'';return`<div class="quiz-q">
       <div class="quiz-q-txt">${qi+1}. ${_e(q.q)}</div>
       ${(q.opts||[]).map((o,oi)=>`<div class="quiz-opt ${oi===rep?'correct':oi===ans&&!ok?'wrong':''}">${oi===rep?'✓':oi===ans&&!ok?'✗':''} ${_e(o)}</div>`).join('')}
-      ${expl?`<div style="font-size:.70rem;color:var(--green);padding:.35rem .6rem;background:#ecfdf5;border-radius:6px;margin-top:.3rem;border-left:3px solid var(--green);">💡 ${_e(expl)}</div>`:''}
+      ${!ok?`<div style="font-size:.72rem;color:#b91c1c;padding:.4rem .65rem;background:#fef2f2;border-radius:6px;margin-top:.35rem;border-left:3px solid #dc2626;line-height:1.5;">❌ <strong>Pourquoi c'est faux :</strong> ${expl?_e(expl):'Explication non disponible pour cette question.'}</div>`
+        :expl?`<div style="font-size:.70rem;color:var(--green);padding:.35rem .6rem;background:#ecfdf5;border-radius:6px;margin-top:.3rem;border-left:3px solid var(--green);">💡 ${_e(expl)}</div>`:''}
     </div>`;}).join('')}</div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;">
       <button class="btn btn-ghost btn-sm" onclick="retryQ()">🔄 Recommencer le quiz</button>
