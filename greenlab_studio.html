@@ -1345,13 +1345,27 @@ function _parseRetryDelay(msg){
   return null;
 }
 
+/* Fiabilité connue pour de la génération pédagogique en français (chat + JSON).
+   'trusted' = testé et fiable. 'caution' = fonctionne différemment (agentique,
+   quota bas, langue non-française) — à essayer avec prudence. 'unknown' = pas
+   de retour d'expérience, l'app ne peut pas garantir le résultat. */
+function _groqReliabilityTier(id){
+  if(/^llama-3\.3-70b-versatile$/.test(id))return'trusted';
+  if(/^llama-3\.1-8b-instant$/.test(id))return'trusted';
+  if(/gemma/i.test(id))return'trusted';
+  if(/^groq\/compound/.test(id))return'caution';   // agentique (outils intégrés), pas un simple modèle de chat
+  if(/^openai\//.test(id))return'caution';          // capable mais quota/minute bas sur le tier gratuit
+  return'unknown';                                    // qwen, allam, deepseek, moonshot… — non vérifiés par l'app
+}
 function _groqModelLabel(id){
-  if(id.includes('instant'))return'⚡ '+id+' (rapide)';
-  if(/8b/i.test(id))return'⚡ '+id;
-  if(/gemma/i.test(id))return'💎 '+id;
-  if(/mixtral/i.test(id))return'📦 '+id+' (32k)';
-  if(/70b|90b|120b/i.test(id))return'🧠 '+id;
-  return id;
+  const tier=_groqReliabilityTier(id);
+  const warn=tier==='caution'?'⚠️ ':tier==='unknown'?'❓ ':'';
+  if(id.includes('instant'))return warn+'⚡ '+id+' (rapide)';
+  if(/8b/i.test(id))return warn+'⚡ '+id;
+  if(/gemma/i.test(id))return warn+'💎 '+id;
+  if(/mixtral/i.test(id))return warn+'📦 '+id+' (32k)';
+  if(/70b|90b|120b/i.test(id))return warn+'🧠 '+id;
+  return warn+id;
 }
 
 /* CLASSEMENT (pas d'exclusion stricte) — certains comptes Groq n'ont accès
@@ -5107,6 +5121,19 @@ const _MODEL_INFO={
   'llama-3.3-70b-versatile':'🧠 Gratuit — Français soigné et contenu fiable. Recommandé pour les modules.',
   'llama-3.1-8b-instant':'⚡ Gratuit — Très rapide, mais français approximatif. Pour tester uniquement.',
 };
+/* Message affiché quand le modèle sélectionné n'a pas de fiche dédiée dans
+   _MODEL_INFO — reflète le niveau de confiance déterminé par _groqReliabilityTier. */
+function _modelInfoText(id){
+  if(_MODEL_INFO[id])return _MODEL_INFO[id];
+  const tier=typeof _groqReliabilityTier==='function'?_groqReliabilityTier(id):'unknown';
+  if(tier==='caution'){
+    if(/^groq\/compound/.test(id))return'⚠️ Modèle agentique (outils intégrés : recherche web, code…), pas un simple modèle de chat. Peut produire une sortie imprévisible pour du contenu structuré — à tester avant usage régulier.';
+    if(/^openai\//.test(id))return'⚠️ Capable, mais quota par minute plus bas sur le tier gratuit Groq — risque de blocages fréquents sur des générations longues.';
+    return'⚠️ À utiliser avec prudence — comportement non garanti pour ce type de contenu.';
+  }
+  if(tier==='unknown')return'❓ Modèle non testé par l\'application — qualité du français et fiabilité du JSON généré non garanties. Ce modèle apparaît car votre compte Groq n\'a pas accès aux modèles recommandés (llama-3.3-70b-versatile, llama-3.1-8b-instant) — vérifiez les autorisations de votre clé sur console.groq.com.';
+  return'Modèle sélectionné.';
+}
 
 function applyPlatformName(){
   const n=getCfg().platformName||'Green Lab Studio';
@@ -5121,7 +5148,7 @@ function applyPlatformName(){
 function updateModelPill(){
   const m=getCfg().model;
   const info=document.getElementById('cfg-model-info');
-  if(info)info.textContent=_MODEL_INFO[m]||'Modèle sélectionné.';
+  if(info)info.textContent=_modelInfoText(m);
   const pill=document.querySelector('.cl-model-pill');
   if(pill){
     // Nom lisible : « llama-3.1-8b-instant » → « Llama 3.1 8B »
