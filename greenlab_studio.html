@@ -806,7 +806,7 @@ h1,h2,.ap-title-lg{
       <div class="lo-feat"><span class="lo-feat-ico">💬</span> Assistant IA conversationnel</div>
       <div class="lo-feat"><span class="lo-feat-ico">⚡</span> Génération parallèle</div>
       <div class="lo-feat"><span class="lo-feat-ico">💼</span> Formation Pro</div>
-      <div class="lo-feat"><span class="lo-feat-ico">🎓</span> Cours Académique</div>
+      <div class="lo-feat"><span class="lo-feat-ico">🎓</span> Tous niveaux académiques</div>
       <div class="lo-feat"><span class="lo-feat-ico">🎯</span> Quiz &amp; Score</div>
       <div class="lo-feat"><span class="lo-feat-ico">📄</span> Export PDF</div>
     </div>
@@ -818,7 +818,7 @@ h1,h2,.ap-title-lg{
       </button>
     </div>
 
-    <p class="lo-footer">Green Lab Studio · 2026 · Tous domaines professionnels &amp; académiques</p>
+    <p class="lo-footer">Green Lab Studio · 2026 · Tous domaines — Lycée → Doctorat, Pro → Expert</p>
   </div>
 </div>
 
@@ -952,6 +952,54 @@ h1,h2,.ap-title-lg{
     </div>
   </div>
   <div id="libGrid"></div>
+</div>
+
+<!-- STATISTIQUES -->
+<div class="screen" id="screen-stats">
+  <div class="ph"><h1>📊 Statistiques</h1><p>Votre activité et progression sur la plateforme.</p></div>
+  <div id="statsContent"></div>
+</div>
+
+<!-- APPRENANTS / PROFILS -->
+<div class="screen" id="screen-profiles">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.3rem;flex-wrap:wrap;gap:.7rem;">
+    <div class="ph" style="margin:0;"><h1>👤 Apprenants</h1><p style="margin:0;">Gérez les profils et suivez la progression de chaque apprenant.</p></div>
+    <button class="btn btn-gold ap-press" onclick="openAddProfile()">+ Nouveau profil</button>
+  </div>
+  <div id="profilesGrid"></div>
+  <!-- MODAL NOUVEAU PROFIL -->
+  <div class="modal-ov" id="profileModal" onclick="if(event.target===this)closeProfileModal()" style="display:none;">
+    <div class="modal-box" style="max-width:460px;">
+      <div class="modal-hdr"><h3>👤 Nouveau profil apprenant</h3><button class="modal-close" onclick="closeProfileModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">Prénom & Nom <span>*</span></label>
+          <input type="text" id="pName" class="form-input" placeholder="ex : Marie Dupont" maxlength="60"></div>
+        <div class="form-group"><label class="form-label">Établissement / Entreprise <span>optionnel</span></label>
+          <input type="text" id="pEtab" class="form-input" placeholder="ex : Lycée Pasteur, ENSTA Paris, Atelier Renault…"></div>
+        <div class="form-group"><label class="form-label">Mode par défaut</label>
+          <select id="pMode" class="form-select">
+            <option value="pro">💼 Formation Professionnelle</option>
+            <option value="acad">🎓 Cours Académique</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Couleur avatar</label>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;" id="pColorPicker">
+            <div onclick="selectProfileColor('#f59e0b')" data-color="#f59e0b" style="width:28px;height:28px;background:#f59e0b;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#7c3aed')" data-color="#7c3aed" style="width:28px;height:28px;background:#7c3aed;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#10b981')" data-color="#10b981" style="width:28px;height:28px;background:#10b981;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#3b82f6')" data-color="#3b82f6" style="width:28px;height:28px;background:#3b82f6;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#ef4444')" data-color="#ef4444" style="width:28px;height:28px;background:#ef4444;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#ec4899')" data-color="#ec4899" style="width:28px;height:28px;background:#ec4899;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#0891b2')" data-color="#0891b2" style="width:28px;height:28px;background:#0891b2;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+            <div onclick="selectProfileColor('#059669')" data-color="#059669" style="width:28px;height:28px;background:#059669;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:border-color .15s;"></div>
+          </div></div>
+        <input type="hidden" id="pColor" value="#7c3aed">
+        <div style="display:flex;gap:.7rem;justify-content:flex-end;margin-top:1rem;">
+          <button class="btn btn-ghost" onclick="closeProfileModal()">Annuler</button>
+          <button class="btn btn-gold" onclick="saveProfile()">Créer le profil</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- SETTINGS -->
@@ -1227,13 +1275,13 @@ const _MODES=[
    formTitle:'💼 Créer une formation professionnelle',
    formSub:'Cours métier complet : théorie du domaine, procédures, exercices pratiques, mises en situation, QCM et attestation.',
    genLabel:'💼 Générer la formation complète'},
-  {id:'acad',ico:'🎓',label:'Cours Ingénieur',tagline:'Cours Ingénieur',badge:'🎓',
+  {id:'acad',ico:'🎓',label:'Cours Académique',tagline:'Cours Académique',badge:'🎓',
    cardCls:'acad',btnCls:'purple-btn',submitCls:'btn-purple',msBtnCls:'active-acad',
-   desc:'Cours rigoureux pour toutes les filières d\'ingénierie — électrique, informatique, mécanique, civil, chimie, aéro, biotechnologie, management… TD corrigés, QCM examen et fiche de révision. Support PDF du professeur accepté.',
-   chips:['Toutes filières ingénierie','TD corrigés','QCM examen','Fiche révision'],
+   desc:'Cours rigoureux pour TOUS les niveaux et filières — Lycée, BTS/BUT, Licence, Master, Doctorat, Médecine, Droit, Psychologie, Sciences, Lettres, Ingénierie, Informatique… TD corrigés, QCM examen et fiche de révision. Support PDF du professeur accepté.',
+   chips:['Tous niveaux & filières','TD corrigés','QCM examen','Fiche révision'],
    cta:'🎓 Créer un cours →',
-   formTitle:'🎓 Créer un cours ingénieur',
-   formSub:'Cours pour toutes les filières d\'ingénierie (BUT, Licence Pro, cycle ingénieur, Master) — toutes disciplines acceptées. TD corrigés, QCM examen, fiche de révision, support PDF du prof.',
+   formTitle:'🎓 Créer un cours académique',
+   formSub:'Cours pour tous les niveaux (Lycée → Doctorat) et toutes disciplines (Sciences, Droit, Médecine, Lettres, Économie, Ingénierie…). TD corrigés, QCM examen, fiche de révision, support PDF du prof.',
    genLabel:'🎓 Générer le cours'},
 ];
 
@@ -1242,6 +1290,8 @@ const _NAV_GROUPS=[
     {id:'home',ico:'🏠',label:'Accueil'},
     {id:'chat',ico:'💬',label:'Assistant IA'},
     {id:'library',ico:'📚',label:'Bibliothèque'},
+    {id:'stats',ico:'📊',label:'Statistiques'},
+    {id:'profiles',ico:'👤',label:'Apprenants'},
   ]},
   {section:'Compte',items:[
     {id:'settings',ico:'⚙️',label:'Paramètres'},
@@ -1400,11 +1450,14 @@ const _VAR_ANGLES={
     'Expose d\'abord le résultat attendu (valeur, état, qualité visée), puis remonte aux causes et à la méthode pour l\'atteindre.',
   ],
   acad:[
-    'Commence par la question physique ou mathématique concrète que ce chapitre résout, puis construis la réponse théorique formelle.',
-    'Pars d\'une observation industrielle ou expérimentale de "${dom}", puis développe le formalisme qui l\'explique.',
-    'Déroule d\'abord une démonstration rigoureuse pas-à-pas en justifiant chaque hypothèse et approximation.',
-    'Commence par un exemple numérique complet (données réalistes → calcul détaillé → résultat commenté), puis généralise au principe.',
-    'Expose le problème concret que les ingénieurs de "${dom}" doivent résoudre, puis construis les outils mathématiques nécessaires.',
+    'Commence par la question concrète que ce chapitre résout, puis construis la réponse théorique formelle pas-à-pas.',
+    'Pars d\'une situation réelle observée dans "${dom}", puis développe le formalisme ou le raisonnement qui l\'explique.',
+    'Déroule d\'abord une démonstration rigoureuse en justifiant chaque étape, hypothèse ou argument.',
+    'Commence par un exemple ou cas concret complet (situation → analyse → conclusion commentée), puis généralise au principe.',
+    'Expose le problème ou la question que les praticiens de "${dom}" doivent résoudre, puis construis les outils conceptuels nécessaires.',
+    'Commence par une définition précise du concept central, puis enrichis avec des exemples contrastés (bon usage vs contre-exemple).',
+    'Pars de ce que l\'étudiant sait déjà en "${dom}", identifie la limite de ce savoir, puis construis le nouveau concept pour la lever.',
+    'Ancre immédiatement dans un texte, cas juridique, résultat expérimental ou donnée chiffrée réelle, puis remonte au principe théorique.',
   ],
 };
 function _pickAngle(mode,dom){
@@ -1525,6 +1578,8 @@ function nav(name){
   if(name==='library')renderLib();
   if(name==='form')renderForm();
   if(name==='chat')initChat();
+  if(name==='stats')renderStats();
+  if(name==='profiles')renderProfiles();
 }
 
 function goCreate(mode){
@@ -1573,7 +1628,7 @@ Déduis les paramètres optimaux pour ce module. JSON :
 {"mode":"pro|acad","dom":"domaine/matière principal","comp":"compétence ou notion précise à former","pub":"public cible (ex: stagiaires débutants, techniciens, étudiants BUT)","niv":"débutant|intermédiaire|expert","dur":"durée estimée (ex: 1 heure, 2 heures, 30 min)","lang":"langue détectée depuis la phrase","nbSections":3,"raisonnement_nbSections":"pourquoi ce nombre (pas le champ default) : sujet simple→3, ordinaire→4-5, dense→6"}
 
 Règles :
-- mode=pro si la phrase mentionne un métier/terrain/entreprise/formation professionnelle ; mode=acad si cours/ingénieur/université/étudiant/BUT/Master ou sujet théorique
+- mode=pro si la phrase mentionne un métier/terrain/entreprise/formation professionnelle ; mode=acad si cours/université/étudiant/lycée/BTS/BUT/licence/master/doctorat/médecine/droit/pharmacie/fac ou sujet théorique académique
 - lang = la langue de la phrase (Français si française, English si anglaise, etc.)
 - nbSections : 3 si sujet simple ou court, 4-5 pour un sujet standard, 6 si complexe ou vaste — NE PAS forcer 5 par défaut`;
 
@@ -1771,12 +1826,26 @@ const ACADDOMS=[
   'Mathématiques pour l\'ingénieur','Probabilités & Statistiques','Algèbre linéaire appliquée','Analyse numérique & méthodes','Méthode des éléments finis','Optimisation','Recherche opérationnelle',
   // Aéronautique & spatial
   'Aérodynamique','Propulsion aéronautique','Structures aéronautiques','Mécanique spatiale & orbitale','Avionique',
-  // Biotechnologie & santé
+  // Biotechnologie & santé ingénierie
   'Génie biologique','Bioinformatique','Bio-ingénierie & biomatériaux','Imagerie médicale','Instrumentation médicale',
   // Environnement & développement durable
   'Génie de l\'environnement','Traitement des eaux','Pollution & écotechnologie','Bilan carbone & ACV',
-  // Management & transversal
-  'Gestion de projet industriel','Qualité & Fiabilité (SPC, AMDEC)','Sécurité industrielle','Économie d\'ingénierie','Métrologie & Instrumentation','Logistique & supply chain'
+  // Management & transversal ingénierie
+  'Gestion de projet industriel','Qualité & Fiabilité (SPC, AMDEC)','Sécurité industrielle','Économie d\'ingénierie','Métrologie & Instrumentation','Logistique & supply chain',
+  // ── Sciences médicales & santé ──
+  'Anatomie & Physiologie','Biochimie médicale','Pharmacologie','Microbiologie & Infectiologie','Sémiologie clinique','Santé publique & Épidémiologie','Soins infirmiers','Kinésithérapie','Nutrition & Diététique',
+  // ── Droit & sciences politiques ──
+  'Droit civil','Droit pénal','Droit des contrats','Droit commercial & des affaires','Droit du travail','Droit international public','Droit constitutionnel','Science politique','Procédure civile','Fiscalité & Droit fiscal',
+  // ── Sciences économiques & gestion ──
+  'Microéconomie','Macroéconomie','Économétrie','Comptabilité générale','Finance d\'entreprise','Marketing stratégique','Management des organisations','Ressources humaines','Économie internationale','Statistiques & Data analyse',
+  // ── Sciences humaines & sociales ──
+  'Psychologie cognitive','Psychologie sociale','Sociologie','Anthropologie','Histoire contemporaine','Géographie humaine','Philosophie','Sciences de l\'éducation','Travail social',
+  // ── Langues & lettres ──
+  'Linguistique générale','Littérature française','Littérature anglaise','Littérature comparée','Traduction & Interprétation','Didactique des langues','Communication & Rhétorique',
+  // ── Sciences fondamentales (tous cycles) ──
+  'Physique générale','Mécanique classique (Physique)','Électromagnétisme','Optique','Physique quantique','Chimie générale','Chimie organique','Chimie analytique','Biologie cellulaire & moléculaire','Génétique & Évolution','Écologie & Environnement','Mathématiques pures','Algèbre abstraite','Analyse réelle & complexe','Topologie',
+  // ── Architecture & arts appliqués ──
+  'Architecture & Urbanisme','Design industriel','Histoire de l\'art','Composition architecturale','Réglementation thermique (RE2020)','Accessibilité & handicap'
 ];
 
 function fieldsProHtml(){return`
@@ -1817,24 +1886,51 @@ function fieldsProHtml(){return`
 
 function fieldsAcadHtml(){return`
   <div class="form-group">
-    <label class="form-label">1. Discipline / matière <span>* toutes filières ingénierie acceptées</span></label>
-    <input type="text" id="fDom" class="form-input" placeholder="ex : Résistance des matériaux, Aérodynamique, IA & ML, Génie chimique, Cybersécurité, Béton armé, Robotique…" autocomplete="off">
+    <label class="form-label">1. Discipline / matière <span>* toutes disciplines acceptées</span></label>
+    <input type="text" id="fDom" class="form-input" placeholder="ex : Droit civil, Pharmacologie, Microéconomie, Résistance des matériaux, Psychologie cognitive, Littérature française…" autocomplete="off">
     <div class="dpills">${ACADDOMS.map(d=>`<span class="dpill acad" onclick="document.getElementById('fDom').value='${d}'">${d}</span>`).join('')}</div>
   </div>
   <div class="form-grid">
     <div class="form-group"><label class="form-label">2. Chapitre / notion à enseigner <span>*</span></label>
-    <input type="text" id="fComp" class="form-input" placeholder="ex : Transformée de Laplace, Pont de Wheatstone, Automate programmable, Loi de Kirchhoff…"></div>
+    <input type="text" id="fComp" class="form-input" placeholder="ex : Transformée de Laplace, Droit du contrat de vente, Biochimie des lipides, Analyse littéraire du roman…"></div>
     <div class="form-group"><label class="form-label">3. Niveau / cursus <span>*</span></label>
     <select id="fPub" class="form-select">
-      <option>BUT / IUT 1ère année</option>
-      <option>BUT / IUT 2ème année</option>
-      <option>BUT / IUT 3ème année</option>
-      <option>Licence Pro</option>
-      <option selected>Ingénieur 1ère année (Bac+3)</option>
-      <option>Ingénieur 2ème année (Bac+4)</option>
-      <option>Ingénieur 3ème année (Bac+5)</option>
-      <option>Master Ingénierie M1</option>
-      <option>Master Ingénierie M2</option>
+      <optgroup label="Secondaire">
+        <option>Lycée — Terminale</option>
+        <option>Classe Préparatoire MPSI/PCSI</option>
+        <option>Classe Préparatoire MP/PC/PSI</option>
+      </optgroup>
+      <optgroup label="BTS / BUT">
+        <option>BTS 1ère année</option>
+        <option>BTS 2ème année</option>
+        <option>BUT / IUT 1ère année</option>
+        <option>BUT / IUT 2ème année</option>
+        <option>BUT / IUT 3ème année</option>
+      </optgroup>
+      <optgroup label="Licence">
+        <option>Licence L1 (Bac+1)</option>
+        <option>Licence L2 (Bac+2)</option>
+        <option selected>Licence L3 (Bac+3)</option>
+        <option>Licence Pro</option>
+      </optgroup>
+      <optgroup label="Ingénieur / Master">
+        <option>Ingénieur 1ère année (Bac+3)</option>
+        <option>Ingénieur 2ème année (Bac+4)</option>
+        <option>Ingénieur 3ème année (Bac+5)</option>
+        <option>Master M1 (Bac+4)</option>
+        <option>Master M2 (Bac+5)</option>
+      </optgroup>
+      <optgroup label="Santé">
+        <option>PASS / L.AS (ex-PACES)</option>
+        <option>DFGSM — Médecine 2e / 3e cycle</option>
+        <option>Pharmacie D1-D6</option>
+        <option>Infirmier(ère) — IFSI</option>
+        <option>Kinésithérapie — IFMK</option>
+      </optgroup>
+      <optgroup label="Doctorat / Recherche">
+        <option>Doctorat / PhD</option>
+        <option>Post-doctorat</option>
+      </optgroup>
     </select></div>
   </div>
   <div class="form-grid-3">
@@ -2306,6 +2402,7 @@ async function startGen(){
   document.getElementById('gSteps').innerHTML=STEPS.map(s=>`<div class="gen-step" id="gs-${s.id}"><div class="gen-ico" id="gi-${s.id}">${s.icon}</div><div><div class="gen-step-title">${s.label}</div><div class="gen-step-sub" id="gsub-${s.id}">${s.sub}</div></div></div>`).join('');
   try{
     const mod=p?await pipePro(fd,key):await pipeAcad(fd,key);
+    _tagModuleWithProfile(mod);
     addMod(mod);_cur=mod;openMod(mod.id);
     _bgVerifyModule(mod,key);
     _reportIncomplete(mod);
@@ -3076,7 +3173,7 @@ function renderViewer(m){
     <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:.85rem;">
       <div style="font-size:2.75rem;line-height:1;flex-shrink:0;">${_icone}</div>
       <div style="flex:1;min-width:0;">
-        <div style="font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${mc};margin-bottom:.2rem;">${p?'Formation Professionnelle':'Cours Ingénieur'}</div>
+        <div style="font-size:.62rem;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${mc};margin-bottom:.2rem;">${p?'Formation Professionnelle':'Cours Académique'}</div>
         <h2 style="font-size:1.38rem;font-weight:900;color:${mcd};line-height:1.2;margin:0 0 .3rem;font-family:'Plus Jakarta Sans',sans-serif;">${_e(m.titre)}</h2>
         ${_accroche?`<p style="font-size:.83rem;color:#374151;line-height:1.65;font-style:italic;margin:0;">${_e(_accroche)}</p>`:''}
       </div>
@@ -5307,6 +5404,7 @@ async function launchChatModule(){
   try{
     const mod=fd.mode==='pro'?await pipePro(fd,key):await pipeAcad(fd,key);
     mod.readSections={};mod.fav=false;
+    _tagModuleWithProfile(mod);
     addMod(mod);
     _bgVerifyModule(mod,key);
     _renderChatMsg({role:'ai',
@@ -5997,6 +6095,276 @@ function _apSetEnrich(targetOpen) {
       if (!wasOpening) el.style.display = 'none';
     }
   });
+}
+
+/* ══════════════════════════════════════════════
+   STATISTIQUES
+══════════════════════════════════════════════ */
+function renderStats(){
+  const ms=getMods();
+  const total=ms.length;
+  const pro=ms.filter(m=>m.mode==='pro'||!m.mode).length;
+  const acad=ms.filter(m=>m.mode==='acad').length;
+  const now=Date.now();
+  const recentCount=ms.filter(m=>m.ts&&(now-m.ts)<7*86400000).length;
+  const totalSecs=ms.reduce((s,m)=>s+(m.sections||[]).length,0);
+
+  // Domaines
+  const domMap={};
+  ms.forEach(m=>{
+    const d=((m.secteur||m.dom||'Autre').split(/[\/,·]/)[0]).trim().slice(0,30)||'Autre';
+    domMap[d]=(domMap[d]||0)+1;
+  });
+  const topDoms=Object.entries(domMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  // Scores quiz
+  const scored=ms.filter(m=>m.quizScore!=null&&m.quizScore!==undefined);
+  const avgScore=scored.length?Math.round(scored.reduce((s,m)=>s+(m.quizScore||0),0)/scored.length):null;
+  const passCount=scored.filter(m=>(m.quizScore||0)>=70).length;
+
+  // Activité mensuelle (6 derniers mois)
+  const monthMap={};
+  ms.forEach(m=>{
+    if(!m.ts)return;
+    const d=new Date(m.ts);
+    const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    monthMap[k]=(monthMap[k]||0)+1;
+  });
+  const months=[];
+  for(let i=5;i>=0;i--){const d=new Date(now-i*30*86400000);months.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+  const maxMonth=Math.max(1,...months.map(k=>monthMap[k]||0));
+
+  const c=document.getElementById('statsContent');
+  if(!c)return;
+
+  c.innerHTML=`
+  <!-- KPIs -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.85rem;margin-bottom:1.5rem;">
+    ${[
+      {ico:'📚',v:total,l:'Modules créés',col:'#7c3aed'},
+      {ico:'💼',v:pro,l:'Formation Pro',col:'#f59e0b'},
+      {ico:'🎓',v:acad,l:'Cours Académique',col:'#7c3aed'},
+      {ico:'📅',v:recentCount,l:'Cette semaine',col:'#10b981'},
+      {ico:'📖',v:totalSecs,l:'Sections totales',col:'#3b82f6'},
+      ...(avgScore!=null?[{ico:'🎯',v:avgScore+'%',l:'Score moyen quiz',col:avgScore>=70?'#10b981':'#ef4444'}]:[]),
+      ...(scored.length?[{ico:'✅',v:passCount+'/'+scored.length,l:'Quiz réussis (≥70%)',col:'#059669'}]:[]),
+    ].map(k=>`<div class="ccard" style="padding:1rem 1.1rem;text-align:center;">
+      <div style="font-size:1.6rem;margin-bottom:.3rem;">${k.ico}</div>
+      <div style="font-size:1.7rem;font-weight:900;color:${k.col};line-height:1.1;">${k.v}</div>
+      <div style="font-size:.68rem;color:var(--gray600);margin-top:.2rem;line-height:1.3;">${k.l}</div>
+    </div>`).join('')}
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+    <!-- Domaines -->
+    <div class="ccard">
+      <div class="ccard-title">🏷️ Domaines les plus créés</div>
+      ${total===0?'<p style="color:var(--gray600);font-size:.8rem;margin:0;">Aucun module créé.</p>':
+        topDoms.map(([d,n])=>{
+          const pct=Math.round(n/total*100);
+          return`<div style="margin-bottom:.6rem;">
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.2rem;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:78%;">${_e(d)}</span><span style="font-weight:800;color:var(--accent);flex-shrink:0;">${n}</span></div>
+            <div style="background:#e2e8f0;border-radius:99px;height:5px;overflow:hidden;"><div style="background:var(--accent);height:100%;width:${pct}%;border-radius:99px;"></div></div>
+          </div>`;
+        }).join('')
+      }
+    </div>
+
+    <!-- Donut + activité mensuelle -->
+    <div class="ccard" style="display:flex;flex-direction:column;gap:1rem;">
+      <div>
+        <div class="ccard-title">📊 Répartition des modes</div>
+        ${total===0?'<p style="color:var(--gray600);font-size:.8rem;margin:0;">Aucun module créé.</p>':`
+        <div style="display:flex;align-items:center;gap:1.2rem;">
+          ${_renderDonut(pro,acad,total)}
+          <div style="font-size:.79rem;line-height:2;">
+            <div style="display:flex;align-items:center;gap:.4rem;"><span style="width:10px;height:10px;background:#f59e0b;border-radius:3px;display:inline-block;"></span>Pro : <b>${pro}</b></div>
+            <div style="display:flex;align-items:center;gap:.4rem;"><span style="width:10px;height:10px;background:#7c3aed;border-radius:3px;display:inline-block;"></span>Acad : <b>${acad}</b></div>
+          </div>
+        </div>`}
+      </div>
+      <div>
+        <div class="ccard-title">📈 Activité mensuelle</div>
+        <div style="display:flex;align-items:flex-end;gap:.35rem;height:60px;">
+          ${months.map(k=>{
+            const v=monthMap[k]||0;
+            const h=Math.round((v/maxMonth)*54)+4;
+            const label=k.slice(5)+'/'+(k.slice(2,4));
+            return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;">
+              <div style="font-size:.6rem;color:var(--gray600);">${v||''}</div>
+              <div style="width:100%;height:${h}px;background:${v?'var(--accent)':'#e2e8f0'};border-radius:4px 4px 0 0;min-height:4px;"></div>
+              <div style="font-size:.58rem;color:var(--gray500);">${label}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Derniers modules -->
+  <div class="ccard">
+    <div class="ccard-title">🕒 Derniers modules générés</div>
+    ${total===0?'<p style="color:var(--gray600);font-size:.82rem;margin:0;">Aucun module créé.</p>':
+      ms.slice(0,10).map(m=>`
+      <div style="display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px solid var(--gray200);cursor:pointer;" onclick="openMod('${_e(m.id)}')">
+        <div style="width:34px;height:34px;background:${_domainAccent(m.secteur||m.dom)||'#7c3aed'}22;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">${m.mode==='acad'?'🎓':'💼'}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${_e(m.titre||m.secteur||'Module')}</div>
+          <div style="font-size:.7rem;color:var(--gray600);">${_e(m.secteur||m.dom||'')}${m.niveau?' · '+_e(m.niveau):''}${m.ts?' · '+_d(m.ts):''}</div>
+        </div>
+        ${m.quizScore!=null?`<div style="font-size:.75rem;font-weight:800;color:${m.quizScore>=70?'#10b981':'#ef4444'};flex-shrink:0;">${m.quizScore}%</div>`:''}
+      </div>`).join('')
+    }
+  </div>`;
+}
+
+function _renderDonut(pro,acad,total){
+  if(!total)return'';
+  const r=42,cx=50,cy=50,sw=16;
+  const circ=2*Math.PI*r;
+  const proLen=(pro/total)*circ;
+  const acadLen=(acad/total)*circ;
+  const proRot=-90;
+  const acadRot=-90+(pro/total)*360;
+  return`<svg width="100" height="100" viewBox="0 0 100 100" style="flex-shrink:0;">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e2e8f0" stroke-width="${sw}"/>
+    ${pro>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f59e0b" stroke-width="${sw}"
+      stroke-dasharray="${proLen.toFixed(1)} ${(circ-proLen).toFixed(1)}"
+      style="transform-origin:${cx}px ${cy}px;transform:rotate(${proRot}deg);"/>`:''}
+    ${acad>0?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#7c3aed" stroke-width="${sw}"
+      stroke-dasharray="${acadLen.toFixed(1)} ${(circ-acadLen).toFixed(1)}"
+      style="transform-origin:${cx}px ${cy}px;transform:rotate(${acadRot}deg);"/>`:''}
+    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="13" font-weight="900" fill="#0d1b2a">${total}</text>
+  </svg>`;
+}
+
+/* ══════════════════════════════════════════════
+   PROFILS APPRENANTS
+══════════════════════════════════════════════ */
+const _PROFILES_KEY='gls_profiles';
+const _ACTIVE_PROFILE_KEY='gls_active_profile';
+
+function getProfiles(){try{return JSON.parse(localStorage.getItem(_PROFILES_KEY)||'[]');}catch{return[];}}
+function saveProfiles(ps){localStorage.setItem(_PROFILES_KEY,JSON.stringify(ps));}
+function getActiveProfileId(){return localStorage.getItem(_ACTIVE_PROFILE_KEY)||null;}
+function setActiveProfileId(id){if(id)localStorage.setItem(_ACTIVE_PROFILE_KEY,id);else localStorage.removeItem(_ACTIVE_PROFILE_KEY);}
+
+function _profileInitials(name){
+  return (name||'?').split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('');
+}
+
+function renderProfiles(){
+  const ps=getProfiles();
+  const activeId=getActiveProfileId();
+  const c=document.getElementById('profilesGrid');
+  if(!c)return;
+  if(!ps.length){
+    c.innerHTML=`<div class="ccard" style="text-align:center;padding:2.5rem 1.5rem;">
+      <div style="font-size:2.5rem;margin-bottom:.7rem;">👤</div>
+      <div style="font-weight:700;margin-bottom:.35rem;">Aucun profil apprenant</div>
+      <p style="font-size:.82rem;color:var(--gray600);margin-bottom:1rem;">Créez des profils pour suivre la progression de chaque apprenant individuellement.</p>
+      <button class="btn btn-gold" onclick="openAddProfile()">+ Créer un premier profil</button>
+    </div>`;
+    return;
+  }
+  c.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;">
+    ${ps.map(p=>{
+      const isActive=p.id===activeId;
+      const mods=getMods().filter(m=>m.profileId===p.id);
+      const initials=_profileInitials(p.name);
+      return`<div class="ccard" style="border:2px solid ${isActive?p.color||'#7c3aed':'transparent'};transition:border-color .2s;">
+        <div style="display:flex;align-items:center;gap:.85rem;margin-bottom:.85rem;">
+          <div style="width:46px;height:46px;border-radius:50%;background:${p.color||'#7c3aed'};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem;color:#fff;flex-shrink:0;">${_e(initials)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${_e(p.name)}</div>
+            <div style="font-size:.72rem;color:var(--gray600);">${p.etab?_e(p.etab)+'&nbsp;·&nbsp;':''}${p.mode==='acad'?'🎓 Académique':'💼 Pro'}</div>
+          </div>
+          ${isActive?`<span style="font-size:.62rem;font-weight:800;background:${p.color||'#7c3aed'};color:#fff;border-radius:30px;padding:.15rem .55rem;flex-shrink:0;">Actif</span>`:''}
+        </div>
+        <div style="display:flex;gap:.5rem;font-size:.72rem;color:var(--gray600);margin-bottom:.85rem;">
+          <span>📚 ${mods.length} module${mods.length>1?'s':''}</span>
+          <span>·</span>
+          <span>📅 ${p.created?_d(p.created):'—'}</span>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+          ${isActive
+            ?`<button class="btn btn-ghost btn-sm" onclick="setActiveProfileId(null);renderProfiles();showToast('Profil désactivé')">Désactiver</button>`
+            :`<button class="btn btn-sm" style="background:${p.color||'#7c3aed'};color:#fff;border:none;" onclick="activateProfile('${_e(p.id)}')">Activer</button>`
+          }
+          <button class="btn btn-ghost btn-sm" onclick="viewProfileModules('${_e(p.id)}')">Voir modules</button>
+          <button class="btn btn-ghost btn-sm" style="color:#ef4444;border-color:#fecaca;" onclick="deleteProfile('${_e(p.id)}')">Supprimer</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function openAddProfile(){
+  document.getElementById('pName').value='';
+  document.getElementById('pEtab').value='';
+  document.getElementById('pMode').value='pro';
+  document.getElementById('pColor').value='#7c3aed';
+  document.querySelectorAll('#pColorPicker div').forEach(el=>el.style.borderColor='transparent');
+  const pm=document.getElementById('profileModal');if(pm)pm.style.display='flex';
+}
+function closeProfileModal(){
+  const pm=document.getElementById('profileModal');if(pm)pm.style.display='none';
+}
+function selectProfileColor(c){
+  document.getElementById('pColor').value=c;
+  document.querySelectorAll('#pColorPicker div').forEach(el=>{
+    el.style.borderColor=el.dataset.color===c?'#fff':'transparent';
+    el.style.transform=el.dataset.color===c?'scale(1.25)':'scale(1)';
+  });
+}
+function saveProfile(){
+  const name=(document.getElementById('pName')?.value||'').trim();
+  if(!name){showToast('Prénom & nom requis.','err');return;}
+  const ps=getProfiles();
+  const p={
+    id:'p'+Date.now(),
+    name,
+    etab:(document.getElementById('pEtab')?.value||'').trim(),
+    mode:document.getElementById('pMode')?.value||'pro',
+    color:document.getElementById('pColor')?.value||'#7c3aed',
+    created:Date.now()
+  };
+  ps.push(p);
+  saveProfiles(ps);
+  closeProfileModal();
+  renderProfiles();
+  showToast('Profil "'+name+'" créé !');
+}
+function deleteProfile(id){
+  if(!confirm('Supprimer ce profil ?'))return;
+  saveProfiles(getProfiles().filter(p=>p.id!==id));
+  if(getActiveProfileId()===id)setActiveProfileId(null);
+  renderProfiles();
+  showToast('Profil supprimé.');
+}
+function activateProfile(id){
+  const ps=getProfiles();
+  const p=ps.find(x=>x.id===id);
+  if(!p)return;
+  setActiveProfileId(id);
+  renderProfiles();
+  showToast('Profil "'+p.name+'" activé. Les modules générés lui seront associés.');
+}
+function viewProfileModules(id){
+  const ps=getProfiles();
+  const p=ps.find(x=>x.id===id);
+  nav('library');
+  setTimeout(()=>{
+    const q=document.getElementById('libQ');
+    if(q&&p){q.value='@'+p.name;renderLib();}
+  },100);
+}
+
+/* Associe le module au profil actif lors de la création */
+function _tagModuleWithProfile(mod){
+  const id=getActiveProfileId();
+  if(id)mod.profileId=id;
+  return mod;
 }
 
 /* ── Partie B : pointerdown → is-pressing (pour éléments sans :active CSS natif) ── */
