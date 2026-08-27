@@ -4783,12 +4783,21 @@ function _ytDuration(iso){
   return h?`${h}:${String(mn).padStart(2,'0')}:${String(sc).padStart(2,'0')}`
           :`${mn}:${String(sc).padStart(2,'0')}`;
 }
+/* Durée totale en secondes — sert de filet de sécurité pour écarter les
+   vidéos courtes même si le filtre videoDuration de l'API laisse passer
+   un cas limite. */
+function _ytDurationSeconds(iso){
+  const mt=/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso||'');
+  if(!mt)return 0;
+  return (+(mt[1]||0))*3600+(+(mt[2]||0))*60+(+(mt[3]||0));
+}
 
 /* Interroge l'API YouTube. Retourne [] si la clé manque ou si le quota est
    épuisé — jamais d'exception qui casserait l'affichage du module. */
 async function _ytSearch(query,ytKey,lang){
-  const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:'3',
+  const p=new URLSearchParams({part:'snippet',q:query,type:'video',maxResults:'5',
     videoEmbeddable:'true',order:'relevance',safeSearch:'strict',
+    videoDuration:'medium',   // exclut les vidéos courtes (< 4 min) — tutoriels/formats trop brefs pour du contenu pédagogique
     relevanceLanguage:(lang||'fr').toLowerCase().startsWith('fr')?'fr':'en',
     key:ytKey});
   const r=await fetch('https://www.googleapis.com/youtube/v3/search?'+p);
@@ -4805,18 +4814,25 @@ async function _ytSearch(query,ytKey,lang){
     const d2=await r2.json();
     (d2.items||[]).forEach(v=>{details[v.id]={
       duree:_ytDuration(v.contentDetails?.duration),
+      secs:_ytDurationSeconds(v.contentDetails?.duration),
       vues:+(v.statistics?.viewCount||0)};});
   }catch(_){}
-  return items.map(i=>({
-    id:i.id.videoId,
-    titre:i.snippet?.title||'',
-    chaine:i.snippet?.channelTitle||'',
-    date:(i.snippet?.publishedAt||'').slice(0,4),
-    vignette:i.snippet?.thumbnails?.medium?.url||'',
-    duree:details[i.id.videoId]?.duree||'',
-    vues:details[i.id.videoId]?.vues||0,
-    requete:query
-  }));
+  return items
+    // Filet de sécurité : écarte les vidéos courtes (< 4 min) même si le
+    // bucket "medium" de l'API laisse passer un cas limite. On ne filtre
+    // que si la durée a bien pu être récupérée (secs>0) pour ne jamais
+    // vider la liste à cause d'un second appel API en échec.
+    .filter(i=>{const s=details[i.id.videoId]?.secs;return!s||s>=240;})
+    .map(i=>({
+      id:i.id.videoId,
+      titre:i.snippet?.title||'',
+      chaine:i.snippet?.channelTitle||'',
+      date:(i.snippet?.publishedAt||'').slice(0,4),
+      vignette:i.snippet?.thumbnails?.medium?.url||'',
+      duree:details[i.id.videoId]?.duree||'',
+      vues:details[i.id.videoId]?.vues||0,
+      requete:query
+    }));
 }
 
 function _ytFormatViews(n){
