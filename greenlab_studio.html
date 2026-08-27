@@ -1309,7 +1309,7 @@ const _MODEL_OPTIONS=[
 ];
 
 /* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v6';
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v7';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 /* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
    français trop approximatif pour du contenu pédagogique publiable. */
@@ -1345,47 +1345,26 @@ function _parseRetryDelay(msg){
   return null;
 }
 
-/* Fiabilité connue pour de la génération pédagogique en français (chat + JSON).
-   'trusted' = testé et fiable. 'caution' = fonctionne différemment (agentique,
-   quota bas, langue non-française) — à essayer avec prudence. 'unknown' = pas
-   de retour d'expérience, l'app ne peut pas garantir le résultat. */
-function _groqReliabilityTier(id){
-  if(/^llama-3\.3-70b-versatile$/.test(id))return'trusted';
-  if(/^llama-3\.1-8b-instant$/.test(id))return'trusted';
-  if(/gemma/i.test(id))return'trusted';
-  if(/^groq\/compound/.test(id))return'caution';   // agentique (outils intégrés), pas un simple modèle de chat
-  if(/^openai\//.test(id))return'caution';          // capable mais quota/minute bas sur le tier gratuit
-  return'unknown';                                    // qwen, allam, deepseek, moonshot… — non vérifiés par l'app
+/* LISTE FERMÉE — uniquement les modèles Groq officiels, testés et fiables à
+   100% pour générer du contenu pédagogique en français (chat + JSON valide).
+   Volontairement AUCUN repli vers des modèles non vérifiés (qwen, allam,
+   groq/compound, openai/gpt-oss…) : mieux vaut un message d'erreur clair
+   demandant de corriger la clé qu'une génération silencieusement peu fiable. */
+const _GROQ_TRUSTED=[
+  {re:/^llama-3\.3-70b-versatile$/,rank:0},  // meilleur français, référence
+  {re:/^llama-3\.1-8b-instant$/,   rank:1},  // rapide, français correct
+  {re:/^gemma2-9b-it$/,            rank:2},  // alternative légère
+];
+function _groqRankOf(id){
+  for(const t of _GROQ_TRUSTED){if(t.re.test(id))return t.rank;}
+  return -1; // hors liste fermée
 }
 function _groqModelLabel(id){
-  const tier=_groqReliabilityTier(id);
-  const warn=tier==='caution'?'⚠️ ':tier==='unknown'?'❓ ':'';
-  if(id.includes('instant'))return warn+'⚡ '+id+' (rapide)';
-  if(/8b/i.test(id))return warn+'⚡ '+id;
-  if(/gemma/i.test(id))return warn+'💎 '+id;
-  if(/mixtral/i.test(id))return warn+'📦 '+id+' (32k)';
-  if(/70b|90b|120b/i.test(id))return warn+'🧠 '+id;
-  return warn+id;
-}
-
-/* CLASSEMENT (pas d'exclusion stricte) — certains comptes Groq n'ont accès
-   qu'à un sous-ensemble restreint de modèles (clé à portée limitée, quotas
-   spécifiques…). Exclure tout ce qui n'est pas dans une liste figée garantit
-   un échec total dès que ces modèles précis ne sont pas autorisés pour la
-   clé utilisée. On classe donc par préférence (français fiable d'abord) sans
-   jamais éliminer un modèle utilisable — seules les catégories structurellement
-   incompatibles (audio, modération, contexte trop court) sont écartées. */
-function _groqRankOf(id){
-  if(/^llama-3\.3-70b-versatile$/.test(id))return 0;               // meilleur français, référence
-  if(/70b|90b|120b/i.test(id)&&!/guard/i.test(id))return 1;         // autres gros modèles
-  if(/^llama-3\.1-8b-instant$/.test(id))return 2;                   // rapide, français correct
-  if(/gemma/i.test(id))return 3;                                    // alternative légère
-  if(/^openai\//.test(id))return 4;                                 // gpt-oss : capable, TPM plus bas
-  return 5;                                                         // tout autre modèle non exclu — secours ultime
-}
-function _groqModelExcluded(id,contextWindow){
-  return /whisper|tts|guard|prompt-guard|moderation/i.test(id)
-    ||(contextWindow!=null&&contextWindow<4096);
+  if(id.includes('instant'))return'⚡ '+id+' (rapide)';
+  if(/8b/i.test(id))return'⚡ '+id;
+  if(/gemma/i.test(id))return'💎 '+id;
+  if(/70b|90b|120b/i.test(id))return'🧠 '+id;
+  return id;
 }
 async function _fetchGroqModels(key){
   try{
@@ -1393,11 +1372,9 @@ async function _fetchGroqModels(key){
     if(!r.ok)return null;
     const d=await r.json();
     const ids=(d.data||[])
-      .filter(m=>m.object==='model'&&!_groqModelExcluded(m.id,m.context_window))
+      .filter(m=>m.object==='model'&&_groqRankOf(m.id)>=0)
       .map(m=>m.id)
-      // Qualité de rédaction d'abord : les gros modèles écrivent un français
-      // nettement plus sûr, ce qui prime sur la vitesse pour du pédagogique.
-      .sort((a,b)=>_groqRankOf(a)-_groqRankOf(b)||a.localeCompare(b));
+      .sort((a,b)=>_groqRankOf(a)-_groqRankOf(b));
     return ids.length?ids:null;
   }catch(e){return null;}
 }
@@ -2152,7 +2129,7 @@ async function _groqExec(key,msgs,maxTok,temp,json){
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
-    throw new Error('Aucun modèle Groq n\'est accessible avec cette clé. Vérifiez sur console.groq.com/keys que la clé est active, ou générez-en une nouvelle clé gratuite.');
+    throw new Error('Votre clé n\'a accès à aucun des modèles Groq fiables (llama-3.3-70b-versatile, llama-3.1-8b-instant, gemma2-9b-it). Créez une nouvelle clé gratuite sur console.groq.com/keys — les comptes standards y ont accès par défaut.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
@@ -5121,18 +5098,8 @@ const _MODEL_INFO={
   'llama-3.3-70b-versatile':'🧠 Gratuit — Français soigné et contenu fiable. Recommandé pour les modules.',
   'llama-3.1-8b-instant':'⚡ Gratuit — Très rapide, mais français approximatif. Pour tester uniquement.',
 };
-/* Message affiché quand le modèle sélectionné n'a pas de fiche dédiée dans
-   _MODEL_INFO — reflète le niveau de confiance déterminé par _groqReliabilityTier. */
 function _modelInfoText(id){
-  if(_MODEL_INFO[id])return _MODEL_INFO[id];
-  const tier=typeof _groqReliabilityTier==='function'?_groqReliabilityTier(id):'unknown';
-  if(tier==='caution'){
-    if(/^groq\/compound/.test(id))return'⚠️ Modèle agentique (outils intégrés : recherche web, code…), pas un simple modèle de chat. Peut produire une sortie imprévisible pour du contenu structuré — à tester avant usage régulier.';
-    if(/^openai\//.test(id))return'⚠️ Capable, mais quota par minute plus bas sur le tier gratuit Groq — risque de blocages fréquents sur des générations longues.';
-    return'⚠️ À utiliser avec prudence — comportement non garanti pour ce type de contenu.';
-  }
-  if(tier==='unknown')return'❓ Modèle non testé par l\'application — qualité du français et fiabilité du JSON généré non garanties. Ce modèle apparaît car votre compte Groq n\'a pas accès aux modèles recommandés (llama-3.3-70b-versatile, llama-3.1-8b-instant) — vérifiez les autorisations de votre clé sur console.groq.com.';
-  return'Modèle sélectionné.';
+  return _MODEL_INFO[id]||'Modèle sélectionné.';
 }
 
 function applyPlatformName(){
