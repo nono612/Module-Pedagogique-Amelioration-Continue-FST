@@ -4377,15 +4377,65 @@ function exportMods(){
   a.download='greenlab-modules-'+new Date().toISOString().slice(0,10)+'.json';a.click();
   showToast(ms.length+' module(s) exporté(s) !');
 }
+/* ══════════════════════════════════════════════
+   IMPORT DEPUIS INDEX.HTML
+   index.html a son propre schéma de module, plus simple (pas de mode
+   pro/acad, sections réduites à {titre,contenu,intuition_expert}, pas de
+   check-list/mémo/KPI). On le détecte et on le remonte vers le schéma
+   complet du Studio, avec des champs vides plutôt que manquants — le
+   render du Studio part déjà du principe que ces champs peuvent être
+   vides (module fraîchement créé), donc rien ne casse, ça affiche juste
+   moins de contenu que ce qu'un module du Studio aurait normalement.
+══════════════════════════════════════════════ */
+function _looksLikeIndexModule(m){
+  return!m.mode&&!!(m.secteur||m.type||m.niveau)&&Array.isArray(m.sections);
+}
+/* Les "types" d'index.html (Méthodologique, Technique, Management…) ne
+   distinguent pas franchement pro/acad — le générateur d'index.html vise
+   lui-même un mélange "professionnel de niveau universitaire". On retient
+   pro par défaut : le "cas" industriel d'index.html correspond mieux au
+   rendu pro du Studio (scénarios + check-list + mémo terrain). */
+const _INDEX_ACAD_TYPES=new Set(['Analyse & Diagnostic']);
+function _convertIndexModule(im){
+  const mode=_INDEX_ACAD_TYPES.has(im.type)?'acad':'pro';
+  const sections=(im.sections||[]).map(s=>({
+    titre:s.titre||'',
+    type:'theorie',
+    contenu:s.contenu||'',
+    reflexe_pro:mode==='pro'?(s.intuition_expert||[]):undefined,
+    intuition_expert:mode==='acad'?(s.intuition_expert||[]):undefined,
+  }));
+  const qcm=(im.qcm||[]).map(q=>({q:q.q||'',opts:q.opts||[],correct:q.rep??0,rep:q.rep??0,explication:q.expl||'',expl:q.expl||''}));
+  return{
+    id:Date.now()+Math.floor(Math.random()*1000),
+    mode,icone:im.icone||(mode==='pro'?'💼':'🎓'),
+    titre:im.titre||'Module importé',desc:im.desc||'',description:im.desc||'',
+    dom:im.secteur||'',secteur:im.secteur||'',
+    pub:mode==='pro'?'apprenant':(im.niveau||'étudiant'),
+    niv:im.niveau||'intermédiaire',niveau:im.niveau||'intermédiaire',
+    dur:im.duree||'',duree:im.duree||'',lang:'Français',prerequis:'',
+    objectifs:im.objectifs||[],
+    competences:mode==='pro'?(im.objectifs||[]):[],
+    notions:mode==='acad'?(im.objectifs||[]):[],
+    etapes:im.etapes||[],formules:im.formules||[],
+    cas:im.cas||{},sections,
+    scenarios:[],exercices:[],
+    checklist:{avant:[],pendant:[],apres:[]},
+    qcm,quiz:qcm,memo:{},revision:{},kpis:[],
+    scores:{},wrongByComp:{},readSections:{},fav:false,
+  };
+}
+
 function importMods(file){
   if(!file)return;
   const r=new FileReader();r.onload=e=>{
     try{
       const data=JSON.parse(e.target.result);
-      const mods=Array.isArray(data)?data:(data.modules||[]);
-      if(!mods.length){showToast('Aucun module trouvé.','err');return;}
+      const raw=Array.isArray(data)?data:(data.modules||[]);
+      if(!raw.length){showToast('Aucun module trouvé.','err');return;}
+      const mods=raw.map(m=>_looksLikeIndexModule(m)?_convertIndexModule(m):m);
       const existing=getMods();const ids=new Set(existing.map(m=>m.id));
-      let added=0;mods.forEach(m=>{if(!ids.has(m.id)){existing.push(m);added++;}});
+      let added=0;mods.forEach(m=>{if(!m.id||ids.has(m.id))m.id=Date.now()+Math.floor(Math.random()*1000)+added;ids.add(m.id);existing.push(m);added++;});
       saveMods(existing);renderLib();renderHome();
       showToast(added+' module(s) importé(s) !');
     }catch{showToast('Fichier JSON invalide.','err');}
