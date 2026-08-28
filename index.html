@@ -2601,6 +2601,161 @@ function isModuleActive(n){const cfg=getAdminConfig();if(!cfg.moduleToggles)retu
 function _prevActiveModule(n){for(let i=n-1;i>=1;i--){if(isModuleActive(i))return i;}return null;}
 function getCustomModules(){return JSON.parse(localStorage.getItem('greenlab_custom_modules')||'[]');}
 function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));_sbPushCustomModules(mods);}
+
+/* ══════════════════════════════════════════
+   IMPORT / EXPORT DE MODULES
+   Les deux applications ont des schémas différents : greenlab_studio.html
+   produit un module riche (sections avec étapes/points de vigilance/erreurs/
+   mini-quiz/schémas/KPIs/check-list…), index.html attend une structure plus
+   simple (titre + contenu prose + intuition_expert). La conversion est donc
+   volontairement à sens unique et partielle : on ramène ce qui a un
+   équivalent ici, le reste (KPIs, check-list, mémo, vidéos, modèles 3D…)
+   n'a nulle part où aller côté étudiant et est laissé de côté plutôt que
+   forcé dans un champ qui ne l'attend pas.
+══════════════════════════════════════════ */
+
+/* Convertit **texte** (markdown) en <strong> — formatAIText ne connaît pas
+   cette syntaxe, seulement les retours à la ligne et certains émojis. */
+function _mdBoldToHtml(s){return typeof s==='string'?s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>'):s;}
+
+/* Aplati une section riche (greenlab_studio) en un seul bloc de prose que
+   formatAIText sait afficher : le contenu principal suivi des listes
+   (étapes, points de vigilance, outils, erreurs, données clés) mises en
+   forme avec les émojis que formatAIText met déjà en valeur. */
+function _flattenSection(s){
+  const parts=[_mdBoldToHtml(s.contenu||s.exemple||'')];
+  const list=(label,items,icon)=>{
+    const arr=(items||[]).filter(Boolean);
+    if(!arr.length)return;
+    parts.push(`\n\n${icon} ${label}\n`+arr.map(x=>'• '+_mdBoldToHtml(String(x))).join('\n'));
+  };
+  list('Étapes',s.etapes,'📋');
+  list('Points de vigilance',s.points_vigilance,'⚠️');
+  list('Outils',s.outils,'🔧');
+  list('Erreurs fréquentes',s.erreurs||s.erreurs_courantes,'❌');
+  list('À retenir',s.donnees_cles||s.points_cles,'💡');
+  return parts.join('');
+}
+
+/* Le savoir d'expert existe sous deux formes selon le mode d'origine :
+   reflexe_pro (souvent une chaîne côté pro) ou intuition_expert (toujours
+   un tableau côté acad). index.html n'a qu'intuition_expert : on unifie. */
+function _sectionIntuition(s){
+  if(Array.isArray(s.intuition_expert)&&s.intuition_expert.length)return s.intuition_expert.map(_mdBoldToHtml);
+  if(Array.isArray(s.reflexe_pro))return s.reflexe_pro.map(_mdBoldToHtml);
+  if(typeof s.reflexe_pro==='string'&&s.reflexe_pro.trim())return[_mdBoldToHtml(s.reflexe_pro)];
+  return[];
+}
+
+const _GEN_TYPE_BY_MODE={pro:'Technique',acad:'Méthodologique'};
+const _GEN_LEVEL_BY_NIV={
+  'débutant':'Professionnel / Formation continue','debutant':'Professionnel / Formation continue',
+  'intermédiaire':'Ingénieur','intermediaire':'Ingénieur',
+  'expert':'Master (Bac+5)','avancé':'Master (Bac+5)','avance':'Master (Bac+5)',
+};
+
+/* Convertit un module greenlab_studio.html en module index.html. Ne touche
+   pas aux modules déjà au format index (ré-import d'un export index). */
+function _convertGreenlabModule(gm){
+  const qcmSrc=gm.qcm||gm.quiz||[];
+  return{
+    titre:gm.titre||'Module importé',
+    icone:gm.icone||'🧩',
+    desc:gm.desc||gm.description||'',
+    duree:gm.dur||gm.duree||'~45 min',
+    secteur:gm.secteur||gm.dom||'Générique (multi-secteur)',
+    type:_GEN_TYPE_BY_MODE[gm.mode]||'Méthodologique',
+    niveau:_GEN_LEVEL_BY_NIV[(gm.niv||gm.niveau||'').toLowerCase()]||'Professionnel / Formation continue',
+    objectifs:(gm.objectifs||[]).map(_mdBoldToHtml),
+    formules:(gm.formules||gm.memo?.formules_kv||gm.revision?.formules_kv||[]).map(f=>({nom:f.nom||'',valeur:_mdBoldToHtml(f.valeur||'')})),
+    etapes:(gm.etapes||[]).map((e,i)=>({id:e.id||String(i+1),titre:e.titre||'',outil:e.outil||'',emoji:['🔍','📊','⚙️','✅','🎯','🔧'][i%6]})),
+    sections:(gm.sections||[]).filter(s=>!s._failed).map(s=>({
+      titre:s.titre||'',
+      contenu:_flattenSection(s),
+      intuition_expert:_sectionIntuition(s),
+    })),
+    qcm:qcmSrc.map(q=>({
+      q:q.q||'',opts:q.opts||[],
+      rep:q.rep!==undefined?q.rep:(q.correct!==undefined?q.correct:0),
+      expl:q.expl||q.explication||'',
+    })),
+    cas:gm.cas&&gm.cas.entreprise?{
+      entreprise:gm.cas.entreprise||'',contexte:gm.cas.contexte||'',donnees:gm.cas.donnees||'',
+      enjeux:gm.cas.enjeux||'',probleme:gm.cas.probleme||'',objectif:gm.cas.objectif||'',contraintes:gm.cas.contraintes||'',
+    }:undefined,
+    active:true,
+  };
+}
+
+/* Un module est « au format greenlab » s'il porte les marqueurs propres à
+   ce schéma (mode pro/acad, ou des sections avec la structure riche) — sinon
+   on le traite comme déjà au format index et on se contente de compléter
+   les champs manquants sans rien réécrire. */
+function _looksLikeGreenlabModule(m){
+  if(m.mode==='pro'||m.mode==='acad')return true;
+  const s=(m.sections||[])[0];
+  return!!(s&&(s.donnees_cles||s.points_cles||s.points_vigilance||s.mini_check));
+}
+
+function _normalizeImportedModule(m){
+  if(_looksLikeGreenlabModule(m))return _convertGreenlabModule(m);
+  // Déjà au format index — on comble juste ce qui pourrait manquer.
+  return{
+    titre:m.titre||'Module importé',icone:m.icone||'🧩',desc:m.desc||'',
+    duree:m.duree||'~45 min',secteur:m.secteur||'Générique (multi-secteur)',
+    type:m.type||'Méthodologique',niveau:m.niveau||'Professionnel / Formation continue',
+    objectifs:m.objectifs||[],formules:m.formules||[],etapes:m.etapes||[],
+    sections:(m.sections||[]).map(s=>({titre:s.titre||'',contenu:s.contenu||'',intuition_expert:s.intuition_expert||[]})),
+    qcm:(m.qcm||[]).map(q=>({q:q.q||'',opts:q.opts||[],rep:q.rep??0,expl:q.expl||''})),
+    cas:m.cas,active:true,
+  };
+}
+
+/* Accepte un export greenlab_studio.html ({version,modules:[...]}), un
+   export index.html du même type, un tableau brut de modules, ou un module
+   unique — et pousse chaque module converti dans la bibliothèque locale. */
+function importCustomModulesFile(file){
+  const msgEl=document.getElementById('admImportModMsg');
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    let data;
+    try{data=JSON.parse(e.target.result);}
+    catch(_){if(msgEl)msgEl.innerHTML='<span style="color:#dc2626;font-weight:700;">❌ Fichier JSON invalide.</span>';return;}
+    const list=Array.isArray(data)?data:Array.isArray(data.modules)?data.modules:[data];
+    if(!list.length){if(msgEl)msgEl.innerHTML='<span style="color:#dc2626;font-weight:700;">❌ Aucun module trouvé dans ce fichier.</span>';return;}
+    const mods=getCustomModules();
+    let ok=0,ko=0;
+    list.forEach(raw=>{
+      try{
+        const conv=_normalizeImportedModule(raw);
+        if(!conv.titre||!conv.sections?.length)throw new Error('incomplet');
+        mods.push(conv);ok++;
+      }catch(_){ko++;}
+    });
+    saveCustomModules(mods);
+    renderCustomModuleList();renderModuleToggles();updateNav();renderRoster();
+    if(msgEl)msgEl.innerHTML=ko
+      ?`<span style="color:#d97706;font-weight:700;">⚠️ ${ok} module(s) importé(s), ${ko} ignoré(s) (incomplets).</span>`
+      :`<span style="color:#059669;font-weight:700;">✅ ${ok} module(s) importé(s) avec succès.</span>`;
+  };
+  r.readAsText(file,'UTF-8');
+}
+
+/* Exporte tous les modules personnalisés dans un fichier au même format
+   d'enveloppe que greenlab_studio.html, pour rester compatible dans les
+   deux sens (un export index peut être ré-importé côté index sans perte,
+   et reste lisible comme JSON classique ailleurs). */
+function exportCustomModules(){
+  const mods=getCustomModules();
+  if(!mods.length){alert('Aucun module à exporter.');return;}
+  const blob=new Blob([JSON.stringify({version:1,source:'index',exported:new Date().toISOString(),modules:mods},null,2)],{type:'application/json;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='greenlab-custom-modules-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
   if(v.trim()){
@@ -8981,6 +9136,20 @@ function renderDocsList(){
         <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.6rem;">📦 Modules publiés</div>
         <div id="customModuleList"></div>
         <div id="customModuleEmpty" style="font-size:.75rem;color:#94a3b8;display:none;">Aucun module créé pour l'instant.</div>
+      </div>
+
+      <!-- Import / Export -->
+      <div style="margin-top:1rem;padding-top:1rem;border-top:2px solid #f1f5f9;">
+        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.3rem;">🔁 Importer / Exporter des modules</div>
+        <div style="font-size:.73rem;color:#6b7280;margin-bottom:.55rem;line-height:1.55;">Importez un fichier exporté depuis Green Lab Studio (ou un précédent export d'ici). La conversion reprend le cours, le quiz, le cas terrain et le savoir d'expert de chaque section — les fonctionnalités propres au Studio (check-list, KPIs, mémo, vidéos, modèles 3D) n'ont pas d'équivalent côté étudiant et ne sont pas importées.</div>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <label class="btn btn-purple btn-sm" style="cursor:pointer;">
+            ⬆️ Importer un .json
+            <input type="file" accept="application/json" style="display:none;" onchange="importCustomModulesFile(this.files[0]);this.value='';">
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="exportCustomModules()">⬇️ Exporter mes modules</button>
+        </div>
+        <div id="admImportModMsg" style="margin-top:.5rem;font-size:.78rem;"></div>
       </div>
     </div>
 
