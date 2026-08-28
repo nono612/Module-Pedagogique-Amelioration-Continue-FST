@@ -3152,14 +3152,18 @@ function _idxDetectProvider(key){
   if(!key)return null;
   return key.startsWith('gsk_')?'groq':null;
 }
-const _IDX_PROVIDER_INFO={groq:{label:'⚡ Groq · Llama',color:'#f59e0b',model:'llama-3.3-70b-versatile'}};
+/* Aligné le 2026-08-28 sur la même mesure que greenlab_studio.html : sur
+   le prompt réel de génération, qwen/qwen3.8-27b produit 2,2× plus de
+   contenu pour 45% de jetons en moins, sans aucun échec JSON — alors que
+   llama-3.3-70b-versatile n'était pas accessible sur le compte testé et
+   qu'openai/gpt-oss-120b échoue par intermittence en mode JSON sur les
+   prompts longs (précisément le cas d'un module complet comme celui-ci). */
+const _IDX_PROVIDER_INFO={groq:{label:'⚡ Groq · Qwen',color:'#f59e0b',model:'qwen/qwen3.8-27b'}};
 
 /* ─── Découverte des modèles disponibles sur le compte ─── */
-const _IDX_MODELS_KEY='_idx_groq_mdls_v3';
+const _IDX_MODELS_KEY='_idx_groq_mdls_v4';
 const _IDX_MODELS_TTL=6*60*60*1000; // 6 h
-/* Secours si l'API /models est injoignable. Le 70B d'abord : le 8B écrit un
-   français trop approximatif pour du contenu pédagogique publiable. */
-const _IDX_FALLBACK_CHAIN=['llama-3.3-70b-versatile','llama-3.1-8b-instant'];
+const _IDX_FALLBACK_CHAIN=['qwen/qwen3.8-27b','qwen/qwen3.6-27b','groq/compound-mini','llama-3.3-70b-versatile'];
 
 function _idxGroqChain(preferred){
   const seen=new Set(),out=[];
@@ -3173,18 +3177,17 @@ function _idxGroqChain(preferred){
   return out;
 }
 
-/* LISTE FERMÉE — uniquement les modèles Groq testés et fiables pour générer
-   du contenu pédagogique en français (chat + JSON valide). Volontairement
-   AUCUN repli vers des modèles jamais vérifiés (qwen, allam, groq/compound…) :
-   mieux vaut un message d'erreur clair demandant de corriger la clé qu'une
-   génération silencieusement peu fiable. */
+/* LISTE FERMÉE — uniquement les modèles Groq mesurés fiables sur le prompt
+   réel de génération d'un module complet (voir greenlab_studio.html pour
+   le détail des mesures du 2026-08-28). Écartés volontairement :
+   openai/gpt-oss-120b et -20b — « Failed to validate JSON » par intermittence
+   sur les prompts longs, alors que chaque appel ici dépend du JSON valide ;
+   gemma2-9b-it — décommissionné par Groq. */
 function _idxRankOf(id){
-  if(/^llama-3\.3-70b-versatile$/.test(id))return 0;
-  if(/^llama-3\.1-8b-instant$/.test(id))return 1;
-  // gemma2-9b-it retiré : décommissionné par Groq (vérifié le 2026-08-27,
-  // erreur "model_decommissioned" — plus aucun compte n'y a accès).
-  if(/^openai\/gpt-oss-120b$/.test(id))return 2;  // testé le 2026-08-27 : JSON valide, français correct
-  if(/^openai\/gpt-oss-20b$/.test(id))return 3;   // même famille, plus rapide et moins précis
+  if(/^qwen\/qwen3\.8-27b$/.test(id))return 0;   // modèle retenu
+  if(/^qwen\/qwen3\.\d+-27b$/.test(id))return 1; // même famille, si la version change
+  if(/^groq\/compound-mini$/.test(id))return 2;  // secours : quota 70 000 jetons/min
+  if(/^llama-3\.3-70b-versatile$/.test(id))return 3; // secours pour les comptes qui y ont accès
   return -1;
 }
 async function _idxFetchGroqModels(key){
@@ -3306,7 +3309,7 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
   if(_IDX_RE_RATE.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez.');
   if(_IDX_RE_SWITCH.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (llama-3.3-70b-versatile, llama-3.1-8b-instant, openai/gpt-oss-120b, openai/gpt-oss-20b). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
+    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (qwen/qwen3.8-27b, groq/compound-mini, llama-3.3-70b-versatile). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
@@ -7337,6 +7340,13 @@ IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de 
       try{_genPreviewData=JSON.parse(raw);}catch(_){throw new Error('Réponse IA invalide — réessayez');}
     }
     if(!_genPreviewData?.sections?.length)throw new Error('Module incomplet (sections manquantes) — réessayez');
+    /* Le modèle indente parfois chaque ligne de "contenu" (paragraphes de
+       cours) avec des espaces de tête — formatAIText ne fait que \n→<br>,
+       sans nettoyer, donc ces espaces s'affichent tels quels. On les retire
+       une fois pour toutes ici plutôt que dans chaque point de rendu. */
+    (_genPreviewData.sections||[]).forEach(s=>{
+      if(typeof s.contenu==='string')s.contenu=s.contenu.split('\n').map(l=>l.trim()).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+    });
     _renderGenPreview(_genPreviewData,dur,level);
   }catch(e){if(prev)prev.innerHTML=`<span style="color:#dc2626;font-size:.78rem;">❌ Erreur : ${_escH(e.message)}</span>`;}
 }
