@@ -9003,6 +9003,20 @@ function renderDocsList(){
         <button class="btn btn-purple btn-sm" onclick="adminBulkImport()" style="margin-top:.5rem;">📥 Importer tout</button>
         <div id="admBulkMsg" style="margin-top:.5rem;"></div>
       </div>
+
+      <!-- Import / Export de MODULES (distinct des codes étudiants ci-dessus) -->
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid #f1f5f9;">
+        <div style="font-weight:800;font-size:.9rem;color:#1e293b;margin-bottom:.4rem;">🔁 Importer / Exporter des modules</div>
+        <div style="font-size:.8rem;color:#6b7280;margin-bottom:1rem;line-height:1.6;">Importez un fichier exporté depuis Green Lab Studio (ou un précédent export d'ici). La conversion reprend le cours, le quiz, le cas terrain et le savoir d'expert de chaque section — les fonctionnalités propres au Studio (check-list, KPIs, mémo, vidéos, modèles 3D) n'ont pas d'équivalent côté étudiant et ne sont pas importées.</div>
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
+          <label class="btn btn-purple btn-sm" style="cursor:pointer;">
+            ⬆️ Importer un .json
+            <input type="file" accept="application/json" style="display:none;" onchange="importCustomModulesFile(this.files[0]);this.value='';">
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="exportCustomModules()">⬇️ Exporter mes modules</button>
+        </div>
+        <div id="admImportModMsg" style="margin-top:.5rem;font-size:.78rem;"></div>
+      </div>
     </div>
     <!-- PANEL: ACCESS / CONFIG -->
     <div id="adm-panel-access" class="adm-panel" style="display:none;">
@@ -9136,20 +9150,6 @@ function renderDocsList(){
         <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.6rem;">📦 Modules publiés</div>
         <div id="customModuleList"></div>
         <div id="customModuleEmpty" style="font-size:.75rem;color:#94a3b8;display:none;">Aucun module créé pour l'instant.</div>
-      </div>
-
-      <!-- Import / Export -->
-      <div style="margin-top:1rem;padding-top:1rem;border-top:2px solid #f1f5f9;">
-        <div style="font-weight:800;font-size:.82rem;color:#374151;margin-bottom:.3rem;">🔁 Importer / Exporter des modules</div>
-        <div style="font-size:.73rem;color:#6b7280;margin-bottom:.55rem;line-height:1.55;">Importez un fichier exporté depuis Green Lab Studio (ou un précédent export d'ici). La conversion reprend le cours, le quiz, le cas terrain et le savoir d'expert de chaque section — les fonctionnalités propres au Studio (check-list, KPIs, mémo, vidéos, modèles 3D) n'ont pas d'équivalent côté étudiant et ne sont pas importées.</div>
-        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;">
-          <label class="btn btn-purple btn-sm" style="cursor:pointer;">
-            ⬆️ Importer un .json
-            <input type="file" accept="application/json" style="display:none;" onchange="importCustomModulesFile(this.files[0]);this.value='';">
-          </label>
-          <button class="btn btn-ghost btn-sm" onclick="exportCustomModules()">⬇️ Exporter mes modules</button>
-        </div>
-        <div id="admImportModMsg" style="margin-top:.5rem;font-size:.78rem;"></div>
       </div>
     </div>
 
