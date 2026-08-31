@@ -1343,6 +1343,11 @@ const _RE_SWITCH_MODEL=/does not exist|not found|invalid_model|no access|do not 
 const _RE_RATE_LIMIT=/rate.?limit|tokens per minute|TPM|requests per minute|RPM|429/i;
 /* Le modèle refuse la taille demandée — réessayer en réduisant max_tokens */
 const _RE_MAX_TOKENS=/max_tokens|context_window|maximum context length|reduce the length/i;
+/* Le modèle a produit un texte qui ne parse pas comme JSON valide (mode
+   response_format json_object). Peut être un raté ponctuel du modèle sur ce
+   prompt précis : on retente une fois le même modèle avant de basculer sur
+   le suivant de la chaîne. */
+const _RE_JSON_FAIL=/failed to generate json|failed_generation|json_validate_failed/i;
 
 const _sleep=ms=>new Promise(r=>setTimeout(r,ms));
 /* Groq renvoie « Please try again in 27.6225s » — on extrait le délai réel */
@@ -2105,8 +2110,9 @@ async function _groqExec(key,msgs,maxTok,temp,json){
       if(tried.has(model))continue;
       tried.add(model);
       let tok=maxTok||2500;
-      let waited=0;   // temps déjà passé à patienter sur ce modèle
-      let shrinks=0;  // réductions de max_tokens appliquées
+      let waited=0;    // temps déjà passé à patienter sur ce modèle
+      let shrinks=0;   // réductions de max_tokens appliquées
+      let jsonFails=0; // échecs de génération JSON sur ce modèle
 
       for(let attempt=0;attempt<4;attempt++){
         try{
@@ -2126,6 +2132,12 @@ async function _groqExec(key,msgs,maxTok,temp,json){
           // Sortie trop grande pour ce modèle → réduire de moitié (plancher 512)
           if(_RE_MAX_TOKENS.test(msg)&&shrinks<3&&tok>512){
             tok=Math.max(512,Math.floor(tok/2));shrinks++;continue;
+          }
+          // JSON invalide généré → un raté ponctuel du modèle peut se corriger
+          // en réessayant tel quel ; sinon on passe au modèle suivant.
+          if(_RE_JSON_FAIL.test(msg)){
+            if(jsonFails<1){jsonFails++;continue;}
+            break;
           }
           // Modèle retiré ou inaccessible pour cette clé → passer au suivant
           if(_RE_SWITCH_MODEL.test(msg))break;

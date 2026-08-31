@@ -3217,6 +3217,11 @@ const _IDX_RE_SWITCH=/does not exist|not found|invalid_model|no access|do not ha
 const _IDX_RE_RATE=/rate.?limit|tokens per minute|TPM|requests per minute|RPM|429/i;
 /* Le modèle refuse la taille demandée → réduire max_tokens */
 const _IDX_RE_MAXTOK=/max_tokens|context_window|maximum context length|reduce the length/i;
+/* Le modèle a produit un texte qui ne parse pas comme JSON valide (mode
+   response_format json_object). Peut être un raté ponctuel du modèle sur ce
+   prompt précis : on retente une fois le même modèle avant de basculer sur
+   le suivant de la chaîne. */
+const _IDX_RE_JSON_FAIL=/failed to generate json|failed_generation|json_validate_failed/i;
 
 const _idxSleep=ms=>new Promise(r=>setTimeout(r,ms));
 /* Groq renvoie « Please try again in 27.6225s » — on extrait le délai réel */
@@ -3254,7 +3259,7 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
     for(const model of chain){
       if(tried.has(model))continue;
       tried.add(model);
-      let tok=maxTokens||1024, waited=0, shrinks=0;
+      let tok=maxTokens||1024, waited=0, shrinks=0, jsonFails=0;
       for(let attempt=0;attempt<4;attempt++){
         try{
           return await _idxGroqFetch(key,model,sys,prompt,tok,temp);
@@ -3270,6 +3275,12 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
           // Sortie trop grande → réduire de moitié (plancher 256)
           if(_IDX_RE_MAXTOK.test(msg)&&shrinks<3&&tok>256){
             tok=Math.max(256,Math.floor(tok/2));shrinks++;continue;
+          }
+          // JSON invalide généré → un raté ponctuel du modèle peut se corriger
+          // en réessayant tel quel ; sinon on passe au modèle suivant.
+          if(_IDX_RE_JSON_FAIL.test(msg)){
+            if(jsonFails<1){jsonFails++;continue;}
+            break;
           }
           // Modèle retiré ou inaccessible pour cette clé → passer au suivant
           if(_IDX_RE_SWITCH.test(msg))break;
