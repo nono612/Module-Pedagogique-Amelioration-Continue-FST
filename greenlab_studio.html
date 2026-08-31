@@ -1320,15 +1320,7 @@ const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 /* Secours si l'API /models est injoignable, ordonné par mesures réelles :
    compound-mini d'abord (70 000 jetons/min contre 8 000 pour les autres, ce qui
    supprime les coupures de quota), puis les modèles à français soigné. */
-const _GROQ_FALLBACK_CHAIN=['qwen/qwen3.8-27b','qwen/qwen3.6-27b','groq/compound-mini','llama-3.3-70b-versatile']
-
-/* Écartés après essai sur l'API :
-   - openai/gpt-oss-120b : échoue par intermittence en mode JSON
-     (« Failed to validate JSON ») et écrit parfois « \n » en toutes lettres
-     dans le texte, ce qui s'affiche tel quel dans le module ;
-   - groq/compound : exécute du code en interne avant de répondre
-     (12 196 jetons mesurés pour une section, contre 2 003 pour compound-mini). */
-const _GROQ_AVOID=/^openai\/gpt-oss-120b$|^groq\/compound$/;
+const _GROQ_FALLBACK_CHAIN=['qwen/qwen3.8-27b','qwen/qwen3.6-27b','groq/compound-mini','llama-3.3-70b-versatile'];
 
 /* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur.
    Évite de tenter des modèles supprimés par Groq. */
@@ -1360,12 +1352,11 @@ function _parseRetryDelay(msg){
   return null;
 }
 
-/* LISTE FERMÉE — uniquement les modèles Groq testés et fiables pour générer
-   du contenu pédagogique en français (chat + JSON valide). Volontairement
-   AUCUN repli vers des modèles jamais vérifiés (qwen, allam, groq/compound…) :
+/* LISTE FERMÉE — uniquement des modèles Groq mesurés et fiables sur le vrai
+   prompt du pipeline. Volontairement aucun repli vers un modèle jamais testé :
    mieux vaut un message d'erreur clair demandant de corriger la clé qu'une
-   génération silencieusement peu fiable. */
-/* Liste fermée, ordonnée par mesures faites sur l'API le 2026-08-27
+   génération silencieusement peu fiable.
+   Liste fermée, ordonnée par mesures faites sur l'API le 2026-08-27
    (quota par minute lu dans les en-têtes, mode JSON et français éprouvés sur
    une génération de section réelle). Le quota est le facteur décisif : à
    8 000 jetons/min, deux sections en parallèle suffisent à déclencher une
@@ -1388,8 +1379,6 @@ function _groqRankOf(id){
 }
 function _groqModelLabel(id){
   if(id.includes('instant'))return'⚡ '+id+' (rapide)';
-  if(id==='openai/gpt-oss-120b')return'🧠 '+id;
-  if(id==='openai/gpt-oss-20b')return'⚡ '+id+' (rapide)';
   if(/8b/i.test(id))return'⚡ '+id;
   if(/70b|90b|120b/i.test(id))return'🧠 '+id;
   return id;
@@ -2091,15 +2080,7 @@ const _GROQ_EP='https://api.groq.com/openai/v1/chat/completions';
 
 /* Un aller-retour HTTP vers Groq. Lève une Error portant le message de l'API. */
 async function _groqFetch(key,model,msgs,maxTok,temp,json){
-  /* Les modèles openai/gpt-oss-* raisonnent avant de répondre (jetons de
-     "reasoning" consommés dans le même budget max_tokens que le contenu final).
-     Sans ajustement, un contenu long peut être tronqué avant même de commencer.
-     reasoning_effort:'low' réduit ce raisonnement interne, et on élargit la
-     marge de tokens pour absorber ce qu'il en reste. */
-  const isReasoning=/^openai\//.test(model);
-  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,
-    max_tokens:isReasoning?Math.round((maxTok||2500)*1.5):maxTok};
-  if(isReasoning)body.reasoning_effort='low';
+  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,max_tokens:maxTok};
   if(json)body.response_format={type:'json_object'};
   const r=await fetch(_GROQ_EP,{method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
@@ -2177,7 +2158,7 @@ async function _groqExec(key,msgs,maxTok,temp,json){
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (llama-3.3-70b-versatile, llama-3.1-8b-instant, openai/gpt-oss-120b, openai/gpt-oss-20b). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
+    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (qwen/qwen3.8-27b, groq/compound-mini, llama-3.3-70b-versatile). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
@@ -5598,11 +5579,10 @@ function _seedLibraryIfEmpty(){
   try{
     const cfg=JSON.parse(localStorage.getItem(_CFG_KEY)||'{}');
     const m=cfg.model;
-    // openai/gpt-oss-* est désormais dans la liste fermée des modèles fiables
-    // (_GROQ_TRUSTED) — ne plus le traiter comme suspect.
     const suspect=!m
       ||/^(gemini|grok|claude)/.test(m)||/^(gpt-4|gpt-3)/.test(m)  // reliquats d'autres fournisseurs
-      ||/^llama3-|mixtral|llama-3\.1-70b|^gemma/.test(m); // retirés/décommissionnés par Groq
+      ||/^llama3-|mixtral|llama-3\.1-70b|^gemma/.test(m)           // retirés/décommissionnés par Groq
+      ||/^openai\/gpt-oss/.test(m);                                // « Failed to validate JSON » sur les prompts longs — voir _GROQ_TRUSTED
     if(suspect){cfg.model='qwen/qwen3.8-27b';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
