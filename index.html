@@ -3276,10 +3276,12 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
           if(_IDX_RE_MAXTOK.test(msg)&&shrinks<3&&tok>256){
             tok=Math.max(256,Math.floor(tok/2));shrinks++;continue;
           }
-          // JSON invalide généré → un raté ponctuel du modèle peut se corriger
-          // en réessayant tel quel ; sinon on passe au modèle suivant.
+          // JSON invalide généré → la cause la plus probable sur un contenu
+          // dense est une réponse tronquée avant sa fin (le budget de tokens
+          // était trop juste) : on réessaie en élargissant la marge plutôt
+          // qu'à l'identique. Si ça persiste, on passe au modèle suivant.
           if(_IDX_RE_JSON_FAIL.test(msg)){
-            if(jsonFails<1){jsonFails++;continue;}
+            if(jsonFails<2){jsonFails++;tok=Math.min(6000,Math.round(tok*1.35));continue;}
             break;
           }
           // Modèle retiré ou inaccessible pour cette clé → passer au suivant
