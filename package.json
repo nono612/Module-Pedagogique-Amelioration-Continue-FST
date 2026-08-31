@@ -1,0 +1,8 @@
+{
+  "name": "green-lab-studio",
+  "private": true,
+  "description": "Fonctions Netlify pour Green Lab Studio (keep-alive Supabase).",
+  "dependencies": {
+    "@supabase/supabase-js": "^2"
+  }
+}

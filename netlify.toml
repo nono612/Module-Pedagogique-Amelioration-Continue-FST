@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Ping Supabase tous les 5 jours (minuit UTC) pour empêcher la mise en pause
+# du projet gratuit après 1 semaine d'inactivité. Écart maximal entre deux
+# exécutions : 5 jours, quelle que soit la longueur du mois — sous le seuil
+# de 7 jours de Supabase avec une marge confortable.
+[functions."keep-supabase-alive"]
+  schedule = "0 0 */5 * *"
