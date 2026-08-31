@@ -2407,7 +2407,7 @@ function _cleanSection(sec){
   if(!sec||typeof sec!=='object')return sec;
   const listFields=['etapes','points_vigilance','outils','erreurs','donnees_cles',
                     'points_cles','erreurs_courantes','intuition_expert','reflexe_pro'];
-  const textFields=['contenu','exemple','exemple_fade','exemple_fade_correction'];
+  const textFields=['contenu','exemple','exemple_fade','exemple_fade_correction','pourquoi_ca_compte'];
   const out={...sec};
   listFields.forEach(f=>{
     if(Array.isArray(out[f]))out[f]=out[f].map(v=>_stripLatex(_stripTplLabel(v))).filter(x=>typeof x!=='string'||x.length>2);
@@ -2415,6 +2415,9 @@ function _cleanSection(sec){
   });
   textFields.forEach(f=>{if(typeof out[f]==='string')out[f]=_stripLatex(out[f]);});
   if(Array.isArray(out.definitions))out.definitions=out.definitions.map(d=>(d&&typeof d==='object')?{...d,def:_stripLatex(d.def)}:d);
+  if(out.calculateur&&typeof out.calculateur==='object'&&typeof out.calculateur.formule==='string'){
+    out.calculateur={...out.calculateur,formule:_stripLatex(out.calculateur.formule)};
+  }
   return out;
 }
 
@@ -2749,6 +2752,8 @@ RÉPÉTITION — interdite : ne redis jamais une phrase déjà écrite, même re
 
 NOTATION MATHÉMATIQUE — impératif : n'utilise JAMAIS de syntaxe LaTeX. Interdits stricts : \\frac{}{}, ^{...}, _{...}, \\pi, \\lambda, \\sqrt{}, \\sum, \\int, \\Delta, $...$, ou tout autre code entre antislash/accolades — ce texte s'affiche tel quel, illisible, dans l'application (pas de moteur de rendu LaTeX). Écris chaque formule en texte brut avec des symboles Unicode directement lisibles : × pour multiplier, / pour diviser, ² ³ ⁴ ⁻¹ pour les puissances usuelles, √ pour la racine, π pour pi, Σ pour une somme, Δ pour delta. Les indices s'écrivent collés sans accolades ni antislash (M_max, σ_adm, P_cr — jamais M_{max} ni \\sigma_{adm}). Exemple correct : « σ = M×y/I + N/A » ou « P_cr = π²×E×I / (K×L)² ». Exemple strictement interdit : « \\frac{M y}{I} + \\frac{N}{A} ».
 
+ANCRAGE RÉEL — fiabilité : quand tu donnes un exemple historique, une anecdote ou un fait réel précis (nom d'entreprise, date, chiffre d'un événement documenté), ne cite QUE des faits largement connus et vérifiables (ex : un principe industriel bien établi, une catastrophe technique célèbre et documentée). Si tu n'es pas certain qu'un fait précis soit exact, ne l'invente pas : décris plutôt le TYPE de conséquence ou de contexte, sans nom propre ni date ni chiffre fabriqués. Mieux vaut une formulation générale honnête qu'un fait précis inventé.
+
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres, les étapes et les explications. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Chaque phrase doit vouloir dire quelque chose de précis — relis-toi avant de répondre.
 
@@ -2794,7 +2799,7 @@ JSON uniquement.`;
         exercice:`Rédige des exercices pratiques de la section "${s.titre}" en partant d'une situation de travail réelle et complexe telle qu'elle se produit dans "${fd.dom}" — avec ses contraintes, ses imprévus, ses critères de réussite mesurables. Angle : le stagiaire est confronté à la situation avant qu'on lui donne les outils — il mobilise ce qu'il vient d'apprendre. Avant de rédiger : vérifie que les situations sont propres à "${fd.dom}" et non interchangeables avec un autre métier.`,
         securite:`Rédige les règles de sécurité de la section "${s.titre}". Angle : démarre par le mécanisme physique du danger tel qu'il se produit dans "${fd.dom}" (sans inventer d'incident spécifique, mais en décrivant le processus réel), puis explique les mesures de prévention. Pour chaque risque : nature exacte du danger, seuils réglementaires en vigueur (formulés prudemment si incertains), EPI adaptés, POURQUOI ce risque existe. Avant de rédiger : vérifie que chaque risque est spécifique à "${fd.dom}".`
       }[s.type]||`Rédige le contenu complet de la section "${s.titre}". Angle pédagogique : ${_angle} Explique systématiquement le POURQUOI. Avant de rédiger : vérifie que le contenu ne pourrait pas s'appliquer tel quel à un domaine voisin.`;
-      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtx}\nCohérence : vocabulaire, niveau de technicité et exemples restent alignés avec le plan ci-dessus, sans changer de registre.\n${typePrompt}${_fadeInstr}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités, issues des données terrain ci-dessus ou propres à ${fd.dom} ; (B) au moins 2 normes ou certifications applicables (formulées prudemment si incertaines) ; (C) au moins 1 erreur terrain réelle avec son mécanisme et sa conséquence précise.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"10-12 paragraphes progressifs et clairs — qualité et compréhension avant volume. Règles de rédaction : (1) définis chaque terme technique avant de l'utiliser ; (2) une idée centrale par paragraphe, du concret vers l'abstrait ; (3) transitions logiques explicites entre paragraphes. Dans chaque paragraphe, entoure de **...** les 2-4 éléments les plus importants : valeur chiffrée précise, terme métier clé, norme ou seuil applicable. Avant de finaliser, vérifie silencieusement : un professionnel de niveau '${fd.niv}' en ${fd.dom} pourrait-il suivre chaque paragraphe sans lacune non expliquée ? Si non, complète avant de livrer. SYSTÉMATIQUEMENT : le POURQUOI physique/mécanique/chimique derrière chaque procédure, les valeurs numériques propres à ${fd.dom}. Sépare par \\n\\n.","etapes":["Étape 1: geste précis + paramètre exact + POURQUOI on fait ça ainsi","Étape 2: ...","Étape 3: ...","Étape 4: ...","Étape 5: ...","Étape 6: ..."],"points_vigilance":["⚠️ Point critique 1: risque exact + valeur seuil + conséquence si dépassé","⚠️ Point 2","⚠️ Point 3","⚠️ Point 4"],"outils":["Outil 1 avec référence technique précise","Outil 2","Outil 3"],"erreurs":["❌ Erreur 1: pourquoi les débutants la font + mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":["Réflexe 1 — signe visuel/sonore/tactile que l'expert reconnaît immédiatement et que le débutant manque : situation déclenchante → geste instinctif + POURQUOI (2 phrases)","Réflexe 2 — raccourci légitime que 10 ans de terrain permettent : condition d'application + action + pourquoi c'est sûr (2 phrases)","Réflexe 3 — subtilité de réglage ou de paramètre que personne n'enseigne explicitement mais que tous les experts appliquent (2 phrases)","Réflexe 4 — vérification instinctive avant ou après l'opération, avec le critère exact que l'expert contrôle (2 phrases)"],"donnees_cles":["Valeur/norme à mémoriser absolument 1 (ex: 230V nominal ±10%, soit 207-253V)","Valeur 2 avec contexte d'application","Valeur 3","Valeur 4","Valeur 5"],${_checkByType}}`,2800,T.CONTENU);
+      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtx}\nCohérence : vocabulaire, niveau de technicité et exemples restent alignés avec le plan ci-dessus, sans changer de registre.\n${typePrompt}${_fadeInstr}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités, issues des données terrain ci-dessus ou propres à ${fd.dom} ; (B) au moins 2 normes ou certifications applicables (formulées prudemment si incertaines) ; (C) au moins 1 erreur terrain réelle avec son mécanisme et sa conséquence précise. (D) Si cette section comporte une formule numérique calculable simplement, ajoute le champ "calculateur" décrit plus bas ; sinon omets-le entièrement.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"10-12 paragraphes progressifs et clairs — qualité et compréhension avant volume. Règles de rédaction : (1) définis chaque terme technique avant de l'utiliser ; (2) une idée centrale par paragraphe, du concret vers l'abstrait ; (3) transitions logiques explicites entre paragraphes. Dans chaque paragraphe, entoure de **...** les 2-4 éléments les plus importants : valeur chiffrée précise, terme métier clé, norme ou seuil applicable. Avant de finaliser, vérifie silencieusement : un professionnel de niveau '${fd.niv}' en ${fd.dom} pourrait-il suivre chaque paragraphe sans lacune non expliquée ? Si non, complète avant de livrer. SYSTÉMATIQUEMENT : le POURQUOI physique/mécanique/chimique derrière chaque procédure, les valeurs numériques propres à ${fd.dom}. Sépare par \\n\\n.","etapes":["Étape 1: geste précis + paramètre exact + POURQUOI on fait ça ainsi","Étape 2: ...","Étape 3: ...","Étape 4: ...","Étape 5: ...","Étape 6: ..."],"points_vigilance":["⚠️ Point critique 1: risque exact + valeur seuil + conséquence si dépassé","⚠️ Point 2","⚠️ Point 3","⚠️ Point 4"],"outils":["Outil 1 avec référence technique précise","Outil 2","Outil 3"],"erreurs":["❌ Erreur 1: pourquoi les débutants la font + mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":["Réflexe 1 — signe visuel/sonore/tactile que l'expert reconnaît immédiatement et que le débutant manque : situation déclenchante → geste instinctif + POURQUOI (2 phrases)","Réflexe 2 — raccourci légitime que 10 ans de terrain permettent : condition d'application + action + pourquoi c'est sûr (2 phrases)","Réflexe 3 — subtilité de réglage ou de paramètre que personne n'enseigne explicitement mais que tous les experts appliquent (2 phrases)","Réflexe 4 — vérification instinctive avant ou après l'opération, avec le critère exact que l'expert contrôle (2 phrases)"],"donnees_cles":["Valeur/norme à mémoriser absolument 1 (ex: 230V nominal ±10%, soit 207-253V)","Valeur 2 avec contexte d'application","Valeur 3","Valeur 4","Valeur 5"],"pourquoi_ca_compte":"3-4 phrases qui ancrent ce sujet dans une réalité concrète et mémorable pour ${fd.dom} : une anecdote ou un exemple réel largement connu et vérifiable, OU si aucun fait précis fiable n'existe pour ce sujet précis, le TYPE de conséquence réelle (financière, humaine, réglementaire) d'une mauvaise maîtrise de cette section — sans inventer de nom d'entreprise, de date ou de chiffre si tu n'en es pas certain.","calculateur":{"titre":"Nom court du calcul (uniquement si pertinent, sinon omets tout ce champ)","formule":"expression en notation ASCII simple avec des noms de variable courts (ex: M*y/I ou sqrt(a^2+b^2) — jamais de syntaxe LaTeX, jamais de lettre grecque comme NOM de variable ici même si son libellé l'affiche)","variables":[{"nom":"M","label":"Nom lisible de la variable","unite":"unité SI","defaut":0}],"resultat":{"nom":"nom_resultat","label":"Nom lisible du résultat","unite":"unité SI"}},${_checkByType}}`,2800,T.CONTENU);
       const cnt=++_psDone;
       setStep('s2','active',`⚡ ${cnt}/${plan.sections.length} sections rédigées`,true);
       const _pl=document.getElementById('genPreviewList');
@@ -2879,6 +2884,8 @@ RÉPÉTITION — interdite : ne redis jamais une phrase déjà écrite, même re
 
 NOTATION MATHÉMATIQUE — impératif : n'utilise JAMAIS de syntaxe LaTeX. Interdits stricts : \\frac{}{}, ^{...}, _{...}, \\pi, \\lambda, \\sqrt{}, \\sum, \\int, \\Delta, $...$, ou tout autre code entre antislash/accolades — ce texte s'affiche tel quel, illisible, dans l'application (pas de moteur de rendu LaTeX). Écris chaque formule en texte brut avec des symboles Unicode directement lisibles : × pour multiplier, / pour diviser, ² ³ ⁴ ⁻¹ pour les puissances usuelles, √ pour la racine, π pour pi, Σ pour une somme, Δ pour delta. Les indices s'écrivent collés sans accolades ni antislash (M_max, σ_adm, P_cr — jamais M_{max} ni \\sigma_{adm}). Exemple correct : « σ = M×y/I + N/A » ou « P_cr = π²×E×I / (K×L)² ». Exemple strictement interdit : « \\frac{M y}{I} + \\frac{N}{A} ».
 
+ANCRAGE RÉEL — fiabilité : quand tu donnes un exemple historique, une anecdote ou un fait réel précis (nom d'entreprise, date, chiffre d'un événement documenté), ne cite QUE des faits largement connus et vérifiables (ex : un principe industriel bien établi, une catastrophe technique célèbre et documentée). Si tu n'es pas certain qu'un fait précis soit exact, ne l'invente pas : décris plutôt le TYPE de conséquence ou de contexte, sans nom propre ni date ni chiffre fabriqués. Mieux vaut une formulation générale honnête qu'un fait précis inventé.
+
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres et les corrigés. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Relis-toi avant de répondre.
 
@@ -2920,7 +2927,7 @@ JSON uniquement.`;
       }[s.type]||`"mini_check":{"type":"completion","q":"Définissez en une phrase : [notion centrale de ${s.titre}] dans le contexte de ${fd.dom}","answer":"définition courte attendue","indice":"contexte : ${fd.dom}"}`;
       const contenuDesc=isApp?`Angle pédagogique : pars d'un cas industriel réel de "${fd.dom}", montre comment identifier la formule applicable à ce cas précis, puis déroule le calcul complet. Méthodologie de résolution + application numérique complète avec données chiffrées. Avant de rédiger : vérifie que le cas ne pourrait pas s'appliquer à une discipline voisine.`:isDemo?`Angle pédagogique : commence par le problème physique ou mathématique que cette démonstration résout, puis construis la preuve pas-à-pas avec les approximations explicitement justifiées et leurs limites de validité dans "${fd.dom}".`:`Angle pédagogique (varie à chaque section pour rompre la monotonie) : ${_angleAcad} Cours complet : définitions formelles, principes physiques en profondeur, relations entre concepts, applications industrielles de "${fd.dom}". Avant de rédiger : vérifie que le contenu est ancré dans "${fd.dom}" et non générique.`;
       const exempleDesc=isApp?`Exercice résolu complet : contexte industriel concret de "${fd.dom}", données numériques réalistes, démarche de résolution montrant le choix de la formule, calculs détaillés avec unités SI, résultat et interprétation physique dans le contexte de "${fd.dom}" (8-10 phrases).`:`Exemple illustratif concret de "${fd.dom}" avec valeurs numériques issues de l'industrie ou de l'expérimentation, analyse du résultat et de son sens physique (6-8 phrases). Avant de rédiger : vérifie que l'exemple est propre à "${fd.dom}".`;
-      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtxA}\nCohérence : reste dans le même registre, le même niveau de technicité et les mêmes symboles que le plan ci-dessus.\nRédige la section "${s.titre}" (${s.type||"theorie"}) de manière complète et rigoureuse.${_fadeInstrA}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités SI ou ordres de grandeur typiques de ${fd.dom} ; (B) au moins 2 formules ou relations mathématiques explicitement développées ; (C) au moins 1 erreur conceptuelle fréquente expliquée avec son mécanisme.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"${contenuDesc}. 10-12 paragraphes progressifs — qualité et clarté avant volume. Règles : (1) définis chaque notion avant de l'utiliser ; (2) une idée par paragraphe avec transitions explicites ; (3) entoure de **...** les 2-3 formules, termes clés ou valeurs numériques essentiels de chaque paragraphe. Avant de finaliser, vérifie silencieusement : un étudiant de niveau '${fd.pub}' pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement (ex: U = R × I). Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis","def":"Définition formelle complète avec unité SI si applicable"}],"points_cles":["Point fondamental 1 avec formule ou valeur numérique si applicable","Point 2","Point 3","Point 4","Point 5"],"erreurs_courantes":["Raisonnement ou calcul erroné typique dans ce chapitre de ${fd.dom} — en quoi il diffère du bon raisonnement (1-2 phrases)","Erreur 2","Erreur 3"],"exemple":"${exempleDesc}","intuition_expert":["Intuition 1 — ce que les experts de ${fd.dom} comprennent instinctivement et que les manuels n'écrivent pas : lien physique non évident, signe de reconnaissance, pattern implicite (2 phrases)","Intuition 2 — connexion entre ce concept et un phénomène observable dans la réalité industrielle ou expérimentale (2 phrases)","Intuition 3 — pourquoi cette formule ou ce théorème fonctionne : l'explication physique/géométrique/algébrique profonde derrière le résultat (2 phrases)"],${_checkByTypeA}}`,2200,T.CONTENU);
+      const sc=await gemini(key,SYS,`${ctxPlan}${_terrainCtxA}\nCohérence : reste dans le même registre, le même niveau de technicité et les mêmes symboles que le plan ci-dessus.\nRédige la section "${s.titre}" (${s.type||"theorie"}) de manière complète et rigoureuse.${_fadeInstrA}\n\nCONTRAINTES OBLIGATOIRES dans le champ "contenu" : (A) au moins 5 valeurs numériques avec unités SI ou ordres de grandeur typiques de ${fd.dom} ; (B) au moins 2 formules ou relations mathématiques explicitement développées ; (C) au moins 1 erreur conceptuelle fréquente expliquée avec son mécanisme. (D) Si cette section comporte une formule numérique calculable simplement, ajoute le champ "calculateur" décrit plus bas ; sinon omets-le entièrement.\n\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"${contenuDesc}. 10-12 paragraphes progressifs — qualité et clarté avant volume. Règles : (1) définis chaque notion avant de l'utiliser ; (2) une idée par paragraphe avec transitions explicites ; (3) entoure de **...** les 2-3 formules, termes clés ou valeurs numériques essentiels de chaque paragraphe. Avant de finaliser, vérifie silencieusement : un étudiant de niveau '${fd.pub}' pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement (ex: U = R × I). Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis","def":"Définition formelle complète avec unité SI si applicable"}],"points_cles":["Point fondamental 1 avec formule ou valeur numérique si applicable","Point 2","Point 3","Point 4","Point 5"],"erreurs_courantes":["Raisonnement ou calcul erroné typique dans ce chapitre de ${fd.dom} — en quoi il diffère du bon raisonnement (1-2 phrases)","Erreur 2","Erreur 3"],"exemple":"${exempleDesc}","intuition_expert":["Intuition 1 — ce que les experts de ${fd.dom} comprennent instinctivement et que les manuels n'écrivent pas : lien physique non évident, signe de reconnaissance, pattern implicite (2 phrases)","Intuition 2 — connexion entre ce concept et un phénomène observable dans la réalité industrielle ou expérimentale (2 phrases)","Intuition 3 — pourquoi cette formule ou ce théorème fonctionne : l'explication physique/géométrique/algébrique profonde derrière le résultat (2 phrases)"],"pourquoi_ca_compte":"3-4 phrases qui ancrent ce chapitre dans une réalité concrète et mémorable pour ${fd.dom} : une anecdote ou un exemple réel largement connu et vérifiable (avancée scientifique, application industrielle célèbre), OU si aucun fait précis fiable n'existe pour ce sujet précis, le TYPE de conséquence réelle (technique, économique, scientifique) d'une mauvaise maîtrise de cette notion — sans inventer de nom, de date ou de chiffre si tu n'en es pas certain.","calculateur":{"titre":"Nom court du calcul (uniquement si pertinent, sinon omets tout ce champ)","formule":"expression en notation ASCII simple avec des noms de variable courts (ex: M*y/I ou sqrt(a^2+b^2) — jamais de syntaxe LaTeX, jamais de lettre grecque comme NOM de variable ici même si son libellé l'affiche)","variables":[{"nom":"M","label":"Nom lisible de la variable","unite":"unité SI","defaut":0}],"resultat":{"nom":"nom_resultat","label":"Nom lisible du résultat","unite":"unité SI"}},${_checkByTypeA}}`,2200,T.CONTENU);
       const cntA=++_paDone;
       setStep('s2','active',`⚡ ${cntA}/${plan.sections.length} sections rédigées`,false);
       const _plA=document.getElementById('genPreviewList');
@@ -3079,6 +3086,122 @@ function _renderInlineQuiz(m){
   <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin-top:.5rem;">
     <button class="btn btn-lg ${p?'btn-gold':'btn-purple'}" onclick="submitQ()">✓ Soumettre l'évaluation</button>
   </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   CALCULATEUR INTERACTIF PAR SECTION
+   Évaluateur de formule à grammaire fermée (nombres, + - * / ^, parenthèses,
+   fonctions mathématiques usuelles, variables déclarées). Volontairement
+   AUCUN eval()/Function() : la formule vient d'un modèle IA, jamais digne de
+   confiance pour de l'exécution de code — seule une grammaire connue et
+   fermée est interprétée ; tout token hors grammaire lève une erreur propre.
+══════════════════════════════════════════════ */
+const _CALC_FUNCS={sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,
+  abs:Math.abs,ln:Math.log,log:Math.log10,exp:Math.exp,min:Math.min,max:Math.max};
+const _CALC_CONSTS={pi:Math.PI,e:Math.E};
+
+function _evalFormula(expr,vars){
+  const s=String(expr||'');let i=0;
+  const peek=()=>s[i];
+  const isDigit=c=>c>='0'&&c<='9';
+  const isAlpha=c=>!!c&&/[a-zA-Z_]/.test(c);
+  const skipWs=()=>{while(s[i]===' '||s[i]==='\t')i++;};
+  function parseExpr(){
+    let v=parseTerm();skipWs();
+    while(peek()==='+'||peek()==='-'){const op=s[i++];const r=parseTerm();v=op==='+'?v+r:v-r;skipWs();}
+    return v;
+  }
+  function parseTerm(){
+    let v=parseFactor();skipWs();
+    while(peek()==='*'||peek()==='/'){
+      const op=s[i++];const r=parseFactor();
+      if(op==='/'){if(r===0)throw new Error('division par zéro');v=v/r;}else v=v*r;
+      skipWs();
+    }
+    return v;
+  }
+  function parseFactor(){
+    let v=parseUnary();skipWs();
+    if(peek()==='^'){i++;v=Math.pow(v,parseFactor());}
+    return v;
+  }
+  function parseUnary(){
+    skipWs();
+    if(peek()==='-'){i++;return -parseUnary();}
+    if(peek()==='+'){i++;return parseUnary();}
+    return parsePrimary();
+  }
+  function parsePrimary(){
+    skipWs();
+    if(peek()==='('){i++;const v=parseExpr();skipWs();if(peek()!==')')throw new Error('parenthèse manquante');i++;return v;}
+    if(isDigit(peek())||peek()==='.'){
+      let j=i;while(isDigit(s[j])||s[j]==='.')j++;
+      const num=parseFloat(s.slice(i,j));i=j;return num;
+    }
+    if(isAlpha(peek())){
+      let j=i;while(isAlpha(s[j])||isDigit(s[j]))j++;
+      const name=s.slice(i,j);i=j;skipWs();
+      if(peek()==='('){
+        i++;const args=[parseExpr()];skipWs();
+        while(peek()===','){i++;args.push(parseExpr());skipWs();}
+        if(peek()!==')')throw new Error('parenthèse manquante');i++;
+        const fn=_CALC_FUNCS[name];
+        if(!fn)throw new Error('fonction inconnue : '+name);
+        return fn(...args);
+      }
+      if(name in vars)return Number(vars[name]);
+      if(name in _CALC_CONSTS)return _CALC_CONSTS[name];
+      throw new Error('variable inconnue : '+name);
+    }
+    throw new Error('expression invalide');
+  }
+  const result=parseExpr();skipWs();
+  if(i<s.length)throw new Error('caractère inattendu : '+s[i]);
+  if(!isFinite(result))throw new Error('résultat non défini');
+  return result;
+}
+
+const _CALC_REGISTRY={}; // uid → définition du calculateur, alimenté au rendu
+
+function _renderCalculator(mId,secIdx,calc){
+  if(!calc||!calc.formule||!Array.isArray(calc.variables)||!calc.variables.length)return'';
+  const uid='calc-'+mId+'-'+secIdx;
+  _CALC_REGISTRY[uid]=calc;
+  const rows=calc.variables.map((v,i)=>`
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;">
+      <label style="flex:1;font-size:.76rem;color:#374151;">${_e(v.label||v.nom)}${v.unite?` <span style="color:#9ca3af;">(${_e(v.unite)})</span>`:''}</label>
+      <input type="number" id="${uid}-v${i}" value="${_e(String(v.defaut!==undefined?v.defaut:1))}" step="any"
+        oninput="_calcRun('${uid}')"
+        style="width:110px;padding:.3rem .5rem;border:1.5px solid #e2e8f0;border-radius:7px;font-size:.78rem;">
+    </div>`).join('');
+  return`<div style="background:#f0fdfa;border:1.5px solid #99f6e4;border-radius:10px;padding:.8rem 1rem;margin-top:.6rem;">
+    <div style="font-size:.70rem;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:#0f766e;margin-bottom:.3rem;">🧮 ${_e(calc.titre||'Calculateur interactif')}</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.76rem;color:#134e4a;background:#fff;border-radius:7px;padding:.3rem .6rem;margin-bottom:.6rem;display:inline-block;">${_e((calc.resultat&&(calc.resultat.label||calc.resultat.nom))||'résultat')} = ${_e(calc.formule)}</div>
+    ${rows}
+    <div id="${uid}-out" style="margin-top:.5rem;font-size:.85rem;font-weight:800;color:#0f766e;"></div>
+  </div>`;
+}
+function _formatCalcNum(n){
+  if(Math.abs(n)>=100000||(Math.abs(n)<0.001&&n!==0))return n.toExponential(3);
+  return Math.round(n*1000)/1000;
+}
+function _calcRun(uid){
+  const calc=_CALC_REGISTRY[uid];if(!calc)return;
+  const out=document.getElementById(uid+'-out');if(!out)return;
+  const vars={};
+  calc.variables.forEach((v,i)=>{
+    const el=document.getElementById(uid+'-v'+i);
+    vars[v.nom]=el?parseFloat(el.value):0;
+  });
+  try{
+    const result=_evalFormula(calc.formule,vars);
+    const unite=(calc.resultat&&calc.resultat.unite)||'';
+    out.textContent='= '+_formatCalcNum(result)+(unite?' '+unite:'');
+    out.style.color='#0f766e';
+  }catch(e){
+    out.textContent='⚠️ '+e.message;
+    out.style.color='#dc2626';
+  }
 }
 
 function exportPDF(m){
@@ -3273,6 +3396,11 @@ function renderViewer(m){
               ${!p&&s.exemple?`<div style="background:${bg};border-left:3px solid ${mc};border-radius:0 9px 9px 0;padding:.6rem .9rem;margin:.6rem 0;font-size:.78rem;color:${mcd};line-height:1.7;"><strong>📐 Exemple :</strong><br>${_e(s.exemple)}</div>`:''}
               ${!p&&(s.points_cles||[]).length?`<div>${(s.points_cles||[]).map(pt=>`<div class="kp acad">💡 ${_e(pt)}</div>`).join('')}</div>`:''}
               ${!p&&(s.intuition_expert||[]).length?`<div class="reflexe-pro-box" style="border-left-color:#7c3aed;"><div class="reflexe-pro-lbl" style="color:#7c3aed;">🧠 Intuition de l'expert</div><ul style="margin:0;padding-left:1.1rem;">${(s.intuition_expert||[]).map(r=>`<li style="margin-bottom:.25rem;font-size:.78rem;">${_e(r)}</li>`).join('')}</ul></div>`:''}
+              ${s.pourquoi_ca_compte?`<div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:10px;padding:.7rem .9rem;margin-top:.6rem;">
+                <div style="font-size:.66rem;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:#92400e;margin-bottom:.3rem;">🕰️ Pourquoi ça compte</div>
+                <div style="font-size:.78rem;color:#78350f;line-height:1.7;">${_e(s.pourquoi_ca_compte)}</div>
+              </div>`:''}
+              ${s.calculateur?_renderCalculator(m.id,idx,s.calculateur):''}
               ${noteVal?`<div style="margin-top:.7rem;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:.5rem .8rem;font-size:.78rem;color:#92400e;"><strong>📝 Mes notes :</strong><br>${_e(noteVal)}</div>`:''}
               <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem;">
                 <button class="note-ico${noteVal?' has-note':p?'':' an'}" id="nbtn-${p?'ps':'cs'}${idx}" onclick="openNoteModal(${m.id},'${p?'ps':'cs'}${idx}',${JSON.stringify(s.titre||'')},${!p})">${noteVal?'📝':'+ Note'}</button>
@@ -3526,6 +3654,9 @@ function renderViewer(m){
     </div>`;
 
   if((m.qcm||m.quiz||[]).length) _renderInlineQuiz(m);
+  // Affiche le résultat initial des calculateurs (valeurs par défaut) sans
+  // attendre une première interaction de l'utilisateur.
+  (m.sections||[]).forEach((s,idx)=>{if(s.calculateur)_calcRun('calc-'+m.id+'-'+idx);});
 }
 
 /* ── Procédures ── */
@@ -4742,8 +4873,8 @@ async function regenSection(secIdx){
       ?`Tu es formateur expert du métier "${m.dom}" avec 20 ans de terrain. Tu régénères cette section avec une perspective DIFFÉRENTE et PLUS RICHE que la version précédente. Vocabulaire du métier réel, valeurs numériques typiques de "${m.dom}" (tensions, pressions, températures, tolérances, débits…), normes précises applicables, réflexes d'expert que les débutants ignorent. Chaque procédure est accompagnée de son POURQUOI physique ou mécanique. JSON uniquement.`
       :`Tu es professeur expert en "${m.dom}" spécialisé en enseignement ingénieur. Tu régénères cette section avec une approche DIFFÉRENTE : approfondis le formalisme mathématique, ajoute des exemples numériques nouveaux avec des données industrielles, explique les pièges conceptuels que les étudiants rencontrent dans ce chapitre précis de "${m.dom}". JSON uniquement.`;
     const prompt=p
-      ?`Formation: "${m.titre}" — niveau ${m.niv} — public: ${m.pub||''}\nDomaine: ${m.dom}\nRégénère la section "${s.titre}" avec une approche différente et plus riche que la version précédente.\nIMPÉRATIF : au moins 3 valeurs chiffrées propres à ${m.dom} (tensions, tolérances, pressions, températures, doses…), le POURQUOI de chaque procédure, des normes précises, les erreurs spécifiques des débutants de ce métier.\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"7-9 paragraphes progressifs — une idée par paragraphe, définis les termes avant de les utiliser. Entoure de **...** les 2-4 éléments clés de chaque paragraphe (valeur chiffrée de ${m.dom}, terme métier, norme). Avant de finaliser : un professionnel débutant en ${m.dom} pourrait-il suivre sans lacune non expliquée ? IMPÉRATIF : valeurs chiffrées précises de ${m.dom}, POURQUOI physique/mécanique de chaque procédure. Sépare par \\n\\n.","etapes":["Étape 1 : geste précis + paramètre exact + POURQUOI","Étape 2","Étape 3","Étape 4","Étape 5"],"points_vigilance":["⚠️ Risque précis 1 : valeur seuil + conséquence physique","⚠️ Risque 2","⚠️ Risque 3"],"outils":["Outil 1 avec référence technique","Outil 2","Outil 3"],"erreurs":["❌ Erreur propre aux débutants de ${m.dom} — mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":"Savoir implicite d'expert propre à ${m.dom} pour cette section — ce que 10 ans de terrain donnent (3 phrases concrètes)","donnees_cles":["Valeur/norme 1 propre à ${m.dom}","Valeur 2","Valeur 3"]}`
-      :`Cours: "${m.titre}" — ${m.pub} — niveau ${m.niv||''}\nDiscipline: ${m.dom}\nRégénère la section "${s.titre}" avec une approche différente de la version précédente.\nIMPÉRATIF : nouvelles formules ou applications numériques non vues, un piège conceptuel propre à ${m.dom} dans ce chapitre, une application industrielle concrète de "${m.dom}".\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"7-9 paragraphes progressifs — une notion par paragraphe, définis les termes avant de les utiliser. Entoure de **...** les 2-3 formules, valeurs ou termes clés de chaque paragraphe. Avant de finaliser : un étudiant de ce niveau pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement. Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis de ${m.dom}","def":"Définition formelle complète avec unité SI"}],"points_cles":["Point fondamental avec formule ou valeur numérique typique de ${m.dom}","Point 2","Point 3","Point 4"],"exemple":"Exercice résolu complet : contexte industriel ${m.dom}, données numériques réalistes, démarche pas-à-pas, résultat avec interprétation physique (8-10 phrases)"}`;
+      ?`Formation: "${m.titre}" — niveau ${m.niv} — public: ${m.pub||''}\nDomaine: ${m.dom}\nRégénère la section "${s.titre}" avec une approche différente et plus riche que la version précédente.\nIMPÉRATIF : au moins 3 valeurs chiffrées propres à ${m.dom} (tensions, tolérances, pressions, températures, doses…), le POURQUOI de chaque procédure, des normes précises, les erreurs spécifiques des débutants de ce métier. N'utilise jamais de syntaxe LaTeX (\\frac, ^{}, _{}) — notation Unicode simple uniquement (×, /, ², σ_adm…).\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"7-9 paragraphes progressifs — une idée par paragraphe, définis les termes avant de les utiliser. Entoure de **...** les 2-4 éléments clés de chaque paragraphe (valeur chiffrée de ${m.dom}, terme métier, norme). Avant de finaliser : un professionnel débutant en ${m.dom} pourrait-il suivre sans lacune non expliquée ? IMPÉRATIF : valeurs chiffrées précises de ${m.dom}, POURQUOI physique/mécanique de chaque procédure. Sépare par \\n\\n.","etapes":["Étape 1 : geste précis + paramètre exact + POURQUOI","Étape 2","Étape 3","Étape 4","Étape 5"],"points_vigilance":["⚠️ Risque précis 1 : valeur seuil + conséquence physique","⚠️ Risque 2","⚠️ Risque 3"],"outils":["Outil 1 avec référence technique","Outil 2","Outil 3"],"erreurs":["❌ Erreur propre aux débutants de ${m.dom} — mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":"Savoir implicite d'expert propre à ${m.dom} pour cette section — ce que 10 ans de terrain donnent (3 phrases concrètes)","donnees_cles":["Valeur/norme 1 propre à ${m.dom}","Valeur 2","Valeur 3"],"pourquoi_ca_compte":"3-4 phrases : anecdote réelle largement connue et vérifiable en lien avec ${m.dom}, ou à défaut le TYPE de conséquence concrète d'une mauvaise maîtrise (sans nom/date/chiffre inventé si incertain)","calculateur":{"titre":"Nom court (uniquement si une formule numérique de la section s'y prête, sinon omets ce champ)","formule":"expression ASCII simple, ex: U*I (jamais de LaTeX ni de lettre grecque comme nom de variable)","variables":[{"nom":"U","label":"Nom lisible","unite":"unité SI","defaut":0}],"resultat":{"nom":"resultat","label":"Nom lisible","unite":"unité SI"}}}`
+      :`Cours: "${m.titre}" — ${m.pub} — niveau ${m.niv||''}\nDiscipline: ${m.dom}\nRégénère la section "${s.titre}" avec une approche différente de la version précédente.\nIMPÉRATIF : nouvelles formules ou applications numériques non vues, un piège conceptuel propre à ${m.dom} dans ce chapitre, une application industrielle concrète de "${m.dom}". N'utilise jamais de syntaxe LaTeX (\\frac, ^{}, _{}) — notation Unicode simple uniquement (×, /, ², σ_adm…).\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"7-9 paragraphes progressifs — une notion par paragraphe, définis les termes avant de les utiliser. Entoure de **...** les 2-3 formules, valeurs ou termes clés de chaque paragraphe. Avant de finaliser : un étudiant de ce niveau pourrait-il suivre sans lacune non expliquée ? Formules écrites explicitement. Sépare par \\n\\n.","definitions":[{"terme":"Terme technique précis de ${m.dom}","def":"Définition formelle complète avec unité SI"}],"points_cles":["Point fondamental avec formule ou valeur numérique typique de ${m.dom}","Point 2","Point 3","Point 4"],"exemple":"Exercice résolu complet : contexte industriel ${m.dom}, données numériques réalistes, démarche pas-à-pas, résultat avec interprétation physique (8-10 phrases)","pourquoi_ca_compte":"3-4 phrases : anecdote réelle largement connue et vérifiable en lien avec ${m.dom}, ou à défaut le TYPE de conséquence concrète d'une mauvaise maîtrise (sans nom/date/chiffre inventé si incertain)","calculateur":{"titre":"Nom court (uniquement si une formule numérique de la section s'y prête, sinon omets ce champ)","formule":"expression ASCII simple, ex: M*y/I (jamais de LaTeX ni de lettre grecque comme nom de variable)","variables":[{"nom":"M","label":"Nom lisible","unite":"unité SI","defaut":0}],"resultat":{"nom":"resultat","label":"Nom lisible","unite":"unité SI"}}}`;
     const sc=await gemini(key,SYS,prompt,1200,T.CONTENU);
     const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
     if(idx>=0){
