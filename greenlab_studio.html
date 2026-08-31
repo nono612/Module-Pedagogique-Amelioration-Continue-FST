@@ -2356,16 +2356,63 @@ function _stripTplLabel(v){
   return out.length>=8?out:v.trim();
 }
 
-/* Applique le nettoyage aux champs rédactionnels d'une section. */
+/* Filet de sécurité anti-LaTeX : la consigne dans le prompt réduit le risque
+   sans l'éliminer — un modèle peut basculer en syntaxe \frac{}{} sur du
+   contenu dense. Ce texte ne se rend pas dans l'application (aucun moteur
+   LaTeX) et devient illisible. On convertit donc en notation lisible, quel
+   que soit le modèle utilisé. */
+function _stripLatex(text){
+  if(typeof text!=='string'||!text)return text;
+  let s=text;
+  if(!/\\[a-zA-Z]|\\frac|\$/.test(s))return s; // rien à nettoyer — sortie rapide
+  s=s.replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g,'($1)/($2)'); // \frac{A}{B} → (A)/(B)
+  s=s.replace(/\\sqrt\{([^{}]*)\}/g,'√$1');
+  s=s.replace(/\\pi\b/g,'π').replace(/\\lambda\b/g,'λ').replace(/\\Delta\b/g,'Δ')
+     .replace(/\\delta\b/g,'δ').replace(/\\sigma\b/g,'σ').replace(/\\theta\b/g,'θ')
+     .replace(/\\omega\b/g,'ω').replace(/\\alpha\b/g,'α').replace(/\\beta\b/g,'β')
+     .replace(/\\gamma\b/g,'γ').replace(/\\mu\b/g,'μ').replace(/\\phi\b/g,'φ')
+     .replace(/\\times\b/g,'×').replace(/\\cdot\b/g,'·').replace(/\\sum\b/g,'Σ')
+     .replace(/\\int\b/g,'∫').replace(/\\infty\b/g,'∞').replace(/\\leq\b/g,'≤')
+     .replace(/\\geq\b/g,'≥').replace(/\\approx\b/g,'≈').replace(/\\neq\b/g,'≠')
+     .replace(/\\pm\b/g,'±');
+  const sup={'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','-1':'⁻¹'};
+  s=s.replace(/\^\{(-?\d+)\}/g,(m,n)=>sup[n]!==undefined?sup[n]:'^'+n);   // ^{2} → ²
+  s=s.replace(/\^(-?\d)(?!\d)/g,(m,n)=>sup[n]!==undefined?sup[n]:'^'+n);  // ^2 → ²
+  s=s.replace(/_\{([^{}]+)\}/g,'_$1');           // _{max} → _max
+  s=s.replace(/\${1,2}([^$]+)\${1,2}/g,'$1');    // $...$ ou $$...$$ → contenu conservé
+  s=s.replace(/\\(left|right|mathrm|text|displaystyle)\b/g,'');
+  return s;
+}
+/* Nettoie récursivement tout objet/tableau/chaîne — appliqué au module
+   généré dans son ensemble (sections, exercices, quiz, mémo, fiche de
+   révision) plutôt qu'à une liste de champs à maintenir manuellement. */
+function _stripLatexDeep(v){
+  if(typeof v==='string')return _stripLatex(v);
+  if(Array.isArray(v))return v.map(_stripLatexDeep);
+  if(v&&typeof v==='object'){
+    const out={};
+    for(const k in v)out[k]=_stripLatexDeep(v[k]);
+    return out;
+  }
+  return v;
+}
+
+/* Applique le nettoyage (libellés de gabarit + syntaxe LaTeX résiduelle) aux
+   champs rédactionnels d'une section. Point de passage unique pour le pipeline
+   initial ET regenSection() : une régénération individuelle bénéficie donc
+   automatiquement du même filet de sécurité qu'une génération complète. */
 function _cleanSection(sec){
   if(!sec||typeof sec!=='object')return sec;
   const listFields=['etapes','points_vigilance','outils','erreurs','donnees_cles',
                     'points_cles','erreurs_courantes','intuition_expert','reflexe_pro'];
+  const textFields=['contenu','exemple','exemple_fade','exemple_fade_correction'];
   const out={...sec};
   listFields.forEach(f=>{
-    if(Array.isArray(out[f]))out[f]=out[f].map(_stripTplLabel).filter(x=>typeof x!=='string'||x.length>2);
-    else if(typeof out[f]==='string')out[f]=_stripTplLabel(out[f]);
+    if(Array.isArray(out[f]))out[f]=out[f].map(v=>_stripLatex(_stripTplLabel(v))).filter(x=>typeof x!=='string'||x.length>2);
+    else if(typeof out[f]==='string')out[f]=_stripLatex(_stripTplLabel(out[f]));
   });
+  textFields.forEach(f=>{if(typeof out[f]==='string')out[f]=_stripLatex(out[f]);});
+  if(Array.isArray(out.definitions))out.definitions=out.definitions.map(d=>(d&&typeof d==='object')?{...d,def:_stripLatex(d.def)}:d);
   return out;
 }
 
@@ -2698,6 +2745,8 @@ Les crochets [ ] du gabarit sont des emplacements à remplir, jamais à conserve
 
 RÉPÉTITION — interdite : ne redis jamais une phrase déjà écrite, même reformulée. Chaque phrase apporte une information nouvelle. Un paragraphe court et dense vaut mieux qu'un paragraphe étiré par des redites.
 
+NOTATION MATHÉMATIQUE — impératif : n'utilise JAMAIS de syntaxe LaTeX. Interdits stricts : \\frac{}{}, ^{...}, _{...}, \\pi, \\lambda, \\sqrt{}, \\sum, \\int, \\Delta, $...$, ou tout autre code entre antislash/accolades — ce texte s'affiche tel quel, illisible, dans l'application (pas de moteur de rendu LaTeX). Écris chaque formule en texte brut avec des symboles Unicode directement lisibles : × pour multiplier, / pour diviser, ² ³ ⁴ ⁻¹ pour les puissances usuelles, √ pour la racine, π pour pi, Σ pour une somme, Δ pour delta. Les indices s'écrivent collés sans accolades ni antislash (M_max, σ_adm, P_cr — jamais M_{max} ni \\sigma_{adm}). Exemple correct : « σ = M×y/I + N/A » ou « P_cr = π²×E×I / (K×L)² ». Exemple strictement interdit : « \\frac{M y}{I} + \\frac{N}{A} ».
+
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres, les étapes et les explications. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Chaque phrase doit vouloir dire quelque chose de précis — relis-toi avant de répondre.
 
@@ -2796,7 +2845,7 @@ JSON uniquement.`;
   setStep('s6','done',kpis.length+' KPIs métier générés',true);
 
   const qcm=(quiz||[]).map(q=>({...q,rep:q.rep!==undefined?q.rep:q.correct,expl:q.expl||q.explication||''}));
-  return{id:Date.now(),mode:'pro',icone:plan.icone||'💼',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],etapes:plan.etapes||[],formules:(memo.formules_kv||[]),cas,sections,scenarios,checklist,qcm,quiz:qcm,memo,kpis,scores:{},wrongByComp:{},_incomplet:_warn.slice()};
+  return _stripLatexDeep({id:Date.now(),mode:'pro',icone:plan.icone||'💼',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],competences:plan.competences||[],etapes:plan.etapes||[],formules:(memo.formules_kv||[]),cas,sections,scenarios,checklist,qcm,quiz:qcm,memo,kpis,scores:{},wrongByComp:{},_incomplet:_warn.slice()});
 }
 
 /* ══════════════════════════════════════════════
@@ -2825,6 +2874,8 @@ N'écris jamais dans ta réponse les libellés du gabarit : pas de « Valeur 1 �
 Les crochets [ ] du gabarit sont des emplacements à remplir, jamais à conserver.
 
 RÉPÉTITION — interdite : ne redis jamais une phrase déjà écrite, même reformulée. Chaque phrase apporte une information nouvelle. Un paragraphe court et dense vaut mieux qu'un paragraphe étiré par des redites.
+
+NOTATION MATHÉMATIQUE — impératif : n'utilise JAMAIS de syntaxe LaTeX. Interdits stricts : \\frac{}{}, ^{...}, _{...}, \\pi, \\lambda, \\sqrt{}, \\sum, \\int, \\Delta, $...$, ou tout autre code entre antislash/accolades — ce texte s'affiche tel quel, illisible, dans l'application (pas de moteur de rendu LaTeX). Écris chaque formule en texte brut avec des symboles Unicode directement lisibles : × pour multiplier, / pour diviser, ² ³ ⁴ ⁻¹ pour les puissances usuelles, √ pour la racine, π pour pi, Σ pour une somme, Δ pour delta. Les indices s'écrivent collés sans accolades ni antislash (M_max, σ_adm, P_cr — jamais M_{max} ni \\sigma_{adm}). Exemple correct : « σ = M×y/I + N/A » ou « P_cr = π²×E×I / (K×L)² ». Exemple strictement interdit : « \\frac{M y}{I} + \\frac{N}{A} ».
 
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres et les corrigés. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Relis-toi avant de répondre.
@@ -2912,7 +2963,7 @@ JSON uniquement.`;
   setStep('s5','done','Fiche de révision complète',false);
 
   const qcm=(quiz||[]).map(q=>({...q,rep:q.rep!==undefined?q.rep:q.correct,expl:q.expl||q.explication||''}));
-  return{id:Date.now(),mode:'acad',icone:plan.icone||'🎓',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],etapes:plan.etapes||[],formules:(revision.formules_kv||[]),cas,sections,exercices,qcm,quiz:qcm,revision,scores:{},wrongByComp:{},_incomplet:_warn.slice()};
+  return _stripLatexDeep({id:Date.now(),mode:'acad',icone:plan.icone||'🎓',titre:plan.titre,desc:plan.description,description:plan.description,secteur:fd.dom,dom:fd.dom,pub:fd.pub,niveau:fd.niv,niv:fd.niv,duree:fd.dur,dur:fd.dur,lang:fd.lang,prerequis:plan.prerequis,objectifs:plan.objectifs||[],notions:plan.notions||[],etapes:plan.etapes||[],formules:(revision.formules_kv||[]),cas,sections,exercices,qcm,quiz:qcm,revision,scores:{},wrongByComp:{},_incomplet:_warn.slice()});
 }
 
 /* ══════════════════════════════════════════════
@@ -3314,7 +3365,7 @@ function renderViewer(m){
     const _memoEmpty=!(s2.regles?.length||s2.formules?.length||s2.interdits?.length||s2.reflexes_expert?.length||s2.regle_or);
     extra+=`<div class="ccard"><div class="ccard-title">📄 Mémo terrain</div>${_memoEmpty?`
       <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Ce mémo n'a pas encore été généré.</div>
-      <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenMemo(${m.id})">🔄 Générer le mémo</button></div>`:`<div style="max-width:640px;">
+      <div style="text-align:center;"><button class="btn btn-primary btn-sm" onclick="regenMemo(${m.id})">🔄 Générer le mémo</button></div>`:`<div>
       <div style="border-left:4px solid ${mc};padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:${mc};text-transform:uppercase;">Mémo terrain — Quick Reference</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(s2.titre||m.titre)}</h3></div>
       ${(s2.regles||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🎯 Règles fondamentales</h4>${(s2.regles||[]).map(r=>`<div class="memo-item" style="color:var(--pro-dark);">${_e(r)}</div>`).join('')}</div>`:''}
       ${(s2.formules||[]).length?`<div class="memo-block" style="background:#eff6ff;"><h4 style="color:#1e40af;">📐 Formules & valeurs</h4>${(s2.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
@@ -3345,7 +3396,7 @@ function renderViewer(m){
     const _rvEmpty=!(rv.titre||rv.notions?.length||rv.formules?.length||rv.pieges?.length||rv.methode?.length);
     extra+=`<div class="ccard"><div class="ccard-title">📋 Fiche de révision</div>${_rvEmpty?`
       <div style="text-align:center;padding:1.2rem 0;color:var(--gray600);font-size:.83rem;">Cette fiche n'a pas encore été générée.</div>
-      <div style="text-align:center;"><button class="btn btn-purple btn-sm" onclick="regenRevision(${m.id})">🔄 Générer la fiche de révision</button></div>`:`<div style="max-width:640px;">
+      <div style="text-align:center;"><button class="btn btn-purple btn-sm" onclick="regenRevision(${m.id})">🔄 Générer la fiche de révision</button></div>`:`<div>
         <div style="border-left:4px solid var(--purple);padding-left:.85rem;margin-bottom:.7rem;"><div style="font-size:.62rem;font-weight:800;color:var(--purple);text-transform:uppercase;">Fiche synthèse — Examen</div><h3 style="font-size:.95rem;color:var(--navy);">${_e(rv.titre||m.titre)}</h3></div>
         ${(rv.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(rv.notions||[]).map(n2=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n2)}</div>`).join('')}</div>`:''}
         ${(rv.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(rv.formules||[]).map(f2=>`<span class="formula-tag">${_e(f2)}</span>`).join('')}</div>`:''}
@@ -4204,20 +4255,6 @@ function renderKPIs(m,mc){
   return intro+`<div class="kpi-meter-wrap">${cards}</div>`+reflexes;
 }
 
-/* ── Révision (acad) ── */
-function renderRev(m){
-  const s=m.revision;if(!s)return empty('📋','Aucune fiche');
-  return`<div style="max-width:640px;">
-    <div class="ccard" style="border-left:4px solid var(--purple);margin-bottom:1rem;">
-      <div style="font-size:.62rem;font-weight:800;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem;">Fiche de révision — Examen</div>
-      <h3 style="font-size:.95rem;color:var(--navy);">${_e(s.titre||m.titre)}</h3></div>
-    ${(s.notions||[]).length?`<div class="memo-block" style="background:var(--acad-bg);"><h4 style="color:var(--acad-dark);">📚 Notions clés</h4>${(s.notions||[]).map(n=>`<div class="memo-item" style="color:var(--acad-dark);">${_e(n)}</div>`).join('')}</div>`:''}
-    ${(s.formules||[]).length?`<div class="memo-block" style="background:#ecfdf5;"><h4 style="color:#065f46;">📐 Formules & théorèmes</h4>${(s.formules||[]).map(f=>`<span class="formula-tag">${_e(f)}</span>`).join('')}</div>`:''}
-    ${(s.methode||[]).length?`<div class="memo-block" style="background:var(--pro-bg);"><h4 style="color:var(--pro-dark);">🗂️ Démarche à l'examen</h4><ul class="steps-ol">${(s.methode||[]).map((e,j)=>`<li class="step-li"><div class="step-n acad">${j+1}</div><div class="step-t" style="color:#78350f;">${_e(e)}</div></li>`).join('')}</ul></div>`:''}
-    ${(s.pieges||[]).length?`<div class="memo-block" style="background:#fef2f2;"><h4 style="color:#991b1b;">⚠️ Pièges classiques</h4>${(s.pieges||[]).map(p=>`<div class="memo-item" style="color:#7f1d1d;">${_e(p)}</div>`).join('')}</div>`:''}
-    ${s.conseil?`<div class="memo-gold"><h4>💡 Conseil stratégique</h4><p>"${_e(s.conseil)}"</p></div>`:''}
-  </div>`;
-}
 
 /* ══════════════════════════════════════════════
    REMÉDIATION IA
@@ -4678,8 +4715,9 @@ async function regenQuiz(){
       :`${ctx}\nGénère ${getCfg().quizCount||8} NOUVEAUX QCM différents des précédents, style examen ingénieur "${m.dom}" :\n{"quiz":[{"q":"Question technique avec données numériques ou piège conceptuel propre à ${m.dom}","opts":["A: réponse","B: erreur d'unité ou formule adjacente incorrecte","C: approximation hors contexte de ${m.dom}","D: confusion avec notion voisine de ${m.dom}"],"correct":0,"notion":"notion précise de ${m.dom}","explication":"Justification rigoureuse : formule ou principe de ${m.dom} + pourquoi les autres options sont fausses (2-3 phrases)"}]}`;
     const res=await gemini(key,SYS,prompt,1600,T.EXERCICE);
     if(res.quiz?.length){
+      const cleanQuiz=_stripLatexDeep(res.quiz);
       const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
-      if(idx>=0){ms[idx].qcm=res.quiz;ms[idx].quiz=res.quiz;ms[idx].scores={};ms[idx].wrongByComp={};saveMods(ms);_cur=ms[idx];}
+      if(idx>=0){ms[idx].qcm=cleanQuiz;ms[idx].quiz=cleanQuiz;ms[idx].scores={};ms[idx].wrongByComp={};saveMods(ms);_cur=ms[idx];}
       _qs=false;_qa={};
       _renderInlineQuiz(_cur);
       showToast(res.quiz.length+' nouvelles questions générées !');
@@ -6221,7 +6259,7 @@ async function regenCas(modId){
       :`${ctxBase}\n\nGénère un cas industriel pédagogique pour ce cours.\n{"cas":{"entreprise":"Nom entreprise industrielle fictive","contexte":"Contexte industriel (3-4 phrases)","donnees":"Données techniques numériques","enjeux":"Enjeux pédagogiques et industriels","probleme":"Problème technique concret (3-4 phrases)","objectif":"Objectif SMART","contraintes":"Contraintes techniques/économiques"}}`,
       1200,T.EXERCICE));
     const idx=ms.findIndex(x=>x.id==modId);
-    if(idx>=0&&r.cas){ms[idx].cas=r.cas;saveMods(ms);_cur=ms[idx];}
+    if(idx>=0&&r.cas){ms[idx].cas=_stripLatexDeep(r.cas);saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast('Cas '+( p?'terrain':'industriel')+' généré !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer le cas';}}
 }
@@ -6236,7 +6274,7 @@ async function regenScenarios(modId){
       `Formation: "${m.titre}"\nObjectifs: ${(m.objectifs||[]).slice(0,3).join(' | ')}\n\nGénère 3 mises en situation terrain progressives.\n{"scenarios":[{"titre":"Titre scénario (lieu + situation)","difficulte":"débutant|intermédiaire|expert","contexte":"Environnement précis: lieu, heure, équipements (3-4 phrases)","situation":"Ce que le professionnel observe (4-5 phrases)","consigne":"Mission exacte avec critères mesurables.","indices":["Indice 1","Indice 2","Indice 3"],"correction":"Raisonnement expert complet (8-10 phrases)."}]}`,
       1800,T.EXERCICE));
     const idx=ms.findIndex(x=>x.id==modId);
-    if(idx>=0&&r.scenarios?.length){ms[idx].scenarios=r.scenarios;saveMods(ms);_cur=ms[idx];}
+    if(idx>=0&&r.scenarios?.length){ms[idx].scenarios=_stripLatexDeep(r.scenarios);saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast(r.scenarios?.length+' mises en situation générées !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer les mises en situation';}}
 }
@@ -6264,7 +6302,7 @@ async function regenChecklist(modId){
       `${ctx}\n\nJSON:\n{"checklist":{"avant":["Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","2","3","4","5"],"pendant":["Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","2","3","4"],"apres":["Vérification/validation APRÈS 1 (critère mesurable)","2","3"]}}`,
       1200,T.EXERCICE));
     const idx=ms.findIndex(x=>x.id==modId);
-    if(idx>=0&&r.checklist){ms[idx].checklist=r.checklist;saveMods(ms);_cur=ms[idx];}
+    if(idx>=0&&r.checklist){ms[idx].checklist=_stripLatexDeep(r.checklist);saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast('Check-list générée !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer la check-list';}}
 }
@@ -6282,7 +6320,7 @@ async function regenMemo(modId){
       `${ctx}\n\nMémo terrain expert — la fiche que le professionnel garde dans sa poche :\n{"titre":"Mémo ${m.dom} : [titre accrocheur]","regles":["Règle 1: principe fondamental avec valeur exacte","Règle 2","Règle 3","Règle 4","Règle 5"],"formules":["Formule/valeur 1: [formule ou valeur] — exemple chiffré","Formule 2","Valeur critique 3"],"formules_kv":[{"nom":"Nom court","valeur":"formule ou valeur numérique exacte"},{"nom":"Nom 2","valeur":"..."},{"nom":"Nom 3","valeur":"..."}],"interdits":["JAMAIS: erreur critique 1 — risque exact","JAMAIS: erreur 2","JAMAIS: erreur 3"],"reflexes_expert":["Réflexe 1: situation déclenchante → action instinctive","Réflexe 2","Réflexe 3"],"regle_or":"La règle d'or absolue du métier — 1 phrase percutante"}`,
       1400,T.CONTENU);
     const idx=ms.findIndex(x=>x.id==modId);
-    if(idx>=0&&r&&Object.keys(r).length){ms[idx].memo=r;saveMods(ms);_cur=ms[idx];}
+    if(idx>=0&&r&&Object.keys(r).length){ms[idx].memo=_stripLatexDeep(r);saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast('Mémo terrain généré !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer le mémo';}}
 }
@@ -6297,7 +6335,7 @@ async function regenExercices(modId){
       `Cours: "${m.titre}"\nObjectifs: ${(m.objectifs||[]).slice(0,3).join(' | ')}\nNotions: ${(m.notions||[]).join(', ')}\n\nGénère 3 exercices TD/TP progressifs.\n{"exercices":[{"titre":"Exercice — [thème précis]","difficulte":"debutant|intermediaire|avance","enonce":"Contexte industriel + données numériques (4-6 phrases)","questions":["Q1. ?","Q2. ?","Q3. ?","Q4. ?"],"correction":"Corrigé complet avec formules et calculs (8-10 phrases)","duree":"~20 min"}]}`,
       1800,T.EXERCICE));
     const idx=ms.findIndex(x=>x.id==modId);
-    if(idx>=0&&r.exercices?.length){ms[idx].exercices=r.exercices;saveMods(ms);_cur=ms[idx];}
+    if(idx>=0&&r.exercices?.length){ms[idx].exercices=_stripLatexDeep(r.exercices);saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast(r.exercices?.length+' exercices TD/TP générés !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer les exercices';}}
 }
@@ -6315,7 +6353,7 @@ async function regenRevision(modId){
       `${ctx}\n\nFiche de révision synthétique pour examen ingénieur:\n{"titre":"Fiche synthèse: [titre]","notions":["Notion 1: définition + formule si applicable","Notion 2","Notion 3","Notion 4"],"formules":["Formule 1: formule mathématique — conditions d'application — unités","Formule 2","Formule 3"],"formules_kv":[{"nom":"Nom court","valeur":"formule exacte"},{"nom":"Nom 2","valeur":"..."},{"nom":"Nom 3","valeur":"..."}],"pieges":["Piège classique 1: erreur fréquente à éviter","Piège 2","Piège 3"],"methode":["Étape 1: action à faire en premier à l'examen","Étape 2","Étape 3"],"conseil":"Conseil stratégique examen (1 phrase percutante)"}`,
       1200,T.CONTENU);
     const idx=ms.findIndex(x=>x.id==modId);
-    if(idx>=0&&r&&Object.keys(r).length){ms[idx].revision=r;saveMods(ms);_cur=ms[idx];}
+    if(idx>=0&&r&&Object.keys(r).length){ms[idx].revision=_stripLatexDeep(r);saveMods(ms);_cur=ms[idx];}
     renderViewer(_cur);showToast('Fiche de révision générée !');
   }catch(e){showToast('Erreur: '+e.message,'err');if(btn){btn.disabled=false;btn.textContent='🔄 Générer la fiche de révision';}}
 }
