@@ -1243,7 +1243,7 @@ const _CFG_DEFAULTS={
   formateur:'',
   formateurTitre:'Formateur / Responsable pédagogique',
   certifIntitule:'Attestation de Formation',
-  model:'qwen/qwen3.8-27b',
+  model:'groq/compound-mini',
   temperature:0.75,
   defaultMode:'pro',
   defaultNiveau:'intermédiaire',
@@ -1307,20 +1307,24 @@ const _NAV_GROUPS=[
    accessibles au compte (_refreshGroqSelector). L'ordre suit des mesures
    faites sur l'API : quota par minute, fiabilité du mode JSON, qualité du
    français, coût en jetons. */
-/* Un seul modèle proposé : choisi sur mesures faites le 2026-08-27 avec le
-   prompt réel du pipeline (voir _GROQ_TRUSTED pour le détail). */
+/* Un seul modèle proposé : basculé sur groq/compound-mini le 2026-09-01 —
+   70 000 jetons/min contre 8 000 pour qwen3.8-27b (l'ancien choix). Sur ce
+   dernier, générer 2 sections en parallèle suffisait à dépasser le quota et
+   faisait échouer plusieurs sections dans la même génération (voir aussi le
+   passage à 1 section à la fois dans pipePro/pipeAcad). Qwen restait le plus
+   dense par jeton, mais la marge de quota prime pour la fiabilité globale. */
 const _MODEL_OPTIONS=[
-  {value:'qwen/qwen3.8-27b',label:'✍️ Qwen 3.8 27B — modèle unique',
-   info:'Le plus fiable pour ce générateur : JSON toujours valide, français soigné, et le contenu le plus dense pour le moins de jetons — ce qui économise le quota.'},
+  {value:'groq/compound-mini',label:'⚡ Compound Mini — modèle unique',
+   info:'Quota généreux (70 000 jetons/min) — largement suffisant même sur des sections denses. JSON valide et français correct sur le prompt réel du pipeline.'},
 ];
 
 /* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v9';
+const _GROQ_MODELS_KEY='_gls_groq_mdls_v10';
 const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
 /* Secours si l'API /models est injoignable, ordonné par mesures réelles :
-   compound-mini d'abord (70 000 jetons/min contre 8 000 pour les autres, ce qui
-   supprime les coupures de quota), puis les modèles à français soigné. */
-const _GROQ_FALLBACK_CHAIN=['qwen/qwen3.8-27b','qwen/qwen3.6-27b','groq/compound-mini','llama-3.3-70b-versatile'];
+   compound-mini d'abord (70 000 jetons/min), puis qwen (dense/fiable mais
+   quota plus serré), puis llama en dernier repli. */
+const _GROQ_FALLBACK_CHAIN=['groq/compound-mini','qwen/qwen3.8-27b','qwen/qwen3.6-27b','llama-3.3-70b-versatile'];
 
 /* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur.
    Évite de tenter des modèles supprimés par Groq. */
@@ -1363,19 +1367,20 @@ function _parseRetryDelay(msg){
    génération silencieusement peu fiable.
    Liste fermée, ordonnée par mesures faites sur l'API le 2026-08-27
    (quota par minute lu dans les en-têtes, mode JSON et français éprouvés sur
-   une génération de section réelle). Le quota est le facteur décisif : à
-   8 000 jetons/min, deux sections en parallèle suffisent à déclencher une
-   attente ; compound-mini en offre 70 000. */
+   une génération de section réelle). Ordre revu le 2026-09-01 : compound-mini
+   passe en tête pour son quota (70 000 jetons/min) — à 8 000 jetons/min,
+   qwen3.8-27b faisait échouer plusieurs sections ensemble dès que 2 tournaient
+   en parallèle. */
 const _GROQ_TRUSTED=[
-  {re:/^qwen\/qwen3\.8-27b$/,     rank:0},  // modèle retenu
-  {re:/^qwen\/qwen3\.\d+-27b$/,   rank:1},  // même famille, si la version change
-  {re:/^groq\/compound-mini$/,     rank:2},  // secours : quota 70 000 j/min
+  {re:/^groq\/compound-mini$/,     rank:0},  // modèle retenu : quota 70 000 j/min
+  {re:/^qwen\/qwen3\.8-27b$/,     rank:1},  // dense et fiable par jeton, mais quota à 8 000 j/min
+  {re:/^qwen\/qwen3\.\d+-27b$/,   rank:2},  // même famille que ci-dessus, si la version change
   {re:/^llama-3\.3-70b-versatile$/,rank:3},  // secours pour les comptes qui y ont accès
   // Écartés — mesures du 2026-08-27 sur le prompt réel du pipeline :
   //  · openai/gpt-oss-120b et -20b : « Failed to validate JSON » sur les
   //    prompts longs, alors que tout le pipeline dépend du mode JSON
-  //  · groq/compound : exécute du code avant de répondre (12 196 jetons
-  //    contre 2 741 pour qwen sur la même section)
+  //  · groq/compound (version complète, pas mini) : exécute du code avant de
+  //    répondre (12 196 jetons contre 2 741 pour qwen sur la même section)
   //  · gemma2-9b-it : décommissionné par Groq
 ];
 function _groqRankOf(id){
@@ -2201,7 +2206,7 @@ async function _groqFetch(key,model,msgs,maxTok,temp,json){
    Utilisé par tous les appels IA de l'application. */
 async function _groqExec(key,msgs,maxTok,temp,json){
   if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
-  const configured=getCfg().model||'qwen/qwen3.8-27b';
+  const configured=getCfg().model||'groq/compound-mini';
   const tried=new Set();
   let lastErr;
 
@@ -2287,7 +2292,7 @@ async function _groqExec(key,msgs,maxTok,temp,json){
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
     throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (qwen/qwen3.8-27b, groq/compound-mini, llama-3.3-70b-versatile). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
+    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (groq/compound-mini, qwen/qwen3.8-27b, llama-3.3-70b-versatile). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
   throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
 }
 
@@ -2786,10 +2791,12 @@ JSON uniquement.`;
   /* Fading index : section procédurale n°0=exemple résolu, 1=partiel, 2+=autonome */
   let _proFadeCount=0;
   setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections rédigées…`,true);
-  /* 1 section à la fois, pas 2 : le compte configuré par défaut (qwen/qwen3.8-27b)
-     n'a que 8000 jetons/min — deux sections en parallèle (jusqu'à 2800 jetons de
-     sortie chacune + le prompt système) dépassaient ce budget et faisaient
-     échouer plusieurs sections ensemble dans la même génération. */
+  /* 1 section à la fois, pas 2 : diagnostiqué sur qwen/qwen3.8-27b (8000 jetons/min,
+     l'ancien modèle par défaut), où deux sections en parallèle (jusqu'à 2800 jetons
+     de sortie chacune + le prompt système) dépassaient ce budget et faisaient
+     échouer plusieurs sections ensemble. Le modèle par défaut a changé pour
+     compound-mini (70 000 jetons/min, largement plus de marge), mais on garde
+     1 à la fois par prudence — à réévaluer si la vitesse de génération le justifie. */
   const sections=await _mapLimited(plan.sections||[],1,async(s,i)=>{
     try{
       const _angle=_pickAngle('pro',fd.dom);
@@ -2922,9 +2929,8 @@ JSON uniquement.`;
   /* Fading index pour sections de type demonstration/application */
   let _acadFadeCount=0;
   setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections rédigées…`,false);
-  /* Même raison que côté pro : 8000 jetons/min sur le modèle par défaut, deux
-     sections en parallèle dépassaient ce budget et faisaient échouer plusieurs
-     sections ensemble. */
+  /* Même raison que côté pro : diagnostiqué sur l'ancien modèle par défaut
+     (8000 jetons/min), voir le commentaire équivalent dans pipePro. */
   const sections=await _mapLimited(plan.sections||[],1,async(s,i)=>{
     try{
       const isDemo=s.type==='demonstration';const isApp=s.type==='application';
@@ -5514,9 +5520,9 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'qwen/qwen3.8-27b':'✍️ JSON toujours valide, français soigné, contenu dense pour peu de jetons.',
-  'qwen/qwen3.6-27b':'✍️ Version précédente de la même famille.',
-  'groq/compound-mini':'🛡️ Secours — quota 70 000 jetons/min, contenu plus ramassé.',
+  'groq/compound-mini':'⚡ Quota généreux (70 000 jetons/min) — JSON valide, français correct, largement de marge même sur des sections denses.',
+  'qwen/qwen3.8-27b':'✍️ Secours — JSON très dense par jeton, mais quota plus serré (8 000 jetons/min).',
+  'qwen/qwen3.6-27b':'✍️ Secours — version précédente de la même famille que ci-dessus.',
   'llama-3.3-70b-versatile':'🧠 Secours — français soigné, si votre compte y a accès.',
 };
 function _modelInfoText(id){
@@ -5900,8 +5906,9 @@ function _seedLibraryIfEmpty(){
     const suspect=!m
       ||/^(gemini|grok|claude)/.test(m)||/^(gpt-4|gpt-3)/.test(m)  // reliquats d'autres fournisseurs
       ||/^llama3-|mixtral|llama-3\.1-70b|^gemma/.test(m)           // retirés/décommissionnés par Groq
-      ||/^openai\/gpt-oss/.test(m);                                // « Failed to validate JSON » sur les prompts longs — voir _GROQ_TRUSTED
-    if(suspect){cfg.model='qwen/qwen3.8-27b';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+      ||/^openai\/gpt-oss/.test(m)                                 // « Failed to validate JSON » sur les prompts longs — voir _GROQ_TRUSTED
+      ||m==='qwen/qwen3.8-27b';                                    // ancien modèle par défaut (8000 j/min) — migré vers compound-mini le 2026-09-01
+    if(suspect){cfg.model='groq/compound-mini';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
