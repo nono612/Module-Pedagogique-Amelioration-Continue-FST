@@ -1359,6 +1359,19 @@ const _RE_MAX_TOKENS=/max_tokens|maxoutputtokens|context_window|maximum context 
    marge de tokens plutôt qu'à l'identique — leçon du bug Groq du 2026-09-01
    où ce cas passait totalement inaperçu de la logique de relance. */
 const _RE_JSON_FAIL=/failed to generate json|failed_generation|json_validate_failed/i;
+/* Surcharge temporaire du modèle ("This model is currently experiencing
+   high demand... usually temporary") — constaté le 2026-09-02, une
+   formulation de plus que je n'avais pas anticipée. Une tentative rapide
+   sur le même modèle avant de passer au suivant. */
+const _RE_OVERLOADED=/currently experiencing high demand|overloaded|temporarily unavailable/i;
+/* La seule catégorie vraiment fatale : la clé elle-même est le problème,
+   aucun changement de modèle n'y changera rien. Tout le reste — y compris
+   une formulation qu'on n'a pas encore vue — est traité comme récupérable
+   par défaut (voir le "break" final dans _geminiExec) : après trois
+   surprises de vocabulaire Google en une journée (JSON tronqué, "no longer
+   available", "high demand"), mieux vaut ce filet par défaut que de
+   continuer à deviner chaque tournure possible d'une erreur transitoire. */
+const _RE_FATAL_KEY=/api key not valid|api_key_invalid|permission_denied|unauthenticated|invalid api key/i;
 
 const _sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
@@ -2283,6 +2296,9 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
             if(waited+delay<=45000){await _sleep(delay);waited+=delay;continue;}
             break; // attente trop longue : on tente un autre modèle
           }
+          // Surcharge temporaire signalée par Google elle-même comme telle
+          // → une tentative rapide sur le même modèle avant de passer au suivant.
+          if(_RE_OVERLOADED.test(msg)&&attempt===0){await _sleep(1500);continue;}
           // Sortie trop grande pour ce modèle (maxOutputTokens rejeté d'emblée
           // par l'API) → réduire de moitié (plancher 512)
           if(_RE_MAX_TOKENS.test(msg)&&shrinks<3&&tok>512){
@@ -2299,8 +2315,16 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
           if(_RE_SWITCH_MODEL.test(msg))break;
           // Coupure réseau passagère → une seule nouvelle tentative
           if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _sleep(1200);continue;}
-          // Vraie erreur (clé invalide…) → remonter immédiatement
-          throw e;
+          // Clé authentiquement invalide : aucun modèle n'y changera rien,
+          // inutile d'épuiser toute la chaîne pour rien → remonter tout de suite.
+          if(_RE_FATAL_KEY.test(msg))throw e;
+          // Erreur non anticipée : traitée comme propre à ce modèle plutôt que
+          // fatale d'emblée — un autre modèle de la chaîne peut très bien ne
+          // pas être concerné. Voir la note sur _RE_FATAL_KEY : ce filet par
+          // défaut a remplacé un "throw" trop strict qui laissait passer sans
+          // aucune tentative de récupération toute formulation d'erreur pas
+          // encore vue (ex: "high demand" avant l'ajout de _RE_OVERLOADED).
+          break;
         }
       }
     }
