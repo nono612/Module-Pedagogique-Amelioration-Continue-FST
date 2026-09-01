@@ -787,7 +787,7 @@ h1,h2,.ap-title-lg{
   <div class="lo-content">
     <div class="lo-badge">
       <span class="lo-badge-dot"></span>
-      Propulsé par Groq IA
+      Propulsé par Gemini IA
     </div>
 
     <h1 class="lo-title">
@@ -841,7 +841,7 @@ h1,h2,.ap-title-lg{
   </div>
   <div class="sb-key">
     <span class="sb-key-label">Clé API IA</span>
-    <input type="password" id="apiKeyInput" placeholder="gsk_… (clé Groq gratuite)" oninput="_onKeyInput.call(this,this.value)">
+    <input type="password" id="apiKeyInput" placeholder="AIza… (clé Gemini gratuite)" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadge" style="display:none;"></div>
   </div>
   <div class="sb-mode" id="sbMode"></div>
@@ -880,7 +880,7 @@ h1,h2,.ap-title-lg{
   <div class="cl-chat-wrap">
     <!-- Topbar -->
     <div class="cl-topbar">
-      <div class="cl-model-pill"><div class="cl-model-dot"></div>Green Lab Assistant · Groq</div>
+      <div class="cl-model-pill"><div class="cl-model-dot"></div>Green Lab Assistant · Gemini</div>
       <div class="cl-topbar-actions">
         <button class="cl-topbar-btn" onclick="resetChat()">↩ Nouvelle conv.</button>
       </div>
@@ -1028,12 +1028,12 @@ h1,h2,.ap-title-lg{
     </div>
   </div>
 
-  <!-- ② CLÉ API — Groq -->
+  <!-- ② CLÉ API — Gemini -->
   <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
-    <div class="ccard-title">🔑 Clé API Groq</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">✅ Gratuit · Sauvegardée automatiquement. Créez votre clé sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#d97706;font-weight:700;text-decoration:none;">console.groq.com ↗</a></p>
-    <div class="form-group"><label class="form-label">Votre clé Groq</label>
-    <input type="password" id="apiKeySettings" class="form-input" placeholder="gsk_…" oninput="_onKeyInput.call(this,this.value)">
+    <div class="ccard-title">🔑 Clé API Gemini</div>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">✅ Gratuit · Sauvegardée automatiquement. Créez votre clé sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#4285f4;font-weight:700;text-decoration:none;">aistudio.google.com ↗</a></p>
+    <div class="form-group"><label class="form-label">Votre clé Gemini</label>
+    <input type="password" id="apiKeySettings" class="form-input" placeholder="AIza…" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadgeSettings" style="margin-top:.4rem;"></div></div>
 
     <div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;">
@@ -1049,9 +1049,9 @@ h1,h2,.ap-title-lg{
   <!-- ③ MOTEUR IA -->
   <div class="ccard" style="max-width:680px;margin-bottom:1rem;">
     <div class="ccard-title">🤖 Moteur IA</div>
-    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle Groq et la créativité. Seuls les modèles <b>testés et fiables</b> pour du contenu pédagogique en français sont proposés — tous fonctionnent, vous pouvez changer sans risque.</p>
+    <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.9rem;">Choisissez le modèle Gemini et la créativité. Un seul modèle est proposé, sélectionné automatiquement parmi ceux accessibles à votre compte.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:end;">
-      <div class="form-group"><label class="form-label">Modèle (Groq)</label>
+      <div class="form-group"><label class="form-label">Modèle (Gemini)</label>
         <select id="cfg-model" class="form-input" onchange="saveCfg('model',this.value);updateModelPill()"></select>
       </div>
       <div class="form-group"><label class="form-label">Créativité — Température : <span id="cfg-temp-val">0.75</span></label>
@@ -1301,134 +1301,111 @@ const _NAV_GROUPS=[
   ]},
 ];
 
-/* Liste de départ. Elle est remplacée au chargement par les modèles réellement
-   disponibles sur le compte (voir _refreshGroqSelector). */
-/* Liste de départ, remplacée au chargement par les modèles réellement
-   accessibles au compte (_refreshGroqSelector). L'ordre suit des mesures
-   faites sur l'API : quota par minute, fiabilité du mode JSON, qualité du
-   français, coût en jetons. */
-/* Un seul modèle proposé : basculé sur groq/compound-mini le 2026-09-01 —
-   70 000 jetons/min contre 8 000 pour qwen3.8-27b (l'ancien choix). Sur ce
-   dernier, générer 2 sections en parallèle suffisait à dépasser le quota et
-   faisait échouer plusieurs sections dans la même génération (voir aussi le
-   passage à 1 section à la fois dans pipePro/pipeAcad). Qwen restait le plus
-   dense par jeton, mais la marge de quota prime pour la fiabilité globale. */
+/* Un seul modèle proposé, basculé sur Gemini le 2026-09-01 après trois
+   échecs de fiabilité différents sur Groq (quota TPM trop serré sur qwen,
+   JSON tronqué en 200 OK sur compound-mini, plan généré sans section sur
+   compound-mini) — décision de l'utilisateur, pas seulement une mesure.
+   IMPORTANT : contrairement à la liste Groq (mesurée en direct sur ce
+   projet le 2026-08-27), aucun modèle Gemini n'a encore été testé sur le
+   prompt réel du pipeline — ce choix de départ est une estimation prudente.
+   La découverte en direct au premier chargement (_refreshGeminiSelector)
+   corrige automatiquement vers ce que le compte a réellement dès qu'une
+   clé valide est saisie. */
 const _MODEL_OPTIONS=[
-  {value:'groq/compound-mini',label:'⚡ Compound Mini — modèle unique',
-   info:'Quota généreux (70 000 jetons/min) — largement suffisant même sur des sections denses. JSON valide et français correct sur le prompt réel du pipeline.'},
+  {value:'gemini-2.0-flash',label:'✨ Gemini 2.0 Flash — modèle unique',
+   info:'Modèle rapide et gratuit chez Google — quota précis à confirmer sur votre compte via la découverte automatique au premier chargement.'},
 ];
 
-/* ─── Groq Live Model Discovery ─── */
-const _GROQ_MODELS_KEY='_gls_groq_mdls_v10';
-const _GROQ_MODELS_TTL=6*60*60*1000; // 6h cache
-/* Secours si l'API /models est injoignable, ordonné par mesures réelles :
-   compound-mini d'abord (70 000 jetons/min), puis qwen (dense/fiable mais
-   quota plus serré), puis llama en dernier repli. */
-const _GROQ_FALLBACK_CHAIN=['groq/compound-mini','qwen/qwen3.8-27b','qwen/qwen3.6-27b','llama-3.3-70b-versatile'];
+/* ─── Gemini Live Model Discovery ─── */
+const _GEMINI_MODELS_KEY='_gls_gemini_mdls_v1';
+const _GEMINI_MODELS_TTL=6*60*60*1000; // 6h cache
+const _GEMINI_FALLBACK_CHAIN=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-flash-8b'];
 
-/* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur.
-   Évite de tenter des modèles supprimés par Groq. */
-function _groqChain(preferred){
+/* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur. */
+function _geminiChain(preferred){
   const seen=new Set();
   const out=[];
   const push=m=>{if(m&&!seen.has(m)){seen.add(m);out.push(m);}};
   push(preferred);
   try{
-    const cached=JSON.parse(localStorage.getItem(_GROQ_MODELS_KEY)||'null');
+    const cached=JSON.parse(localStorage.getItem(_GEMINI_MODELS_KEY)||'null');
     if(cached&&Array.isArray(cached.ids))cached.ids.forEach(push);
   }catch(_){}
-  _GROQ_FALLBACK_CHAIN.forEach(push);
+  _GEMINI_FALLBACK_CHAIN.forEach(push);
   return out;
 }
 
 /* Erreurs qui justifient d'essayer un autre modèle (le modèle est inutilisable tel quel) */
-const _RE_SWITCH_MODEL=/does not exist|not found|invalid_model|no access|do not have access|decommission|deprecat/i;
+const _RE_SWITCH_MODEL=/does not exist|not found|invalid_model|no access|do not have access|decommission|deprecat|not supported/i;
 /* Erreurs de quota — attendre puis réessayer le MÊME modèle est plus efficace */
-const _RE_RATE_LIMIT=/rate.?limit|tokens per minute|TPM|requests per minute|RPM|429/i;
-/* Le modèle refuse la taille demandée — réessayer en réduisant max_tokens */
-const _RE_MAX_TOKENS=/max_tokens|context_window|maximum context length|reduce the length/i;
-/* Le modèle a produit un texte qui ne parse pas comme JSON valide (mode
-   response_format json_object). Peut être un raté ponctuel du modèle sur ce
-   prompt précis : on retente une fois le même modèle avant de basculer sur
-   le suivant de la chaîne. */
+const _RE_RATE_LIMIT=/quota|rate.?limit|RESOURCE_EXHAUSTED|429/i;
+/* Le modèle refuse la taille demandée (maxOutputTokens hors limites du modèle) —
+   réessayer en réduisant. Différent d'une troncature en cours de génération
+   (voir _RE_JSON_FAIL) : ici c'est l'API qui rejette la requête d'emblée. */
+const _RE_MAX_TOKENS=/max_tokens|maxoutputtokens|context_window|maximum context length|reduce the length|token limit/i;
+/* Réponse tronquée avant la fin (MAX_TOKENS en cours de génération — donc
+   200 OK mais JSON incomplet, voir _geminiFetch) ou JSON localement invalide
+   malgré responseMimeType=application/json. On réessaie en élargissant la
+   marge de tokens plutôt qu'à l'identique — leçon du bug Groq du 2026-09-01
+   où ce cas passait totalement inaperçu de la logique de relance. */
 const _RE_JSON_FAIL=/failed to generate json|failed_generation|json_validate_failed/i;
 
 const _sleep=ms=>new Promise(r=>setTimeout(r,ms));
-/* Groq renvoie « Please try again in 27.6225s » — on extrait le délai réel */
-function _parseRetryDelay(msg){
-  const m=/try again in ([\d.]+)\s*s/i.exec(msg||'');
-  if(m){const s=parseFloat(m[1]);if(s>0&&s<75)return Math.ceil(s*1000)+400;}
-  return null;
-}
 
-/* LISTE FERMÉE — uniquement des modèles Groq mesurés et fiables sur le vrai
-   prompt du pipeline. Volontairement aucun repli vers un modèle jamais testé :
-   mieux vaut un message d'erreur clair demandant de corriger la clé qu'une
-   génération silencieusement peu fiable.
-   Liste fermée, ordonnée par mesures faites sur l'API le 2026-08-27
-   (quota par minute lu dans les en-têtes, mode JSON et français éprouvés sur
-   une génération de section réelle). Ordre revu le 2026-09-01 : compound-mini
-   passe en tête pour son quota (70 000 jetons/min) — à 8 000 jetons/min,
-   qwen3.8-27b faisait échouer plusieurs sections ensemble dès que 2 tournaient
-   en parallèle. */
-const _GROQ_TRUSTED=[
-  {re:/^groq\/compound-mini$/,     rank:0},  // modèle retenu : quota 70 000 j/min
-  {re:/^qwen\/qwen3\.8-27b$/,     rank:1},  // dense et fiable par jeton, mais quota à 8 000 j/min
-  {re:/^qwen\/qwen3\.\d+-27b$/,   rank:2},  // même famille que ci-dessus, si la version change
-  {re:/^llama-3\.3-70b-versatile$/,rank:3},  // secours pour les comptes qui y ont accès
-  // Écartés — mesures du 2026-08-27 sur le prompt réel du pipeline :
-  //  · openai/gpt-oss-120b et -20b : « Failed to validate JSON » sur les
-  //    prompts longs, alors que tout le pipeline dépend du mode JSON
-  //  · groq/compound (version complète, pas mini) : exécute du code avant de
-  //    répondre (12 196 jetons contre 2 741 pour qwen sur la même section)
-  //  · gemma2-9b-it : décommissionné par Groq
+/* LISTE FERMÉE — ESTIMATION, pas une mesure comme pour Groq (voir note sur
+   _MODEL_OPTIONS). Priorité aux modèles "flash" (quota gratuit nettement
+   plus généreux que "pro" chez Google), en évitant les previews/experimental
+   (quota habituellement très restreint) et les modèles non conversationnels
+   (embedding, vision-only, aqa…). À ajuster après un premier test réel sur
+   le prompt du pipeline. */
+const _GEMINI_TRUSTED=[
+  {re:/^gemini-2\.\d+-flash$/,        rank:0},  // ex. gemini-2.0-flash — quota généreux pressenti
+  {re:/^gemini-2\.\d+-flash-\d+b$/,   rank:1},  // variantes légères de la même génération
+  {re:/^gemini-1\.5-flash$/,          rank:2},  // génération précédente, encore largement disponible
+  {re:/^gemini-1\.5-flash-8b$/,       rank:3},
+  {re:/^gemini-\d+(\.\d+)?-pro$/,     rank:4},  // quota gratuit plus serré chez Google, en dernier recours
 ];
-function _groqRankOf(id){
-  for(const t of _GROQ_TRUSTED){if(t.re.test(id))return t.rank;}
+function _geminiRankOf(id){
+  for(const t of _GEMINI_TRUSTED){if(t.re.test(id))return t.rank;}
   return -1; // hors liste fermée
 }
-function _groqModelLabel(id){
-  if(id.includes('instant'))return'⚡ '+id+' (rapide)';
-  if(/8b/i.test(id))return'⚡ '+id;
-  if(/70b|90b|120b/i.test(id))return'🧠 '+id;
-  return id;
-}
-async function _fetchGroqModels(key){
+async function _fetchGeminiModels(key){
   try{
-    const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key));
     if(!r.ok)return null;
     const d=await r.json();
-    const ids=(d.data||[])
-      .filter(m=>m.object==='model'&&_groqRankOf(m.id)>=0)
-      .map(m=>m.id)
-      .sort((a,b)=>_groqRankOf(a)-_groqRankOf(b));
+    const ids=(d.models||[])
+      .filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent'))
+      .map(m=>(m.name||'').replace(/^models\//,''))
+      .filter(id=>_geminiRankOf(id)>=0)
+      .sort((a,b)=>_geminiRankOf(a)-_geminiRankOf(b));
     return ids.length?ids:null;
   }catch(e){return null;}
 }
 
-let _groqRefreshTimer=null;
-async function _refreshGroqSelector(key,force=false){
-  if(!key||!key.startsWith('gsk_'))return;
-  const cached=JSON.parse(localStorage.getItem(_GROQ_MODELS_KEY)||'null');
-  const ids=(!force&&cached&&Date.now()-cached.ts<_GROQ_MODELS_TTL)
+let _geminiRefreshTimer=null;
+async function _refreshGeminiSelector(key,force=false){
+  if(!key||!key.startsWith('AIza'))return;
+  const cached=JSON.parse(localStorage.getItem(_GEMINI_MODELS_KEY)||'null');
+  const ids=(!force&&cached&&Date.now()-cached.ts<_GEMINI_MODELS_TTL)
     ?cached.ids
-    :await _fetchGroqModels(key);
+    :await _fetchGeminiModels(key);
   if(!ids||!ids.length)return;
-  localStorage.setItem(_GROQ_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
+  localStorage.setItem(_GEMINI_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
   /* On ne propose qu'un modèle : le mieux classé parmi ceux auxquels le compte
-     a réellement accès. Si le modèle retenu disparaît du catalogue Groq, le
+     a réellement accès. Si le modèle retenu disparaît du catalogue Gemini, le
      suivant de la liste fermée prend sa place sans intervention. */
   const best=ids[0];
   _MODEL_OPTIONS.length=0;
   _MODEL_OPTIONS.push({value:best,
-    label:(_groqModelLabel(best)||best)+' — modèle unique',
-    info:_MODEL_INFO[best]||'Modèle vérifié sur votre compte Groq.'});
+    label:'✨ '+best+' — modèle unique',
+    info:_MODEL_INFO[best]||'Modèle vérifié sur votre compte Gemini.'});
   // Auto-migrate config if current model no longer available
   const cur=getCfg().model;
   if(cur&&!ids.includes(cur)){
     const first=ids[0];
     saveCfg('model',first);
-    if(typeof showToast==='function')showToast('Modèle Groq mis à jour : '+first);
+    if(typeof showToast==='function')showToast('Modèle Gemini mis à jour : '+first);
   }
   // Refresh selector in settings panel if already open
   _fillSelect('cfg-model',_MODEL_OPTIONS,getCfg().model,o=>o.value,o=>o.label);
@@ -2179,34 +2156,72 @@ function _loadScript(src){
 }
 
 /* ══════════════════════════════════════════════
-   API — Groq uniquement
+   API — Gemini uniquement
 ══════════════════════════════════════════════ */
 function detectProvider(key){
   if(!key)return null;
-  if(key.startsWith('gsk_'))return'groq';
+  if(key.startsWith('AIza'))return'gemini';
   return null;
 }
-const _PROVIDER_INFO={groq:{label:'⚡ Groq · Llama',color:'#f59e0b'}};
+const _PROVIDER_INFO={gemini:{label:'✨ Gemini',color:'#4285f4'}};
 
-const _GROQ_EP='https://api.groq.com/openai/v1/chat/completions';
+const _GEMINI_EP=model=>`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-/* Un aller-retour HTTP vers Groq. Lève une Error portant le message de l'API. */
-async function _groqFetch(key,model,msgs,maxTok,temp,json){
-  const body={model,messages:msgs,temperature:temp!==undefined?temp:getCfg().temperature,max_tokens:maxTok};
-  if(json)body.response_format={type:'json_object'};
-  const r=await fetch(_GROQ_EP,{method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+/* Convertit les messages au format OpenAI (system/user/assistant) utilisés
+   partout ailleurs dans l'app vers le format Gemini : systemInstruction à
+   part, contents avec les rôles user/model (Gemini n'a pas "assistant"). */
+function _toGeminiContents(msgs){
+  const sys=msgs.filter(m=>m.role==='system').map(m=>m.content).join('\n\n');
+  const contents=msgs.filter(m=>m.role!=='system').map(m=>({
+    role:m.role==='assistant'?'model':'user',
+    parts:[{text:m.content}],
+  }));
+  return{sys,contents};
+}
+
+/* Un aller-retour HTTP vers Gemini. Lève une Error portant le message de l'API. */
+async function _geminiFetch(key,model,msgs,maxTok,temp,json){
+  const{sys,contents}=_toGeminiContents(msgs);
+  const body={
+    contents,
+    generationConfig:{
+      temperature:temp!==undefined?temp:getCfg().temperature,
+      maxOutputTokens:maxTok,
+    },
+  };
+  if(sys)body.systemInstruction={parts:[{text:sys}]};
+  if(json)body.generationConfig.responseMimeType='application/json';
+  const r=await fetch(_GEMINI_EP(model)+'?key='+encodeURIComponent(key),{
+    method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
-  return d.choices?.[0]?.message?.content||'';
+  if(!r.ok){
+    const err=new Error(d.error?.message||'Erreur Gemini '+r.status);
+    // Gemini indique parfois le délai d'attente dans error.details plutôt
+    // que dans le message texte (contrairement à Groq) — on le récupère ici
+    // pour patienter le bon temps plutôt qu'un délai générique.
+    const detail=(d.error?.details||[]).find(x=>x['@type']?.includes('RetryInfo'));
+    if(detail?.retryDelay){const s=parseFloat(detail.retryDelay);if(s>0)err.retryDelaySeconds=s;}
+    throw err;
+  }
+  const cand=d.candidates?.[0];
+  if(cand?.finishReason==='SAFETY'||cand?.finishReason==='RECITATION')
+    throw new Error('Réponse bloquée par les filtres Gemini (finishReason: '+cand.finishReason+') — reformulez le prompt.');
+  const text=(cand?.content?.parts||[]).map(p=>p.text||'').join('');
+  /* Gemini peut renvoyer 200 OK avec un JSON tronqué si maxOutputTokens est
+     atteint avant la fin de la génération (finishReason:"MAX_TOKENS") — même
+     angle mort que celui trouvé sur Groq le 2026-09-01. On le traite comme
+     un échec JSON explicite pour déclencher la même relance à budget élargi. */
+  if(json&&cand?.finishReason==='MAX_TOKENS')
+    throw new Error('failed_generation: MAX_TOKENS — réponse tronquée avant la fin (JSON incomplet)');
+  return text;
 }
 
 /* Exécuteur unique : gère quotas, modèles retirés, tailles refusées et coupures réseau.
    Utilisé par tous les appels IA de l'application. */
-async function _groqExec(key,msgs,maxTok,temp,json){
-  if(!key?.startsWith('gsk_'))throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
-  const configured=getCfg().model||'groq/compound-mini';
+async function _geminiExec(key,msgs,maxTok,temp,json){
+  if(!key?.startsWith('AIza'))throw new Error('Clé Gemini requise (format : AIza…). Obtenez-en une gratuite sur aistudio.google.com/apikey');
+  const configured=getCfg().model||'gemini-2.0-flash';
   const tried=new Set();
   let lastErr;
 
@@ -2223,42 +2238,38 @@ async function _groqExec(key,msgs,maxTok,temp,json){
 
       for(let attempt=0;attempt<4;attempt++){
         try{
-          const res=await _groqFetch(key,model,msgs,tok,temp,json);
-          /* Groq ne signale pas toujours lui-même un JSON tronqué (statut 200
-             renvoyé quand même) — surtout sur un schéma dense proche de la
-             limite de tokens. Sans ce contrôle, gemini() ferait échouer la
-             section au JSON.parse(), APRÈS ce point : la relance avec un
-             budget de tokens élargi (juste en dessous) ne se déclencherait
-             jamais. On valide donc ici, dans la boucle de tentatives, pour
-             que ce cas suive exactement le même chemin que les échecs JSON
-             signalés par l'API elle-même. */
+          const res=await _geminiFetch(key,model,msgs,tok,temp,json);
+          /* Filet de sécurité supplémentaire, indépendant du contrôle
+             finishReason déjà fait dans _geminiFetch : couvre le cas rare
+             où Gemini renvoie un JSON malformé pour une autre raison que
+             MAX_TOKENS malgré responseMimeType=application/json. */
           if(json){
             const cleaned=res.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
             try{JSON.parse(cleaned);}
             catch(_){throw new Error('failed_generation: JSON local invalide ou tronqué');}
           }
-          if(model!==configured){saveCfg('model',model);setTimeout(()=>_refreshGroqSelector(key,true),0);}
+          if(model!==configured){saveCfg('model',model);setTimeout(()=>_refreshGeminiSelector(key,true),0);}
           return res;
         }catch(e){
           const msg=e.message||'';
           lastErr=e;
 
-          // Quota atteint → patienter le délai annoncé par Groq, puis réessayer ce modèle
+          // Quota atteint → patienter le délai annoncé par Gemini, puis réessayer ce modèle
           if(_RE_RATE_LIMIT.test(msg)){
-            const delay=_parseRetryDelay(msg)??4000;
+            const delay=e.retryDelaySeconds?Math.ceil(e.retryDelaySeconds*1000)+400:4000;
             if(waited+delay<=45000){await _sleep(delay);waited+=delay;continue;}
             break; // attente trop longue : on tente un autre modèle
           }
-          // Sortie trop grande pour ce modèle → réduire de moitié (plancher 512)
+          // Sortie trop grande pour ce modèle (maxOutputTokens rejeté d'emblée
+          // par l'API) → réduire de moitié (plancher 512)
           if(_RE_MAX_TOKENS.test(msg)&&shrinks<3&&tok>512){
             tok=Math.max(512,Math.floor(tok/2));shrinks++;continue;
           }
-          // JSON invalide généré → la cause la plus probable sur un contenu
-          // dense est une réponse tronquée avant sa fin (le budget de tokens
-          // était trop juste) : on réessaie en élargissant la marge plutôt
-          // qu'à l'identique. Si ça persiste, on passe au modèle suivant.
+          // JSON invalide ou tronqué en cours de génération → on réessaie en
+          // élargissant la marge plutôt qu'à l'identique. Si ça persiste, on
+          // passe au modèle suivant.
           if(_RE_JSON_FAIL.test(msg)){
-            if(jsonFails<2){jsonFails++;tok=Math.min(6000,Math.round(tok*1.35));continue;}
+            if(jsonFails<2){jsonFails++;tok=Math.min(8000,Math.round(tok*1.35));continue;}
             break;
           }
           // Modèle retiré ou inaccessible pour cette clé → passer au suivant
@@ -2273,7 +2284,7 @@ async function _groqExec(key,msgs,maxTok,temp,json){
     return undefined; // chaîne épuisée sans succès
   };
 
-  let res=await tryChain(_groqChain(configured));
+  let res=await tryChain(_geminiChain(configured));
   if(res!==undefined)return res;
 
   // Toute la chaîne connue (configurée + cache + secours codé en dur) a échoué.
@@ -2281,26 +2292,26 @@ async function _groqExec(key,msgs,maxTok,temp,json){
   // accessibles à cette clé : la liste mémorisée peut être obsolète, ou la clé
   // peut n'avoir accès qu'à un sous-ensemble différent des modèles standards.
   try{
-    const fresh=await _fetchGroqModels(key);
+    const fresh=await _fetchGeminiModels(key);
     if(fresh&&fresh.length){
-      localStorage.setItem(_GROQ_MODELS_KEY,JSON.stringify({ts:Date.now(),ids:fresh}));
+      localStorage.setItem(_GEMINI_MODELS_KEY,JSON.stringify({ts:Date.now(),ids:fresh}));
       res=await tryChain(fresh);
       if(res!==undefined)return res;
     }
   }catch(_){}
 
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
-    throw new Error('Quota Groq atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
+    throw new Error('Quota Gemini atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (groq/compound-mini, qwen/qwen3.8-27b, llama-3.3-70b-versatile). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
-  throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
+    throw new Error('Votre clé n\'a accès à aucun modèle Gemini fiable. Vérifiez votre clé sur aistudio.google.com/apikey.');
+  throw lastErr||new Error('Aucun modèle Gemini disponible. Vérifiez votre clé sur aistudio.google.com');
 }
 
 async function _callAI(key,sys,usr,maxTok,temp,json){
   const msgs=[];
   if(sys)msgs.push({role:'system',content:sys});
   msgs.push({role:'user',content:usr});
-  return _groqExec(key,msgs,maxTok,temp,json);
+  return _geminiExec(key,msgs,maxTok,temp,json);
 }
 
 /* Température par nature de tâche.
@@ -2328,7 +2339,7 @@ async function geminiText(key,sys,usr,maxTok,temp){
 /* Conversation multi-tours (panneau chat) — format natif préservé,
    même robustesse que les autres appels. */
 async function _callAIWithHistory(key,msgs,maxTok,temp){
-  return _groqExec(key,msgs,maxTok,temp,false);
+  return _geminiExec(key,msgs,maxTok,temp,false);
 }
 
 /* ── Content quality verification (background, non-blocking) ── */
@@ -2619,9 +2630,9 @@ function _bgVerifyModule(mod,key){
 function _updateProviderBadge(key){
   const badge=document.getElementById('providerBadge');
   if(!badge)return;
-  if(key?.startsWith('gsk_')){
-    badge.textContent='⚡ Groq · Llama';
-    badge.style.cssText='display:inline-block;margin-top:.35rem;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#f59e0b18;color:#f59e0b;border:1.5px solid #f59e0b40;';
+  if(key?.startsWith('AIza')){
+    badge.textContent='✨ Gemini';
+    badge.style.cssText='display:inline-block;margin-top:.35rem;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#4285f418;color:#4285f4;border:1.5px solid #4285f440;';
   } else {
     badge.style.display='none';
   }
@@ -2632,10 +2643,10 @@ function _onKeyInput(value){
   const set=document.getElementById('apiKeySettings');if(set&&set!==this)set.value=value;
   _updateProviderBadge(value);
   const b2=document.getElementById('providerBadgeSettings');
-  if(b2)b2.innerHTML=value.startsWith('gsk_')?'<span style="display:inline-block;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#f59e0b18;color:#f59e0b;border:1.5px solid #f59e0b40;">⚡ Groq détecté ✓</span>':'';
-  if(value.startsWith('gsk_')&&value.length>15){
-    clearTimeout(_groqRefreshTimer);
-    _groqRefreshTimer=setTimeout(()=>_refreshGroqSelector(value,true),900);
+  if(b2)b2.innerHTML=value.startsWith('AIza')?'<span style="display:inline-block;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#4285f418;color:#4285f4;border:1.5px solid #4285f440;">✨ Gemini détecté ✓</span>':'';
+  if(value.startsWith('AIza')&&value.length>15){
+    clearTimeout(_geminiRefreshTimer);
+    _geminiRefreshTimer=setTimeout(()=>_refreshGeminiSelector(value,true),900);
   }
 }
 
@@ -2644,8 +2655,8 @@ function _onKeyInput(value){
 ══════════════════════════════════════════════ */
 async function startGen(){
   const key=getKey();
-  if(!key){setFMsg('⚠️ Saisissez votre clé API Groq (gsk_…) dans la barre latérale.','var(--red)');return;}
-  if(!key.startsWith('gsk_')){setFMsg('⚠️ Clé Groq requise — format : gsk_… Obtenez-en une gratuite sur console.groq.com','var(--red)');return;}
+  if(!key){setFMsg('⚠️ Saisissez votre clé API Gemini (AIza…) dans la barre latérale.','var(--red)');return;}
+  if(!key.startsWith('AIza')){setFMsg('⚠️ Clé Gemini requise — format : AIza… Obtenez-en une gratuite sur aistudio.google.com','var(--red)');return;}
   const dom=document.getElementById('fDom')?.value.trim();
   if(!dom){setFMsg('⚠️ Saisissez le domaine/matière.','var(--red)');return;}
   const comp=document.getElementById('fComp')?.value.trim();
@@ -5534,10 +5545,9 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'groq/compound-mini':'⚡ Quota généreux (70 000 jetons/min) — JSON valide, français correct, largement de marge même sur des sections denses.',
-  'qwen/qwen3.8-27b':'✍️ Secours — JSON très dense par jeton, mais quota plus serré (8 000 jetons/min).',
-  'qwen/qwen3.6-27b':'✍️ Secours — version précédente de la même famille que ci-dessus.',
-  'llama-3.3-70b-versatile':'🧠 Secours — français soigné, si votre compte y a accès.',
+  'gemini-2.0-flash':'✨ Modèle rapide et gratuit — quota généreux pressenti chez Google, à confirmer sur votre compte.',
+  'gemini-1.5-flash':'✨ Secours — génération précédente, encore largement disponible.',
+  'gemini-1.5-flash-8b':'✨ Secours — variante légère de la même famille.',
 };
 function _modelInfoText(id){
   return _MODEL_INFO[id]||'Modèle sélectionné.';
@@ -5910,24 +5920,23 @@ function _seedLibraryIfEmpty(){
    INIT
 ══════════════════════════════════════════════ */
 (function(){
-  // Migration : remplace les anciens modèles dépréciés
-  /* Le modèle mémorisé n'est conservé que s'il reste plausible.
-     Une liste noire devient vite obsolète : on valide plutôt le format et on
-     laisse la découverte en direct (_refreshGroqSelector) confirmer ou corriger. */
+  /* Migration du 2026-09-01 : passage de Groq à Gemini comme unique
+     fournisseur, après trois échecs de fiabilité différents sur Groq
+     (quota TPM, JSON tronqué, plan généré sans section). Tout modèle
+     mémorisé qui ne ressemble pas à un nom Gemini (donc tout résidu de
+     Groq ou d'un fournisseur antérieur) est remplacé par le modèle par
+     défaut — la découverte en direct (_refreshGeminiSelector) corrige
+     ensuite vers ce que le compte a réellement dès qu'une clé valide est
+     saisie. */
   try{
     const cfg=JSON.parse(localStorage.getItem(_CFG_KEY)||'{}');
     const m=cfg.model;
-    const suspect=!m
-      ||/^(gemini|grok|claude)/.test(m)||/^(gpt-4|gpt-3)/.test(m)  // reliquats d'autres fournisseurs
-      ||/^llama3-|mixtral|llama-3\.1-70b|^gemma/.test(m)           // retirés/décommissionnés par Groq
-      ||/^openai\/gpt-oss/.test(m)                                 // « Failed to validate JSON » sur les prompts longs — voir _GROQ_TRUSTED
-      ||m==='qwen/qwen3.8-27b';                                    // ancien modèle par défaut (8000 j/min) — migré vers compound-mini le 2026-09-01
-    if(suspect){cfg.model='groq/compound-mini';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+    if(!/^gemini-/.test(m||'')){cfg.model='gemini-2.0-flash';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
-    // Non-blocking: refresh Groq model list on startup (uses 6h cache)
-    if(k.startsWith('gsk_'))setTimeout(()=>_refreshGroqSelector(k),300);
+    // Non-blocking: refresh Gemini model list on startup (uses 6h cache)
+    if(k.startsWith('AIza'))setTimeout(()=>_refreshGeminiSelector(k),300);
   }
   _seedLibraryIfEmpty();   // modules pré-créés de démonstration (une seule fois)
   renderNav();
@@ -6176,7 +6185,7 @@ async function sendChat(){
   const input=document.getElementById('chatInput');
   const text=(input?.value||'').trim();if(!text)return;
   const key=getKey();
-  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API Groq (gsk_…) dans la barre latérale.\n\nElle est gratuite : créez-la sur **console.groq.com/keys**.'},false);return;}
+  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API Gemini (AIza…) dans la barre latérale.\n\nElle est gratuite : créez-la sur **aistudio.google.com/apikey**.'},false);return;}
   input.value='';input.style.height='auto';
   document.getElementById('chatSendBtn').disabled=true;
   _renderChatMsg({role:'user',text});
