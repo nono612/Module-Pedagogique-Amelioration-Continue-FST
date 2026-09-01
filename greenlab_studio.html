@@ -2714,8 +2714,6 @@ function setStep(id,state,msg,p){
 async function _retry(fn,attempts=2){let last;for(let i=0;i<attempts;i++){try{return await fn();}catch(e){last=e;}}throw last;}
 
 /* Exécute des tâches par petits lots plutôt que toutes en parallèle.
-   Lancer 6 sections d'un coup dépasse le quota Groq par minute ; deux à la fois
-   passe sans encombre tout en restant nettement plus rapide que du séquentiel.
    L'ordre des résultats est préservé. */
 async function _mapLimited(items,limit,fn){
   const out=new Array(items.length);
@@ -2787,8 +2785,12 @@ JSON uniquement.`;
   let _psDone=0;
   /* Fading index : section procédurale n°0=exemple résolu, 1=partiel, 2+=autonome */
   let _proFadeCount=0;
-  setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections en parallèle…`,true);
-  const sections=await _mapLimited(plan.sections||[],2,async(s,i)=>{
+  setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections rédigées…`,true);
+  /* 1 section à la fois, pas 2 : le compte configuré par défaut (qwen/qwen3.8-27b)
+     n'a que 8000 jetons/min — deux sections en parallèle (jusqu'à 2800 jetons de
+     sortie chacune + le prompt système) dépassaient ce budget et faisaient
+     échouer plusieurs sections ensemble dans la même génération. */
+  const sections=await _mapLimited(plan.sections||[],1,async(s,i)=>{
     try{
       const _angle=_pickAngle('pro',fd.dom);
       /* Fading pour sections procédurales */
@@ -2919,8 +2921,11 @@ JSON uniquement.`;
   let _paDone=0;
   /* Fading index pour sections de type demonstration/application */
   let _acadFadeCount=0;
-  setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections en parallèle…`,false);
-  const sections=await _mapLimited(plan.sections||[],2,async(s,i)=>{
+  setStep('s2','active',`⚡ 0/${(plan.sections||[]).length} sections rédigées…`,false);
+  /* Même raison que côté pro : 8000 jetons/min sur le modèle par défaut, deux
+     sections en parallèle dépassaient ce budget et faisaient échouer plusieurs
+     sections ensemble. */
+  const sections=await _mapLimited(plan.sections||[],1,async(s,i)=>{
     try{
       const isDemo=s.type==='demonstration';const isApp=s.type==='application';
       const _angleAcad=_pickAngle('acad',fd.dom);
