@@ -1243,7 +1243,7 @@ const _CFG_DEFAULTS={
   formateur:'',
   formateurTitre:'Formateur / Responsable pédagogique',
   certifIntitule:'Attestation de Formation',
-  model:'groq/compound-mini',
+  model:'gemini-3.6-flash',
   temperature:0.75,
   defaultMode:'pro',
   defaultNiveau:'intermédiaire',
@@ -1310,16 +1310,21 @@ const _NAV_GROUPS=[
    prompt réel du pipeline — ce choix de départ est une estimation prudente.
    La découverte en direct au premier chargement (_refreshGeminiSelector)
    corrige automatiquement vers ce que le compte a réellement dès qu'une
-   clé valide est saisie. */
+   clé valide est saisie.
+   gemini-2.0-flash (le choix initial) s'est révélé indisponible dès le
+   premier test réel le 2026-09-02 : l'API elle-même a répondu qu'il fallait
+   gemini-3.6-flash. Mis à jour en conséquence, et surtout : _GEMINI_TRUSTED
+   ci-dessous ne fige plus de numéro de version en dur, pour ne pas revivre
+   ça à chaque nouvelle génération de modèle Google. */
 const _MODEL_OPTIONS=[
-  {value:'gemini-2.0-flash',label:'✨ Gemini 2.0 Flash — modèle unique',
+  {value:'gemini-3.6-flash',label:'✨ Gemini 3.6 Flash — modèle unique',
    info:'Modèle rapide et gratuit chez Google — quota précis à confirmer sur votre compte via la découverte automatique au premier chargement.'},
 ];
 
 /* ─── Gemini Live Model Discovery ─── */
-const _GEMINI_MODELS_KEY='_gls_gemini_mdls_v1';
+const _GEMINI_MODELS_KEY='_gls_gemini_mdls_v2';
 const _GEMINI_MODELS_TTL=6*60*60*1000; // 6h cache
-const _GEMINI_FALLBACK_CHAIN=['gemini-2.0-flash','gemini-1.5-flash','gemini-1.5-flash-8b'];
+const _GEMINI_FALLBACK_CHAIN=['gemini-3.6-flash','gemini-2.0-flash','gemini-1.5-flash'];
 
 /* Chaîne d'essai : modèle configuré → modèles découverts en direct → secours codé en dur. */
 function _geminiChain(preferred){
@@ -1336,7 +1341,12 @@ function _geminiChain(preferred){
 }
 
 /* Erreurs qui justifient d'essayer un autre modèle (le modèle est inutilisable tel quel) */
-const _RE_SWITCH_MODEL=/does not exist|not found|invalid_model|no access|do not have access|decommission|deprecat|not supported/i;
+/* "no longer available" ajouté le 2026-09-02 : c'est la formulation exacte
+   employée par Gemini pour un modèle retiré du catalogue (ex: gemini-2.5-flash
+   "is no longer available to new users") — sans ce motif, l'erreur remontait
+   telle quelle à l'utilisateur au lieu de déclencher le passage au modèle
+   suivant de la chaîne. */
+const _RE_SWITCH_MODEL=/does not exist|not found|invalid_model|no access|do not have access|no longer available|decommission|deprecat|not supported/i;
 /* Erreurs de quota — attendre puis réessayer le MÊME modèle est plus efficace */
 const _RE_RATE_LIMIT=/quota|rate.?limit|RESOURCE_EXHAUSTED|429/i;
 /* Le modèle refuse la taille demandée (maxOutputTokens hors limites du modèle) —
@@ -1356,14 +1366,17 @@ const _sleep=ms=>new Promise(r=>setTimeout(r,ms));
    _MODEL_OPTIONS). Priorité aux modèles "flash" (quota gratuit nettement
    plus généreux que "pro" chez Google), en évitant les previews/experimental
    (quota habituellement très restreint) et les modèles non conversationnels
-   (embedding, vision-only, aqa…). À ajuster après un premier test réel sur
-   le prompt du pipeline. */
+   (embedding, vision-only, aqa…).
+   Volontairement SANS numéro de version figé (pas de "2\.\d+" ni "1.5") :
+   gemini-2.0-flash, mon premier choix, s'est révélé mort dès le lendemain
+   ("no longer available to new users", remplacé par gemini-3.6-flash selon
+   l'API elle-même). Un pattern générique sur la famille "flash" reste valide
+   quelle que soit la génération que Google sort ensuite, sans retoucher ce
+   fichier à chaque fois. */
 const _GEMINI_TRUSTED=[
-  {re:/^gemini-2\.\d+-flash$/,        rank:0},  // ex. gemini-2.0-flash — quota généreux pressenti
-  {re:/^gemini-2\.\d+-flash-\d+b$/,   rank:1},  // variantes légères de la même génération
-  {re:/^gemini-1\.5-flash$/,          rank:2},  // génération précédente, encore largement disponible
-  {re:/^gemini-1\.5-flash-8b$/,       rank:3},
-  {re:/^gemini-\d+(\.\d+)?-pro$/,     rank:4},  // quota gratuit plus serré chez Google, en dernier recours
+  {re:/^gemini-\d+(\.\d+)?-flash$/,        rank:0},  // toute génération "flash" — quota généreux pressenti
+  {re:/^gemini-\d+(\.\d+)?-flash-\d+b$/,   rank:1},  // variantes légères de la même famille
+  {re:/^gemini-\d+(\.\d+)?-pro$/,          rank:2},  // quota gratuit plus serré chez Google, en dernier recours
 ];
 function _geminiRankOf(id){
   for(const t of _GEMINI_TRUSTED){if(t.re.test(id))return t.rank;}
@@ -2231,7 +2244,7 @@ async function _geminiFetch(key,model,msgs,maxTok,temp,json){
    Utilisé par tous les appels IA de l'application. */
 async function _geminiExec(key,msgs,maxTok,temp,json){
   if(!_looksLikeGeminiKey(key))throw new Error('Clé Gemini requise. Obtenez-en une gratuite sur aistudio.google.com/apikey');
-  const configured=getCfg().model||'gemini-2.0-flash';
+  const configured=getCfg().model||'gemini-3.6-flash';
   const tried=new Set();
   let lastErr;
 
@@ -5555,9 +5568,9 @@ function _render3DViewer(containerId,code,modId,secIdx){
    SETTINGS UI HELPERS
 ══════════════════════════════════════════════ */
 const _MODEL_INFO={
-  'gemini-2.0-flash':'✨ Modèle rapide et gratuit — quota généreux pressenti chez Google, à confirmer sur votre compte.',
-  'gemini-1.5-flash':'✨ Secours — génération précédente, encore largement disponible.',
-  'gemini-1.5-flash-8b':'✨ Secours — variante légère de la même famille.',
+  'gemini-3.6-flash':'✨ Modèle rapide et gratuit — recommandé par l\'API elle-même le 2026-09-02 (gemini-2.5-flash n\'était plus disponible pour les nouveaux comptes).',
+  'gemini-2.0-flash':'✨ Secours — génération précédente.',
+  'gemini-1.5-flash':'✨ Secours — génération plus ancienne, encore largement disponible.',
 };
 function _modelInfoText(id){
   return _MODEL_INFO[id]||'Modèle sélectionné.';
@@ -5941,7 +5954,12 @@ function _seedLibraryIfEmpty(){
   try{
     const cfg=JSON.parse(localStorage.getItem(_CFG_KEY)||'{}');
     const m=cfg.model;
-    if(!/^gemini-/.test(m||'')){cfg.model='gemini-2.0-flash';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
+    /* gemini-2.0-flash était le tout premier choix (2026-09-01) — mort dès
+       le lendemain pour les nouveaux comptes selon l'API elle-même. Migration
+       explicite en plus du filtre générique ci-dessous, pour que les
+       navigateurs qui l'ont déjà enregistré basculent sans attendre que la
+       découverte en direct s'en aperçoive toute seule. */
+    if(!/^gemini-/.test(m||'')||m==='gemini-2.0-flash'){cfg.model='gemini-3.6-flash';localStorage.setItem(_CFG_KEY,JSON.stringify(cfg));}
   }catch(_){}
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
