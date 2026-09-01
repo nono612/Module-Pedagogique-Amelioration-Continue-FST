@@ -841,7 +841,7 @@ h1,h2,.ap-title-lg{
   </div>
   <div class="sb-key">
     <span class="sb-key-label">Clé API IA</span>
-    <input type="password" id="apiKeyInput" placeholder="AIza… (clé Gemini gratuite)" oninput="_onKeyInput.call(this,this.value)">
+    <input type="password" id="apiKeyInput" placeholder="Clé Gemini gratuite (aistudio.google.com)" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadge" style="display:none;"></div>
   </div>
   <div class="sb-mode" id="sbMode"></div>
@@ -1033,7 +1033,7 @@ h1,h2,.ap-title-lg{
     <div class="ccard-title">🔑 Clé API Gemini</div>
     <p style="font-size:.78rem;color:var(--gray600);margin-bottom:.8rem;">✅ Gratuit · Sauvegardée automatiquement. Créez votre clé sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#4285f4;font-weight:700;text-decoration:none;">aistudio.google.com ↗</a></p>
     <div class="form-group"><label class="form-label">Votre clé Gemini</label>
-    <input type="password" id="apiKeySettings" class="form-input" placeholder="AIza…" oninput="_onKeyInput.call(this,this.value)">
+    <input type="password" id="apiKeySettings" class="form-input" placeholder="Collez votre clé Gemini ici" oninput="_onKeyInput.call(this,this.value)">
     <div id="providerBadgeSettings" style="margin-top:.4rem;"></div></div>
 
     <div style="border-top:1px solid var(--gray200);margin-top:1rem;padding-top:.9rem;">
@@ -1385,7 +1385,7 @@ async function _fetchGeminiModels(key){
 
 let _geminiRefreshTimer=null;
 async function _refreshGeminiSelector(key,force=false){
-  if(!key||!key.startsWith('AIza'))return;
+  if(!_looksLikeGeminiKey(key))return;
   const cached=JSON.parse(localStorage.getItem(_GEMINI_MODELS_KEY)||'null');
   const ids=(!force&&cached&&Date.now()-cached.ts<_GEMINI_MODELS_TTL)
     ?cached.ids
@@ -2158,9 +2158,19 @@ function _loadScript(src){
 /* ══════════════════════════════════════════════
    API — Gemini uniquement
 ══════════════════════════════════════════════ */
+/* Ne fige plus sur un préfixe précis ("AIza…") : constaté le 2026-09-02
+   qu'une clé Google AI Studio bien réelle et active peut aussi commencer
+   par "AQ." — Google fait manifestement coexister plusieurs formats.
+   Plutôt que de maintenir une liste de préfixes connus, vouée à devenir
+   obsolète à chaque nouveau format, on vérifie juste que la valeur
+   ressemble à une clé (assez longue, sans espace) et on laisse le vrai
+   appel API faire l'unique validation qui compte. */
+function _looksLikeGeminiKey(key){
+  return!!(key&&key.trim().length>=20&&!/\s/.test(key.trim()));
+}
 function detectProvider(key){
   if(!key)return null;
-  if(key.startsWith('AIza'))return'gemini';
+  if(_looksLikeGeminiKey(key))return'gemini';
   return null;
 }
 const _PROVIDER_INFO={gemini:{label:'✨ Gemini',color:'#4285f4'}};
@@ -2220,7 +2230,7 @@ async function _geminiFetch(key,model,msgs,maxTok,temp,json){
 /* Exécuteur unique : gère quotas, modèles retirés, tailles refusées et coupures réseau.
    Utilisé par tous les appels IA de l'application. */
 async function _geminiExec(key,msgs,maxTok,temp,json){
-  if(!key?.startsWith('AIza'))throw new Error('Clé Gemini requise (format : AIza…). Obtenez-en une gratuite sur aistudio.google.com/apikey');
+  if(!_looksLikeGeminiKey(key))throw new Error('Clé Gemini requise. Obtenez-en une gratuite sur aistudio.google.com/apikey');
   const configured=getCfg().model||'gemini-2.0-flash';
   const tried=new Set();
   let lastErr;
@@ -2630,7 +2640,7 @@ function _bgVerifyModule(mod,key){
 function _updateProviderBadge(key){
   const badge=document.getElementById('providerBadge');
   if(!badge)return;
-  if(key?.startsWith('AIza')){
+  if(_looksLikeGeminiKey(key)){
     badge.textContent='✨ Gemini';
     badge.style.cssText='display:inline-block;margin-top:.35rem;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#4285f418;color:#4285f4;border:1.5px solid #4285f440;';
   } else {
@@ -2643,8 +2653,8 @@ function _onKeyInput(value){
   const set=document.getElementById('apiKeySettings');if(set&&set!==this)set.value=value;
   _updateProviderBadge(value);
   const b2=document.getElementById('providerBadgeSettings');
-  if(b2)b2.innerHTML=value.startsWith('AIza')?'<span style="display:inline-block;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#4285f418;color:#4285f4;border:1.5px solid #4285f440;">✨ Gemini détecté ✓</span>':'';
-  if(value.startsWith('AIza')&&value.length>15){
+  if(b2)b2.innerHTML=_looksLikeGeminiKey(value)?'<span style="display:inline-block;padding:.18rem .6rem;border-radius:20px;font-size:.68rem;font-weight:800;background:#4285f418;color:#4285f4;border:1.5px solid #4285f440;">✨ Gemini détecté ✓</span>':'';
+  if(_looksLikeGeminiKey(value)){
     clearTimeout(_geminiRefreshTimer);
     _geminiRefreshTimer=setTimeout(()=>_refreshGeminiSelector(value,true),900);
   }
@@ -2655,8 +2665,8 @@ function _onKeyInput(value){
 ══════════════════════════════════════════════ */
 async function startGen(){
   const key=getKey();
-  if(!key){setFMsg('⚠️ Saisissez votre clé API Gemini (AIza…) dans la barre latérale.','var(--red)');return;}
-  if(!key.startsWith('AIza')){setFMsg('⚠️ Clé Gemini requise — format : AIza… Obtenez-en une gratuite sur aistudio.google.com','var(--red)');return;}
+  if(!key){setFMsg('⚠️ Saisissez votre clé API Gemini dans la barre latérale.','var(--red)');return;}
+  if(!_looksLikeGeminiKey(key)){setFMsg('⚠️ Clé Gemini invalide — obtenez-en une gratuite sur aistudio.google.com','var(--red)');return;}
   const dom=document.getElementById('fDom')?.value.trim();
   if(!dom){setFMsg('⚠️ Saisissez le domaine/matière.','var(--red)');return;}
   const comp=document.getElementById('fComp')?.value.trim();
@@ -5936,7 +5946,7 @@ function _seedLibraryIfEmpty(){
   const k=localStorage.getItem('gls_key');
   if(k){document.getElementById('apiKeyInput').value=k;const ks=document.getElementById('apiKeySettings');if(ks)ks.value=k;_updateProviderBadge(k);
     // Non-blocking: refresh Gemini model list on startup (uses 6h cache)
-    if(k.startsWith('AIza'))setTimeout(()=>_refreshGeminiSelector(k),300);
+    if(_looksLikeGeminiKey(k))setTimeout(()=>_refreshGeminiSelector(k),300);
   }
   _seedLibraryIfEmpty();   // modules pré-créés de démonstration (une seule fois)
   renderNav();
@@ -6185,7 +6195,7 @@ async function sendChat(){
   const input=document.getElementById('chatInput');
   const text=(input?.value||'').trim();if(!text)return;
   const key=getKey();
-  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API Gemini (AIza…) dans la barre latérale.\n\nElle est gratuite : créez-la sur **aistudio.google.com/apikey**.'},false);return;}
+  if(!key){_renderChatMsg({role:'ai',text:'⚠️ Saisissez d\'abord votre clé API Gemini dans la barre latérale.\n\nElle est gratuite : créez-la sur **aistudio.google.com/apikey**.'},false);return;}
   input.value='';input.style.height='auto';
   document.getElementById('chatSendBtn').disabled=true;
   _renderChatMsg({role:'user',text});
