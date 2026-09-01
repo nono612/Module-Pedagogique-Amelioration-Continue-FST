@@ -2347,11 +2347,18 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
     }
   }catch(_){}
 
+  /* Les messages ci-dessous incluent volontairement le détail brut renvoyé
+     par Google et la liste des modèles réellement essayés — un message
+     générique du type "aucun modèle fiable" ne permet de diagnostiquer ni
+     un problème de clé, ni un nom de modèle obsolète, ni autre chose. Après
+     plusieurs formulations d'erreur Google imprévues en une journée, mieux
+     vaut montrer le vrai texte que le deviner. */
+  const triedList=[...tried].join(', ')||'aucun';
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
-    throw new Error('Quota Gemini atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres.');
+    throw new Error('Quota Gemini atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres. (Détail Google : '+(lastErr?.message||'')+')');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun modèle Gemini fiable. Vérifiez votre clé sur aistudio.google.com/apikey.');
-  throw lastErr||new Error('Aucun modèle Gemini disponible. Vérifiez votre clé sur aistudio.google.com');
+    throw new Error('Votre clé n\'a accès à aucun modèle Gemini parmi ceux testés ('+triedList+'). Détail Google : '+(lastErr?.message||'')+' — Vérifiez votre clé sur aistudio.google.com/apikey.');
+  throw new Error('Aucun modèle Gemini disponible (testés : '+triedList+'). Détail Google : '+(lastErr?.message||'clé invalide ou compte sans accès — vérifiez sur aistudio.google.com')+'.');
 }
 
 async function _callAI(key,sys,usr,maxTok,temp,json){
