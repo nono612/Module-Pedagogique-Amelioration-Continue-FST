@@ -2219,6 +2219,19 @@ async function _groqExec(key,msgs,maxTok,temp,json){
       for(let attempt=0;attempt<4;attempt++){
         try{
           const res=await _groqFetch(key,model,msgs,tok,temp,json);
+          /* Groq ne signale pas toujours lui-même un JSON tronqué (statut 200
+             renvoyé quand même) — surtout sur un schéma dense proche de la
+             limite de tokens. Sans ce contrôle, gemini() ferait échouer la
+             section au JSON.parse(), APRÈS ce point : la relance avec un
+             budget de tokens élargi (juste en dessous) ne se déclencherait
+             jamais. On valide donc ici, dans la boucle de tentatives, pour
+             que ce cas suive exactement le même chemin que les échecs JSON
+             signalés par l'API elle-même. */
+          if(json){
+            const cleaned=res.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
+            try{JSON.parse(cleaned);}
+            catch(_){throw new Error('failed_generation: JSON local invalide ou tronqué');}
+          }
           if(model!==configured){saveCfg('model',model);setTimeout(()=>_refreshGroqSelector(key,true),0);}
           return res;
         }catch(e){
@@ -2682,7 +2695,7 @@ function _reportIncomplete(mod){
   const secKO=(mod.sections||[]).filter(s=>s._failed).length;
   if(secKO)parts.unshift(secKO+(secKO>1?' sections':' section'));
   if(!parts.length)return;
-  showToast(`⚠️ Généré partiellement — manquant : ${parts.join(', ')}. Utilisez « Régénérer » pour compléter.`,'err');
+  showToast(`⚠️ Généré partiellement — manquant : ${parts.join(', ')}. Ouvrez le module et cliquez sur « Générer cette section » sous chaque section en attente.`,'err');
 }
 
 function setFMsg(m,c){document.getElementById('fMsg').innerHTML=`<span style="color:${c};">${m}</span>`;}
