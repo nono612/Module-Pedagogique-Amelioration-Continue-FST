@@ -1121,7 +1121,7 @@ textarea{resize:vertical;min-height:80px;}
     <div class="api-field" style="position:relative;display:flex;flex-direction:column;gap:.15rem;">
       <div style="display:flex;align-items:center;gap:.4rem;">
         <span style="color:inherit;font-weight:700;font-size:.75rem;white-space:nowrap;">Clé API</span>
-        <input type="password" id="apiKey" placeholder="gsk_… (clé Groq)" oninput="saveKey();_idxUpdateProviderBadge(this.value)" style="width:195px;">
+        <input type="password" id="apiKey" placeholder="Clé Gemini gratuite" oninput="saveKey();_idxUpdateProviderBadge(this.value)" style="width:195px;">
       </div>
       <div id="idxProviderBadge" style="display:none;font-size:.62rem;font-weight:800;padding:.1rem .45rem;border-radius:12px;align-self:flex-start;"></div>
     </div>
@@ -2556,7 +2556,7 @@ function saveKey(){
   localStorage.setItem('ac_grok_key',v.trim());
   _idxUpdateProviderBadge(v.trim());
   // Rafraîchit la liste des modèles réellement accessibles sur ce compte
-  if(v.trim().startsWith('gsk_')&&v.trim().length>15){
+  if(_idxLooksLikeGeminiKey(v.trim())){
     clearTimeout(_idxModelsTimer);
     _idxModelsTimer=setTimeout(()=>_idxRefreshModels(v.trim(),true),900);
   }
@@ -3146,26 +3146,41 @@ function formatAIText(text){
 }
 
 /* ══════════════════════════════════════════════
-   API — Groq uniquement
+   API — Gemini uniquement
+   Migration du 2026-09-02, portée depuis greenlab_studio.html après
+   plusieurs échecs de fiabilité sur Groq (quota TPM trop serré, JSON
+   tronqué en 200 OK, plan généré sans section) — voir ce fichier pour le
+   détail complet des mesures. Reprend directement les leçons déjà tirées
+   là-bas plutôt que de les redécouvrir ici une par une :
+   - modèles identifiés par test réel (pas d'estimation cette fois),
+   - alias "-latest" en tête (Google les repointe lui-même, pas de
+     numéro de version à maintenir),
+   - quota gratuit journalier distinct du quota par minute (le premier ne
+     se résout pas en attendant, contrairement au second),
+   - toute erreur non reconnue traitée comme récupérable par défaut
+     (changement de modèle) plutôt que fatale d'emblée — seule une clé
+     authentiquement invalide interrompt la chaîne immédiatement.
 ══════════════════════════════════════════════ */
+/* Ne fige plus sur un préfixe précis : une clé Google AI Studio réelle et
+   active peut commencer par "AIza…" (ancien format) ou "AQ." (format plus
+   récent, constaté le 2026-09-02) — Google fait coexister plusieurs
+   formats. On vérifie juste que la valeur ressemble à une clé et on laisse
+   le vrai appel API faire l'unique validation qui compte. */
+function _idxLooksLikeGeminiKey(key){
+  return!!(key&&key.trim().length>=20&&!/\s/.test(key.trim()));
+}
 function _idxDetectProvider(key){
   if(!key)return null;
-  return key.startsWith('gsk_')?'groq':null;
+  return _idxLooksLikeGeminiKey(key)?'gemini':null;
 }
-/* Aligné le 2026-08-28 sur la même mesure que greenlab_studio.html : sur
-   le prompt réel de génération, qwen/qwen3.8-27b produit 2,2× plus de
-   contenu pour 45% de jetons en moins, sans aucun échec JSON — alors que
-   llama-3.3-70b-versatile n'était pas accessible sur le compte testé et
-   qu'openai/gpt-oss-120b échoue par intermittence en mode JSON sur les
-   prompts longs (précisément le cas d'un module complet comme celui-ci). */
-const _IDX_PROVIDER_INFO={groq:{label:'⚡ Groq · Qwen',color:'#f59e0b',model:'qwen/qwen3.8-27b'}};
+const _IDX_PROVIDER_INFO={gemini:{label:'✨ Gemini',color:'#4285f4',model:'gemini-flash-latest'}};
 
 /* ─── Découverte des modèles disponibles sur le compte ─── */
-const _IDX_MODELS_KEY='_idx_groq_mdls_v4';
+const _IDX_MODELS_KEY='_idx_gemini_mdls_v1';
 const _IDX_MODELS_TTL=6*60*60*1000; // 6 h
-const _IDX_FALLBACK_CHAIN=['qwen/qwen3.8-27b','qwen/qwen3.6-27b','groq/compound-mini','llama-3.3-70b-versatile'];
+const _IDX_FALLBACK_CHAIN=['gemini-flash-latest','gemini-3.6-flash','gemini-flash-lite-latest'];
 
-function _idxGroqChain(preferred){
+function _idxGeminiChain(preferred){
   const seen=new Set(),out=[];
   const push=m=>{if(m&&!seen.has(m)){seen.add(m);out.push(m);}};
   push(preferred);
@@ -3177,79 +3192,103 @@ function _idxGroqChain(preferred){
   return out;
 }
 
-/* LISTE FERMÉE — uniquement les modèles Groq mesurés fiables sur le prompt
-   réel de génération d'un module complet (voir greenlab_studio.html pour
-   le détail des mesures du 2026-08-28). Écartés volontairement :
-   openai/gpt-oss-120b et -20b — « Failed to validate JSON » par intermittence
-   sur les prompts longs, alors que chaque appel ici dépend du JSON valide ;
-   gemma2-9b-it — décommissionné par Groq. */
+/* LISTE FERMÉE — testée en direct le 2026-09-02 (voir greenlab_studio.html) :
+   gemini-flash-latest et gemini-flash-lite-latest répondent 200 OK.
+   gemini-2.5-flash, -2.0-flash, -1.5-flash, -2.5-flash-lite sont tous morts
+   ("no longer available"/"not found"), MALGRÉ le fait que /v1beta/models
+   les liste encore comme supportant generateContent — incohérence du
+   catalogue Google. Aucun numéro de version figé en tête : les alias
+   "-latest" survivent aux dépréciations sans qu'il faille retoucher ce
+   fichier à chaque nouvelle génération de modèle. */
 function _idxRankOf(id){
-  if(/^qwen\/qwen3\.8-27b$/.test(id))return 0;   // modèle retenu
-  if(/^qwen\/qwen3\.\d+-27b$/.test(id))return 1; // même famille, si la version change
-  if(/^groq\/compound-mini$/.test(id))return 2;  // secours : quota 70 000 jetons/min
-  if(/^llama-3\.3-70b-versatile$/.test(id))return 3; // secours pour les comptes qui y ont accès
+  if(/^gemini-flash-latest$/.test(id))return 0;             // alias toujours à jour — priorité absolue
+  if(/^gemini-flash-lite-latest$/.test(id))return 1;        // variante légère du même alias
+  if(/^gemini-\d+(\.\d+)?-flash$/.test(id))return 2;        // version datée d'une génération "flash"
+  if(/^gemini-\d+(\.\d+)?-flash-lite$/.test(id))return 3;   // variante légère versionnée
+  if(/^gemini-\d+(\.\d+)?-pro$/.test(id))return 4;          // quota gratuit plus serré, en dernier recours
   return -1;
 }
-async function _idxFetchGroqModels(key){
+async function _idxFetchGeminiModels(key){
   try{
-    const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}});
+    const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(key));
     if(!r.ok)return null;
     const d=await r.json();
-    const ids=(d.data||[])
-      .filter(m=>m.object==='model'&&_idxRankOf(m.id)>=0)
-      .map(m=>m.id)
+    const ids=(d.models||[])
+      .filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent'))
+      .map(m=>(m.name||'').replace(/^models\//,''))
+      .filter(id=>_idxRankOf(id)>=0)
       .sort((a,b)=>_idxRankOf(a)-_idxRankOf(b));
     return ids.length?ids:null;
   }catch(_){return null;}
 }
 
 async function _idxRefreshModels(key,force){
-  if(!key||!key.startsWith('gsk_'))return;
+  if(!_idxLooksLikeGeminiKey(key))return;
   const cached=JSON.parse(localStorage.getItem(_IDX_MODELS_KEY)||'null');
   if(!force&&cached&&Date.now()-cached.ts<_IDX_MODELS_TTL)return;
-  const ids=await _idxFetchGroqModels(key);
+  const ids=await _idxFetchGeminiModels(key);
   if(ids&&ids.length)localStorage.setItem(_IDX_MODELS_KEY,JSON.stringify({ts:Date.now(),ids}));
 }
 
 /* Erreurs justifiant de changer de modèle (il est inutilisable tel quel) */
-const _IDX_RE_SWITCH=/does not exist|not found|invalid_model|no access|do not have access|decommission|deprecat/i;
-/* Quota : attendre puis réessayer le MÊME modèle est plus efficace */
-const _IDX_RE_RATE=/rate.?limit|tokens per minute|TPM|requests per minute|RPM|429/i;
-/* Le modèle refuse la taille demandée → réduire max_tokens */
-const _IDX_RE_MAXTOK=/max_tokens|context_window|maximum context length|reduce the length/i;
-/* Le modèle a produit un texte qui ne parse pas comme JSON valide (mode
-   response_format json_object). Peut être un raté ponctuel du modèle sur ce
-   prompt précis : on retente une fois le même modèle avant de basculer sur
-   le suivant de la chaîne. */
+const _IDX_RE_SWITCH=/does not exist|not found|invalid_model|no access|do not have access|no longer available|decommission|deprecat|not supported/i;
+/* Quota GRATUIT JOURNALIER épuisé pour ce modèle précis (constaté :
+   "generate_content_free_tier_requests, limit: 20" par modèle). Contrairement
+   à un plafond par minute, attendre puis réessayer le même modèle ne sert à
+   rien — on passe directement au suivant, qui a son propre quota séparé.
+   Vérifié AVANT _IDX_RE_RATE, plus générique et qui matcherait aussi ce cas. */
+const _IDX_RE_DAILY=/free_tier_requests|per[ _-]day|daily limit/i;
+/* Quota par minute : attendre puis réessayer le MÊME modèle est plus efficace */
+const _IDX_RE_RATE=/quota|rate.?limit|RESOURCE_EXHAUSTED|429/i;
+/* Le modèle refuse la taille demandée (maxOutputTokens hors limites du modèle) */
+const _IDX_RE_MAXTOK=/max_tokens|maxoutputtokens|context_window|maximum context length|reduce the length|token limit/i;
+/* Réponse tronquée avant la fin (MAX_TOKENS en cours de génération, donc
+   200 OK mais texte incomplet) ou JSON localement invalide. */
 const _IDX_RE_JSON_FAIL=/failed to generate json|failed_generation|json_validate_failed/i;
+/* Surcharge temporaire signalée par Google elle-même comme telle
+   ("currently experiencing high demand... usually temporary"). */
+const _IDX_RE_OVERLOADED=/currently experiencing high demand|overloaded|temporarily unavailable/i;
+/* La seule catégorie vraiment fatale : la clé elle-même est le problème,
+   aucun changement de modèle n'y changera rien. Tout le reste — y compris
+   une formulation jamais vue — est traité comme récupérable par défaut
+   (voir le "break" final dans _geminiRaw). */
+const _IDX_RE_FATAL_KEY=/api key not valid|api_key_invalid|permission_denied|unauthenticated|invalid api key/i;
 
 const _idxSleep=ms=>new Promise(r=>setTimeout(r,ms));
-/* Groq renvoie « Please try again in 27.6225s » — on extrait le délai réel */
-function _idxRetryDelay(msg){
-  const m=/try again in ([\d.]+)\s*s/i.exec(msg||'');
-  if(m){const s=parseFloat(m[1]);if(s>0&&s<75)return Math.ceil(s*1000)+400;}
-  return null;
-}
 
-async function _idxGroqFetch(key,model,sys,usr,maxTok,temp){
-  const msgs=[];
-  if(sys)msgs.push({role:'system',content:sys});
-  msgs.push({role:'user',content:usr});
-  const body={model,messages:msgs,temperature:temp!==undefined?temp:0.7,max_tokens:maxTok||1024};
-  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-    body:JSON.stringify(body)});
+async function _idxGeminiFetch(key,model,sys,usr,maxTok,temp,json){
+  const body={
+    contents:[{role:'user',parts:[{text:usr}]}],
+    generationConfig:{temperature:temp!==undefined?temp:0.7,maxOutputTokens:maxTok||1024},
+  };
+  if(sys)body.systemInstruction={parts:[{text:sys}]};
+  if(json)body.generationConfig.responseMimeType='application/json';
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{
+    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error?.message||'Erreur Groq '+r.status);
-  return d.choices?.[0]?.message?.content||'';
+  if(!r.ok){
+    const err=new Error(d.error?.message||'Erreur Gemini '+r.status);
+    // Gemini indique parfois le délai d'attente dans error.details plutôt
+    // que dans le texte du message.
+    const detail=(d.error?.details||[]).find(x=>x['@type']?.includes('RetryInfo'));
+    if(detail?.retryDelay){const s=parseFloat(detail.retryDelay);if(s>0)err.retryDelaySeconds=s;}
+    throw err;
+  }
+  const cand=d.candidates?.[0];
+  if(cand?.finishReason==='SAFETY'||cand?.finishReason==='RECITATION')
+    throw new Error('Réponse bloquée par les filtres Gemini (finishReason: '+cand.finishReason+') — reformulez le prompt.');
+  const text=(cand?.content?.parts||[]).map(p=>p.text||'').join('');
+  if(json&&cand?.finishReason==='MAX_TOKENS')
+    throw new Error('failed_generation: MAX_TOKENS — réponse tronquée avant la fin (JSON incomplet)');
+  return text;
 }
 
 /* Appel IA unique de l'application : gère quotas, modèles retirés,
    tailles refusées et coupures réseau. */
-async function _geminiRaw(key,prompt,maxTokens,temp,sys){
-  if(!key?.startsWith('gsk_'))
-    throw new Error('Clé Groq requise (format : gsk_…). Obtenez-en une gratuite sur console.groq.com');
-  const configured=_IDX_PROVIDER_INFO.groq.model;
+async function _geminiRaw(key,prompt,maxTokens,temp,sys,json){
+  if(!_idxLooksLikeGeminiKey(key))
+    throw new Error('Clé Gemini requise. Obtenez-en une gratuite sur aistudio.google.com/apikey');
+  const configured=_IDX_PROVIDER_INFO.gemini.model;
   const tried=new Set();
   let lastErr;
 
@@ -3262,24 +3301,27 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
       let tok=maxTokens||1024, waited=0, shrinks=0, jsonFails=0;
       for(let attempt=0;attempt<4;attempt++){
         try{
-          return await _idxGroqFetch(key,model,sys,prompt,tok,temp);
+          return await _idxGeminiFetch(key,model,sys,prompt,tok,temp,json);
         }catch(e){
           const msg=e.message||'';
           lastErr=e;
-          // Quota atteint → patienter le délai annoncé, puis réessayer ce modèle
+          // Quota journalier épuisé → inutile d'attendre, on passe au modèle suivant
+          if(_IDX_RE_DAILY.test(msg))break;
+          // Quota par minute atteint → patienter le délai annoncé, puis réessayer ce modèle
           if(_IDX_RE_RATE.test(msg)){
-            const delay=_idxRetryDelay(msg)??4000;
+            const delay=e.retryDelaySeconds?Math.ceil(e.retryDelaySeconds*1000)+400:4000;
             if(waited+delay<=45000){await _idxSleep(delay);waited+=delay;continue;}
             break;
           }
+          // Surcharge temporaire signalée par Google elle-même comme telle
+          if(_IDX_RE_OVERLOADED.test(msg)&&attempt===0){await _idxSleep(1500);continue;}
           // Sortie trop grande → réduire de moitié (plancher 256)
           if(_IDX_RE_MAXTOK.test(msg)&&shrinks<3&&tok>256){
             tok=Math.max(256,Math.floor(tok/2));shrinks++;continue;
           }
-          // JSON invalide généré → la cause la plus probable sur un contenu
-          // dense est une réponse tronquée avant sa fin (le budget de tokens
-          // était trop juste) : on réessaie en élargissant la marge plutôt
-          // qu'à l'identique. Si ça persiste, on passe au modèle suivant.
+          // JSON invalide ou tronqué en cours de génération → on réessaie en
+          // élargissant la marge plutôt qu'à l'identique. Si ça persiste, on
+          // passe au modèle suivant.
           if(_IDX_RE_JSON_FAIL.test(msg)){
             if(jsonFails<2){jsonFails++;tok=Math.min(6000,Math.round(tok*1.35));continue;}
             break;
@@ -3288,22 +3330,26 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
           if(_IDX_RE_SWITCH.test(msg))break;
           // Coupure réseau passagère → une seule nouvelle tentative
           if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _idxSleep(1200);continue;}
-          throw e; // vraie erreur (clé invalide…)
+          // Clé authentiquement invalide : aucun modèle n'y changera rien
+          if(_IDX_RE_FATAL_KEY.test(msg))throw e;
+          // Erreur non anticipée : traitée comme propre à ce modèle plutôt
+          // que fatale d'emblée — un autre modèle de la chaîne peut très
+          // bien ne pas être concerné.
+          break;
         }
       }
     }
     return undefined; // chaîne épuisée sans succès
   };
 
-  let res=await tryChain(_idxGroqChain(configured));
+  let res=await tryChain(_idxGeminiChain(configured));
   if(res!==undefined)return res;
 
   // Toute la chaîne connue (configurée + cache + secours codé en dur) a échoué.
   // Avant d'abandonner, on force une redécouverte live des modèles RÉELLEMENT
-  // accessibles à cette clé : la liste mémorisée peut être obsolète, ou la clé
-  // peut n'avoir accès qu'à un sous-ensemble différent des modèles standards.
+  // accessibles à cette clé.
   try{
-    const fresh=await _idxFetchGroqModels(key);
+    const fresh=await _idxFetchGeminiModels(key);
     if(fresh&&fresh.length){
       localStorage.setItem(_IDX_MODELS_KEY,JSON.stringify({ts:Date.now(),ids:fresh}));
       res=await tryChain(fresh);
@@ -3311,11 +3357,15 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys){
     }
   }catch(_){}
 
+  /* Le détail brut de Google et la liste des modèles testés sont inclus
+     volontairement : un message générique ne permet de diagnostiquer ni un
+     problème de clé, ni un nom de modèle obsolète, ni autre chose. */
+  const triedList=[...tried].join(', ')||'aucun';
   if(_IDX_RE_RATE.test(lastErr?.message||''))
-    throw new Error('Quota Groq atteint. Patientez une minute puis relancez.');
+    throw new Error('Quota Gemini atteint. Patientez une minute puis relancez. (Détail Google : '+(lastErr?.message||'')+')');
   if(_IDX_RE_SWITCH.test(lastErr?.message||''))
-    throw new Error('Votre clé n\'a accès à aucun modèle Groq fiable (qwen/qwen3.8-27b, groq/compound-mini, llama-3.3-70b-versatile). Créez une nouvelle clé gratuite sur console.groq.com/keys.');
-  throw lastErr||new Error('Aucun modèle Groq disponible. Vérifiez votre clé sur console.groq.com');
+    throw new Error('Votre clé n\'a accès à aucun modèle Gemini parmi ceux testés ('+triedList+'). Détail Google : '+(lastErr?.message||'')+' — Vérifiez votre clé sur aistudio.google.com/apikey.');
+  throw new Error('Aucun modèle Gemini disponible (testés : '+triedList+'). Détail Google : '+(lastErr?.message||'clé invalide ou compte sans accès — vérifiez sur aistudio.google.com')+'.');
 }
 
 function _idxUpdateProviderBadge(key){
@@ -3331,8 +3381,8 @@ async function callGeminiAI(prompt,elId,maxTokens=1024,sys=''){
   const key=getKey();
   const el=document.getElementById(elId);
   if(!el)return null;
-  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API Groq requise — entrez-la en haut de la page (format gsk_…).</div>';return null;}
-  if(!_idxDetectProvider(key)){el.innerHTML='<div class="alert alert-danger">⚠️ Clé non reconnue — une clé Groq commence par gsk_… (gratuite sur console.groq.com).</div>';return null;}
+  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API Gemini requise — entrez-la en haut de la page (gratuite sur aistudio.google.com).</div>';return null;}
+  if(!_idxDetectProvider(key)){el.innerHTML='<div class="alert alert-danger">⚠️ Clé non reconnue — obtenez une clé Gemini gratuite sur aistudio.google.com/apikey.</div>';return null;}
   el.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse en cours...</div><div class="ai-loading-text">L\'IA traite votre demande...</div></div>';
   try{
     const text=await _geminiRaw(key,prompt,maxTokens,0.7,sys||undefined);
@@ -5208,7 +5258,7 @@ async function generateModuleExercise(modId){
   const key=getKey();
   const statusEl=document.getElementById('genExStatusM'+modId);
   if(!key){
-    statusEl.innerHTML='<div class="alert alert-danger" style="margin:0;padding:.35rem .7rem;font-size:.77rem;">⚠️ Clé API Groq requise dans l\'en-tête de la page.</div>';
+    statusEl.innerHTML='<div class="alert alert-danger" style="margin:0;padding:.35rem .7rem;font-size:.77rem;">⚠️ Clé API Gemini requise dans l\'en-tête de la page.</div>';
     return;
   }
   const btn=document.getElementById('genExBtnM'+modId);
@@ -6892,7 +6942,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   const savedKey=localStorage.getItem('ac_grok_key');
   if(savedKey){const kf=document.getElementById('apiKey');if(kf)kf.value=savedKey;const cf=document.getElementById('cvApiKey');if(cf)cf.value=savedKey;_idxUpdateProviderBadge(savedKey);
     // Sans bloquer : met à jour la liste des modèles (cache 6 h)
-    if(savedKey.startsWith('gsk_'))setTimeout(()=>_idxRefreshModels(savedKey),300);
+    if(_idxLooksLikeGeminiKey(savedKey))setTimeout(()=>_idxRefreshModels(savedKey),300);
   }
   // CV modal setup
   const inp=document.getElementById('cvFileInput');
@@ -7058,7 +7108,7 @@ async function generateRemediationCourse(n,score,minScore){
   body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem 1rem;color:#6b7280;"><div class="ai-spinner"></div><span style="font-size:.88rem;">Génération de votre cours personnalisé en cours…</span></div>`;
   const key=getKey();
   if(!key){
-    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Groq requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
+    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Gemini requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
     return;
   }
   const ctx=_REM_CTX[n]||{concepts:modName,pitfalls:'Erreurs communes',formulas:'',example:'Cas industriel',tools:'Outils associés'};
@@ -7234,7 +7284,7 @@ async function generateCustomModule(){
   const key=getKey();
   const title=(document.getElementById('genTitle')?.value||'').trim();
   const rawDesc=(document.getElementById('genDesc')?.value||'').trim();
-  // Tronquer à 400 mots pour rester sous la limite TPM de Groq
+  // Tronquer à 400 mots pour garder un prompt raisonnable
   const desc=rawDesc.split(/\s+/).slice(0,400).join(' ')+(rawDesc.split(/\s+/).length>400?'…':'');
   const level=document.getElementById('genLevel')?.value||'Master (Bac+5)';
   const dur=(document.getElementById('genDuration')?.value||'~45 min').trim();
@@ -7244,7 +7294,7 @@ async function generateCustomModule(){
   const prev=document.getElementById('genPreview');
   const msg=document.getElementById('admGenMsg');
   if(!title||!rawDesc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et les objectifs pédagogiques.</span>';return;}
-  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
+  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Gemini requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>🔍 Analyse du domaine…</div></div>';
   const sysPrompt=`Tu es un expert formateur en Génie Industriel, Lean Manufacturing et Excellence Opérationnelle. Tu crées des modules pédagogiques professionnels de niveau universitaire. Réponds UNIQUEMENT en JSON valide, sans markdown ni texte autour.`;
@@ -7334,7 +7384,7 @@ STRUCTURE JSON EXACTE (remplace TOUT le texte entre guillemets par le vrai conte
 
 IMPORTANT : Remplis TOUT avec du vrai contenu professionnel de qualité. Pas de descriptions génériques.`;
   try{
-    // Passe par l'appel Groq commun : mêmes garanties de reprise que le reste de l'app
+    // Passe par l'appel Gemini commun : mêmes garanties de reprise que le reste de l'app
     const text=await _geminiRaw(key,userPrompt,4096,0.6,sysPrompt);
     try{_genPreviewData=JSON.parse(text);}
     catch(pe){
@@ -8939,8 +8989,8 @@ function renderDocsList(){
     <div class="cv-body">
       <!-- ÉTAPE 1 : Clé API -->
       <div id="cvKeyStep" style="background:#f5f3ff;border:2px solid #c4b5fd;border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem;">
-        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Groq</div>
-        <input type="password" id="cvApiKey" placeholder="gsk_…" oninput="cvSyncKey(this.value)"
+        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Gemini</div>
+        <input type="password" id="cvApiKey" placeholder="Clé Gemini gratuite" oninput="cvSyncKey(this.value)"
           style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:.45rem .7rem;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:border .2s;box-sizing:border-box;"
           onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#c4b5fd'">
         <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">aistudio.google.com ↗</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
