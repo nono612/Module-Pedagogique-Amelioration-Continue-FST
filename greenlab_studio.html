@@ -2307,6 +2307,27 @@ async function _geminiFetch(key,model,msgs,maxTok,temp,json){
   return text;
 }
 
+/* Modèles morts (404 « no longer available ») ou en cooldown quota (429),
+   mémorisés au niveau de la PAGE plutôt que d'un seul appel _geminiExec.
+   Sans ce cache partagé, un cours qui enchaîne 10+ appels (plan, chaque
+   section, exercices, quiz, fiche) redécouvrait à chaque étape les mêmes
+   modèles morts et re-attendait sur les mêmes quotas déjà épuisés — des
+   minutes perdues en 404/429 identiques, observées en direct le
+   2026-09-02 sur l'étape Quiz (~5 min pour ce qui aurait dû prendre
+   quelques secondes une fois les modèles morts/épuisés identifiés). */
+const _geminiDeadModels=new Set();
+const _geminiCooldownUntil=new Map();
+/* Étape de génération actuellement affichée à l'écran — permet à
+   _geminiExec de faire remonter un statut lisible ("modèle X indisponible,
+   nouvelle tentative…") au lieu de laisser le spinner muet pendant les
+   relances. */
+let _curGenStepId=null;
+function _geminiStatus(msg){
+  if(!_curGenStepId)return;
+  const sub=document.getElementById('gsub-'+_curGenStepId);
+  if(sub)sub.textContent=msg;
+}
+
 /* Exécuteur unique : gère quotas, modèles retirés, tailles refusées et coupures réseau.
    Utilisé par tous les appels IA de l'application. */
 async function _geminiExec(key,msgs,maxTok,temp,json){
@@ -2320,6 +2341,9 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
   const tryChain=async(chain)=>{
     for(const model of chain){
       if(tried.has(model))continue;
+      if(_geminiDeadModels.has(model))continue; // déjà confirmé mort cette session
+      const _cd=_geminiCooldownUntil.get(model);
+      if(_cd&&_cd>Date.now())continue; // encore en cooldown quota — inutile de le retenter
       tried.add(model);
       let tok=maxTok||2500;
       let waited=0;    // temps déjà passé à patienter sur ce modèle
@@ -2347,10 +2371,18 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
           // Quota GRATUIT JOURNALIER épuisé pour ce modèle → inutile d'attendre,
           // ça ne se réinitialise pas dans les minutes qui suivent. On passe
           // directement au modèle suivant, qui a son propre quota séparé.
-          if(_RE_DAILY_QUOTA.test(msg))break;
-          // Quota par minute atteint → patienter le délai annoncé par Gemini, puis réessayer ce modèle
+          // Mémorisé plusieurs heures pour que les étapes suivantes du même
+          // cours (et les cours suivants dans la session) ne perdent pas de
+          // temps à le retenter.
+          if(_RE_DAILY_QUOTA.test(msg)){_geminiCooldownUntil.set(model,Date.now()+6*3600*1000);_geminiStatus(`⏳ Quota journalier ${model} épuisé — passage au modèle suivant…`);break;}
+          // Quota par minute atteint → patienter le délai annoncé par Gemini, puis réessayer ce modèle.
+          // Le cooldown est mémorisé immédiatement pour que les AUTRES appels
+          // de ce cours (une autre section, le quiz…) sautent ce modèle
+          // directement au lieu de re-attendre le même quota déjà connu épuisé.
           if(_RE_RATE_LIMIT.test(msg)){
             const delay=e.retryDelaySeconds?Math.ceil(e.retryDelaySeconds*1000)+400:4000;
+            _geminiCooldownUntil.set(model,Date.now()+delay);
+            _geminiStatus(`⏳ Quota ${model} atteint — nouvelle tentative dans ${Math.ceil(delay/1000)}s…`);
             if(waited+delay<=45000){await _sleep(delay);waited+=delay;continue;}
             break; // attente trop longue : on tente un autre modèle
           }
@@ -2369,8 +2401,10 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
             if(jsonFails<2){jsonFails++;tok=Math.min(8000,Math.round(tok*1.35));continue;}
             break;
           }
-          // Modèle retiré ou inaccessible pour cette clé → passer au suivant
-          if(_RE_SWITCH_MODEL.test(msg))break;
+          // Modèle retiré ou inaccessible pour cette clé → passer au suivant.
+          // Mémorisé pour toute la session : ce modèle ne redeviendra pas
+          // disponible d'ici la fin du cours en cours de génération.
+          if(_RE_SWITCH_MODEL.test(msg)){_geminiDeadModels.add(model);_geminiStatus(`↻ Modèle ${model} indisponible — changement de modèle…`);break;}
           // Coupure réseau passagère → une seule nouvelle tentative
           if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _sleep(1200);continue;}
           // Clé authentiquement invalide : aucun modèle n'y changera rien,
@@ -2831,6 +2865,10 @@ function setStep(id,state,msg,p){
   const el=document.getElementById('gs-'+id),ico=document.getElementById('gi-'+id),sub=document.getElementById('gsub-'+id);
   if(!el)return;
   el.className='gen-step '+state+(state==='active'&&!p?' a-acad':'');
+  /* Étape affichée actuellement — _geminiExec s'en sert pour remonter un
+     statut de relance ("quota atteint, nouvel essai…") sous cette étape,
+     au lieu d'un spinner muet pendant potentiellement plusieurs minutes. */
+  _curGenStepId=state==='active'?id:(_curGenStepId===id?null:_curGenStepId);
   if(state==='active')ico.innerHTML='<div class="spinner"></div>';
   if(state==='done')ico.innerHTML='✓';if(state==='error')ico.innerHTML='✕';
   if(msg&&sub)sub.textContent=msg;

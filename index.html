@@ -3310,6 +3310,15 @@ async function _idxGeminiFetch(key,model,sys,usr,maxTok,temp,json){
 
 /* Appel IA unique de l'application : gère quotas, modèles retirés,
    tailles refusées et coupures réseau. */
+/* Modèles morts (404) ou en cooldown quota (429), mémorisés au niveau de la
+   PAGE plutôt que d'un seul appel _geminiRaw — voir la note équivalente
+   dans greenlab_studio.html : sans ce cache partagé, chaque étape d'une
+   génération qui enchaîne plusieurs appels redécouvre indépendamment les
+   mêmes modèles morts/épuisés et perd plusieurs minutes en 404/429
+   identiques. */
+const _idxDeadModels=new Set();
+const _idxCooldownUntil=new Map();
+
 async function _geminiRaw(key,prompt,maxTokens,temp,sys,json){
   if(!_idxLooksLikeGeminiKey(key))
     throw new Error('Clé Gemini requise. Obtenez-en une gratuite sur aistudio.google.com/apikey');
@@ -3322,6 +3331,9 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys,json){
   const tryChain=async(chain)=>{
     for(const model of chain){
       if(tried.has(model))continue;
+      if(_idxDeadModels.has(model))continue;
+      const _cd=_idxCooldownUntil.get(model);
+      if(_cd&&_cd>Date.now())continue;
       tried.add(model);
       let tok=maxTokens||1024, waited=0, shrinks=0, jsonFails=0;
       for(let attempt=0;attempt<4;attempt++){
@@ -3331,10 +3343,11 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys,json){
           const msg=e.message||'';
           lastErr=e;
           // Quota journalier épuisé → inutile d'attendre, on passe au modèle suivant
-          if(_IDX_RE_DAILY.test(msg))break;
+          if(_IDX_RE_DAILY.test(msg)){_idxCooldownUntil.set(model,Date.now()+6*3600*1000);break;}
           // Quota par minute atteint → patienter le délai annoncé, puis réessayer ce modèle
           if(_IDX_RE_RATE.test(msg)){
             const delay=e.retryDelaySeconds?Math.ceil(e.retryDelaySeconds*1000)+400:4000;
+            _idxCooldownUntil.set(model,Date.now()+delay);
             if(waited+delay<=45000){await _idxSleep(delay);waited+=delay;continue;}
             break;
           }
@@ -3352,7 +3365,7 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys,json){
             break;
           }
           // Modèle retiré ou inaccessible pour cette clé → passer au suivant
-          if(_IDX_RE_SWITCH.test(msg))break;
+          if(_IDX_RE_SWITCH.test(msg)){_idxDeadModels.add(model);break;}
           // Coupure réseau passagère → une seule nouvelle tentative
           if(/network|fetch|timeout|502|503|504/i.test(msg)&&attempt===0){await _idxSleep(1200);continue;}
           // Clé authentiquement invalide : aucun modèle n'y changera rien
