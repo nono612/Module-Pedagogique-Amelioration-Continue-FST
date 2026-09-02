@@ -2510,6 +2510,21 @@ const T={
   RELECTURE:0.1,  // correction : quasi déterministe
 };
 
+/* Budget de tokens pour un quiz de N questions (question + 4 options + notion
+   + explication de 2-3 phrases chacune ≈ 200-250 tokens/question). Avec la
+   valeur par défaut (12 questions) et un budget fixe de 1600-1800 tokens
+   (constaté dans le code avant ce correctif), la réponse dépassait
+   systématiquement maxOutputTokens (finishReason:"MAX_TOKENS") : traitée en
+   JSON tronqué, l'étape relançait à budget élargi UNIQUEMENT sur le même
+   modèle (2 essais max), puis recommençait à ce même budget trop petit sur
+   le modèle suivant — épuisant toute la chaîne sans jamais aboutir. C'était
+   la cause principale de l'échec quasi systématique du quiz, observé en
+   test réel le 2026-09-02 (7-8 tentatives sur des modèles différents, aucun
+   succès faute de place pour terminer la réponse). */
+function _quizTokBudget(){
+  return Math.max(1800,(getCfg().quizCount||12)*230+600);
+}
+
 async function gemini(key,sys,usr,maxTok,temp){
   const raw=await _callAI(key,sys,usr,maxTok,temp,true);
   const cleaned=raw.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'').trim();
@@ -3066,7 +3081,7 @@ JSON uniquement.`;
 
   setStep('s4','active','',true);
   let checklist={avant:[],pendant:[],apres:[]},quiz=[];
-  try{const cr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtx}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n${getCfg().quizCount} questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Chaque mauvaise réponse correspond à un type d'erreur réelle et identifiable dans ce métier : confusion entre deux valeurs/normes proches de "${fd.dom}", erreur d'unité ou de facteur, geste presque correct mais incorrect dans CE contexte précis, ou réponse correcte dans un contexte légèrement différent (autre matériau, autre tension, autre norme). L'explication indique POURQUOI la mauvaise réponse est une erreur courante dans "${fd.dom}", pas seulement pourquoi la bonne est correcte (2-3 phrases).`,2200,T.EXERCICE));checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch(e){_warn.push('check-list + quiz');}
+  try{const cr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtx}\n\nJSON:\n{"checklist":{"avant":["✔ Vérification précise AVANT intervention 1 (avec valeur ou critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"pendant":["✔ Contrôle ou action PENDANT 1 (avec valeur seuil si applicable)","✔ 2","✔ 3","✔ 4","✔ 5","✔ 6"],"apres":["✔ Vérification/validation APRÈS 1 (critère mesurable)","✔ 2","✔ 3","✔ 4","✔ 5"]},"quiz":[{"q":"Question","opts":["A","B","C","D"],"correct":0,"competence":"compétence","explication":"explication"}]}\n${getCfg().quizCount} questions QCM de qualité : mélanger 4 types — (1) connaissance factuelle (valeur/norme exacte), (2) compréhension du principe (POURQUOI), (3) situationnel (dans ce cas concret, que feriez-vous ?), (4) diagnostic (vous observez X symptôme, quelle est la cause probable ?). Chaque mauvaise réponse correspond à un type d'erreur réelle et identifiable dans ce métier : confusion entre deux valeurs/normes proches de "${fd.dom}", erreur d'unité ou de facteur, geste presque correct mais incorrect dans CE contexte précis, ou réponse correcte dans un contexte légèrement différent (autre matériau, autre tension, autre norme). L'explication indique POURQUOI la mauvaise réponse est une erreur courante dans "${fd.dom}", pas seulement pourquoi la bonne est correcte (2-3 phrases).`,_quizTokBudget()+900,T.EXERCICE));checklist=cr.checklist||checklist;quiz=cr.quiz||[];}catch(e){_warn.push('check-list + quiz');}
   setStep('s4','done','Check-list + '+quiz.length+' questions QCM',true);
 
   setStep('s5','active','',true);
@@ -3198,7 +3213,7 @@ JSON uniquement.`;
 
   setStep('s4','active','',false);
   let quiz=[];
-  try{const qr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtxAcad}\nNotions: ${(plan.notions||[]).join(', ')}\n\n${getCfg().quizCount} QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nChaque mauvaise réponse correspond à un type d'erreur conceptuelle réelle dans "${fd.dom}" : erreur d'unité ou d'exposant, confusion entre deux formules proches du chapitre, résultat d'une démarche presque correcte avec une hypothèse fausse, ou valeur correcte dans un autre régime ou une autre configuration. L'explication précise pourquoi la mauvaise réponse est une erreur que les étudiants font souvent dans "${fd.dom}", pas seulement pourquoi la bonne est correcte.`,1800,T.EXERCICE));quiz=qr.quiz||[];}catch(e){_warn.push('quiz');}
+  try{const qr=await _retry(()=>gemini(key,SYS,`${ctxPlan}${casCtxAcad}\nNotions: ${(plan.notions||[]).join(', ')}\n\n${getCfg().quizCount} QCM style examen d'ingénieurs (variés: calcul numérique, principe physique, définition technique, application industrielle, piège conceptuel):\n{"quiz":[{"q":"Question technique précise (peut inclure des valeurs numériques)","opts":["A: réponse","B: réponse","C: réponse","D: réponse"],"correct":0,"notion":"notion technique évaluée","explication":"Explication technique rigoureuse: pourquoi cette réponse, la formule ou le principe utilisé, pourquoi les autres sont faux (2-3 phrases)"}]}\nChaque mauvaise réponse correspond à un type d'erreur conceptuelle réelle dans "${fd.dom}" : erreur d'unité ou d'exposant, confusion entre deux formules proches du chapitre, résultat d'une démarche presque correcte avec une hypothèse fausse, ou valeur correcte dans un autre régime ou une autre configuration. L'explication précise pourquoi la mauvaise réponse est une erreur que les étudiants font souvent dans "${fd.dom}", pas seulement pourquoi la bonne est correcte.`,_quizTokBudget(),T.EXERCICE));quiz=qr.quiz||[];}catch(e){_warn.push('quiz');}
   setStep('s4','done',quiz.length+' questions QCM générées',false);
 
   setStep('s5','active','',false);
@@ -5082,7 +5097,7 @@ async function regenQuiz(){
     const prompt=p
       ?`${ctx}\nGénère ${getCfg().quizCount||8} NOUVELLES questions QCM différentes des précédentes, spécifiques au métier "${m.dom}" :\n{"quiz":[{"q":"Question terrain propre à ${m.dom} : valeur numérique à connaître, norme à appliquer, diagnostic d'une situation réelle, ou décision de sécurité","opts":["A: option réaliste et plausible","B: erreur classique débutant ${m.dom}","C: option technique proche mais fausse","D: option plausible"],"correct":0,"competence":"compétence métier précise","explication":"Le principe propre à ${m.dom} qui justifie cette réponse + pourquoi les distracteurs sont faux (2-3 phrases concrètes)"}]}`
       :`${ctx}\nGénère ${getCfg().quizCount||8} NOUVEAUX QCM différents des précédents, style examen ingénieur "${m.dom}" :\n{"quiz":[{"q":"Question technique avec données numériques ou piège conceptuel propre à ${m.dom}","opts":["A: réponse","B: erreur d'unité ou formule adjacente incorrecte","C: approximation hors contexte de ${m.dom}","D: confusion avec notion voisine de ${m.dom}"],"correct":0,"notion":"notion précise de ${m.dom}","explication":"Justification rigoureuse : formule ou principe de ${m.dom} + pourquoi les autres options sont fausses (2-3 phrases)"}]}`;
-    const res=await gemini(key,SYS,prompt,1600,T.EXERCICE);
+    const res=await gemini(key,SYS,prompt,_quizTokBudget(),T.EXERCICE);
     if(res.quiz?.length){
       const cleanQuiz=_stripLatexDeep(res.quiz);
       const ms=getMods();const idx=ms.findIndex(x=>x.id==m.id);
