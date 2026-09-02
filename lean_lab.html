@@ -707,10 +707,10 @@ textarea{resize:vertical;min-height:80px;}
   </div>
   <div class="header-right">
     <div class="api-field" style="position:relative;">
-      <span>Clé Groq</span>
-      <input type="password" id="apiKey" placeholder="gsk_..." oninput="saveKey()">
-      <a href="https://console.groq.com/keys" target="_blank" rel="noopener"
-         title="Obtenir une clé Groq gratuite"
+      <span>Clé Gemini</span>
+      <input type="password" id="apiKey" placeholder="AIza..." oninput="saveKey()">
+      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener"
+         title="Obtenir une clé Gemini gratuite"
          style="color:rgba(245,158,11,.7);font-size:.72rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:.2rem;border:1px solid rgba(245,158,11,.3);border-radius:5px;padding:.1rem .35rem;transition:all .2s;"
          onmouseover="this.style.color='#f59e0b';this.style.borderColor='rgba(245,158,11,.7)'"
          onmouseout="this.style.color='rgba(245,158,11,.7)';this.style.borderColor='rgba(245,158,11,.3)'">
@@ -1883,7 +1883,7 @@ function copySessionCode(){
 }
 function saveKey(){
   const v=document.getElementById('apiKey')?.value||'';
-  if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
+  if(v.trim())sessionStorage.setItem('ac_gemini_key',v.trim());
 }
 function getKey(){
   const el=document.getElementById('apiKey');
@@ -1924,7 +1924,7 @@ function getCustomModules(){return JSON.parse(localStorage.getItem('greenlab_cus
 function saveCustomModules(mods){localStorage.setItem('greenlab_custom_modules',JSON.stringify(mods));}
 function cvSyncKey(v){
   const h=document.getElementById('apiKey');if(h)h.value=v;
-  if(v.trim())sessionStorage.setItem('ac_groq_key',v.trim());
+  if(v.trim())sessionStorage.setItem('ac_gemini_key',v.trim());
   const keyStep=document.getElementById('cvKeyStep');
   if(keyStep&&v.trim()){keyStep.style.border='2px solid #a78bfa';keyStep.style.background='#f5f3ff';}
 }
@@ -2154,26 +2154,21 @@ function formatAIText(text){
 }
 
 /* ── AI Call ── */
-async function callGroq(prompt,elId,maxTokens=1024){
+async function callAI(prompt,elId,maxTokens=1024){
   const key=getKey();
   const el=document.getElementById(elId);
-  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API Groq requise.</div>';return null;}
+  if(!key){el.innerHTML='<div class="alert alert-danger">⚠️ Clé API Gemini requise.</div>';return null;}
   el.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Analyse en cours...</div><div class="ai-loading-text">L\'IA traite votre demande...</div></div>';
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:maxTokens})
-    });
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens}})});
     if(!resp.ok){const e=await resp.json();el.innerHTML=`<div class="alert alert-danger">Erreur API : ${e.error?.message||resp.statusText}</div>`;return null;}
     const data=await resp.json();
-    const text=data.choices[0].message.content;
+    const text=data.candidates[0].content.parts[0].text;
     el.innerHTML=`<div class="ai-wrap"><div class="ai-wrap-header">🤖 Analyse de l'IA</div>${formatAIText(text)}</div>`;
     return text;
   }catch(e){el.innerHTML=`<div class="alert alert-danger">Erreur réseau : ${e.message}</div>`;return null;}
 }
-async function callClaude(prompt,elId){return callGroq(prompt,elId);}
-async function callGemini(prompt,elId){return callGroq(prompt,elId);}
+async function callClaude(prompt,elId){return callAI(prompt,elId);}
 
 /* ══ M1 – PDCA ══ */
 const PDCA_FALLBACKS=[
@@ -2222,9 +2217,9 @@ function generatePDCAProblem(){
   }
   const _pdcaSeed=Math.floor(Math.random()*99999);
   const prompt=`Tu es expert Génie Industriel. Génère un problème industriel réaliste pour un exercice PDCA étudiant ingénieur. Niveau : ${lvDesc}\nSecteur IMPOSÉ: ${sector}${domainHint}\n[Variation #${_pdcaSeed} — entreprise fictive ORIGINALE, problème DIFFÉRENT des précédents.]\nRéponds UNIQUEMENT en JSON valide (sans texte autour):\n{"titre":"Titre accrocheur max 8 mots","secteur":"${sector}","contexte":"Contexte en 2 phrases avec chiffres concrets","probleme":"Problème précis avec données chiffrées (%, volumes, coûts)","objectif":"Objectif SMART précis avec métriques et délai","contraintes":"Contraintes réelles (budget, délai, ressources, réglementaire)"}`;
-  fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:1.0})})
+  fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:600,temperature:1.0}})})
   .then(r=>r.json()).then(data=>{
-    const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
+    const m=data.candidates[0].content.parts[0].text.match(/\{[\s\S]*\}/);
     if(!m)throw new Error();
     const prob=JSON.parse(m[0]);
     currentPDCAProblem=prob;state.currentPDCAProblem=prob;save();
@@ -2336,10 +2331,10 @@ async function evaluatePDCA(){
   el.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Évaluation en cours...</div><div class="ai-loading-text">L\'IA analyse vos réponses quadrant par quadrant...</div></div>';
   const prompt=`Tu es formateur expert Lean Six Sigma. Évalue STRICTEMENT les réponses PDCA de cet étudiant.\n\nPROBLÈME: ${prob.probleme}\nOBJECTIF: ${prob.objectif}\nCONTRAINTES: ${prob.contraintes}\n\nRÉPONSES:\nPLAN – Objectif: "${p.plan1||'[Vide]'}"\nPLAN – Actions: "${p.plan2||'[Vide]'}"\nDO – Actions: "${p.do1||'[Vide]'}"\nDO – Ressources: "${p.do2||'[Vide]'}"\nCHECK – Résultats: "${p.check1||'[Vide]'}"\nCHECK – KPIs: "${p.check2||'[Vide]'}"\nACT – Standardisation: "${p.act1||'[Vide]'}"\nACT – Prochain cycle: "${p.act2||'[Vide]'}"\n\nRéponds UNIQUEMENT en JSON valide:\n{"plan":{"score":0-100,"avis":"feedback 1 phrase"},"do":{"score":0-100,"avis":"feedback 1 phrase"},"check":{"score":0-100,"avis":"feedback 1 phrase"},"act":{"score":0-100,"avis":"feedback 1 phrase"},"total":0-100}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:500})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:500}})});
     if(!resp.ok){const e=await resp.json();el.innerHTML=`<div class="alert alert-danger">Erreur API : ${e.error?.message||resp.statusText}</div>`;return;}
     const data=await resp.json();
-    const m=data.choices[0].message.content.match(/\{[\s\S]*\}/);
+    const m=data.candidates[0].content.parts[0].text.match(/\{[\s\S]*\}/);
     if(!m)throw new Error('JSON not found');
     const r=JSON.parse(m[0]);
     state.scores[1]=r.total;save();
@@ -2461,10 +2456,10 @@ Réponds UNIQUEMENT avec ce JSON (aucun texte avant ou après) :
 {"plan1":X,"plan2":X,"do1":X,"do2":X,"check1":X,"check2":X,"act1":X,"act2":X}
 où X est le score numérique entre 0 et le max de chaque champ.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:120,temperature:0.1})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:120,temperature:0.1}})});
     if(!resp.ok)return scorePDCA();
     const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const m=text.match(/\{[\s\S]*?\}/);
     if(!m)return scorePDCA();
     const sc=JSON.parse(m[0]);
@@ -2493,8 +2488,8 @@ Contraintes : ${prob.contraintes}
 Génère des réponses modèles pour les 8 champs PDCA. JSON uniquement :
 {"plan1":"Objectif SMART complet avec métriques et délai","plan2":"Plan d'action détaillé semaine par semaine","do1":"Actions concrètes réalisées avec précisions","do2":"Ressources mobilisées (budget, équipes, outils)","check1":"Résultats mesurés avec chiffres avant/après","check2":"KPIs suivis et valeurs mesurées","act1":"Standardisation des améliorations (procédures, formation)","act2":"Prochain cycle PDCA et nouvel objectif"}`;
     try{
-      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:900,temperature:0.3})});
-      const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+      const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:900,temperature:0.3}})});
+      const data=await resp.json();const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
       const mm=text.match(/\{[\s\S]*\}/);
       if(!mm)throw new Error();
       prob.correction=JSON.parse(mm[0]);
@@ -3015,8 +3010,8 @@ async function aiIshikawa(){
   const _sec5M=state.domain?state.domain.secteur:'industriel';
   const prompt=`Pour le problème: "${effect}" dans un contexte ${_sec5M}, suggère 3 causes par catégorie 5M adaptées à ce secteur. JSON strict uniquement: {"Matière":["...","...","..."],"Méthode":[...],"Main-d'œuvre":[...],"Machines":[...],"Milieu":[...]}`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:800})});
-    const data=await resp.json();const text=data.choices[0].message.content;
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:800}})});
+    const data=await resp.json();const text=data.candidates[0].content.parts[0].text;
     const m=text.match(/\{[\s\S]*\}/);
     if(m){
       const sug=JSON.parse(m[0]);
@@ -3096,10 +3091,10 @@ Réponds UNIQUEMENT avec ce JSON :
 {"effet":X,"causes_score":X,"racines":X}
 où causes_score est entre 0 et 55, effet entre 0 et 15, racines entre 0 et 15.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:80,temperature:0.1})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:80,temperature:0.1}})});
     if(!resp.ok)return scoreIshikawa();
     const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const m=text.match(/\{[\s\S]*?\}/);
     if(!m)return scoreIshikawa();
     const sc=JSON.parse(m[0]);
@@ -4051,7 +4046,7 @@ async function generateModuleExercise(modId){
   const key=getKey();
   const statusEl=document.getElementById('genExStatusM'+modId);
   if(!key){
-    statusEl.innerHTML='<div class="alert alert-danger" style="margin:0;padding:.35rem .7rem;font-size:.77rem;">⚠️ Clé API Groq requise dans l\'en-tête de la page.</div>';
+    statusEl.innerHTML='<div class="alert alert-danger" style="margin:0;padding:.35rem .7rem;font-size:.77rem;">⚠️ Clé API Gemini requise dans l\'en-tête de la page.</div>';
     return;
   }
   const btn=document.getElementById('genExBtnM'+modId);
@@ -4091,14 +4086,10 @@ async function generateModuleExercise(modId){
   const _seed=Math.floor(Math.random()*99999);
   prompt+=`\n[Variation #${_seed} — génère un scénario ORIGINAL, entreprise et secteur différents des exercices précédents.]`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
-      method:'POST',
-      headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:750,temperature:1.0})
-    });
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:750,temperature:1.0}})});
     const rdata=await resp.json();
     if(!resp.ok)throw new Error(rdata.error?.message||'Erreur API '+resp.status);
-    const text=rdata.choices[0].message.content;
+    const text=rdata.candidates[0].content.parts[0].text;
     const mm=text.match(/\{[\s\S]*\}/);
     if(!mm)throw new Error('Réponse IA invalide — pas de JSON');
     const ex=JSON.parse(mm[0]);
@@ -4153,9 +4144,9 @@ Calcule mentalement :
 
 Réponds UNIQUEMENT avec un entier (minutes totales). Rien d'autre.`;
   try{
-    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:8,temperature:0.1})});
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:8,temperature:0.1}})});
     const d=await r.json();
-    const raw=d.choices?.[0]?.message?.content?.trim()||'';
+    const raw=d.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'';
     const parsed=parseInt(raw.match(/\d+/)?.[0]);
     if(parsed>0)return Math.max(2,Math.min(35,parsed));
   }catch(_){}
@@ -4276,8 +4267,8 @@ async function generateQuiz(){
   const _quizSeed=Math.floor(Math.random()*99999);
   const prompt=`Génère 10 questions QCM en français sur Lean/Six Sigma/PDCA/5S/Ishikawa/Pareto/Kanban/VSM/SPC/SMED pour ingénieurs.${domainHintQuiz} [Variation #${_quizSeed} — questions ORIGINALES, différentes des sessions précédentes.] JSON uniquement:\n[{"q":"?","opts":["A","B","C","D"],"correct":0},...]\n10 questions exactes, index correct 0-based.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:1500,temperature:1.0})});
-    const data=await resp.json();const text=data.choices[0].message.content;
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1500,temperature:1.0}})});
+    const data=await resp.json();const text=data.candidates[0].content.parts[0].text;
     const m=text.match(/\[[\s\S]*\]/);
     quizData=m?JSON.parse(m[0]):FALLBACK;
   }catch(e){quizData=FALLBACK;}
@@ -4396,7 +4387,7 @@ async function generateAmdecExercise(){
   stopExTimer();
   const btn=document.getElementById('genExBtnM9');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const ctx=document.getElementById('amdecExContext');if(ctx)ctx.innerHTML='<div class="ai-loading">🤖 Génération d\'un contexte industriel…</div>';
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_gemini_key')||'';
   if(!key){if(ctx)ctx.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise pour générer un exercice.</div>';if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}return;}
   const lv=getExLevel(9);
   const lvDescs=[
@@ -4407,9 +4398,9 @@ async function generateAmdecExercise(){
   const _amdecSeed=Math.floor(Math.random()*99999);
   const prompt=`Génère un scénario industriel réaliste pour un exercice AMDEC en génie industriel. Niveau : ${lvDescs}. Décris en 4-6 phrases : le secteur, la ligne de production, les symptômes de défaillance observés (rebuts, pannes, accidents). Sois précis et concret avec des chiffres. Termine par une liste de 4-5 composants ou étapes du processus à analyser en AMDEC. Réponds directement sans introduction. [Variation #${_amdecSeed} — scénario ORIGINAL, entreprise et secteur différents des précédents.]`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:1.0})});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:400,temperature:1.0}})});
     const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'';
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const lv=getExLevel(9);
     if(ctx)ctx.innerHTML=`<div style="background:#faf5ff;border-radius:10px;padding:.9rem 1rem;border:1.5px solid ${lv.border};font-size:.82rem;color:#374151;line-height:1.8;margin-top:.5rem;"><div style="font-size:.7rem;font-weight:800;color:${lv.color};margin-bottom:.4rem;">${lv.stars} Exercice niveau ${lv.label}</div>${formatAIText(txt)}</div>`;
     amdecRows=[];renderAmdecTable();
@@ -4421,7 +4412,7 @@ async function generateAmdecExercise(){
   if(btn){btn.disabled=false;btn.textContent='🎲 Nouvel exercice';}
 }
 async function analyzeAmdec(){
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_gemini_key')||'';
   const el=document.getElementById('amdecAI');if(el)el.innerHTML='<div class="ai-loading">🤖 Analyse AMDEC en cours…</div>';
   if(!key){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const filled=amdecRows.filter(r=>r.g&&r.o&&r.d);
@@ -4466,9 +4457,9 @@ Feedback expert structuré en FRANÇAIS :
 — Lien avec le PDCA : IPR critique → Plan d'action PDCA
 — Score estimé /100`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:600,temperature:.5})});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:600,temperature:.5}})});
     const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'Pas de réponse.';
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse.';
     if(el)el.innerHTML=`<div class="ai-feedback">${formatAIText(txt)}</div>`;
   }catch(e){if(el)el.innerHTML='<div class="alert alert-warning">Erreur IA.</div>';}
 }
@@ -4490,16 +4481,16 @@ function generateCapstoneProblem(){generateModuleExercise(10);}
 async function _generateCapstoneProblemLegacy(){
   const btn=document.querySelector('#m10 .btn-primary');if(btn){btn.disabled=true;btn.textContent='⏳ Génération...';}
   const statusEl=document.getElementById('capstoneGenStatus');if(statusEl)statusEl.textContent='';
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_gemini_key')||'';
   if(!key){if(statusEl)statusEl.innerHTML='<span style="color:#dc2626;font-size:.78rem;">⚠️ Clé API requise</span>';if(btn){btn.disabled=false;btn.textContent='🤖 Générer un cas industriel';}return;}
   const sectors=['automobile','aéronautique','agroalimentaire','pharmaceutique','textile','logistique','sidérurgie'];
   const sector=sectors[Math.floor(Math.random()*sectors.length)];
   const prompt=`Génère un cas industriel complexe multi-problèmes pour un projet de synthèse Lean en génie industriel, secteur ${sector}. Décris une situation réelle avec 3-4 problèmes imbriqués (ex: taux de rebuts élevé + pannes machines + retards livraison + surstock). Sois très précis avec des chiffres réels (%, heures, nombre de pièces). Le cas doit nécessiter au moins 3-4 outils Lean différents. Format : paragraphe narratif de 6-8 phrases, concret et technique. Pas d'introduction, commence directement par la description.`;
   const pc=document.getElementById('capstoneProblemCard'),pt=document.getElementById('capstoneProblemText'),tc=document.getElementById('capstoneToolsCard'),jc=document.getElementById('capstoneJustifCard');
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:500,temperature:.8})});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:500,temperature:.8}})});
     const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'';
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     if(pt)pt.innerHTML=formatAIText(txt);
     if(pc)pc.style.display='block';
     if(tc)tc.style.display='block';
@@ -4527,7 +4518,7 @@ function updateCapstoneScore(){
   </div>`;
 }
 async function analyzeCapstone(){
-  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_groq_key')||'';
+  const key=document.getElementById('apiKey')?.value||sessionStorage.getItem('ac_gemini_key')||'';
   const el=document.getElementById('capstoneAI');if(el)el.innerHTML='<div class="ai-loading">🤖 Évaluation du projet…</div>';
   if(!key){if(el)el.innerHTML='<div class="alert alert-warning">⚠️ Clé API requise.</div>';return;}
   const tools=[...document.querySelectorAll('#capstoneToolGrid input[type=checkbox]:checked')].map(cb=>cb.closest('label').textContent.trim()).join(', ');
@@ -4572,9 +4563,9 @@ RÈGLE ABSOLUE : Si la justification est du charabia ou hors-sujet → signale a
 — KPIs à suivre pour mesurer l'efficacité de ce plan Lean
 — Score estimé /100`;
   try{
-    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content:prompt}],max_tokens:700,temperature:.5})});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:700,temperature:.5}})});
     const data=await res.json();
-    const txt=data.choices?.[0]?.message?.content||'Pas de réponse.';
+    const txt=data.candidates?.[0]?.content?.parts?.[0]?.text||'Pas de réponse.';
     if(el)el.innerHTML=`<div class="ai-feedback">${formatAIText(txt)}</div>`;
   }catch(e){if(el)el.innerHTML='<div class="alert alert-warning">Erreur IA.</div>';}
 }
@@ -4628,10 +4619,10 @@ Réponds UNIQUEMENT avec ce JSON :
 {"justif":X,"plan":X}
 où X est le score entre 0 et le maximum indiqué.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:80,temperature:0.1})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:80,temperature:0.1}})});
     if(!resp.ok)return scoreCapstone();
     const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const m=text.match(/\{[\s\S]*?\}/);
     if(!m)return scoreCapstone();
     const sc=JSON.parse(m[0]);
@@ -5000,15 +4991,15 @@ Réponds UNIQUEMENT avec ce JSON, sans aucun texte avant ou après :
 
 CV :
 ${txt.slice(0,4000)}`;
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:300})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:300}})});
     const data=await resp.json();
     if(!resp.ok){
       const msg=data.error?.message||`Erreur API ${resp.status}`;
-      if(resp.status===401)throw new Error('Clé API invalide — vérifiez votre clé sur console.groq.com');
+      if(resp.status===401)throw new Error('Clé API invalide — vérifiez votre clé sur aistudio.google.com');
       if(resp.status===429)throw new Error('Quota dépassé — attendez quelques secondes et réessayez');
       throw new Error(msg);
     }
-    const content=(data.choices?.[0]?.message?.content||'');
+    const content=(data.candidates?.[0]?.content?.parts?.[0]?.text||'');
     console.log('[CV IA] Réponse brute :', content);
     // Extraire le JSON même s'il est entouré de ```json ... ```
     const mm=content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/)||content.match(/(\{[\s\S]*?\})/s);
@@ -5054,9 +5045,9 @@ async function genererRecommandationCV(){
   const actifNames=MODULES.filter(m=>isModuleActive(m.id)).map(m=>`M${m.id}: ${m.name}`).join(', ');
   const prompt=`Tu es un conseiller pédagogique Lean/Six Sigma. Voici le profil d'un étudiant :\n- Poste : ${state.domain.poste||'ingénieur'}\n- Entreprise : ${state.domain.entreprise||'industrie'}\n- Secteur : ${state.domain.secteur||'industrie'}\n- Contexte : ${state.domain.contexte||''}\n\nModules disponibles : ${actifNames}\n\nRecommande 7 modules prioritaires pour CE profil. JSON uniquement : [{"id":1,"justification":"une phrase"},...] (exactement 7 items, id = numéro du module parmi ceux disponibles)`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:700})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:700}})});
     const data=await resp.json();
-    const text=data.choices[0].message.content;
+    const text=data.candidates[0].content.parts[0].text;
     const m=text.match(/\[[\s\S]*\]/);
     return m?JSON.parse(m[0]):null;
   }catch(e){return null;}
@@ -5217,10 +5208,10 @@ Réponds UNIQUEMENT avec un JSON valide (aucun texte avant ou après) :
 
 Génère EXACTEMENT 18 items. Les valeurs "correct" DOIVENT être parmi : seiri, seiton, seiso, seiketsu, shitsuke. Minimum 3 items par catégorie. Les zones doivent être parmi : usinage, stockage, controle, allee, bureau, vestiaire.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2600,temperature:1.0})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:2600,temperature:1.0}})});
     if(!resp.ok)throw new Error((await resp.json()).error?.message||resp.statusText);
     const data=await resp.json();
-    const raw=data.choices[0].message.content;
+    const raw=data.candidates[0].content.parts[0].text;
     const jm=raw.match(/\{[\s\S]*\}/);if(!jm)throw new Error('JSON non trouvé');
     const ex=JSON.parse(jm[0]);
     if(!ex.items||ex.items.length<12)throw new Error('Données incomplètes');
@@ -5684,7 +5675,7 @@ function updateMudaScore(){
 window.addEventListener('DOMContentLoaded',()=>{
   updateNav();loadPDCA();initPareto();renderParetoRows();
   if(state.studentName)document.getElementById('studentName').value=state.studentName;
-  const savedKey=sessionStorage.getItem('ac_groq_key');
+  const savedKey=sessionStorage.getItem('ac_gemini_key');
   if(savedKey){const kf=document.getElementById('apiKey');if(kf)kf.value=savedKey;const cf=document.getElementById('cvApiKey');if(cf)cf.value=savedKey;}
   // CV modal setup
   const inp=document.getElementById('cvFileInput');
@@ -5850,7 +5841,7 @@ async function generateRemediationCourse(n,score,minScore){
   body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:3rem 1rem;color:#6b7280;"><div class="ai-spinner"></div><span style="font-size:.88rem;">Génération de votre cours personnalisé en cours…</span></div>`;
   const key=getKey();
   if(!key){
-    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Groq requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
+    body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">⚠️ Clé API Gemini requise pour générer le cours personnalisé. Saisissez-la dans le champ en haut du site.</div>';
     return;
   }
   const ctx=_REM_CTX[n]||{concepts:modName,pitfalls:'Erreurs communes',formulas:'',example:'Cas industriel',tools:'Outils associés'};
@@ -5933,10 +5924,10 @@ Un problème complexe avec données partielles ou contradictoires, nécessitant 
   };
 
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:sections[niveau]}],max_tokens:2000,temperature:0.4})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:sections[niveau]}]}],generationConfig:{maxOutputTokens:2000,temperature:0.4}})});
     if(!resp.ok){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">Erreur API ('+resp.status+'). Vérifiez votre clé API.</div>';return;}
     const data=await resp.json();
-    const text=data.choices?.[0]?.message?.content||'';
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     body.innerHTML=_renderRemCourse(text,modName,score,minScore,niveau,color,n);
   }catch(e){body.innerHTML='<div class="alert alert-warning" style="margin:1rem;">Erreur réseau. Vérifiez votre connexion et réessayez.</div>';}
 }
@@ -6025,14 +6016,14 @@ async function generateCustomModule(){
   const prev=document.getElementById('genPreview');
   const msg=document.getElementById('admGenMsg');
   if(!title||!desc){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Remplissez le titre et la description.</span>';return;}
-  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Groq requise (renseignez-la sur la page d\'accueil).</span>';return;}
+  if(!key){if(msg)msg.innerHTML='<span style="color:#dc2626;">⚠️ Clé Gemini requise (renseignez-la sur la page d\'accueil).</span>';return;}
   if(msg)msg.innerHTML='';
   if(prev)prev.innerHTML='<div class="ai-wrap"><div class="ai-wrap-header"><div class="ai-spinner"></div>Génération du module en cours…</div></div>';
   const prompt=`Tu es un expert Lean/Six Sigma. Crée un module pédagogique complet sur "${title}" pour ingénieurs de niveau ${level}.\nObjectifs : ${desc}\n\nRéponds UNIQUEMENT en JSON valide (pas de texte autour) :\n{"titre":"${title}","icone":"🔧","desc":"description courte (1 phrase)","duree":"${dur||'~20 min'}","sections":[{"titre":"...","contenu":"Contenu détaillé (4-5 paragraphes, exemples industriels, emojis)"},{"titre":"...","contenu":"..."},{"titre":"...","contenu":"..."}],"quiz":[{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1},{"q":"?","opts":["A","B","C","D"],"correct":2},{"q":"?","opts":["A","B","C","D"],"correct":0},{"q":"?","opts":["A","B","C","D"],"correct":1}]}\n\n3 sections obligatoires, 5 questions quiz. JSON uniquement.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2500})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:2500}})});
     const data=await resp.json();
-    const text=data.choices[0].message.content;
+    const text=data.candidates[0].content.parts[0].text;
     const m=text.match(/\{[\s\S]*\}/);
     if(!m)throw new Error('JSON introuvable dans la réponse IA');
     _genPreviewData=JSON.parse(m[0]);
@@ -6173,8 +6164,8 @@ async function showCustomExercise(i){
     const sectionsText=(m.sections||[]).map(s=>s.titre+': '+(s.contenu||'').slice(0,200)).join('\n');
     const prompt=`Génère un exercice de niveau ${levelDesc} sur le module "${m.titre}" pour étudiant Lean/Génie Industriel.\nContenu du module:\n${sectionsText}\n\nJSON strict uniquement: {"question":"Question claire","context":"Données ou contexte fourni (optionnel, peut être vide)","expectedAnswer":"Éléments de réponse attendus","tempsMinutes":X}\nOù tempsMinutes = entier = minutes estimées pour résoudre cet exercice (Débutant 3-5 min, Intermédiaire 5-10 min, Avancé 10-18 min).\n\nJSON uniquement, pas de texte autour.`;
     try{
-      const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:400,temperature:0.5})});
-      const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+      const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:400,temperature:0.5}})});
+      const data=await resp.json();const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
       const jm=text.match(/\{[\s\S]*?\}/);
       exData=jm?JSON.parse(jm[0]):{question:`Décrivez l'application de "${m.titre}" dans un contexte industriel — niveau ${lv.label}.`,context:'',expectedAnswer:''};
       // Cache
@@ -6216,8 +6207,8 @@ Estime le temps total réaliste en minutes pour un étudiant de niveau ${lv.labe
 
 Réponds UNIQUEMENT avec un entier (total en minutes). Rien d'autre.`;
   try{
-    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:10,temperature:0.2})});
-    const d=await r.json();const raw=d.choices?.[0]?.message?.content?.trim()||'';
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:10,temperature:0.2}})});
+    const d=await r.json();const raw=d.candidates?.[0]?.content?.parts?.[0]?.text?.trim()||'';
     const parsed=parseInt(raw.match(/\d+/)?.[0]);
     if(parsed>0)return Math.max(2,Math.min(25,parsed));
   }catch(_){}
@@ -6251,8 +6242,8 @@ Si la réponse est valide et en lien avec la question, évalue en 3 points conci
 
 Sois honnête et exigeant. Une réponse vague ou incomplète mérite des ❌.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:220,temperature:0.4})});
-    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:220,temperature:0.4}})});
+    const data=await resp.json();const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     const lvAfter=_EX_LEVELS[Math.min(_getCustomLevDone(i),2)];
     feedEl.innerHTML=`<div class="ai-feedback">${formatAIText(text)}</div>
       <div style="margin-top:.8rem;padding-top:.7rem;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">
@@ -6357,9 +6348,9 @@ async function _genRemCustom(i,score,minScore,m){
   };
   const prompt=`Tu es formateur expert. Un étudiant a obtenu ${score}% au module "${m.titre}" (seuil: ${minScore}%).${domCtx}\n\nCONTENU DU MODULE :\n${sectionsText}\n\nGénère un cours de rattrapage très détaillé et complet (minimum 600 mots) EXACTEMENT avec ces 6 sections :\n${levelSections[niveau]}\n\nChaque section doit être développée avec des exemples concrets liés au contenu du module. Sois très pédagogique.`;
   try{
-    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${key}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:2000,temperature:0.4})});
+    const resp=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:2000,temperature:0.4}})});
     if(!resp.ok){body.innerHTML='<div class="alert alert-warning">Erreur API.</div>';return;}
-    const data=await resp.json();const text=data.choices?.[0]?.message?.content||'';
+    const data=await resp.json();const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
     body.innerHTML=_renderRemCourse(text,m.titre,score,minScore,niveau,color,'c'+i);
   }catch(e){body.innerHTML='<div class="alert alert-warning">Erreur réseau.</div>';}
 }
@@ -6408,11 +6399,11 @@ function submitCustomQuiz(){
     <div class="cv-body">
       <!-- ÉTAPE 1 : Clé API -->
       <div id="cvKeyStep" style="background:#f5f3ff;border:2px solid #c4b5fd;border-radius:12px;padding:.9rem 1rem;margin-bottom:.9rem;">
-        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Groq</div>
+        <div style="font-size:.78rem;font-weight:800;color:#4c1d95;margin-bottom:.5rem;">🔑 Étape 1 — Entrez votre clé API Gemini</div>
         <input type="password" id="cvApiKey" placeholder="gsk_..." oninput="cvSyncKey(this.value)"
           style="width:100%;border:1.5px solid #c4b5fd;border-radius:8px;padding:.45rem .7rem;font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:border .2s;box-sizing:border-box;"
           onfocus="this.style.borderColor='#7c3aed'" onblur="this.style.borderColor='#c4b5fd'">
-        <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">console.groq.com</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
+        <div style="font-size:.7rem;color:#9ca3af;margin-top:.3rem;">Clé gratuite sur <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:#a78bfa;font-weight:700;text-decoration:underline;">aistudio.google.com</a> · Nécessaire pour analyser votre CV et générer les exercices · <span style="color:#a78bfa;">Elle sera automatiquement copiée dans le champ en haut du site</span></div>
       </div>
       <!-- ÉTAPE 2 : Dépôt CV -->
       <div style="font-size:.78rem;font-weight:800;color:#374151;margin-bottom:.4rem;">📄 Étape 2 — Déposez votre CV (PDF)</div>
