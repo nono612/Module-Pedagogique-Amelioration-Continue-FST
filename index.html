@@ -3297,6 +3297,11 @@ async function _idxGeminiFetch(key,model,sys,usr,maxTok,temp,json){
     // que dans le texte du message.
     const detail=(d.error?.details||[]).find(x=>x['@type']?.includes('RetryInfo'));
     if(detail?.retryDelay){const s=parseFloat(detail.retryDelay);if(s>0)err.retryDelaySeconds=s;}
+    // Voir la note équivalente dans greenlab_studio.html : le retryDelay
+    // ci-dessus ne distingue PAS quota par minute et quota journalier —
+    // seul le quotaId de la violation est fiable pour ça.
+    const quotaViol=(d.error?.details||[]).find(x=>x['@type']?.includes('QuotaFailure'))?.violations?.[0];
+    if(quotaViol?.quotaId)err.quotaId=quotaViol.quotaId;
     throw err;
   }
   const cand=d.candidates?.[0];
@@ -3343,10 +3348,10 @@ async function _geminiRaw(key,prompt,maxTokens,temp,sys,json){
           const msg=e.message||'';
           lastErr=e;
           // Quota journalier épuisé → inutile d'attendre, on passe au modèle suivant
-          // Google réutilise le même texte "free_tier_requests" pour le
-          // quota par minute ET le quota journalier — seul le délai annoncé
-          // les distingue (voir la note équivalente dans greenlab_studio.html).
-          if(_IDX_RE_DAILY.test(msg)&&!(e.retryDelaySeconds&&e.retryDelaySeconds<180)){_idxCooldownUntil.set(model,Date.now()+6*3600*1000);break;}
+          // Seul le quotaId distingue de façon fiable un 429 journalier d'un
+          // 429 par minute — voir la note équivalente dans greenlab_studio.html.
+          const isDailyQuota=/PerDay/i.test(e.quotaId||'')||(!e.quotaId&&_IDX_RE_DAILY.test(msg));
+          if(isDailyQuota){_idxCooldownUntil.set(model,Date.now()+6*3600*1000);break;}
           // Quota par minute atteint → patienter le délai annoncé, puis réessayer ce modèle
           if(_IDX_RE_RATE.test(msg)){
             const delay=e.retryDelaySeconds?Math.ceil(e.retryDelaySeconds*1000)+400:4000;

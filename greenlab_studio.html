@@ -2292,6 +2292,15 @@ async function _geminiFetch(key,model,msgs,maxTok,temp,json){
     // pour patienter le bon temps plutôt qu'un délai générique.
     const detail=(d.error?.details||[]).find(x=>x['@type']?.includes('RetryInfo'));
     if(detail?.retryDelay){const s=parseFloat(detail.retryDelay);if(s>0)err.retryDelaySeconds=s;}
+    /* Le retryDelay ci-dessus NE distingue PAS un quota par minute d'un
+       quota journalier — vérifié en direct le 2026-09-02 : Google renvoie
+       "retryDelay":"44s" sur une violation dont le quotaId est explicitement
+       "GenerateRequestsPerDayPerProjectPerModel-FreeTier". Se fier au délai
+       aurait fait retenter toutes les 44s un modèle dont le quota ne se
+       réinitialise pas avant le lendemain. Le seul signal fiable est le
+       quotaId de la violation elle-même. */
+    const quotaViol=(d.error?.details||[]).find(x=>x['@type']?.includes('QuotaFailure'))?.violations?.[0];
+    if(quotaViol?.quotaId)err.quotaId=quotaViol.quotaId;
     throw err;
   }
   const cand=d.candidates?.[0];
@@ -2369,19 +2378,22 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
           lastErr=e;
 
           // Quota GRATUIT JOURNALIER épuisé pour ce modèle → inutile d'attendre,
-          // ça ne se réinitialise pas dans les minutes qui suivent. On passe
-          // directement au modèle suivant, qui a son propre quota séparé.
-          // Mémorisé plusieurs heures pour que les étapes suivantes du même
-          // cours (et les cours suivants dans la session) ne perdent pas de
-          // temps à le retenter.
-          // ATTENTION : Google utilise le même texte "free_tier_requests"
-          // pour le quota PAR MINUTE et le quota JOURNALIER — seul le délai
-          // annoncé (retryDelaySeconds) les distingue. Sans cette vérification,
-          // un simple 429 de quelques secondes (vu en test réel : 4.7s, 9.9s,
-          // 52s...) était traité comme épuisé pour la journée, mettant TOUS
-          // les modèles en cooldown de 6h après un seul cours généré — la
-          // clé semblait alors "invalide" alors qu'il fallait juste patienter.
-          if(_RE_DAILY_QUOTA.test(msg)&&!(e.retryDelaySeconds&&e.retryDelaySeconds<180)){
+          // ça ne se réinitialise pas avant le lendemain. On passe directement
+          // au modèle suivant, qui a son propre quota séparé.
+          //
+          // IMPORTANT : le seul signal FIABLE pour savoir si un 429 est
+          // journalier est le quotaId renvoyé par Google dans la violation
+          // ("...PerDay..." vs "...PerMinute..."), PAS le délai annoncé
+          // (retryDelaySeconds) ni le texte du message. Vérifié en direct le
+          // 2026-09-02 : un 429 dont le quotaId est explicitement
+          // "GenerateRequestsPerDayPerProjectPerModel-FreeTier" annonçait
+          // quand même "retryDelay":"44s" — se fier à ce délai aurait fait
+          // retenter indéfiniment (toutes les ~44s) un modèle dont le quota
+          // ne bouge pas avant le lendemain, ce qui ressemblait à un blocage
+          // infini sur le quiz. _RE_DAILY_QUOTA (texte du message) reste en
+          // secours seulement si Google ne renvoie pas de quotaId du tout.
+          const isDailyQuota=/PerDay/i.test(e.quotaId||'')||(!e.quotaId&&_RE_DAILY_QUOTA.test(msg));
+          if(isDailyQuota){
             _geminiCooldownUntil.set(model,Date.now()+6*3600*1000);
             _geminiStatus(`⏳ Quota journalier ${model} épuisé — passage au modèle suivant…`);
             break;
