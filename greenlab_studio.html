@@ -2374,7 +2374,18 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
           // Mémorisé plusieurs heures pour que les étapes suivantes du même
           // cours (et les cours suivants dans la session) ne perdent pas de
           // temps à le retenter.
-          if(_RE_DAILY_QUOTA.test(msg)){_geminiCooldownUntil.set(model,Date.now()+6*3600*1000);_geminiStatus(`⏳ Quota journalier ${model} épuisé — passage au modèle suivant…`);break;}
+          // ATTENTION : Google utilise le même texte "free_tier_requests"
+          // pour le quota PAR MINUTE et le quota JOURNALIER — seul le délai
+          // annoncé (retryDelaySeconds) les distingue. Sans cette vérification,
+          // un simple 429 de quelques secondes (vu en test réel : 4.7s, 9.9s,
+          // 52s...) était traité comme épuisé pour la journée, mettant TOUS
+          // les modèles en cooldown de 6h après un seul cours généré — la
+          // clé semblait alors "invalide" alors qu'il fallait juste patienter.
+          if(_RE_DAILY_QUOTA.test(msg)&&!(e.retryDelaySeconds&&e.retryDelaySeconds<180)){
+            _geminiCooldownUntil.set(model,Date.now()+6*3600*1000);
+            _geminiStatus(`⏳ Quota journalier ${model} épuisé — passage au modèle suivant…`);
+            break;
+          }
           // Quota par minute atteint → patienter le délai annoncé par Gemini, puis réessayer ce modèle.
           // Le cooldown est mémorisé immédiatement pour que les AUTRES appels
           // de ce cours (une autre section, le quiz…) sautent ce modèle
@@ -2446,6 +2457,19 @@ async function _geminiExec(key,msgs,maxTok,temp,json){
      plusieurs formulations d'erreur Google imprévues en une journée, mieux
      vaut montrer le vrai texte que le deviner. */
   const triedList=[...tried].join(', ')||'aucun';
+  /* tried vide = chaque modèle a été écarté d'emblée par le cache (mort ou
+     encore en cooldown), sans qu'aucune requête ne parte — lastErr reste
+     alors undefined. Sans ce cas à part, le message générique plus bas
+     accusait à tort une "clé invalide", alors qu'il suffit d'attendre la
+     fin du cooldown le plus proche. */
+  if(!tried.size){
+    const now=Date.now();
+    const waits=[..._geminiCooldownUntil.values()].filter(t=>t>now);
+    if(waits.length){
+      const waitS=Math.ceil((Math.min(...waits)-now)/1000);
+      throw new Error(`Quota Gemini temporairement atteint sur tous les modèles connus (suite aux appels précédents). Réessayez dans ${waitS}s.`);
+    }
+  }
   if(_RE_RATE_LIMIT.test(lastErr?.message||''))
     throw new Error('Quota Gemini atteint. Patientez une minute puis relancez — ou réduisez le nombre de sections dans les Paramètres. (Détail Google : '+(lastErr?.message||'')+')');
   if(_RE_SWITCH_MODEL.test(lastErr?.message||''))
