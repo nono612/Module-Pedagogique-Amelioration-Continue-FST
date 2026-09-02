@@ -197,7 +197,7 @@ tr:nth-child(even) td{background:var(--gray50);}
     </div>
     <div class="cover-meta">
       <div><strong>Outil</strong>Green Lab Studio</div>
-      <div><strong>IA</strong>Groq · OpenAI · Anthropic · Google</div>
+      <div><strong>IA</strong>Gemini (Google)</div>
       <div><strong>Version</strong>2026 · Mise à jour août</div>
     </div>
   </div>
@@ -337,7 +337,7 @@ tr:nth-child(even) td{background:var(--gray50);}
       <li><strong>📚 Bibliothèque</strong> — tous vos modules sauvegardés, recherche, filtres</li>
       <li><strong>⚙️ Paramètres</strong> — configuration du modèle IA, nom de la plateforme, sections affichées</li>
     </ul>
-    <p style="margin-top:.7rem;">En haut de la sidebar se trouvent le <strong>champ de clé API</strong> (compatible Groq, OpenAI, Anthropic ou Google) et l'indicateur de mode actif (Pro ou Académique).</p>
+    <p style="margin-top:.7rem;">En haut de la sidebar se trouvent le <strong>champ de clé API</strong> (Gemini / Google) et l'indicateur de mode actif (Pro ou Académique).</p>
   </div>
 
   <hr class="divider" id="s1b">
@@ -394,53 +394,26 @@ tr:nth-child(even) td{background:var(--gray50);}
 <div class="page" id="s2">
   <div class="section-header gold">
     <div class="sh-icon">🔑</div>
-    <div><div class="sn">Section 2</div><h2>Première connexion — Clé API (tous fournisseurs)</h2><p>Green Lab Studio accepte les clés Groq, OpenAI, Anthropic et Google — utilisez celle que vous avez déjà</p></div>
+    <div><div class="sn">Section 2</div><h2>Première connexion — Clé API Gemini</h2><p>Green Lab Studio fonctionne exclusivement avec Gemini (Google) — une clé gratuite en moins de 2 minutes</p></div>
   </div>
 
   <div class="warning">
     <strong>⚠️ Indispensable avant de commencer</strong>
-    Green Lab Studio nécessite une clé API pour fonctionner. Sans elle, aucune génération n'est possible. La procédure prend moins de 2 minutes, et Groq propose une clé <strong>entièrement gratuite</strong>.
+    Green Lab Studio nécessite une clé API pour fonctionner. Sans elle, aucune génération n'est possible. La procédure prend moins de 2 minutes, et Google propose une clé <strong>entièrement gratuite</strong>.
   </div>
 
   <div id="s2a">
-    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.2rem 0 .8rem;">2.1 — Choisir votre fournisseur IA</h3>
-    <p style="margin-bottom:.9rem;">L'application détecte automatiquement votre fournisseur dès que vous collez la clé — aucune configuration manuelle nécessaire. Choisissez le fournisseur dont vous avez déjà un compte :</p>
+    <h3 style="font-size:1rem;font-weight:800;color:var(--navy);margin:1.2rem 0 .8rem;">2.1 — Créer votre clé Gemini</h3>
+    <p style="margin-bottom:.9rem;">L'application détecte automatiquement la clé dès que vous la collez — aucune configuration manuelle nécessaire.</p>
 
     <div class="grid2" style="gap:.8rem;margin-bottom:1rem;">
-      <div class="card" style="margin:0;border-left:4px solid #f59e0b;">
-        <h3 style="color:#b45309;">⚡ Groq · Llama 3.3 70B</h3>
-        <p style="font-size:.85rem;">Gratuit, ultra-rapide, idéal pour démarrer.</p>
-        <ul style="font-size:.84rem;margin-top:.4rem;">
-          <li>Clé commence par <code>gsk_</code></li>
-          <li>Quota gratuit : 6 000 tokens/min</li>
-          <li>Inscription : <code>console.groq.com</code></li>
-        </ul>
-      </div>
-      <div class="card" style="margin:0;border-left:4px solid #10b981;">
-        <h3 style="color:#065f46;">🟢 OpenAI · GPT-4o mini</h3>
-        <p style="font-size:.85rem;">Fiable et largement utilisé.</p>
-        <ul style="font-size:.84rem;margin-top:.4rem;">
-          <li>Clé commence par <code>sk-</code></li>
-          <li>Accès payant (crédit de départ offert)</li>
-          <li>Inscription : <code>platform.openai.com</code></li>
-        </ul>
-      </div>
-      <div class="card" style="margin:0;border-left:4px solid #7c3aed;">
-        <h3 style="color:#5b21b6;">🟣 Anthropic · Claude Haiku</h3>
-        <p style="font-size:.85rem;">Raisonnement précis et fiable.</p>
-        <ul style="font-size:.84rem;margin-top:.4rem;">
-          <li>Clé commence par <code>sk-ant-</code></li>
-          <li>Accès payant</li>
-          <li>Inscription : <code>console.anthropic.com</code></li>
-        </ul>
-      </div>
       <div class="card" style="margin:0;border-left:4px solid #3b82f6;">
-        <h3 style="color:#1d4ed8;">🔵 Google · Gemini 2.0 Flash</h3>
-        <p style="font-size:.85rem;">Multimodal, rapide, avec quota gratuit généreux.</p>
+        <h3 style="color:#1d4ed8;">✨ Gemini Flash</h3>
+        <p style="font-size:.85rem;">Gratuit, rapide, quota généreux — le seul fournisseur utilisé par l'application.</p>
         <ul style="font-size:.84rem;margin-top:.4rem;">
           <li>Clé commence par <code>AIza</code></li>
           <li>Quota gratuit disponible</li>
-          <li>Inscription : <code>aistudio.google.com</code></li>
+          <li>Inscription : <code>aistudio.google.com/apikey</code></li>
         </ul>
       </div>
     </div>
@@ -449,15 +422,15 @@ tr:nth-child(even) td{background:var(--gray50);}
       <div class="step-block">
         <div class="step-num gold">1</div>
         <div class="step-content">
-          <h4>Créez un compte chez votre fournisseur</h4>
-          <p>Allez sur le site correspondant (voir tableau ci-dessus). Aucune carte bancaire requise pour Groq et Google (quota gratuit). Inscrivez-vous avec votre email ou via Google/GitHub.</p>
+          <h4>Créez un compte Google</h4>
+          <p>Allez sur <code>aistudio.google.com/apikey</code>. Aucune carte bancaire requise (quota gratuit). Connectez-vous avec votre compte Google.</p>
         </div>
       </div>
       <div class="step-block">
         <div class="step-num gold">2</div>
         <div class="step-content">
           <h4>Créez une clé API</h4>
-          <p>Dans votre tableau de bord, recherchez la section <strong>API Keys</strong> (ou "Clés API"), puis cliquez sur <strong>Create</strong>. Donnez-lui un nom (ex : "GreenLab").</p>
+          <p>Cliquez sur <strong>Create API Key</strong>. Donnez-lui un nom (ex : "GreenLab").</p>
         </div>
       </div>
       <div class="step-block">
@@ -484,14 +457,14 @@ tr:nth-child(even) td{background:var(--gray50);}
         <div class="step-num">2</div>
         <div class="step-content">
           <h4>Collez la clé dans le champ en haut de la sidebar</h4>
-          <p>Le champ affiche le placeholder <code>gsk_… / sk-… / sk-ant-… / AIza…</code>. Collez votre clé avec <span class="key">Ctrl+V</span> (ou <span class="key">⌘V</span> sur Mac). Elle est masquée par défaut pour la sécurité.</p>
+          <p>Le champ affiche le placeholder <code>AIza…</code>. Collez votre clé avec <span class="key">Ctrl+V</span> (ou <span class="key">⌘V</span> sur Mac). Elle est masquée par défaut pour la sécurité.</p>
         </div>
       </div>
       <div class="step-block">
         <div class="step-num">3</div>
         <div class="step-content">
           <h4>Un badge de confirmation apparaît</h4>
-          <p>L'application reconnaît automatiquement le fournisseur (⚡ Groq, 🟢 OpenAI, 🟣 Anthropic ou 🔵 Google) et affiche un badge coloré sous le champ. La clé est sauvegardée localement dans votre navigateur.</p>
+          <p>L'application reconnaît automatiquement la clé et affiche un badge <strong>✨ Gemini</strong> sous le champ. La clé est sauvegardée localement dans votre navigateur.</p>
         </div>
       </div>
     </div>
@@ -1038,12 +1011,12 @@ tr:nth-child(even) td{background:var(--gray50);}
   <div class="card">
     <h3>La génération est bloquée / ne démarre pas</h3>
     <div class="danger"><strong>Cause la plus fréquente : clé API absente ou non reconnue.</strong>
-    Vérifiez que votre clé est bien saisie et que le badge fournisseur (⚡ Groq / 🟢 OpenAI / 🟣 Anthropic / 🔵 Google) apparaît sous le champ. Si le champ est vide ou que la clé n'est pas reconnue, aucune génération n'est possible.</div>
+    Vérifiez que votre clé est bien saisie et que le badge <strong>✨ Gemini</strong> apparaît sous le champ. Si le champ est vide ou que la clé n'est pas reconnue, aucune génération n'est possible.</div>
     <p>Autres causes :</p>
     <ul>
-      <li>Quota gratuit atteint (Groq : 6 000 tokens/min, Google : variable) → attendez 1 minute</li>
+      <li>Quota gratuit atteint (variable selon Google) → attendez 1 minute</li>
       <li>Connexion internet instable → vérifiez votre réseau</li>
-      <li>Le modèle sélectionné est indisponible → changez de fournisseur ou de modèle dans Paramètres</li>
+      <li>Le modèle sélectionné est temporairement indisponible → réessayez, l'application bascule automatiquement sur une autre variante</li>
     </ul>
   </div>
 
@@ -1085,13 +1058,8 @@ tr:nth-child(even) td{background:var(--gray50);}
 
   <div class="card">
     <h3>Combien de modules puis-je créer ?</h3>
-    <p>Il n'y a pas de limite dans Green Lab Studio. La seule contrainte est le quota de votre fournisseur IA :</p>
-    <ul style="margin-top:.4rem;">
-      <li><strong>Groq (gratuit)</strong> — 6 000 tokens/min, se réinitialise chaque minute</li>
-      <li><strong>Google Gemini (gratuit)</strong> — quota généreux, variable selon le modèle</li>
-      <li><strong>OpenAI / Anthropic</strong> — accès payant, quota selon votre crédit</li>
-    </ul>
-    <p style="margin-top:.5rem;">En pratique, avec Groq ou Google, vous pouvez générer plusieurs modules par heure sans frais.</p>
+    <p>Il n'y a pas de limite dans Green Lab Studio. La seule contrainte est le quota gratuit de Gemini (Google), variable selon le modèle et qui se réinitialise régulièrement.</p>
+    <p style="margin-top:.5rem;">En pratique, vous pouvez générer plusieurs modules par heure sans frais.</p>
   </div>
 
   <div class="card">
@@ -1107,7 +1075,7 @@ tr:nth-child(even) td{background:var(--gray50);}
   <hr class="divider">
   <div class="success" style="text-align:center;padding:1.5rem;">
     <strong style="font-size:1rem;display:block;margin-bottom:.4rem;">🚀 Vous êtes prêt à utiliser Green Lab Studio !</strong>
-    Commencez par obtenir votre clé API (Groq gratuit recommandé), puis laissez l'assistant IA créer votre premier module — et explorez votre plan de révision pour un apprentissage structuré.
+    Commencez par obtenir votre clé API Gemini (gratuite), puis laissez l'assistant IA créer votre premier module — et explorez votre plan de révision pour un apprentissage structuré.
   </div>
   <p style="text-align:center;font-size:.78rem;color:var(--gray400);margin-top:1.5rem;">
     Green Lab Studio · Générateur Pédagogique IA · Édition août 2026
