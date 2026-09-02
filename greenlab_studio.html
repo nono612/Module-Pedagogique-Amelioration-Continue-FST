@@ -2220,7 +2220,12 @@ function _loadScript(src){
    ressemble à une clé (assez longue, sans espace) et on laisse le vrai
    appel API faire l'unique validation qui compte. */
 function _looksLikeGeminiKey(key){
-  return!!(key&&key.trim().length>=20&&!/\s/.test(key.trim()));
+  const k=key&&key.trim();
+  if(!k||k.length<20||/\s/.test(k))return false;
+  if(/^gsk_/.test(k))return false;
+  if(/^sk-ant-/.test(k))return false;
+  if(/^sk-/.test(k))return false;
+  return true;
 }
 function detectProvider(key){
   if(!key)return null;
@@ -2255,9 +2260,23 @@ async function _geminiFetch(key,model,msgs,maxTok,temp,json){
   };
   if(sys)body.systemInstruction={parts:[{text:sys}]};
   if(json)body.generationConfig.responseMimeType='application/json';
-  const r=await fetch(_GEMINI_EP(model)+'?key='+encodeURIComponent(key),{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(body)});
+  /* Sans timeout, une connexion qui se bloque silencieusement (proxy, wifi
+     instable) laisse ce fetch en attente pour toujours — l'étape reste
+     bloquée sur son spinner sans que la logique de relance ci-dessous
+     (qui sait déjà gérer "timeout") ne soit jamais déclenchée. */
+  const _ctrl=new AbortController();
+  const _timer=setTimeout(()=>_ctrl.abort(),45000);
+  let r;
+  try{
+    r=await fetch(_GEMINI_EP(model)+'?key='+encodeURIComponent(key),{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(body),signal:_ctrl.signal});
+  }catch(e){
+    if(e.name==='AbortError')throw new Error('network timeout — Gemini n\'a pas répondu à temps');
+    throw e;
+  }finally{
+    clearTimeout(_timer);
+  }
   const d=await r.json().catch(()=>({}));
   if(!r.ok){
     const err=new Error(d.error?.message||'Erreur Gemini '+r.status);

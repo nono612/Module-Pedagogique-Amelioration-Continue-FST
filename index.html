@@ -3167,7 +3167,12 @@ function formatAIText(text){
    formats. On vérifie juste que la valeur ressemble à une clé et on laisse
    le vrai appel API faire l'unique validation qui compte. */
 function _idxLooksLikeGeminiKey(key){
-  return!!(key&&key.trim().length>=20&&!/\s/.test(key.trim()));
+  const k=key&&key.trim();
+  if(!k||k.length<20||/\s/.test(k))return false;
+  if(/^gsk_/.test(k))return false;
+  if(/^sk-ant-/.test(k))return false;
+  if(/^sk-/.test(k))return false;
+  return true;
 }
 function _idxDetectProvider(key){
   if(!key)return null;
@@ -3263,8 +3268,21 @@ async function _idxGeminiFetch(key,model,sys,usr,maxTok,temp,json){
   };
   if(sys)body.systemInstruction={parts:[{text:sys}]};
   if(json)body.generationConfig.responseMimeType='application/json';
-  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{
-    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  /* Sans timeout, une connexion qui se bloque silencieusement laisse ce
+     fetch en attente pour toujours — voir la note équivalente dans
+     greenlab_studio.html. */
+  const _ctrl=new AbortController();
+  const _timer=setTimeout(()=>_ctrl.abort(),45000);
+  let r;
+  try{
+    r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+encodeURIComponent(key),{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:_ctrl.signal});
+  }catch(e){
+    if(e.name==='AbortError')throw new Error('network timeout — Gemini n\'a pas répondu à temps');
+    throw e;
+  }finally{
+    clearTimeout(_timer);
+  }
   const d=await r.json().catch(()=>({}));
   if(!r.ok){
     const err=new Error(d.error?.message||'Erreur Gemini '+r.status);
