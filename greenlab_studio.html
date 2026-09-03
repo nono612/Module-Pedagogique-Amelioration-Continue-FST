@@ -2957,10 +2957,30 @@ async function _gatherTerrainData(fd,key,SYS,ctx){
 /* ══════════════════════════════════════════════
    PIPELINE PRO
 ══════════════════════════════════════════════ */
+/* Sans directive explicite, "Niveau: débutant" et "Niveau: expert" ne sont
+   que des étiquettes passives dans le prompt — Gemini les lit mais rien ne
+   l'oblige concrètement à produire un contenu différent, d'où un rendu très
+   similaire d'un niveau à l'autre en pratique (constaté et rapporté par un
+   utilisateur le 2026-09-03). Ces 4 blocs donnent une consigne dont le
+   RÉSULTAT ATTENDU diverge réellement selon le niveau choisi. */
+function _proLevelDirective(niv){
+  const n=(niv||'').toLowerCase();
+  if(n.includes('débutant')||n.includes('debutant'))
+    return`NIVEAU DU STAGIAIRE — DÉBUTANT, AUCUNE EXPÉRIENCE : ne suppose RIEN d'acquis. Définis chaque terme technique et chaque geste dès sa première apparition, avec une analogie simple si utile. Rythme volontairement lent et détaillé : décompose les procédures en étapes plus petites qu'à l'accoutumée. Rappelle explicitement les règles de sécurité de base même évidentes pour un professionnel. Aucun jargon non expliqué immédiatement.`;
+  if(n.includes('intermédiaire')||n.includes('intermediaire'))
+    return`NIVEAU DU STAGIAIRE — INTERMÉDIAIRE, BASES ACQUISES : suppose le vocabulaire courant et les gestes simples déjà maîtrisés — ne les redéfinis pas en détail. Consacre l'essentiel du contenu à la consolidation, aux cas un peu moins évidents et aux erreurs qui apparaissent une fois les bases dépassées.`;
+  if(n.includes('confirmé')||n.includes('confirme'))
+    return`NIVEAU DU STAGIAIRE — CONFIRMÉ, PERFECTIONNEMENT : un rappel des fondamentaux en une phrase maximum suffit, jamais plus. L'essentiel du contenu porte sur les subtilités de réglage, les cas particuliers, les optimisations et les erreurs qui ne surviennent qu'avec l'expérience du terrain — pas sur ce qu'un débutant apprend en premier.`;
+  if(n.includes('expert'))
+    return`NIVEAU DU STAGIAIRE — EXPERT, RÉFÉRENT TECHNIQUE : aucun rappel des bases, même bref — le stagiaire les maîtrise déjà et un rappel serait perçu comme condescendant. Va directement aux cas limites, exceptions, arbitrages techniques fins et retours d'expérience rares que seul un référent technique rencontre. Vocabulaire dense, sans simplification pédagogique.`;
+  return'';
+}
+
 async function pipePro(fd,key){
   const _warn=[]; // étapes optionnelles ayant échoué — signalées à la fin
   const docCtx=fd.doc?`\n\n--- DOCUMENT DE RÉFÉRENCE FOURNI PAR LE FORMATEUR ---\n${fd.doc.slice(0,8000)}\n--- FIN DOCUMENT ---`:'';
   const ctx=`Domaine: ${fd.dom}\nCompétence/thème: ${fd.comp}\nPublic cible: ${fd.pub}\nNiveau: ${fd.niv}\nDurée: ${fd.dur}\nLangue: ${fd.lang}${fd.norm?'\nPrérequis: '+fd.norm:''}${fd.ctx?'\nObjectifs pédagogiques précis: '+fd.ctx:''}${docCtx}`;
+  const _levelDirective=_proLevelDirective(fd.niv);
   const SYS=`Tu es un formateur professionnel expert du métier "${fd.dom}" (spécialité : ${fd.comp||fd.dom}), avec 20 ans d'expérience terrain dans CE domaine précis.
 
 AVANT DE GÉNÉRER, identifie mentalement ces 4 ancres qui distinguent "${fd.dom}" d'un domaine voisin :
@@ -2985,6 +3005,8 @@ ANCRAGE RÉEL — fiabilité : quand tu donnes un exemple historique, une anecdo
 
 LANGUE DE RÉDACTION — impératif : tu rédiges INTÉGRALEMENT en ${fd.lang||'français'}. Tous les champs texte du JSON sont dans cette langue, y compris les titres, les étapes et les explications. Seules les clés JSON restent en anglais.
 QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulaire technique juste, employé dans son sens exact. Aucun mot approximatif, aucune tournure bancale, aucun anglicisme non traduit. Chaque phrase doit vouloir dire quelque chose de précis — relis-toi avant de répondre.
+
+${_levelDirective}
 
 JSON uniquement.`;
 
@@ -5090,7 +5112,7 @@ async function regenQuiz(){
   try{
     const p=m.mode==='pro';
     const SYS=p
-      ?`Tu es formateur expert du métier "${m.dom}" — spécialiste de l'évaluation terrain dans ce métier précis. Tes questions distinguent un vrai professionnel d'un débutant : valeurs numériques propres à "${m.dom}", normes à appliquer, diagnostics de situations réelles, décisions de sécurité spécifiques au domaine. Les distracteurs sont des erreurs que les débutants de "${m.dom}" font vraiment — pas des erreurs génériques. JSON uniquement.`
+      ?`Tu es formateur expert du métier "${m.dom}" — spécialiste de l'évaluation terrain dans ce métier précis. Tes questions distinguent un vrai professionnel d'un débutant : valeurs numériques propres à "${m.dom}", normes à appliquer, diagnostics de situations réelles, décisions de sécurité spécifiques au domaine. Les distracteurs sont des erreurs que les débutants de "${m.dom}" font vraiment — pas des erreurs génériques.\n\n${_proLevelDirective(m.niv)} Calibre la DIFFICULTÉ des questions et distracteurs sur ce niveau précis, pas sur un niveau générique.\n\nJSON uniquement.`
       :`Tu es professeur expert en "${m.dom}" — spécialiste des examens d'ingénieurs dans cette discipline. Tes QCM testent la compréhension profonde : calculs numériques avec pièges d'unités propres à "${m.dom}", application de la bonne formule au bon cas, discrimination entre deux notions proches de cette discipline, analyse d'un résultat physiquement incohérent. Les distracteurs sont des erreurs conceptuelles réelles des étudiants de "${m.dom}". JSON uniquement.`;
     const ctx=p?`Formation: "${m.titre}" — ${m.niv} — ${m.pub}\nDomaine: ${m.dom}\nCompétences: ${(m.competences||[]).join(', ')}`
       :`Cours: "${m.titre}" — ${m.pub} — ${m.niv}\nDiscipline: ${m.dom}\nNotions: ${(m.notions||[]).join(', ')}`;
@@ -5121,7 +5143,7 @@ async function regenSection(secIdx){
   try{
     const p=m.mode==='pro';
     const SYS=p
-      ?`Tu es formateur expert du métier "${m.dom}" avec 20 ans de terrain. Tu régénères cette section avec une perspective DIFFÉRENTE et PLUS RICHE que la version précédente. Vocabulaire du métier réel, valeurs numériques typiques de "${m.dom}" (tensions, pressions, températures, tolérances, débits…), normes précises applicables, réflexes d'expert que les débutants ignorent. Chaque procédure est accompagnée de son POURQUOI physique ou mécanique. JSON uniquement.`
+      ?`Tu es formateur expert du métier "${m.dom}" avec 20 ans de terrain. Tu régénères cette section avec une perspective DIFFÉRENTE et PLUS RICHE que la version précédente. Vocabulaire du métier réel, valeurs numériques typiques de "${m.dom}" (tensions, pressions, températures, tolérances, débits…), normes précises applicables, réflexes d'expert que les débutants ignorent. Chaque procédure est accompagnée de son POURQUOI physique ou mécanique.\n\n${_proLevelDirective(m.niv)}\n\nJSON uniquement.`
       :`Tu es professeur expert en "${m.dom}" spécialisé en enseignement ingénieur. Tu régénères cette section avec une approche DIFFÉRENTE : approfondis le formalisme mathématique, ajoute des exemples numériques nouveaux avec des données industrielles, explique les pièges conceptuels que les étudiants rencontrent dans ce chapitre précis de "${m.dom}". JSON uniquement.`;
     const prompt=p
       ?`Formation: "${m.titre}" — niveau ${m.niv} — public: ${m.pub||''}\nDomaine: ${m.dom}\nRégénère la section "${s.titre}" avec une approche différente et plus riche que la version précédente.\nIMPÉRATIF : au moins 3 valeurs chiffrées propres à ${m.dom} (tensions, tolérances, pressions, températures, doses…), le POURQUOI de chaque procédure, des normes précises, les erreurs spécifiques des débutants de ce métier. N'utilise jamais de syntaxe LaTeX (\\frac, ^{}, _{}) — notation Unicode simple uniquement (×, /, ², σ_adm…).\nJSON:\n{"titre":"${(s.titre||'').replace(/"/g,'\\"')}","contenu":"7-9 paragraphes progressifs — une idée par paragraphe, définis les termes avant de les utiliser. Entoure de **...** les 2-4 éléments clés de chaque paragraphe (valeur chiffrée de ${m.dom}, terme métier, norme). Avant de finaliser : un professionnel débutant en ${m.dom} pourrait-il suivre sans lacune non expliquée ? IMPÉRATIF : valeurs chiffrées précises de ${m.dom}, POURQUOI physique/mécanique de chaque procédure. Sépare par \\n\\n.","etapes":["Étape 1 : geste précis + paramètre exact + POURQUOI","Étape 2","Étape 3","Étape 4","Étape 5"],"points_vigilance":["⚠️ Risque précis 1 : valeur seuil + conséquence physique","⚠️ Risque 2","⚠️ Risque 3"],"outils":["Outil 1 avec référence technique","Outil 2","Outil 3"],"erreurs":["❌ Erreur propre aux débutants de ${m.dom} — mécanisme + correction expert","❌ Erreur 2","❌ Erreur 3"],"reflexe_pro":"Savoir implicite d'expert propre à ${m.dom} pour cette section — ce que 10 ans de terrain donnent (3 phrases concrètes)","donnees_cles":["Valeur/norme 1 propre à ${m.dom}","Valeur 2","Valeur 3"],"pourquoi_ca_compte":"3-4 phrases : anecdote réelle largement connue et vérifiable en lien avec ${m.dom}, ou à défaut le TYPE de conséquence concrète d'une mauvaise maîtrise (sans nom/date/chiffre inventé si incertain)","calculateur":{"titre":"Nom court (uniquement si une formule numérique de la section s'y prête, sinon omets ce champ)","formule":"expression ASCII simple, ex: U*I (jamais de LaTeX ni de lettre grecque comme nom de variable)","variables":[{"nom":"U","label":"Nom lisible","unite":"unité SI","defaut":0}],"resultat":{"nom":"resultat","label":"Nom lisible","unite":"unité SI"}}}`
