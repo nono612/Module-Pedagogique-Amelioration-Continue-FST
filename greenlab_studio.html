@@ -2976,6 +2976,42 @@ function _proLevelDirective(niv){
   return'';
 }
 
+/* Même angle mort que pour le niveau : "Durée: 30 minutes" et "Durée: 3
+   jours" n'étaient que des étiquettes passives — le plan demandait TOUJOURS
+   "5 à 6 sections" (Pro) ou "4 à 6 sections" (Académique), quelle que soit
+   la durée choisie. Un stage de 30 min et un de 3 jours produisaient donc
+   le même volume de contenu. Ces deux fonctions font varier le nombre de
+   sections demandé à l'IA selon la durée réelle (plafonné pour éviter
+   qu'un cours de plusieurs jours n'épuise le quota gratuit en un seul
+   clic — voir la note sur le budget de tokens du quiz). */
+function _proSectionRange(dur){
+  const d=(dur||'').toLowerCase();
+  if(d.includes('30 min'))return'2 à 3';
+  if(d.includes('1 heure'))return'3 à 4';
+  if(d.includes('2 heures'))return'5 à 6';
+  if(d.includes('demi-journée'))return'6 à 8';
+  if(d.includes('1 journée'))return'8 à 10';
+  if(d.includes('jours'))return'10 à 12'; // 2 jours et 3 jours plafonnés pareil — au-delà, plus de jours = plus d'exercices/mise en situation, pas un empilement infini de sections théoriques
+  return'5 à 6';
+}
+function _acadSectionRange(dur){
+  const d=(dur||'').toLowerCase();
+  if(d.includes('1 heure'))return'3 à 4';
+  if(d.includes('1h30'))return'4 à 6';
+  if(d.includes('3 heures'))return'6 à 8';
+  if(d.includes('demi-journée'))return'8 à 10';
+  return'4 à 6';
+}
+/* Nombre MAXIMUM de sections que _proSectionRange/_acadSectionRange peuvent
+   demander, pour calculer un budget de tokens suffisant pour le plan —
+   sinon la liste "sections" du JSON déborde de maxOutputTokens (fixé à 900
+   à l'origine, pensé pour 4-6 sections seulement) dès qu'une durée longue
+   en demande 10-12 : réponse tronquée sur TOUS les modèles à la fois. */
+function _planTokBudget(sectionRangeLabel){
+  const max=parseInt((sectionRangeLabel||'').split(/[àa-]/).pop())||6;
+  return Math.max(900,500+max*140);
+}
+
 async function pipePro(fd,key){
   const _warn=[]; // étapes optionnelles ayant échoué — signalées à la fin
   const docCtx=fd.doc?`\n\n--- DOCUMENT DE RÉFÉRENCE FOURNI PAR LE FORMATEUR ---\n${fd.doc.slice(0,8000)}\n--- FIN DOCUMENT ---`:'';
@@ -3011,12 +3047,13 @@ ${_levelDirective}
 JSON uniquement.`;
 
   setStep('s1','active','',true);
+  const _secRangePro=_proSectionRange(fd.dur);
   /* Un plan sans section n'est pas un échec que gemini() peut détecter tout
      seul (le JSON est syntaxiquement valide, juste vide de ce qui compte) —
      observé en conditions réelles avec compound-mini. On vérifie donc le
      contenu ici, avec une relance automatique avant d'abandonner. */
   const plan=await _retry(async()=>{
-    const p=await gemini(key,SYS,`${ctx}\n\nCrée le plan complet de cette formation professionnelle. JSON:\n{"icone":"emoji unique représentant ce métier (1 seul emoji, ex: ⚡ électricien, 🔧 mécanicien, 🏗️ BTP, 🧪 chimie, 💊 santé)","titre":"Titre formation percutant (max 10 mots)","description":"Accroche professionnelle motivante qui explique ce que le stagiaire va VRAIMENT comprendre (2 phrases)","prerequis":"Prérequis techniques concrets nécessaires","objectifs":["À l'issue de la formation, le stagiaire SAURA/POURRA faire concrètement 1","... 2","... 3","... 4","... 5"],"etapes":[{"id":"E1","titre":"Étape principale du processus professionnel (ex: Préparation du chantier)","outil":"Outil ou équipement principal"},{"id":"E2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","duree":"ex: 30 min","type":"theorie|procedure|exercice|securite"},{"id":2,...}],"competences":["Compétence métier précise et mesurable 1","Compétence 2","Compétence 3","Compétence 4"]}\n5 à 6 sections. etapes = les 4-6 grandes étapes du processus de travail réel dans ce métier (pas les sections de cours).`,900,T.PLAN);
+    const p=await gemini(key,SYS,`${ctx}\n\nCrée le plan complet de cette formation professionnelle. JSON:\n{"icone":"emoji unique représentant ce métier (1 seul emoji, ex: ⚡ électricien, 🔧 mécanicien, 🏗️ BTP, 🧪 chimie, 💊 santé)","titre":"Titre formation percutant (max 10 mots)","description":"Accroche professionnelle motivante qui explique ce que le stagiaire va VRAIMENT comprendre (2 phrases)","prerequis":"Prérequis techniques concrets nécessaires","objectifs":["À l'issue de la formation, le stagiaire SAURA/POURRA faire concrètement 1","... 2","... 3","... 4","... 5"],"etapes":[{"id":"E1","titre":"Étape principale du processus professionnel (ex: Préparation du chantier)","outil":"Outil ou équipement principal"},{"id":"E2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","duree":"ex: 30 min","type":"theorie|procedure|exercice|securite"},{"id":2,...}],"competences":["Compétence métier précise et mesurable 1","Compétence 2","Compétence 3","Compétence 4"]}\n${_secRangePro} sections, adapté à la durée réelle de "${fd.dur}" (une session de 30 min a moins de sections qu'une formation de plusieurs jours). etapes = les 4-6 grandes étapes du processus de travail réel dans ce métier (pas les sections de cours).`,_planTokBudget(_secRangePro),T.PLAN);
     if(!p.sections?.length)throw new Error('Plan généré sans section — nouvelle tentative');
     return p;
   },2);
@@ -3157,10 +3194,11 @@ QUALITÉ D'ÉCRITURE : phrases courtes et grammaticalement correctes. Vocabulair
 JSON uniquement.`;
 
   setStep('s1','active','',false);
+  const _secRangeAcad=_acadSectionRange(fd.dur);
   /* Voir le commentaire équivalent dans pipePro : un plan sans section est
      syntaxiquement valide mais inutilisable — on le détecte et on relance. */
   const plan=await _retry(async()=>{
-    const p=await gemini(key,SYS,`${ctx}\n\nCrée le plan structuré de ce cours technique. JSON:\n{"icone":"emoji représentant cette discipline (1 seul emoji, ex: ⚡ électrique, 🔩 mécanique, 🧪 chimie, 📡 réseaux, 🏗️ génie civil, ✈️ aéro, 🧬 biotech, 🌱 environnement, 🤖 IA/robotique, 🏛️ structures, 🌊 hydraulique, 🔥 thermique, 💻 info, 📐 maths)","titre":"Titre cours technique précis (max 12 mots)","description":"Accroche pédagogique (1-2 phrases qui motivent l'étudiant ingénieur)","prerequis":"Notions techniques préalables requises (formules, outils mathématiques, notions physiques)","objectifs":["À l'issue du cours, l'étudiant sera capable de VERBE+OBJET TECHNIQUE 1","... 2","... 3","... 4"],"etapes":[{"id":"1","titre":"Étape de la démarche pédagogique ou du processus technique (ex: Analyse du système)","outil":"Outil ou méthode utilisée"},{"id":"2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","objectif":"Compétence acquise","duree":"ex: 20 min","type":"theorie|demonstration|application"}],"notions":["Notion technique clé 1","Notion 2","Notion 3","Notion 4","Notion 5"]}\n4 à 6 sections avec progression logique. etapes = les 4-6 grandes étapes de la démarche technique ou du processus étudié.`,900,T.PLAN);
+    const p=await gemini(key,SYS,`${ctx}\n\nCrée le plan structuré de ce cours technique. JSON:\n{"icone":"emoji représentant cette discipline (1 seul emoji, ex: ⚡ électrique, 🔩 mécanique, 🧪 chimie, 📡 réseaux, 🏗️ génie civil, ✈️ aéro, 🧬 biotech, 🌱 environnement, 🤖 IA/robotique, 🏛️ structures, 🌊 hydraulique, 🔥 thermique, 💻 info, 📐 maths)","titre":"Titre cours technique précis (max 12 mots)","description":"Accroche pédagogique (1-2 phrases qui motivent l'étudiant ingénieur)","prerequis":"Notions techniques préalables requises (formules, outils mathématiques, notions physiques)","objectifs":["À l'issue du cours, l'étudiant sera capable de VERBE+OBJET TECHNIQUE 1","... 2","... 3","... 4"],"etapes":[{"id":"1","titre":"Étape de la démarche pédagogique ou du processus technique (ex: Analyse du système)","outil":"Outil ou méthode utilisée"},{"id":"2","titre":"...","outil":"..."}],"sections":[{"id":1,"titre":"Titre section","objectif":"Compétence acquise","duree":"ex: 20 min","type":"theorie|demonstration|application"}],"notions":["Notion technique clé 1","Notion 2","Notion 3","Notion 4","Notion 5"]}\n${_secRangeAcad} sections avec progression logique, adapté à la durée réelle de "${fd.dur}" (un CM d'1h a moins de sections qu'une demi-journée de TP). etapes = les 4-6 grandes étapes de la démarche technique ou du processus étudié.`,_planTokBudget(_secRangeAcad),T.PLAN);
     if(!p.sections?.length)throw new Error('Plan généré sans section — nouvelle tentative');
     return p;
   },2);
